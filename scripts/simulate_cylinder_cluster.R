@@ -15,12 +15,21 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
   # Get directional vector
   v1 <- end_loc - start_loc
   
+  # Get 'd values of planes' at start_loc and end_loc
+  d1 <- sum(v1 * start_loc)
+  d2 <- sum(v1 * end_loc)
+  
   for (i in seq_len(n_cells)) {
     # Get x, y, z and phenotype of ith cell
     x <- bg_sample[i, "Cell.X.Position"]
     y <- bg_sample[i, "Cell.Y.Position"]
     z <- bg_sample[i, "Cell.Z.Position"]
     pheno <- bg_sample[i, "Cell.Type"]
+    
+    # Ignore points outside of these planes
+    if (sum(v1 *  c(x, y, z)) < d1 || sum(v1 * c(x, y, z)) > d2) {
+      next
+    }
     
     # Get vector between from point to start_loc
     v2 <- c(x, y, z) - start_loc
