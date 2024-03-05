@@ -61,4 +61,5 @@ simulate_mixing3D <- function(bg_sample,
     legend3d("topright", legend = idents, pch = 16, col = plot_colours[seq_len(length(idents))], inset = c(0.02))
     
   }
+  return(bg_sample)
 }
