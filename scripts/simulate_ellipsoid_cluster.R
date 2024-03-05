@@ -1,6 +1,5 @@
 simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
   
-  
   # Get sphere properties
   cell_type <- cluster_properties$name_of_cluster_cell
   infiltration_types <- cluster_properties$infiltration_types
