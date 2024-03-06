@@ -1,10 +1,12 @@
-simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
+simulate_ellipsoid_cluster <- function(bg_sample, cluster_properties) {
   
   # Get sphere properties
   cell_type <- cluster_properties$name_of_cluster_cell
   infiltration_types <- cluster_properties$infiltration_types
   infiltration_proportions <- cluster_properties$infiltration_proportions
-  radius <- cluster_properties$radius
+  x_radius <- cluster_properties$x_radius
+  y_radius <- cluster_properties$y_radius
+  z_radius <- cluster_properties$z_radius
   centre_loc <- cluster_properties$centre_loc
   
   # Get number of cells
@@ -17,11 +19,12 @@ simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
     z <- bg_sample[i, "Cell.Z.Position"]
     pheno <- bg_sample[i, "Cell.Type"]
     
-    R <- radius^2
     
-    D <- (x - centre_loc[1])^2 + (y - centre_loc[2])^2 + (z - centre_loc[3])^2
+    D <- ((x - centre_loc[1])/x_radius)^2 + 
+         ((y - centre_loc[2])/y_radius)^2 + 
+         ((z - centre_loc[3])/z_radius)^2
     
-    if (D < R){ 
+    if (D < 1){ 
       # in the region of cluster, generate random number to decide the `Cell.Type`
       random <- stats::runif(1)
       
