@@ -43,7 +43,7 @@ simulate_clusters3D <- function(bg_sample,
     
     ### Ellipsoid shape
     if (shape == "Ellipsoid") {
-      
+      bg_sample <- simulate_ellipsoid_cluster(bg_sample = bg_sample, cluster_properties = cluster_properties[[k]])
     }
     
     ### Cylinder shape
