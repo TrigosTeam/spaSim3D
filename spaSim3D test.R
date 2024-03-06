@@ -29,7 +29,6 @@ bg_mix <- simulate_mixing3D(bg)
 
 bg_sphere <- simulate_clusters3D(bg_sample = bg)
 
-
 bg_cylinder <- simulate_clusters3D(bg_sample = bg,
                                    n_clusters = 4,
                                    bg_type = "Others",
@@ -75,29 +74,27 @@ bg_cylinder <- simulate_clusters3D(bg_sample = bg,
                                    plot_categories = c("Others", "Immune1", "Endo"),
                                    plot_colours = NULL)
 
-bg_cluster <- simulate_clusters3D(bg_sample = bg, plot_categories = c("Others", "Tumour", "Endo", "Immune1"))
+
+bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
+                                   n_clusters = 1,
+                                   bg_type = "Others",
+                                   cluster_properties = list(
+                                     C1 = list(
+                                       name_of_cluster_cell = "Tumour",
+                                       infiltration_types = c("Immune1", "Others"),
+                                       infiltration_proportions = c(0.1, 0.05),
+                                       shape = "Ellipsoid",
+                                       x_radius = 20,
+                                       y_radius = 20,
+                                       z_radius = 40,
+                                       centre_loc = c(50, 50, 50)
+                                     )
+                                   ),
+                                   plot_image = TRUE,
+                                   plot_categories = c("Others", "Immune1", "Tumour"),
+                                   plot_colours = NULL)
 
 
+# bg_cluster <- simulate_clusters3D(bg_sample = bg, plot_categories = c("Others", "Tumour", "Endo", "Immune1"))
 
 
-start_loc <- c(0, 0, 0)
-
-end_loc <- c(50, 50, 50)
-
-v1 <- end_loc - start_loc
-d <- sum(v1 * end_loc)
-
-color <- c()
-
-for (i in 1:1000) {
-  point <- c(x[i], y[i], z[i])
-  
-  if (sum(v1 * point) >= d) {
-    color <- append(color, "blue")
-  }
-  else {
-    color <- append(color, "lightgray")
-  }
-}
-
-plot3d(x, y, z, col = color, size = 4)
