@@ -85,9 +85,12 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
                                        infiltration_proportions = c(0.1, 0.05),
                                        shape = "Ellipsoid",
                                        x_radius = 20,
-                                       y_radius = 20,
+                                       y_radius = 30,
                                        z_radius = 40,
-                                       centre_loc = c(50, 50, 50)
+                                       centre_loc = c(50, 50, 50),
+                                       y_z_rotation = pi/4,
+                                       x_z_rotation = 0,
+                                       x_y_rotation = pi/4
                                      )
                                    ),
                                    plot_image = TRUE,
@@ -98,3 +101,6 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
 # bg_cluster <- simulate_clusters3D(bg_sample = bg, plot_categories = c("Others", "Tumour", "Endo", "Immune1"))
 
 
+sum(((bg$Cell.X.Position - centre_loc[1])/x_radius)^2 +
+    ((bg$Cell.Y.Position - centre_loc[2])/y_radius)^2 +
+    ((bg$Cell.Z.Position - centre_loc[3])/z_radius)^2 <= 1)
