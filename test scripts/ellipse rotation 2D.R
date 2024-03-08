@@ -4,7 +4,7 @@ n_points <- 1000
 
 x_radius <- 15
 y_radius <- 10
-centre_loc <- c(5, 10)
+centre_loc <- c(-5, 10)
 theta <- 3 * pi / 16
 
 df <- data.frame(x = runif(n_points, -length, length), 
@@ -27,4 +27,5 @@ df[n_points + 1, ] <- list(centre_loc[1],
                            "red")
 
 plot(df$x, df$y, pch = 19, col = df$color)
-
+abline(a=centre_loc[2] - tan(theta) * centre_loc[1], b=tan(theta), lty="solid")
+abline(a=centre_loc[2] + 1/tan(theta) * centre_loc[1], b=-1/tan(theta), lty="solid")
