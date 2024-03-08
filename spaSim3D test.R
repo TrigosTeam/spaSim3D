@@ -76,7 +76,7 @@ bg_cylinder <- simulate_clusters3D(bg_sample = bg,
 
 
 bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
-                                   n_clusters = 1,
+                                   n_clusters = 2,
                                    bg_type = "Others",
                                    cluster_properties = list(
                                      C1 = list(
@@ -84,18 +84,41 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
                                        infiltration_types = c("Immune1", "Others"),
                                        infiltration_proportions = c(0.1, 0.05),
                                        shape = "Ellipsoid",
-                                       x_radius = 20,
-                                       y_radius = 30,
-                                       z_radius = 40,
+                                       x_radius = 15,
+                                       y_radius = 15,
+                                       z_radius = 25,
                                        centre_loc = c(50, 50, 50),
                                        y_z_rotation = pi/4,
                                        x_z_rotation = 0,
-                                       x_y_rotation = pi/4
+                                       x_y_rotation = 0
+                                     ), 
+                                     C2 = list(
+                                       name_of_cluster_cell = "Tumour",
+                                       infiltration_types = c("Immune1", "Others"),
+                                       infiltration_proportions = c(0.1, 0.05),
+                                       shape = "Ellipsoid",
+                                       x_radius = 15,
+                                       y_radius = 15,
+                                       z_radius = 25,
+                                       centre_loc = c(50, 66, 50),
+                                       y_z_rotation = -pi/4,
+                                       x_z_rotation = 0,
+                                       x_y_rotation = 0
                                      )
                                    ),
                                    plot_image = TRUE,
                                    plot_categories = c("Others", "Immune1", "Tumour"),
                                    plot_colours = NULL)
 
+
+bg_heart <- bg_ellipsoid[bg_ellipsoid$Cell.Type != "Others" ,]
+plot3d(bg_heart$Cell.X.Position, 
+       bg_heart$Cell.Y.Position, 
+       bg_heart$Cell.Z.Position, 
+       col = "red", 
+       size = 4,
+       xlim = c(0, 100),
+       ylim = c(0, 100),
+       zlim = c(0, 100))
 
 # bg_cluster <- simulate_clusters3D(bg_sample = bg, plot_categories = c("Others", "Tumour", "Endo", "Immune1"))
