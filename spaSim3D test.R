@@ -99,8 +99,3 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
 
 
 # bg_cluster <- simulate_clusters3D(bg_sample = bg, plot_categories = c("Others", "Tumour", "Endo", "Immune1"))
-
-
-sum(((bg$Cell.X.Position - centre_loc[1])/x_radius)^2 +
-    ((bg$Cell.Y.Position - centre_loc[2])/y_radius)^2 +
-    ((bg$Cell.Z.Position - centre_loc[3])/z_radius)^2 <= 1)
