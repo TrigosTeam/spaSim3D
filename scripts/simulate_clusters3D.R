@@ -1,6 +1,6 @@
 simulate_clusters3D <- function(bg_sample,
-                                n_clusters = 2,
                                 bg_type = "Others",
+                                n_clusters = 2,
                                 cluster_properties = list(
                                   C1 = list(
                                     name_of_cluster_cell = "Tumour",
