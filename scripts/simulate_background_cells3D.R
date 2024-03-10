@@ -99,9 +99,14 @@ simulate_background_cells3D <- function(n_cells,
     # Need to oversample
     n_cells_inflated <- n_cells*oversampling_rate
     
-    x = runif(n_cells_inflated)*length
-    y = runif(n_cells_inflated)*width
-    z = runif(n_cells_inflated)*height
+    # Use poisson distribution to sample points
+    pois_df <- poisson_distribution3D(n_cells = n_cells_inflated, 
+                                      length = length, 
+                                      width = width, 
+                                      height = height)
+    x <- pois_df$x
+    y <- pois_df$y
+    z <- pois_df$z
     
     
     # Check if all other cells are to close to the current cell 
