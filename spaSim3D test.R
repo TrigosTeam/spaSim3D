@@ -84,9 +84,9 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
                                        infiltration_types = c("Immune1", "Others"),
                                        infiltration_proportions = c(0.1, 0.05),
                                        shape = "Ellipsoid",
-                                       x_radius = 15,
-                                       y_radius = 15,
-                                       z_radius = 25,
+                                       x_radius = 20,
+                                       y_radius = 20,
+                                       z_radius = 30,
                                        centre_loc = c(50, 50, 50),
                                        y_z_rotation = pi/4,
                                        x_z_rotation = 0,
@@ -97,9 +97,9 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
                                        infiltration_types = c("Immune1", "Others"),
                                        infiltration_proportions = c(0.1, 0.05),
                                        shape = "Ellipsoid",
-                                       x_radius = 15,
-                                       y_radius = 15,
-                                       z_radius = 25,
+                                       x_radius = 20,
+                                       y_radius = 20,
+                                       z_radius = 30,
                                        centre_loc = c(50, 66, 50),
                                        y_z_rotation = -pi/4,
                                        x_z_rotation = 0,
@@ -122,3 +122,134 @@ plot3d(bg_heart$Cell.X.Position,
        zlim = c(0, 100))
 
 # bg_cluster <- simulate_clusters3D(bg_sample = bg, plot_categories = c("Others", "Tumour", "Endo", "Immune1"))
+
+
+
+## Ring
+bg_ring <- simulate_rings3D(bg_sample = bg)
+
+
+bg_heart_ring <- simulate_rings3D(bg_sample = bg,
+                                     bg_type = "Others",
+                                     n_ring = 2,
+                                     ring_properties = list(
+                                       R1 = list(
+                                          name_of_cluster_cell = "Tumour",
+                                          infiltration_types = c("Immune1", "Others"),
+                                          infiltration_proportions = c(0.1, 0.05),
+                                          shape = "Ellipsoid",
+                                          x_radius = 15,
+                                          y_radius = 15,
+                                          z_radius = 25,
+                                          centre_loc = c(50, 50, 50),
+                                          y_z_rotation = pi/4,
+                                          x_z_rotation = 0,
+                                          x_y_rotation = 0,
+                                          name_of_ring_cell = "Immune1",
+                                          ring_width = 5,
+                                          ring_infiltration_types = c("Others"),
+                                          ring_infiltration_proportions = c(0.15)
+                                       ), 
+                                       R2 = list(
+                                          name_of_cluster_cell = "Tumour",
+                                          infiltration_types = c("Immune1", "Others"),
+                                          infiltration_proportions = c(0.1, 0.05),
+                                          shape = "Ellipsoid",
+                                          x_radius = 15,
+                                          y_radius = 15,
+                                          z_radius = 25,
+                                          centre_loc = c(50, 66, 50),
+                                          y_z_rotation = -pi/4,
+                                          x_z_rotation = 0,
+                                          x_y_rotation = 0,
+                                          name_of_ring_cell = "Immune1",
+                                          ring_width = 5,
+                                          ring_infiltration_types = c("Others"),
+                                          ring_infiltration_proportions = c(0.15)
+                                       )
+                                     ),
+                                     plot_image = TRUE,
+                                     plot_categories = c("Others", "Immune1", "Tumour"),
+                                     plot_colours = NULL)
+
+bg_heart_ring1 <- bg_heart_ring[bg_heart_ring$Cell.Type != "Others" ,]
+color <- ifelse(bg_heart_ring1$Cell.Type == "Tumour", "red", "darkgreen")
+
+plot3d(bg_heart_ring1$Cell.X.Position, 
+       bg_heart_ring1$Cell.Y.Position, 
+       bg_heart_ring1$Cell.Z.Position, 
+       col = color, 
+       size = 4,
+       xlim = c(0, 100),
+       ylim = c(0, 100),
+       zlim = c(0, 100))
+
+
+
+## Double rings
+
+bg_dr <- simulate_double_rings3D(bg_sample = bg)
+
+bg_heart_dr <- simulate_double_rings3D(bg_sample = bg,
+                                       bg_type = "Others",
+                                       n_dr = 2,
+                                       dr_properties = list(
+                                       D1 = list(
+                                        name_of_cluster_cell = "Tumour",
+                                        infiltration_types = c("Immune1", "Others"),
+                                        infiltration_proportions = c(0.1, 0.05),
+                                        shape = "Ellipsoid",
+                                        x_radius = 15,
+                                        y_radius = 15,
+                                        z_radius = 25,
+                                        centre_loc = c(50, 50, 50),
+                                        y_z_rotation = pi/4,
+                                        x_z_rotation = 0,
+                                        x_y_rotation = 0,
+                                        name_of_inner_ring_cell = "Immune1",
+                                        inner_ring_width = 3,
+                                        inner_ring_infiltration_types = c("Others"),
+                                        inner_ring_infiltration_proportions = c(0.15),
+                                        name_of_outer_ring_cell = "Immune2",
+                                        outer_ring_width = 2,
+                                        outer_ring_infiltration_types = c("Others"),
+                                        outer_ring_infiltration_proportions = c(0.15)
+                                       ), 
+                                       D2 = list(
+                                        name_of_cluster_cell = "Tumour",
+                                        infiltration_types = c("Immune1", "Others"),
+                                        infiltration_proportions = c(0.1, 0.05),
+                                        shape = "Ellipsoid",
+                                        x_radius = 15,
+                                        y_radius = 15,
+                                        z_radius = 25,
+                                        centre_loc = c(50, 66, 50),
+                                        y_z_rotation = -pi/4,
+                                        x_z_rotation = 0,
+                                        x_y_rotation = 0,
+                                        name_of_inner_ring_cell = "Immune1",
+                                        inner_ring_width = 3,
+                                        inner_ring_infiltration_types = c("Others"),
+                                        inner_ring_infiltration_proportions = c(0.15),
+                                        name_of_outer_ring_cell = "Immune2",
+                                        outer_ring_width = 2,
+                                        outer_ring_infiltration_types = c("Others"),
+                                        outer_ring_infiltration_proportions = c(0.15)
+                                       )
+                                     ),
+                                     plot_image = TRUE,
+                                     plot_categories = c("Others", "Tumour", "Immune1", "Immune2"),
+                                     plot_colours = NULL)
+
+bg_heart_dr1 <- bg_heart_dr[bg_heart_dr$Cell.Type != "Others" ,]
+color <- ifelse(bg_heart_dr1$Cell.Type == "Tumour", "darkgreen",
+                ifelse(bg_heart_dr1$Cell.Type == "Immune1", "red", "blue"))
+
+plot3d(bg_heart_dr1$Cell.X.Position, 
+       bg_heart_dr1$Cell.Y.Position, 
+       bg_heart_dr1$Cell.Z.Position, 
+       col = color, 
+       size = 4,
+       xlim = c(0, 100),
+       ylim = c(0, 100),
+       zlim = c(0, 100))
