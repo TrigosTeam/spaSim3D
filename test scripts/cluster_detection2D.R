@@ -51,59 +51,101 @@ summary(cell_dens[[cell_type]][cell_dens[[cell_type]] > 0.0])
 
 ## The cluser detection function
 
-rect_data <- list()
-rect_data[[length(rect_data) + 1]] <- c()
+# rect_data <- list()
+# rect_data[[length(rect_data) + 1]] <- c()
 
+rect_data <- c()
 cell_type <- "Tumour"
 
 for (grid_rect in seq(ngrid_rect)) {
   
-  if (cell_props[[cell_type]][grid_rect] > 0.2) {
+  if (cell_props[[cell_type]][grid_rect] > 0.0) {
     x_coord <- (grid_rect - 1)%%ncols * grid_rect_width
     y_coord <- floor((grid_rect - 1)/nrows) * grid_rect_length
     
-    print(paste(x_coord, y_coord))
-    rect_data[[length(rect_data) + 1]] <- check_grid_rect(data,
-                                                          cell_type,
-                                                          x_coord,
-                                                          y_coord,
-                                                          grid_rect_length,
-                                                          grid_rect_width)
+    rect_data <- append(rect_data, check_grid_rect(data,
+                                                   cell_type,
+                                                   x_coord,
+                                                   y_coord,
+                                                   grid_rect_length,
+                                                   grid_rect_width,
+                                                   c()))
   }
 }
-
-
-
-# bottom left coord of rectangle: (x_coord, y_coord)
-
-check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width) {
-  
-  data_temp <- data$Cell.Type[data$Cell.X.Position >= x_coord &
-                              data$Cell.X.Position < (x_coord + width) &
-                              data$Cell.Y.Position >= y_coord &
-                              data$Cell.Y.Position < (y_coord + length)]
-  
-  cell_prop <- (sum(data_temp == cell_type)) / length(data_temp)
-  
-  if (cell_prop > 0.9) {
-    return (c(x_coord, y_coord, length, width))
-  }
-
-  else {
-    return (c())
-  }
-}
-
 
 ## Plot rectangles
-
-
 plot_rect(rect_data = rect_data,
           xmin = 0,
           xmax = width,
           ymin = 0,
           ymax = length)
 
+
+# bottom left coord of rectangle: (x_coord, y_coord)
+check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width, 
+                            answer) {
+  
+  data_temp <- data$Cell.Type[data$Cell.X.Position >= x_coord &
+                              data$Cell.X.Position < (x_coord + width) &
+                              data$Cell.Y.Position >= y_coord &
+                              data$Cell.Y.Position < (y_coord + length)]
+  
+  if (length(data_temp) == 0) {
+    return (c())
+  }
+  
+  cell_prop <- (sum(data_temp == cell_type)) / length(data_temp)
+  
+  if (length < 5 || width < 5) {
+    return (c())
+  }
+  
+  if (cell_prop > 0.85) {
+    return (c(x_coord, y_coord, length, width))
+  }
+  
+  else if (cell_prop > 0) {
+    # Bottom Left
+    answer <- append(answer, check_grid_rect(data,
+                                             cell_type,
+                                             x_coord,
+                                             y_coord,
+                                             length/2,
+                                             width/2,
+                                             answer))
+    # Bottom Right
+    answer <- append(answer, check_grid_rect(data,
+                                             cell_type,
+                                             x_coord + width/2,
+                                             y_coord,
+                                             length/2,
+                                             width/2,
+                                             answer))
+    # Top Left
+    answer <- append(answer, check_grid_rect(data,
+                                             cell_type,
+                                             x_coord,
+                                             y_coord + length/2,
+                                             length/2,
+                                             width/2,
+                                             answer))
+    
+    # Top Right
+    answer <- append(answer, check_grid_rect(data,
+                                             cell_type,
+                                             x_coord + width/2,
+                                             y_coord + length/2,
+                                             length/2,
+                                             width/2,
+                                             answer))
+    
+    return (answer)
+  }
+  
+  else {
+    return (c())
+  }
+}
 
 
 
@@ -181,8 +223,10 @@ plot_cells <- function(data, length, width, nrows, ncols) {
 
 plot_rect <- function(rect_data, xmin, xmax, ymin, ymax) {
   
-  df <- do.call(rbind.data.frame, rect_data)
-  colnames(df) <- c("x", "y", "length", "width")
+  df <- data.frame(x = rect_data[seq(1, length(rect_data), 4)],
+                   y = rect_data[seq(2, length(rect_data), 4)],
+                   length = rect_data[seq(3, length(rect_data), 4)],
+                   width = rect_data[seq(4, length(rect_data), 4)])
   
   ggplot(df, aes(x = x, y = y)) +
     geom_rect(aes(xmin = x, ymin = y, 
