@@ -44,7 +44,7 @@ plot_cells(data = data_specific_cell, length = length, width = width, nrows = nr
 ## Other stuff
 cell_type <- "Tumour"
 summary(cell_props[[cell_type]][cell_props[[cell_type]] > 0.0])
-hist(cell_props[[cell_type]][cell_props[[cell_type]] > 0.0])
+# hist(cell_props[[cell_type]][cell_props[[cell_type]] > 0.0])
 
 summary(cell_dens[[cell_type]][cell_dens[[cell_type]] > 0.0])
 
@@ -85,22 +85,25 @@ plot_rect(rect_data = rect_data,
 check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width, 
                             answer) {
   
-  data_temp <- data$Cell.Type[data$Cell.X.Position >= x_coord &
-                              data$Cell.X.Position < (x_coord + width) &
-                              data$Cell.Y.Position >= y_coord &
-                              data$Cell.Y.Position < (y_coord + length)]
-  
-  if (length(data_temp) == 0) {
+  if (length < 1) {
     return (c())
   }
   
-  cell_prop <- (sum(data_temp == cell_type)) / length(data_temp)
+  data <- data[data$Cell.X.Position >= x_coord &
+               data$Cell.X.Position < (x_coord + width) &
+               data$Cell.Y.Position >= y_coord &
+               data$Cell.Y.Position < (y_coord + length), ]
   
-  if (length < 5 || width < 5) {
+  data_cell_type <- data$Cell.Type
+  
+  if (length(data_cell_type) == 0) {
     return (c())
   }
+
+  cell_prop <- (sum(data_cell_type == cell_type)) / length(data_cell_type)
   
-  if (cell_prop > 0.85) {
+  
+  if (cell_prop > 0.95) {
     return (c(x_coord, y_coord, length, width))
   }
   
@@ -112,7 +115,7 @@ check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width,
                                              y_coord,
                                              length/2,
                                              width/2,
-                                             answer))
+                                             c()))
     # Bottom Right
     answer <- append(answer, check_grid_rect(data,
                                              cell_type,
@@ -120,7 +123,7 @@ check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width,
                                              y_coord,
                                              length/2,
                                              width/2,
-                                             answer))
+                                             c()))
     # Top Left
     answer <- append(answer, check_grid_rect(data,
                                              cell_type,
@@ -128,7 +131,7 @@ check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width,
                                              y_coord + length/2,
                                              length/2,
                                              width/2,
-                                             answer))
+                                             c()))
     
     # Top Right
     answer <- append(answer, check_grid_rect(data,
@@ -137,7 +140,7 @@ check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width,
                                              y_coord + length/2,
                                              length/2,
                                              width/2,
-                                             answer))
+                                             c()))
     
     return (answer)
   }
@@ -238,3 +241,14 @@ plot_rect <- function(rect_data, xmin, xmax, ymin, ymax) {
   
 }
 
+# x <- y <- c()
+# density <- 0.016
+# 
+# for (i in seq(nrow(df))) {
+#   row <- df[i, ]
+#   npoints <- density * row$length * row$width
+#   x <- append(x, runif(npoints, min = row$x, max = row$x + row$width))
+#   y <- append(y, runif(npoints, min = row$y, max = row$y + row$length))
+# }
+# 
+# plot(x, y, col = "green", xlim = c(0, 2000), ylim = c(0, 2000), pch = '.')
