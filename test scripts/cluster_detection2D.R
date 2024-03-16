@@ -10,16 +10,21 @@ ngrid_rect <- nrows * ncols
 grid_rect_length <- length / nrows
 grid_rect_width <- width / ncols
 
+# Get data
+data <- bgCluster # from spaSim script
 
-### Algorithm to see proportion of cells in each grid square, show as histogram
-data <- bgCluster
-
+# Determine the grid rectangle number each point belongs
+# Bottom left is grid_rect_1, move right for grid_rect_2, 
+# once at the end of the first row, go to the second row 
 data <- determine_grid_rect_nums(data = data,
                                  length = length, width = width,
                                  nrows = nrows, ncols = ncols)
 
+# Determine cell proportions for each cell type in each grid rectangle
 cell_props <- find_grid_rect_props(data = data,
                                    nrows = nrows, ncols = ncols)
+
+# Determine cell densities for each cell type in each grid rectangle
 cell_dens <- find_grid_rect_densities(data = data,
                                       nrows = nrows, ncols = ncols,
                                       area = grid_rect_length * grid_rect_width)
@@ -30,7 +35,6 @@ library(ggplot2)
 
 ## Plot all cells
 plot_cells(data = data, length = length, width = width, nrows = nrows, ncols = ncols)
-
 
 
 ## Plot only showing a specific cell type
@@ -49,13 +53,11 @@ summary(cell_props[[cell_type]][cell_props[[cell_type]] > 0.0])
 summary(cell_dens[[cell_type]][cell_dens[[cell_type]] > 0.0])
 
 
-## The cluser detection function
 
-# rect_data <- list()
-# rect_data[[length(rect_data) + 1]] <- c()
 
+# Determining the rectangles that represent the clusters
 rect_data <- c()
-cell_type <- "Tumour"
+cell_type <- "Immune1"
 
 for (grid_rect in seq(ngrid_rect)) {
   
@@ -75,10 +77,10 @@ for (grid_rect in seq(ngrid_rect)) {
 
 ## Plot rectangles
 plot_rect(rect_data = rect_data,
-          xmin = 0,
-          xmax = width,
-          ymin = 0,
-          ymax = length)
+          length = length,
+          width = width,
+          nrows = nrows,
+          ncols = ncols)
 
 
 # THE CLUSTER DETECTION FUNCTION
@@ -234,7 +236,7 @@ plot_cells <- function(data, length, width, nrows, ncols) {
 
 
 
-plot_rect <- function(rect_data, xmin, xmax, ymin, ymax) {
+plot_rect <- function(rect_data, length, width, nrows, ncols) {
   
   df <- data.frame(x = rect_data[seq(1, length(rect_data), 4)],
                    y = rect_data[seq(2, length(rect_data), 4)],
@@ -246,19 +248,28 @@ plot_rect <- function(rect_data, xmin, xmax, ymin, ymax) {
                   xmax = x + width, ymax = y + length),
               fill = "green",
               color = "black") +
-    xlim(xmin, xmax) +
-    ylim(ymin, ymax)
+    theme(
+      panel.background = element_rect(fill = NA),
+      panel.ontop = TRUE,
+      panel.grid.major = element_line(color = "black"),
+      panel.grid.minor = element_blank()
+    ) + 
+    scale_x_continuous(limits = c(0, width), breaks = round(seq(0, width, width/ncols))) +
+    scale_y_continuous(limits = c(0, length), breaks = round(seq(0, length, length/nrows))) 
   
 }
 
+
+
 # x <- y <- c()
-# density <- 0.016
+# density <- max(cell_dens[[cell_type]])
 # 
 # for (i in seq(nrow(df))) {
 #   row <- df[i, ]
-#   npoints <- density * row$length * row$width
+#   npoints <- round(density * row$length * row$width)
 #   x <- append(x, runif(npoints, min = row$x, max = row$x + row$width))
 #   y <- append(y, runif(npoints, min = row$y, max = row$y + row$length))
 # }
+# data_sim <- data.frame(Cell.X.Position = x, Cell.Y.Position = y, Cell.Type = cell_type)
 # 
-# plot(x, y, col = "green", xlim = c(0, 2000), ylim = c(0, 2000), pch = '.')
+# plot_cells(data = data_sim, length = length, width = width, nrows = nrows, ncols = ncols)
