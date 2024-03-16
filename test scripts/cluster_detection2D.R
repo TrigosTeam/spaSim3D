@@ -81,32 +81,39 @@ plot_rect(rect_data = rect_data,
           ymax = length)
 
 
+# THE CLUSTER DETECTION FUNCTION
 # bottom left coord of rectangle: (x_coord, y_coord)
 check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width, 
                             answer) {
   
-  if (length < 1) {
+  # size of rectangle is getting too small
+  if (length < 20 | width < 20) {
     return (c())
   }
   
+  # look at cells only in the current rectangle
   data <- data[data$Cell.X.Position >= x_coord &
                data$Cell.X.Position < (x_coord + width) &
                data$Cell.Y.Position >= y_coord &
                data$Cell.Y.Position < (y_coord + length), ]
   
+  # consider cell_types in the rectangle
   data_cell_type <- data$Cell.Type
   
+  # no cells in the rectangle
   if (length(data_cell_type) == 0) {
     return (c())
   }
 
+  # determine cell proportion for chosen cell_type in the rectangle
   cell_prop <- (sum(data_cell_type == cell_type)) / length(data_cell_type)
   
-  
-  if (cell_prop > 0.95) {
+  # cell proportion in the rectangle must be more than the 75th percentile proportion
+  if (cell_prop > quantile(cell_props[[cell_type]][cell_props[[cell_type]] > 0.0], 0.75)) {
     return (c(x_coord, y_coord, length, width))
   }
   
+  # some cell_type of interest still in the rectangle, check sub-rectangles
   else if (cell_prop > 0) {
     # Bottom Left
     answer <- append(answer, check_grid_rect(data,
@@ -145,6 +152,7 @@ check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width,
     return (answer)
   }
   
+  # cell proportion is zero
   else {
     return (c())
   }
@@ -222,6 +230,8 @@ plot_cells <- function(data, length, width, nrows, ncols) {
     scale_x_continuous(limits = c(0, width), breaks = round(seq(0, width, width/ncols))) +
     scale_y_continuous(limits = c(0, length), breaks = round(seq(0, length, length/nrows))) 
 }
+
+
 
 
 plot_rect <- function(rect_data, xmin, xmax, ymin, ymax) {
