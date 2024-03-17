@@ -57,13 +57,14 @@ summary(cell_dens[[cell_type]][cell_dens[[cell_type]] > 0.0])
 
 # Determining the rectangles that represent the clusters
 rect_data <- c()
-cell_type <- "Immune1"
+cell_type <- "Tumour"
 
 for (grid_rect in seq(ngrid_rect)) {
   
+  # Only examine rectangles which contain the chosen cell_type
   if (cell_props[[cell_type]][grid_rect] > 0.0) {
     x_coord <- (grid_rect - 1)%%ncols * grid_rect_width
-    y_coord <- floor((grid_rect - 1)/nrows) * grid_rect_length
+    y_coord <- floor((grid_rect - 1)/ncols) * grid_rect_length
     
     rect_data <- append(rect_data, check_grid_rect(data,
                                                    cell_type,
@@ -111,7 +112,7 @@ check_grid_rect <- function(data, cell_type, x_coord, y_coord, length, width,
   cell_prop <- (sum(data_cell_type == cell_type)) / length(data_cell_type)
   
   # cell proportion in the rectangle must be more than the 75th percentile proportion
-  if (cell_prop > quantile(cell_props[[cell_type]][cell_props[[cell_type]] > 0.0], 0.75)) {
+  if (cell_prop >= quantile(cell_props[[cell_type]][cell_props[[cell_type]] > 0.0], 0.75)) {
     return (c(x_coord, y_coord, length, width))
   }
   
@@ -186,9 +187,13 @@ find_grid_rect_props <- function(data,
   
   for (i in seq(nrows * ncols)) {
     cells <- data$Cell.Type[data$Cell.Num == i]
-    
+
     for (cell_type in cell_types) {
-      cell_props[[cell_type]] <- append(cell_props[[cell_type]], sum(cells == cell_type) / length(cells)) 
+      
+      answer <- ifelse(length(cells) > 0, 
+                       sum(cells == cell_type) / length(cells), 0)
+      
+      cell_props[[cell_type]] <- append(cell_props[[cell_type]], answer) 
       
     }
   }  
@@ -207,9 +212,12 @@ find_grid_rect_densities <- function(data,
   
   for (i in seq(nrows * ncols)) {
     cells <- data$Cell.Type[data$Cell.Num == i]
-    
+
     for (cell_type in cell_types) {
-      cell_dens[[cell_type]] <- append(cell_dens[[cell_type]], sum(cells == cell_type) / area) 
+      answer <- ifelse(length(cells) > 0, 
+                       sum(cells == cell_type) / area, 0)
+      
+      cell_dens[[cell_type]] <- append(cell_dens[[cell_type]], answer) 
       
     }
   }  
