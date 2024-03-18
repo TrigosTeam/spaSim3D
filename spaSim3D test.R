@@ -186,6 +186,30 @@ plot3d(bg_heart_ring1$Cell.X.Position,
 
 
 
+
+bg_cylinder_ring <- simulate_rings3D(bg_sample = bg,
+                                  bg_type = "Others",
+                                  n_ring = 1,
+                                  ring_properties = list(
+                                    R1 = list(
+                                      name_of_cluster_cell = "Void",
+                                      infiltration_types = c("Immune1", "Others"),
+                                      infiltration_proportions = c(0, 0),
+                                      shape = "Cylinder",
+                                      radius = 10,
+                                      start_loc = c(0, 0, 0),
+                                      end_loc = c(100, 80, 60),
+                                      name_of_ring_cell = "Immune1",
+                                      ring_width = 5,
+                                      ring_infiltration_types = c("Others"),
+                                      ring_infiltration_proportions = c(0.15)
+                                    )
+                                  ),
+                                  plot_image = TRUE,
+                                  plot_categories = c("Others", "Immune1", "Tumour"),
+                                  plot_colours = NULL)
+
+
 ## Double rings
 
 bg_dr <- simulate_double_rings3D(bg_sample = bg)
