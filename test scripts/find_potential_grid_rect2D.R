@@ -108,18 +108,20 @@ max_rect_prop <- cell_props[[cell_type]][max_rect_num]
 #          cell_prop > 25% of max_rect_prop. If they do, remove from
 #          grid_rect_nums and append to cluster_rect_nums.
 
-# cluster_rect_nums <- c(max_rect_num)
-cluster_rect_nums <- c()
+cluster_rect_nums <- grid_rect_nums
 
-cluster_rect_nums <- append(cluster_rect_nums,
-                            check_adjacent_grid_rects(c(), max_rect_num, grid_rect_nums))
+# REMOVE elements from grid_rect_nums which ARE included in the cluster
+grid_rect_nums <- check_adjacent_grid_rects(max_rect_num, grid_rect_nums)
+
+# Take the difference to get elements included in the cluster
+cluster_rect_nums <- setdiff(cluster_rect_nums, grid_rect_nums)
 
 
 
-check_adjacent_grid_rects <- function(answer, curr_grid_rect_num, grid_rect_nums) {
+check_adjacent_grid_rects <- function(curr_grid_rect_num, grid_rect_nums) {
   
   if (curr_grid_rect_num %in% grid_rect_nums == FALSE) {
-    return (c())
+    return (grid_rect_nums)
   }
   
   if (cell_props[[cell_type]][curr_grid_rect_num] > 0.25 * max_rect_prop) {
@@ -132,49 +134,36 @@ check_adjacent_grid_rects <- function(answer, curr_grid_rect_num, grid_rect_nums
     
     # Left
     if (curr_grid_rect_num%%ncols != 1) {
-      answer <- append(answer, 
-                       check_adjacent_grid_rects(c(), 
-                                                 curr_grid_rect_num - 1, 
-                                                 grid_rect_nums))  
+      grid_rect_nums <- check_adjacent_grid_rects(curr_grid_rect_num - 1, 
+                                                  grid_rect_nums)  
     }
     
     # Right
     if (curr_grid_rect_num%%ncols != 0) {
-      answer <- append(answer, 
-                       check_adjacent_grid_rects(c(), 
-                                                 curr_grid_rect_num + 1, 
-                                                 grid_rect_nums))  
+      grid_rect_nums <- check_adjacent_grid_rects(curr_grid_rect_num + 1, 
+                                                  grid_rect_nums)  
     }
     
     # Up
     if (curr_grid_rect_num <= ncols * (nrows - 1)) {
-      answer <- append(answer, 
-                       check_adjacent_grid_rects(c(), 
-                                                 curr_grid_rect_num + ncols, 
-                                                 grid_rect_nums))  
+      grid_rect_nums <- check_adjacent_grid_rects(curr_grid_rect_num + ncols, 
+                                                         grid_rect_nums)
     }
     
     # Down
     if (curr_grid_rect_num > ncols) {
-      answer <- append(answer, 
-                       check_adjacent_grid_rects(c(), 
-                                                 curr_grid_rect_num - ncols, 
-                                                 grid_rect_nums))  
+      grid_rect_nums <- check_adjacent_grid_rects(curr_grid_rect_num - ncols, 
+                                                         grid_rect_nums)
     }
     
-    answer <- append(answer, curr_grid_rect_num)
-    
-    return (answer)
   }
-  else {
-    return (c())
-  }
+  return (grid_rect_nums)
 }
 
-
-
-
-
+# x = (cluster_rect_nums - 1)%%ncols * grid_rect_width
+# y = floor((cluster_rect_nums - 1)/ncols) * grid_rect_length
+# rect_data = data.frame(x = x, y = y, length = grid_rect_length, width = grid_rect_width)
+# plot_rect(rect_data, length, width, nrows, ncols)
 
 
 ## Functions
