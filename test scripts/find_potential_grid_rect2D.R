@@ -1,6 +1,16 @@
 library(spaSim)
 
 ### Simulate 2D data ----------------------------------------------------------
+bgHardcore <- simulate_background_cells(n_cells = 5000,
+                                        width = 2000,
+                                        height = 2000,
+                                        method = "Hardcore",
+                                        min_d = 10,
+                                        #oversampling_rate,
+                                        #jitter,
+                                        #Cell.Type,
+                                        plot_image = T)
+
 cluster_prop <- list(
   C1 = list(
     name_of_cluster_cell = "Tumour",
@@ -91,11 +101,7 @@ max_rect_num <- find_max_prop_grid_rect(cell_props = cell_props,
                                     grid_rect_nums = grid_rect_nums,
                                     cell_type = cell_type)
 
-max_rect_prop <- cell_props[[cell_type]][rect_num]
-
-
-## Step 5. Remove rect_num from grid_rect_nums vectors and add it to a new vector
-grid_rect_nums <- grid_rect_nums[-c(rect_num)]
+max_rect_prop <- cell_props[[cell_type]][max_rect_num]
 
 
 ## Step 6. Recursive algorithm. Determine if adjacent grid_rects have a
@@ -118,7 +124,7 @@ check_adjacent_grid_rects <- function(answer, curr_grid_rect_num, grid_rect_nums
   
   if (cell_props[[cell_type]][curr_grid_rect_num] > 0.25 * max_rect_prop) {
     
-    grid_rect_nums <- grid_rect_nums[-c(curr_grid_rect_num)]
+    grid_rect_nums <- grid_rect_nums[! grid_rect_nums %in% curr_grid_rect_num]
     
     ### CHECK LEFT, RIGHT, UP, DOWN
     
