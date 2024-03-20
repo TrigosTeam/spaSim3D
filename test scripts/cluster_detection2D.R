@@ -269,15 +269,15 @@ plot_rect <- function(rect_data, length, width, nrows, ncols) {
 
 
 
-# x <- y <- c()
-# density <- max(cell_dens[[cell_type]])
-# 
-# for (i in seq(nrow(df))) {
-#   row <- df[i, ]
-#   npoints <- round(density * row$length * row$width)
-#   x <- append(x, runif(npoints, min = row$x, max = row$x + row$width))
-#   y <- append(y, runif(npoints, min = row$y, max = row$y + row$length))
-# }
-# data_sim <- data.frame(Cell.X.Position = x, Cell.Y.Position = y, Cell.Type = cell_type)
-# 
-# plot_cells(data = data_sim, length = length, width = width, nrows = nrows, ncols = ncols)
+x <- y <- c()
+density <- max(cell_dens[[cell_type]])
+
+for (i in seq(nrow(df))) {
+  row <- df[i, ]
+  npoints <- round(density * row$length * row$width)
+  x <- append(x, runif(npoints, min = row$x, max = row$x + row$width))
+  y <- append(y, runif(npoints, min = row$y, max = row$y + row$length))
+}
+data_sim <- data.frame(Cell.X.Position = x, Cell.Y.Position = y, Cell.Type = cell_type)
+
+plot_cells(data = data_sim, length = length, width = width, nrows = nrows, ncols = ncols)
