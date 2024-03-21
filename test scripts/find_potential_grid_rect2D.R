@@ -21,7 +21,7 @@ cluster_prop <- list(
     infiltration_proportions = c(0.10, 0.00)),
   C2 = list(
     name_of_cluster_cell = "Tumour",
-    size = 400,
+    size = 350,
     shape = "Circle",
     centre_loc = data.frame("x" = 1500, "y" = 1500),
     infiltration_types = c("Immune1", "Others"),
@@ -53,8 +53,8 @@ length <- 2000
 width <- 2000
 
 ## Define grid dimensions
-nrows <- 8
-ncols <- 8
+nrows <- 10
+ncols <- 10
 ngrid_rect <- nrows * ncols
 
 grid_rect_length <- length / nrows
@@ -72,59 +72,40 @@ plot_cells(data = data, length = length, width = width, nrows = nrows, ncols = n
 
 
 ## Plot only showing a specific cell type
-cell_type <- "Tumour"
+cell_type <- "Immune1"
 data_specific_cell <- data[data$Cell.Type == cell_type, ]
 
 plot_cells(data = data_specific_cell, length = length, width = width, nrows = nrows, ncols = ncols)
 
 
+## get cluster_rect_list
+cluster_rect_list <- get_cluster_rect_list(data = data,
+                                           ngrid_rect = ngrid_rect,
+                                           nrows = nrows,
+                                           ncols = ncols)
 
 
 
-## Step 1. Create vector with number for each grid_rect
-grid_rect_nums <- seq(ngrid_rect)
 
-
-## Step 2. Determine cell proportions for each cell_type for each grid_rect
-cell_props <- find_grid_rect_props(data = data,
-                                   nrows = nrows, ncols = ncols)
-
-
-## Step 3. Remove numbers from grid_rect_nums where cell_prop = 0
-cell_type <- "Tumour"
-grid_rect_nums <- grid_rect_nums[cell_props[[cell_type]] > 0]
+## Plot the chosen rectangles
+x = (cluster_rect_list[["Immune1"]][[2]] - 1)%%ncols * grid_rect_width
+y = floor((cluster_rect_list[["Immune1"]][[2]]- 1)/ncols) * grid_rect_length
+rect_data = data.frame(x = x, y = y, length = grid_rect_length, width = grid_rect_width)
+plot_rect(rect_data, length, width, nrows, ncols)
 
 
 
-## Step 4. Determine grid_rect with highest cell_prop
-max_rect_num <- find_max_prop_grid_rect(cell_props = cell_props,
-                                    grid_rect_nums = grid_rect_nums,
-                                    cell_type = cell_type)
-
-max_rect_prop <- cell_props[[cell_type]][max_rect_num]
-
-
-## Step 6. Recursive algorithm. Determine if adjacent grid_rects have a
-#          cell_prop > 25% of max_rect_prop. If they do, remove from
-#          grid_rect_nums and append to cluster_rect_nums.
-
-cluster_rect_nums <- grid_rect_nums
-
-# REMOVE elements from grid_rect_nums which ARE included in the cluster
-grid_rect_nums <- check_adjacent_grid_rects(max_rect_num, grid_rect_nums)
-
-# Take the difference to get elements included in the cluster
-cluster_rect_nums <- setdiff(cluster_rect_nums, grid_rect_nums)
 
 
 
-check_adjacent_grid_rects <- function(curr_grid_rect_num, grid_rect_nums) {
+
+check_adjacent_grid_rects <- function(curr_grid_rect_num, grid_rect_nums, max_rect_prop, cell_props) {
   
   if (curr_grid_rect_num %in% grid_rect_nums == FALSE) {
     return (grid_rect_nums)
   }
   
-  if (cell_props[[cell_type]][curr_grid_rect_num] > 0.25 * max_rect_prop) {
+  if (cell_props[[cell_type]][curr_grid_rect_num] > 0.20 * max_rect_prop) {
     
     grid_rect_nums <- grid_rect_nums[! grid_rect_nums %in% curr_grid_rect_num]
     
@@ -135,35 +116,110 @@ check_adjacent_grid_rects <- function(curr_grid_rect_num, grid_rect_nums) {
     # Left
     if (curr_grid_rect_num%%ncols != 1) {
       grid_rect_nums <- check_adjacent_grid_rects(curr_grid_rect_num - 1, 
-                                                  grid_rect_nums)  
+                                                  grid_rect_nums,
+                                                  max_rect_prop,
+                                                  cell_props)  
     }
     
     # Right
     if (curr_grid_rect_num%%ncols != 0) {
       grid_rect_nums <- check_adjacent_grid_rects(curr_grid_rect_num + 1, 
-                                                  grid_rect_nums)  
+                                                  grid_rect_nums,
+                                                  max_rect_prop,
+                                                  cell_props)  
     }
     
     # Up
     if (curr_grid_rect_num <= ncols * (nrows - 1)) {
       grid_rect_nums <- check_adjacent_grid_rects(curr_grid_rect_num + ncols, 
-                                                         grid_rect_nums)
+                                                  grid_rect_nums,
+                                                  max_rect_prop,
+                                                  cell_props)
     }
     
     # Down
     if (curr_grid_rect_num > ncols) {
       grid_rect_nums <- check_adjacent_grid_rects(curr_grid_rect_num - ncols, 
-                                                         grid_rect_nums)
+                                                  grid_rect_nums,
+                                                  max_rect_prop,
+                                                  cell_props)
     }
     
   }
   return (grid_rect_nums)
 }
 
-# x = (cluster_rect_nums - 1)%%ncols * grid_rect_width
-# y = floor((cluster_rect_nums - 1)/ncols) * grid_rect_length
-# rect_data = data.frame(x = x, y = y, length = grid_rect_length, width = grid_rect_width)
-# plot_rect(rect_data, length, width, nrows, ncols)
+
+
+get_cluster_rect_list <- function(data, ngrid_rect, nrows, ncols) {
+  
+  ## Step 0. Set up cluster_rect_list
+  cell_types <- unique(data$Cell.Type)
+  cluster_rect_list <- vector(mode = 'list', length = length(cell_types))
+  names(cluster_rect_list) <- cell_types
+  cluster_rect_list[["Others"]] <- NULL # ignore "others" cell type
+  
+  
+  for (cell_type in cell_types) {
+    
+    if (cell_type == "Others") {
+      next
+    }
+    
+    ## Step 1. Create vector with number for each grid_rect
+    grid_rect_nums <- seq(ngrid_rect)
+    
+    ## Step 2. Determine cell proportions for each cell_type for each grid_rect
+    cell_props <- find_grid_rect_props(data = data,
+                                       nrows = nrows, ncols = ncols)
+    
+    ## Step 3. Remove numbers from grid_rect_nums where cell_prop = 0
+    grid_rect_nums <- grid_rect_nums[cell_props[[cell_type]] > 0]
+    
+    ## Step 4. Loop until no more grid_rects left or max_rect_num < 0.25
+    index <- 1
+    cluster_rect_list[[cell_type]] <- list()
+    
+    while (length(grid_rect_nums) > 0) {
+      
+      ## Step 5. Determine grid_rect with highest cell_prop
+      max_rect_num <- find_max_prop_grid_rect(cell_props = cell_props,
+                                              grid_rect_nums = grid_rect_nums,
+                                              cell_type = cell_type)
+      
+      max_rect_prop <- cell_props[[cell_type]][max_rect_num]
+      
+      if (max_rect_prop < 0.25) {
+        break
+      }
+      
+      
+      ## Step 6. Recursive algorithm. Determine if adjacent grid_rects have a
+      #          cell_prop > 20% of max_rect_prop. If they do, remove from
+      #          grid_rect_nums and append to cluster_rect_nums.
+      
+      cluster_rect_nums <- grid_rect_nums
+      
+      # REMOVE elements from grid_rect_nums which ARE included in the cluster
+      grid_rect_nums <- check_adjacent_grid_rects(max_rect_num, 
+                                                  grid_rect_nums, 
+                                                  max_rect_prop,
+                                                  cell_props)
+      
+      # Take the difference to get elements included in the cluster
+      cluster_rect_nums <- setdiff(cluster_rect_nums, grid_rect_nums)
+      
+      
+      ## Step 7. Add cluster_rect_nums to list
+      cluster_rect_list[[cell_type]][[index]] <- cluster_rect_nums
+      index <- index + 1
+    }
+    
+  }
+  
+  return (cluster_rect_list)
+}
+
 
 
 ## Functions
@@ -177,6 +233,7 @@ determine_grid_rect_nums <- function(data,
   
   return(data)
 }
+
 
 plot_cells <- function(data, length, width, nrows, ncols) {
   
@@ -223,3 +280,29 @@ find_max_prop_grid_rect <- function(cell_props, grid_rect_nums, cell_type) {
   
   return (grid_rect_nums[which.max(cell_props[[cell_type]][grid_rect_nums])])
 }
+
+
+
+plot_rect <- function(rect_data, length, width, nrows, ncols) {
+  
+  df <- data.frame(x = rect_data[seq(1, length(rect_data), 4)],
+                   y = rect_data[seq(2, length(rect_data), 4)],
+                   length = rect_data[seq(3, length(rect_data), 4)],
+                   width = rect_data[seq(4, length(rect_data), 4)])
+  
+  ggplot(df, aes(x = x, y = y)) +
+    geom_rect(aes(xmin = x, ymin = y, 
+                  xmax = x + width, ymax = y + length),
+              fill = "green",
+              color = "black") +
+    theme(
+      panel.background = element_rect(fill = NA),
+      panel.ontop = TRUE,
+      panel.grid.major = element_line(color = "black"),
+      panel.grid.minor = element_blank()
+    ) + 
+    scale_x_continuous(limits = c(0, width), breaks = round(seq(0, width, width/ncols))) +
+    scale_y_continuous(limits = c(0, length), breaks = round(seq(0, length, length/nrows))) 
+  
+}
+
