@@ -25,7 +25,7 @@ cluster_prop <- list(
     shape = "Circle",
     centre_loc = data.frame("x" = 1500, "y" = 1500),
     infiltration_types = c("Immune1", "Others"),
-    infiltration_proportions = c(0.5, 0.00)),
+    infiltration_proportions = c(0.6, 0.00)),
   C3 = list(
     name_of_cluster_cell = "Immune1",
     size = 250,
@@ -68,14 +68,18 @@ data <- determine_grid_rect_nums(data = data,
 
 ## Plot all cells
 library(ggplot2)
-plot_cells(data = data, length = length, width = width, nrows = nrows, ncols = ncols)
+plot_cells(data = data, 
+           length = length, width = width, 
+           nrows = nrows, ncols = ncols)
 
 
 ## Plot only showing a specific cell type
-cell_type <- "Immune1"
+cell_type <- "Tumour"
 data_specific_cell <- data[data$Cell.Type == cell_type, ]
 
-plot_cells(data = data_specific_cell, length = length, width = width, nrows = nrows, ncols = ncols)
+plot_cells(data = data_specific_cell, 
+           length = length, width = width, 
+           nrows = nrows, ncols = ncols)
 
 
 ## get cluster_rect_list
@@ -86,10 +90,11 @@ cluster_rect_list <- get_cluster_rect_list(data = data,
 
 
 
+cluster_rect_data <- cluster_rect_list[["Tumour"]][[2]]
 
 ## Plot the chosen rectangles
-x = (cluster_rect_list[["Immune1"]][[2]] - 1)%%ncols * grid_rect_width
-y = floor((cluster_rect_list[["Immune1"]][[2]]- 1)/ncols) * grid_rect_length
+x = (cluster_rect_data - 1)%%ncols * grid_rect_width
+y = floor((cluster_rect_data - 1)/ncols) * grid_rect_length
 rect_data = data.frame(x = x, y = y, length = grid_rect_length, width = grid_rect_width)
 plot_rect(rect_data, length, width, nrows, ncols)
 

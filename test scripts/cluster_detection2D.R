@@ -3,8 +3,8 @@ length <- 2000
 width <- 2000
 
 ## Define grid dimensions
-nrows <- 8
-ncols <- 8
+nrows <- 10
+ncols <- 10
 ngrid_rect <- nrows * ncols
 
 grid_rect_length <- length / nrows
