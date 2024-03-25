@@ -1,4 +1,5 @@
 # In 3D
+library(rgl)
 
 bg <- simulate_background_cells3D(n_cells = 20000,
                                   length = 100,
