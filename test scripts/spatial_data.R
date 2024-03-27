@@ -20,9 +20,9 @@ phenos
 ## Determine cell types for each phenotype
 cell_types <- c("Tumour",
                 "Other",
-                "Helper T",
-                "Cytotoxic T",
-                "Regulatory T",
+                "CD4 T",
+                "CD8 T",
+                "T-reg",
                 "Double negative T",
                 "PDL1+ Immune")
 
@@ -35,6 +35,14 @@ formatted_spatial_data <- define_celltypes(spe_object = spatial_data,
                                            print_names = FALSE)
 
 
+
+avg_d <- calculate_pairwise_distances_between_celltypes(spe_object = formatted_spatial_data, 
+                                                        cell_types_of_interest = c("Tumour"), 
+                                                        feature_colname = "Cell.Type")
+
+min_d <- calculate_minimum_distances_between_celltypes(spe_object = formatted_spatial_data, 
+                                                       feature_colname = "Cell.Type",
+                                                       cell_types_of_interest = c("CD4 T", "Tumour"))
 
 ###---------------------------------
 
