@@ -36,30 +36,17 @@ formatted_spatial_data <- define_celltypes(spe_object = spatial_data,
 
 
 
-###----------------------
-# Construct a dummy marker intensity matrix
-## rows are markers, columns are cells
-intensity_matrix <- matrix(c(14.557, 0.169, 1.655, 0.054,
-                             17.588, 0.229, 1.188, 2.074, 
-                             21.262, 4.206,  5.924, 0.021), nrow = 4, ncol = 3)
-# define marker names as rownames
-rownames(intensity_matrix) <- c("DAPI", "CD3", "CD4", "AMACR")
-# define cell IDs as colnames
-colnames(intensity_matrix) <- c("Cell_1", "Cell_2", "Cell_3") 
+###---------------------------------
 
-# Construct a dummy metadata (phenotypes, x/y coordinates)
-# the order of the elements in these vectors correspond to the cell order 
-# in `intensity matrix`
-phenotypes <- c("OTHER",  "AMACR", "CD3,CD4")
-coord_x <- c(82, 171, 184)
-coord_y <- c(30, 22, 38)
+data("simulated_image")
+simulated_image$Phenotype
+assay(simulated_image[1:5, 1:5])
 
-general_format_image <- format_image_to_spe(format = "general", 
-                                            intensity_matrix = intensity_matrix,
-                                            phenotypes = phenotypes, 
-                                            coord_x = coord_x,
-                                            coord_y = coord_y)
-colData(general_format_image)
-spatialCoords(general_format_image)
-assay(general_format_image)
-
+predicted_image <- predict_phenotypes(spe_object = simulated_image,
+                                      thresholds = NULL,
+                                      tumour_marker = "Tumour_marker",
+                                      baseline_markers = c("Immune_marker1", 
+                                                           "Immune_marker2", 
+                                                           "Immune_marker3", 
+                                                           "Immune_marker4"),
+                                      reference_phenotypes = FALSE)
