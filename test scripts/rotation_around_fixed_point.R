@@ -92,31 +92,76 @@ ggplot(df2, aes(x, y, color=type)) +
 ## between same cell types between the two rectangles is a minimum
 ###---------------------------------------------------------------------------
 
-x_shifts <- seq(-centre[1], centre[1], length.out = 10)
-y_shifts <- seq(-centre[1], centre[1], length.out = 10)
-angle_shifts <- seq(-pi/4, pi/4, length.out = 10)
+x_shifts <- seq(-5, 5, length.out = 10)
+y_shifts <- seq(-5, 5, length.out = 10)
+angle_shifts <- seq(-pi/6, pi/6, length.out = 10)
 
 min_d = 100
 for (x_shift in x_shifts) {
   for (y_shift in y_shifts) {
     for (angle_shift in angle_shifts) {
       x_new <- cos(angle_shift) * (df2$x - centre[1]) - 
-               sin(angle_shift) * (df2$y - centre[2]) + centre[1]
+               sin(angle_shift) * (df2$y - centre[2]) + centre[1] + x_shift
       
       y_new <- sin(angle_shift) * (df2$x - centre[1]) + 
-               cos(angle_shift) * (df2$y - centre[2]) + centre[2]
+               cos(angle_shift) * (df2$y - centre[2]) + centre[2] + y_shift
+      
+      df_new <- data.frame(x = x_new, y = y_new, type = df2$type)
+      
+      d <- average_minimum_distance(df1, df_new)
+      
+      if (d < min_d) {
+        min_d <- d
+        transformations <- c(x_shift, y_shift, angle_shift)
+      }
     }
   }
 }
 
-avg_min_d <- average_minimum_distance(df1, df2)
+
+## apply transformations to df2
+x_shift <- transformations[1]
+y_shift <- transformations[2]
+angle_shift <- transformations[3]
+
+x_new <- cos(angle_shift) * (df2$x - centre[1]) - 
+  sin(angle_shift) * (df2$y - centre[2]) + centre[1] + x_shift
+
+y_new <- sin(angle_shift) * (df2$x - centre[1]) + 
+  cos(angle_shift) * (df2$y - centre[2]) + centre[2] + y_shift
+
+
+df2_transformed <- data.frame(x = x_new, y = y_new, type = df2$type)
+
+## Plot points
+ggplot(df2_transformed, aes(x, y, color=type)) +
+  geom_point() +
+  xlim(-50, 150) +
+  ylim(-50, 150)
+
+
+## Plot df1 and df2_transformed together
+df2_transformed[df2_transformed$type == "typeA", "type"] <- "typeA*" 
+df2_transformed[df2_transformed$type == "typeB", "type"] <- "typeB*" 
+
+df_combined <- data.frame(x = c(df1$x, df2_transformed$x),
+                          y = c(df1$y, df2_transformed$y),
+                          type = c(df1$type, df2_transformed$type))
+
+ggplot(df_combined, aes(x, y, color=type)) +
+  geom_point() +
+  xlim(-50, 150) +
+  ylim(-50, 150)
+
+
+
 
 average_minimum_distance <- function(data1, data2) {
  
   ## Assume types are matching between data1 and data2 
   
   types <- unique(data1$type)
-  distances <- list()
+  sum <- 0
   
   for (type in types) {
     data1_temp <- data1[data1$type == type, ]
@@ -139,9 +184,11 @@ average_minimum_distance <- function(data1, data2) {
       }
       vec <- append(vec, min_d)
     }
-    distances[[type]] <- vec
+    sum <- sum + 
+      (nrow(data1_temp) + nrow(data2_temp)) * mean(vec) / 
+      (nrow(data1) + nrow(data2))
   }
-  return (distances)
+  return (sum)
 }
 
 
