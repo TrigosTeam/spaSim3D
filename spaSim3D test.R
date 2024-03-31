@@ -277,3 +277,15 @@ plot3d(bg_heart_dr1$Cell.X.Position,
        xlim = c(0, 100),
        ylim = c(0, 100),
        zlim = c(0, 100))
+
+
+
+## Plotting a slice of 3D data in 2D
+bg_slice <- bg_sphere[bg_sphere$Cell.Z.Position > 45 & bg_sphere$Cell.Z.Position < 55, ]
+
+library(ggplot2)
+
+ggplot(bg_slice,
+       aes(Cell.X.Position, Cell.Y.Position, color = Cell.Type)) +
+  geom_point() + 
+  scale_color_manual(values=c("red", "green", "grey", "blue"))
