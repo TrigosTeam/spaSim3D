@@ -18,7 +18,7 @@ simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
     z <- bg_sample[i, "Cell.Z.Position"]
     pheno <- bg_sample[i, "Cell.Type"]
     
-    R <- radius^2
+    R <- (radius * runif(1, min = 0.7, max = 1.3))^2
     
     D <- (x - centre_loc[1])^2 + (y - centre_loc[2])^2 + (z - centre_loc[3])^2
     
