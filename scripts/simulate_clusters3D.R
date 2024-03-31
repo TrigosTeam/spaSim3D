@@ -7,7 +7,7 @@ simulate_clusters3D <- function(bg_sample,
                                     infiltration_types = c("Immune1", "Others"),
                                     infiltration_proportions = c(0.1, 0.05),
                                     shape = "Sphere",
-                                    radius = 50,
+                                    radius = 40,
                                     centre_loc = c(50, 50, 50)),
                                   C2 = list(
                                     name_of_cluster_cell = "Endo",
@@ -16,11 +16,11 @@ simulate_clusters3D <- function(bg_sample,
                                     shape = "Cylinder",
                                     radius = 10,
                                     start_loc = c(0, 0, 0),
-                                    end_loc   = c(20, 40 ,60)
+                                    end_loc   = c(40, 40 ,60)
                                   )
                                 ),
                                 plot_image = TRUE,
-                                plot_categories = NULL,
+                                plot_categories = c("Others", "Immune1", "Endo", "Tumour"),
                                 plot_colours = NULL) {
   
   
