@@ -1,3 +1,5 @@
+library(rgl)
+
 poisson_distribution3D <- function(n_cells, length, width, height)  {
   
   # Choose lambda
@@ -218,7 +220,7 @@ simulate_clusters3D <- function(bg_sample,
                                     infiltration_types = c("Immune1", "Others"),
                                     infiltration_proportions = c(0.1, 0.05),
                                     shape = "Sphere",
-                                    radius = 50,
+                                    radius = 40,
                                     centre_loc = c(50, 50, 50)),
                                   C2 = list(
                                     name_of_cluster_cell = "Endo",
@@ -227,11 +229,11 @@ simulate_clusters3D <- function(bg_sample,
                                     shape = "Cylinder",
                                     radius = 10,
                                     start_loc = c(0, 0, 0),
-                                    end_loc   = c(20, 40 ,60)
+                                    end_loc   = c(40, 40 ,60)
                                   )
                                 ),
                                 plot_image = TRUE,
-                                plot_categories = NULL,
+                                plot_categories = c("Others", "Immune1", "Endo", "Tumour"),
                                 plot_colours = NULL) {
   
   
@@ -297,6 +299,7 @@ simulate_clusters3D <- function(bg_sample,
   
   return(bg_sample)
 }
+
 
 
 simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
@@ -1023,7 +1026,7 @@ simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
     z <- bg_sample[i, "Cell.Z.Position"]
     pheno <- bg_sample[i, "Cell.Type"]
     
-    R <- radius^2
+    R <- (radius * runif(1, min = 0.7, max = 1.3))^2
     
     D <- (x - centre_loc[1])^2 + (y - centre_loc[2])^2 + (z - centre_loc[3])^2
     
@@ -1052,6 +1055,7 @@ simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
   }
   return(bg_sample)
 }
+
 
 
 simulate_sphere_dr <- function(bg_sample, dr_properties) {
