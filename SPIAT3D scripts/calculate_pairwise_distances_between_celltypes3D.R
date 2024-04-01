@@ -1,8 +1,5 @@
 ## data is a dataframe with colnames:
-## "Cell.X.Position" "Cell.Y.Position" "Cell.Z.Position" "Cell.Type"     
-
-bg_sphere$Cell.ID <- (paste("Cell_", seq(nrow(bg_sphere)), sep="")) ## adding Cell.ID column
-
+## "Cell.X.Position" "Cell.Y.Position" "Cell.Z.Position" "Cell.Type" "Cell.ID"     
 
 calculate_pairwise_distances_between_celltypes3D <- function(
     data,
@@ -18,10 +15,7 @@ calculate_pairwise_distances_between_celltypes3D <- function(
   # If there are no cells which match cell_type_of_interest, give error:
   
   if (nrow(data) == 0) {
-    print("There are no cells or no cells of specified cell types")
-    
-    return (c(Cell1 = NA, Cell2 = NA, Distance = NA, 
-              Pair = NA, Type1 = NA, Type2 = NA)) 
+    stop("There are no cells or no cells of specified cell types")
   }
   
   # Create a list of the number of cell types with their
@@ -33,7 +27,7 @@ calculate_pairwise_distances_between_celltypes3D <- function(
     )
   }
   
-  # Calculate cell to cel ldistances
+  # Calculate cell to cell distances
   dist_all <- -1 * apcluster::negDistMat(data[ c("Cell.X.Position",
                                                  "Cell.Y.Position",
                                                  "Cell.Z.Position")])
@@ -80,5 +74,5 @@ calculate_pairwise_distances_between_celltypes3D <- function(
   # Remove NAs (for distance between the same cell)
   cell_to_cell_dist_all <- cell_to_cell_dist_all[stats::complete.cases(cell_to_cell_dist_all), ]
   
-  return(cell_to_cell_dist_all)
+  return (cell_to_cell_dist_all)
 }
