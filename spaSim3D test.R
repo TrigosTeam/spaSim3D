@@ -28,6 +28,9 @@ bg <- simulate_background_cells3D(n_cells = 10000,
 bg_mix <- simulate_mixing3D(bg)
 
 bg_sphere <- simulate_clusters3D(bg_sample = bg)
+bg_sphere$Cell.ID <- (paste("Cell_", seq(nrow(bg_sphere)), sep="")) ## adding Cell.ID column
+
+
 
 bg_cylinder <- simulate_clusters3D(bg_sample = bg,
                                    n_clusters = 4,
