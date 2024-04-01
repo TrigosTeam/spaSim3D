@@ -13,7 +13,6 @@ calculate_pairwise_distances_between_celltypes3D <- function(
    
   
   # If there are no cells which match cell_type_of_interest, give error:
-  
   if (nrow(data) == 0) {
     stop("There are no cells or no cells of specified cell types")
   }
@@ -22,9 +21,7 @@ calculate_pairwise_distances_between_celltypes3D <- function(
   # corresponding cell ID's
   cell_types <- list()
   for (eachType in unique(data[ , feature_colname])) {
-    cell_types[[eachType]] <- as.character(
-      data$Cell.ID[data[ , feature_colname] == eachType]
-    )
+    cell_types[[eachType]] <- as.character(data$Cell.ID[data[ , feature_colname] == eachType])
   }
   
   # Calculate cell to cell distances
@@ -36,16 +33,19 @@ calculate_pairwise_distances_between_celltypes3D <- function(
   colnames(dist_all) <- cell_id_vector
   rownames(dist_all) <- cell_id_vector
   
-  
   cell_to_cell_dist_all <- vector()
-  
-  for (cell_name1 in names(cell_types)){
+
+  for (i in seq(length(cell_types))) {
     
-    for (cell_name2 in names(cell_types)){
-      
+    for (j in i:length(cell_types)) {
+  
+      cell_name1 <- names(cell_types)[i]
+      cell_name2 <- names(cell_types)[j]
+
       cell_ids1 <- cell_types[[cell_name1]]
       cell_ids2 <- cell_types[[cell_name2]]
       
+      ## Need to investigate this
       if (length(cell_ids1) < 2 & length(cell_ids2) < 2) {
         next
       }
@@ -53,26 +53,23 @@ calculate_pairwise_distances_between_celltypes3D <- function(
       cell_to_cell <- dist_all[cell_id_vector %in% cell_ids1, 
                                cell_id_vector %in% cell_ids2]
       
-      #Melts dist_all to produce dataframe of target and nearest 
-      #cell ID's columns and distance column
-      cell_to_cell_dist <- reshape2::melt(cell_to_cell)
+      if (cell_name1 == cell_name2) {
+        cell_to_cell[upper.tri(cell_to_cell, diag = TRUE)] = NA
+      }
+      
+      # Melts dist_all to produce dataframe of target and nearest 
+      # cell ID's columns and distance column
+      cell_to_cell_dist <- reshape2::melt(cell_to_cell, na.rm = TRUE)
       cell_to_cell_dist$Type1 <- cell_name1
       cell_to_cell_dist$Type2 <- cell_name2
-      cell_to_cell_dist$Pair <- paste(cell_name1, cell_name2,sep="/")
-      
-      # Ignore distance between the same cell
-      if (cell_name1 == cell_name2) {
-        cell_to_cell_dist$value[cell_to_cell_dist$value == 0] <- NA
-      }
+      cell_to_cell_dist$Pair <- paste(cell_name1, cell_name2, sep="/")
       
       cell_to_cell_dist_all <- rbind(cell_to_cell_dist_all, 
                                      cell_to_cell_dist)
     }
   }
-  colnames(cell_to_cell_dist_all)[c(1,2,3)] <- c("Cell1", "Cell2", "Distance")
-
-  # Remove NAs (for distance between the same cell)
-  cell_to_cell_dist_all <- cell_to_cell_dist_all[stats::complete.cases(cell_to_cell_dist_all), ]
   
+  colnames(cell_to_cell_dist_all)[c(1,2,3)] <- c("Cell1", "Cell2", "Distance")
+ 
   return (cell_to_cell_dist_all)
 }
