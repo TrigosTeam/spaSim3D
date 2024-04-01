@@ -37,7 +37,7 @@ formatted_spatial_data <- define_celltypes(spe_object = spatial_data,
 
 
 avg_d <- calculate_pairwise_distances_between_celltypes(spe_object = formatted_spatial_data, 
-                                                        cell_types_of_interest = c("Tumour"), 
+                                                        cell_types_of_interest = c("Immune1"), 
                                                         feature_colname = "Cell.Type")
 
 min_d <- calculate_minimum_distances_between_celltypes(spe_object = formatted_spatial_data, 
