@@ -1,0 +1,84 @@
+## data is a dataframe with colnames:
+## "Cell.X.Position" "Cell.Y.Position" "Cell.Z.Position" "Cell.Type"     
+
+bg_sphere$Cell.ID <- (paste("Cell_", seq(nrow(bg_sphere)), sep="")) ## adding Cell.ID column
+
+
+calculate_pairwise_distances_between_celltypes3D <- function(
+    data,
+    cell_type_of_interest = NULL,
+    feature_colname = "Cell.Type") {
+ 
+  # Select all rows in data which only contains the cells of interest
+  if (!is.null(cell_type_of_interest)) {
+    data <- data[data[ , feature_colname] %in% cell_type_of_interest, ]
+  }
+   
+  
+  # If there are no cells which match cell_type_of_interest, give error:
+  
+  if (nrow(data) == 0) {
+    print("There are no cells or no cells of specified cell types")
+    
+    return (c(Cell1 = NA, Cell2 = NA, Distance = NA, 
+              Pair = NA, Type1 = NA, Type2 = NA)) 
+  }
+  
+  # Create a list of the number of cell types with their
+  # corresponding cell ID's
+  cell_types <- list()
+  for (eachType in unique(data[ , feature_colname])) {
+    cell_types[[eachType]] <- as.character(
+      data$Cell.ID[data[ , feature_colname] == eachType]
+    )
+  }
+  
+  # Calculate cell to cel ldistances
+  dist_all <- -1 * apcluster::negDistMat(data[ c("Cell.X.Position",
+                                                 "Cell.Y.Position",
+                                                 "Cell.Z.Position")])
+  
+  cell_id_vector <- data$Cell.ID
+  colnames(dist_all) <- cell_id_vector
+  rownames(dist_all) <- cell_id_vector
+  
+  
+  cell_to_cell_dist_all <- vector()
+  
+  for (cell_name1 in names(cell_types)){
+    
+    for (cell_name2 in names(cell_types)){
+      
+      cell_ids1 <- cell_types[[cell_name1]]
+      cell_ids2 <- cell_types[[cell_name2]]
+      
+      if (length(cell_ids1) < 2 & length(cell_ids2) < 2) {
+        next
+      }
+        
+      cell_to_cell <- dist_all[cell_id_vector %in% cell_ids1, 
+                               cell_id_vector %in% cell_ids2]
+      
+      #Melts dist_all to produce dataframe of target and nearest 
+      #cell ID's columns and distance column
+      cell_to_cell_dist <- reshape2::melt(cell_to_cell)
+      cell_to_cell_dist$Type1 <- cell_name1
+      cell_to_cell_dist$Type2 <- cell_name2
+      cell_to_cell_dist$Pair <- paste(cell_name1, cell_name2,sep="/")
+      
+      # Ignore distance between the same cell
+      if (cell_name1 == cell_name2) {
+        cell_to_cell_dist$value[cell_to_cell_dist$value == 0] <- NA
+      }
+      
+      cell_to_cell_dist_all <- rbind(cell_to_cell_dist_all, 
+                                     cell_to_cell_dist)
+    }
+  }
+  colnames(cell_to_cell_dist_all)[c(1,2,3)] <- c("Cell1", "Cell2", "Distance")
+
+  # Remove NAs (for distance between the same cell)
+  cell_to_cell_dist_all <- cell_to_cell_dist_all[stats::complete.cases(cell_to_cell_dist_all), ]
+  
+  return(cell_to_cell_dist_all)
+}
