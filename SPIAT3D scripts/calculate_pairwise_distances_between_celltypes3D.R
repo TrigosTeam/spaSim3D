@@ -54,7 +54,7 @@ calculate_pairwise_distances_between_celltypes3D <- function(
                                cell_id_vector %in% cell_ids2]
       
       if (cell_name1 == cell_name2) {
-        cell_to_cell[upper.tri(cell_to_cell, diag = TRUE)] = NA
+        cell_to_cell[upper.tri(cell_to_cell, diag = TRUE)] <- NA
       }
       
       # Melts dist_all to produce dataframe of target and nearest 
