@@ -21,13 +21,13 @@ calculate_pairwise_distances_between_cell_types3D <- function(
   # corresponding cell ID's
   cell_types <- list()
   for (eachType in unique(data[ , feature_colname])) {
-    cell_types[[eachType]] <- as.character(data$Cell.ID[data[ , feature_colname] == eachType])
+    cell_types[[eachType]] <- as.character(data$Cell.ID[data[, feature_colname] == eachType])
   }
   
   # Calculate cell to cell distances
-  dist_all <- -1 * apcluster::negDistMat(data[ c("Cell.X.Position",
-                                                 "Cell.Y.Position",
-                                                 "Cell.Z.Position")])
+  dist_all <- -1 * apcluster::negDistMat(data[, c("Cell.X.Position",
+                                                  "Cell.Y.Position",
+                                                  "Cell.Z.Position")])
   
   cell_id_vector <- data$Cell.ID
   colnames(dist_all) <- cell_id_vector
