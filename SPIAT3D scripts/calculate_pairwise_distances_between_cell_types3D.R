@@ -1,7 +1,7 @@
 ## data is a dataframe with colnames:
 ## "Cell.X.Position" "Cell.Y.Position" "Cell.Z.Position" "Cell.Type" "Cell.ID"     
 
-calculate_pairwise_distances_between_celltypes3D <- function(
+calculate_pairwise_distances_between_cell_types3D <- function(
     data,
     cell_type_of_interest = NULL,
     feature_colname = "Cell.Type") {
