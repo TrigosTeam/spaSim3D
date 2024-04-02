@@ -30,6 +30,60 @@ bg_mix <- simulate_mixing3D(bg)
 bg_sphere <- simulate_clusters3D(bg_sample = bg)
 bg_sphere$Cell.ID <- (paste("Cell_", seq(nrow(bg_sphere)), sep="")) ## adding Cell.ID column
 
+# Two spheres
+bg_cluster <- simulate_clusters3D(bg_sample = bg,
+                                  n_clusters = 2,
+                                  bg_type = "Others",
+                                  cluster_properties = list(
+                                    C1 = list(
+                                      name_of_cluster_cell = "Tumour",
+                                      infiltration_types = NULL,
+                                      infiltration_proportions = NULL,
+                                      shape = "Sphere",
+                                      radius = 20,
+                                      centre_loc = c(30, 30, 30)
+                                    ),
+                                    C2 = list(
+                                      name_of_cluster_cell = "Immune",
+                                      infiltration_types = NULL,
+                                      infiltration_proportions = NULL,
+                                      shape = "Sphere",
+                                      radius = 20,
+                                      centre_loc = c(70, 70, 70)
+                                    )
+                                  ),
+                                  plot_image = TRUE,
+                                  plot_categories = c("Others", "Tumour", "Immune"),
+                                  plot_colours = NULL)
+bg_cluster$Cell.ID <- (paste("Cell_", seq(nrow(bg_cluster)), sep="")) ## adding Cell.ID column
+
+
+# One sphere with mixing
+bg_cluster <- simulate_clusters3D(bg_sample = bg,
+                                  n_clusters = 1,
+                                  bg_type = "Others",
+                                  cluster_properties = list(
+                                    C1 = list(
+                                      name_of_cluster_cell = "Tumour",
+                                      infiltration_types = "Immune",
+                                      infiltration_proportions = 0.5,
+                                      shape = "Sphere",
+                                      radius = 20,
+                                      centre_loc = c(30, 30, 30)
+                                    )
+                                  ),
+                                  plot_image = TRUE,
+                                  plot_categories = c("Others", "Tumour", "Immune"),
+                                  plot_colours = NULL)
+bg_cluster$Cell.ID <- (paste("Cell_", seq(nrow(bg_cluster)), sep="")) ## adding Cell.ID column
+
+
+
+
+
+
+
+
 
 
 bg_cylinder <- simulate_clusters3D(bg_sample = bg,
