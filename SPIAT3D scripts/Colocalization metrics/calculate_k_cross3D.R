@@ -49,7 +49,7 @@ calculate_k_cross3D <- function(data,
   
   # Calculate observed cross-k value for a sequence of distances
   # i.e. the number of ref-target distances less than the chosen distance
-  distances <- 1:distance
+  distances <- seq(1, distance, 0.25)
   observed_k <- unlist(lapply(distances, function(x) sum(reference_target_distances < x)))
   
   # Get volume of the window the cells are in
@@ -63,10 +63,10 @@ calculate_k_cross3D <- function(data,
                        Expected = expected_k)
   
   if (plot_results) {
-    plot(result$Distance, result$Observed, type = "o", col = "red", 
+    plot(result$Distance, result$Observed, type = "l", col = "red", 
          xlim = c(0, distance), ylim = c(0, max(result)),
          xlab = "Distance", ylab = "Cross K-function Value")
-    lines(result$Distance, result$Expected, type = "o", col = "blue", lty = 2)
+    lines(result$Distance, result$Expected, type = "l", col = "blue", lty = 2)
     legend(0, max(result), legend = c("Observed K", "Expected K"), col = c("red", "blue"), lty = c(1, 2))
   }
   
