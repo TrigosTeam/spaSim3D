@@ -1,4 +1,4 @@
-calculate_k_cross3D <- function(data, 
+calculate_Kcross3D <- function(data, 
                                 reference_cell_type,
                                 target_cell_type,
                                 distance,
