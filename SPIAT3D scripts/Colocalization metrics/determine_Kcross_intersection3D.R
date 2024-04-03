@@ -1,9 +1,9 @@
-determine_k_cross_intersection3D <- function(k_cross_df) {
+determine_Kcross_intersection3D <- function(Kcross_df) {
   
-  k_cross_df$sign <- k_cross_df$Observed - k_cross_df$Expected
+  Kcross_df$sign <- Kcross_df$Observed - Kcross_df$Expected
   
   ## Determine when sign flips from -ve to +ve OR +ve to -ve
-  change_of_sign <- diff(sign(k_cross_df$sign))
+  change_of_sign <- diff(sign(Kcross_df$sign))
   
   ## Determine indices for when observed curve goes above or below the expected curve
   observed_goes_above_indices <- which(change_of_sign == 2)
@@ -17,12 +17,12 @@ determine_k_cross_intersection3D <- function(k_cross_df) {
   below_distance <- c()
   
   if (length(observed_goes_above_indices) != 0) {
-    above_distance <- k_cross_df$Distance[observed_goes_above_indices]
+    above_distance <- Kcross_df$Distance[observed_goes_above_indices]
     print("The observed curve goes above the expected curve at the following distances:")
     print(paste(above_distance))
   }
   if (length(observed_goes_below_indices) != 0) {
-    below_distance <- k_cross_df$Distance[observed_goes_below_indices]
+    below_distance <- Kcross_df$Distance[observed_goes_below_indices]
     print("The observed curve goes below the expected curve at the following distances:")
     print(paste(below_distance))
   }
