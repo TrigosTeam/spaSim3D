@@ -1,9 +1,9 @@
 calculate_Kcross3D <- function(data, 
-                                reference_cell_type,
-                                target_cell_type,
-                                distance,
-                                feature_colname = "Cell.Type", 
-                                plot_results = TRUE) {
+                               reference_cell_type,
+                               target_cell_type,
+                               distance,
+                               feature_colname = "Cell.Type", 
+                               plot_results = TRUE) {
   
   
   ## Get x, y, z coords for cells of reference cell type and target cell type
