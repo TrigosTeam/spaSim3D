@@ -1,8 +1,8 @@
-calculate_cell_proportions <- function(data,
-                                       reference_cell_types = NULL, 
-                                       cell_types_to_exclude = NULL, 
-                                       feature_colname = "Cell.Type",
-                                       plot.image = TRUE) {
+calculate_cell_proportions3D <- function(data,
+                                         reference_cell_types = NULL, 
+                                         cell_types_to_exclude = NULL, 
+                                         feature_colname = "Cell.Type",
+                                         plot.image = TRUE) {
   
   # Check
   if (nrow(data) == 0) {
