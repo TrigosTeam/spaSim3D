@@ -27,7 +27,8 @@ calculate_Kcross3D <- function(data,
   reference_cell_data <- reference_cell_data[chosen_rows, c("Cell.X.Position",
                                                             "Cell.Y.Position",
                                                             "Cell.Z.Position",
-                                                            "Cell.Type")]
+                                                            "Cell.Type",
+                                                            "Cell.ID")]
   
   ## Get number of reference and target cells
   n_reference_cells <- nrow(reference_cell_data)
