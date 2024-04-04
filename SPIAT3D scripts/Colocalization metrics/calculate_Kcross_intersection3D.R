@@ -1,4 +1,4 @@
-determine_Kcross_intersection3D <- function(Kcross_df) {
+calculate_Kcross_intersection3D <- function(Kcross_df) {
   
   Kcross_df$sign <- Kcross_df$Observed - Kcross_df$Expected
   
