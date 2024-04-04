@@ -9,6 +9,7 @@ bg <- simulate_background_cells3D(n_cells = 10000,
                                   jitter_prop = 0,
                                   cell_type = "Others",
                                   plot_image = T)
+bg$Cell.ID <- (paste("Cell_", seq(nrow(bg)), sep="")) ## adding Cell.ID column
 
 # color <- ifelse(bg$Cell.Z.Position == bg$Cell.Z.Position[1],
 #                 "blue",
