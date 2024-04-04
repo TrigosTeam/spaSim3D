@@ -1,4 +1,4 @@
-AUC_of_cross_function <- function(Kcross_df) {
+calculate_AUC_of_Kcross <- function(Kcross_df) {
   
   ## Get difference in area between 
   AUC <- pracma::trapz(Kcross_df$Distance, Kcross_df$Observed) - 
