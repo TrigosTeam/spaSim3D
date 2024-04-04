@@ -3,16 +3,16 @@
 
 calculate_pairwise_distances_between_cell_types3D <- function(
     data,
-    cell_type_of_interest = NULL,
+    cell_types_of_interest = NULL,
     feature_colname = "Cell.Type") {
  
   # Select all rows in data which only contains the cells of interest
-  if (!is.null(cell_type_of_interest)) {
-    data <- data[data[ , feature_colname] %in% cell_type_of_interest, ]
+  if (!is.null(cell_types_of_interest)) {
+    data <- data[data[ , feature_colname] %in% cell_types_of_interest, ]
   }
    
   
-  # If there are no cells which match cell_type_of_interest, give error:
+  # If there are no cells which match cell_types_of_interest, give error:
   if (nrow(data) == 0) {
     stop("There are no cells or no cells of specified cell types")
   }
