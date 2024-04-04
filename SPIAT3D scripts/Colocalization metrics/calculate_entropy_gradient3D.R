@@ -24,6 +24,6 @@ calculate_entropy_gradient3D <- function(data,
     plot(seq(1, radii, 0.5), entropy_mean, type = "l", xlab = "Radius", ylab = "Entropy Mean")
   }
   
-  return(entropy_gradient)
+  return (entropy_gradient)
   
 }
