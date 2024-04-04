@@ -1,10 +1,9 @@
 ## data is a dataframe with colnames:
 ## "Cell.X.Position" "Cell.Y.Position" "Cell.Z.Position" "Cell.Type" "Cell.ID"
 
-calculate_minimum_distances_between_cell_types3D <- function(
-    data,
-    cell_types_of_interest = NULL,
-    feature_colname = "Cell.Type") {
+calculate_minimum_distances_between_cell_types3D <- function(data,
+                                                             cell_types_of_interest = NULL,
+                                                             feature_colname = "Cell.Type") {
   
   # Select all rows in data which only contains the cells of interest
   if (!is.null(cell_types_of_interest)) {
