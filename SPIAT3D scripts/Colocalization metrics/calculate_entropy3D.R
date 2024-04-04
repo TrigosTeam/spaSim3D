@@ -38,14 +38,19 @@ calculate_entropy3D <- function(data,
   }
   
   ## Radius has been specified, calculate entropy for chosen reference cell
-  cells_in_neighborhood_data <- calculate_cells_in_neighborhood(data,
-                                                                reference_cell_type,
-                                                                target_cell_types,
-                                                                radius,
-                                                                feature_colname)[[1]]
+  
+  ## Include reference cell type as one of the target cell types
+  ## Make sure not to include the reference cell type as one of the target cell types when using function
+  target_cell_types <- append(reference_cell_type, target_cell_types)
+  
+  cells_in_neighborhood_data <- calculate_cells_in_neighborhood3D(data,
+                                                                  reference_cell_type,
+                                                                  target_cell_types,
+                                                                  radius,
+                                                                  feature_colname)[[1]]
   
   ## Get total number of target cells for each row
-  cells_in_neighborhood_data$Total <- apply(df[target_cell_types], 1, sum)
+  cells_in_neighborhood_data$Total <- apply(cells_in_neighborhood_data[target_cell_types], 1, sum)
   
   ## Get entropy for each row
   cells_in_neighborhood_data$Entropy <- 0
