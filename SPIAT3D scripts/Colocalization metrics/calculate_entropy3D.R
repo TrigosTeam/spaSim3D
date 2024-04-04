@@ -39,9 +39,7 @@ calculate_entropy3D <- function(data,
   
   ## Radius has been specified, calculate entropy for chosen reference cell
   
-  ## Include reference cell type as one of the target cell types
-  ## Make sure not to include the reference cell type as one of the target cell types when using function
-  target_cell_types <- append(reference_cell_type, target_cell_types)
+  ## Users should ensure include the reference_cell_type as one of the target_cell_types
   
   cells_in_neighborhood_data <- calculate_cells_in_neighborhood3D(data,
                                                                   reference_cell_type,
