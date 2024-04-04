@@ -8,9 +8,9 @@ calculate_entropy3D <- function(data,
   
   # Calculate entropy of the entire image
   if (is.null(radius)) {
-    
+
     ## Get data for chosen target cells
-    data <- data[which(data[, feature_colname] == target_cell_types), ]
+    data <- data[(data[, feature_colname] %in% target_cell_types), ]
     
     n_all_cell_types <- nrow(data)
     
@@ -22,7 +22,7 @@ calculate_entropy3D <- function(data,
     for (target_cell_type in target_cell_types) {
       
       ## Get data for current target cell 
-      target_cell_type_data <- data[which(data[, feature_colname] == target_cell_type), ]
+      target_cell_type_data <- data[data[, feature_colname] == target_cell_type, ]
       n_target_cell_type <- nrow(target_cell_type_data)
       
       ## No cells found for current target cell, move on
