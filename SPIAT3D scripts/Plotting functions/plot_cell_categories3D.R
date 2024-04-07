@@ -5,7 +5,6 @@ plot_cell_categories3D <- function(data,
                                    include_cell_types_of_no_interest = FALSE,
                                    feature_colname = "Cell.Type") {
   
-  
   if (is.null(cell_types_of_interest)) {
     cell_types_of_interest <- unique(data$Cell.Type)
   }
