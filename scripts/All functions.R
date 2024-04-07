@@ -217,14 +217,14 @@ simulate_clusters3D <- function(bg_sample,
                                 cluster_properties = list(
                                   C1 = list(
                                     name_of_cluster_cell = "Tumour",
-                                    infiltration_types = c("Immune1", "Others"),
-                                    infiltration_proportions = c(0.1, 0.05),
+                                    infiltration_types = c("Immune", "Others"),
+                                    infiltration_proportions = c(0.4, 0.05),
                                     shape = "Sphere",
-                                    radius = 40,
+                                    radius = 25,
                                     centre_loc = c(50, 50, 50)),
                                   C2 = list(
                                     name_of_cluster_cell = "Endo",
-                                    infiltration_types = c("Immune1", "Others"),
+                                    infiltration_types = c("Immune", "Others"),
                                     infiltration_proportions = c(0.1, 0.05),
                                     shape = "Cylinder",
                                     radius = 10,
@@ -233,7 +233,7 @@ simulate_clusters3D <- function(bg_sample,
                                   )
                                 ),
                                 plot_image = TRUE,
-                                plot_categories = c("Others", "Immune1", "Endo", "Tumour"),
+                                plot_categories = c("Others", "Immune", "Endo", "Tumour"),
                                 plot_colours = NULL) {
   
   
@@ -936,7 +936,7 @@ simulate_rings3D <- function(bg_sample,
                                R1 = list(
                                  name_of_cluster_cell = "Tumour",
                                  infiltration_types = c("Immune1", "Others"),
-                                 infiltration_proportions = c(0.1, 0.05),
+                                 infiltration_proportions = c(0.0, 0.00),
                                  shape = "Sphere",
                                  radius = 35,
                                  centre_loc = c(50, 50, 50),
