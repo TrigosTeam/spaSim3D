@@ -69,8 +69,8 @@ bg_cluster <- simulate_clusters3D(bg_sample = bg,
                                       infiltration_types = "Immune",
                                       infiltration_proportions = 0.5,
                                       shape = "Sphere",
-                                      radius = 20,
-                                      centre_loc = c(30, 30, 30)
+                                      radius = 30,
+                                      centre_loc = c(50, 50, 50)
                                     )
                                   ),
                                   plot_image = TRUE,
