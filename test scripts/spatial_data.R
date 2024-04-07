@@ -43,6 +43,18 @@ min_d <- calculate_minimum_distances_between_celltypes(spe_object = formatted_sp
                                                        feature_colname = "Cell.Type",
                                                        cell_types_of_interest = c("CD4 T", "Tumour"))
 
+min_d_summary <- SPIAT::calculate_summary_distances_between_celltypes(min_d)
+
+plot_distance_heatmap(min_d_summary, metric = "mean")
+
+cell_props <- calculate_cell_proportions(formatted_spatial_data,
+                                         c("Tumour"),
+                                         c("PDL1+ Immune", "Other", "T-reg", "Double negative T"),
+                                         "Cell.Type")
+plot_cell_percentages(cell_props)
+
+
+
 ###---------------------------------
 
 data("simulated_image")
