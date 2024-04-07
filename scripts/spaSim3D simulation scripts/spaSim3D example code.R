@@ -1,4 +1,6 @@
-
+###-------------------------------------------------------------------------###
+### Background
+###-------------------------------------------------------------------------###
 bg <- simulate_background_cells3D(n_cells = 10000,
                                   length = 100,
                                   width  = 100,
@@ -11,27 +13,25 @@ bg <- simulate_background_cells3D(n_cells = 10000,
                                   plot_image = T)
 bg$Cell.ID <- (paste("Cell_", seq(nrow(bg)), sep="")) ## adding Cell.ID column
 
-# color <- ifelse(bg$Cell.Z.Position == bg$Cell.Z.Position[1],
-#                 "blue",
-#                 ifelse(bg$Cell.Z.Position == bg$Cell.Z.Position[500],
-#                 "red",
-#                 "lightgray"))
-#
-# plot3d(bg$Cell.X.Position,
-#        bg$Cell.Y.Position,
-#        bg$Cell.Z.Position,
-#        xlab = "x",
-#        ylab = "y",
-#        zlab = "z",
-#        col = color,
-#        size = 4)
 
+###-------------------------------------------------------------------------###
+### Mixing
+###-------------------------------------------------------------------------###
 bg_mix <- simulate_mixing3D(bg)
 
+
+
+###-------------------------------------------------------------------------###
+### Sphere
+###-------------------------------------------------------------------------###
 bg_sphere <- simulate_clusters3D(bg_sample = bg)
 bg_sphere$Cell.ID <- (paste("Cell_", seq(nrow(bg_sphere)), sep="")) ## adding Cell.ID column
 
-# Two spheres
+
+
+###-------------------------------------------------------------------------###
+### Two separate spheres
+###-------------------------------------------------------------------------###
 bg_cluster <- simulate_clusters3D(bg_sample = bg,
                                   n_clusters = 2,
                                   bg_type = "Others",
@@ -59,7 +59,10 @@ bg_cluster <- simulate_clusters3D(bg_sample = bg,
 bg_cluster$Cell.ID <- (paste("Cell_", seq(nrow(bg_cluster)), sep="")) ## adding Cell.ID column
 
 
-# One sphere with mixing
+
+###-------------------------------------------------------------------------###
+### One sphere with mixing
+###-------------------------------------------------------------------------###
 bg_cluster <- simulate_clusters3D(bg_sample = bg,
                                   n_clusters = 1,
                                   bg_type = "Others",
@@ -81,12 +84,9 @@ bg_cluster$Cell.ID <- (paste("Cell_", seq(nrow(bg_cluster)), sep="")) ## adding 
 
 
 
-
-
-
-
-
-
+###-------------------------------------------------------------------------###
+### Cylinder
+###-------------------------------------------------------------------------###
 bg_cylinder <- simulate_clusters3D(bg_sample = bg,
                                    n_clusters = 4,
                                    bg_type = "Others",
@@ -133,6 +133,10 @@ bg_cylinder <- simulate_clusters3D(bg_sample = bg,
                                    plot_colours = NULL)
 
 
+
+###-------------------------------------------------------------------------###
+### Ellipsoid
+###-------------------------------------------------------------------------###
 bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
                                    n_clusters = 2,
                                    bg_type = "Others",
@@ -169,6 +173,10 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
                                    plot_colours = NULL)
 
 
+
+###-------------------------------------------------------------------------###
+### Heart
+###-------------------------------------------------------------------------###
 bg_heart <- bg_ellipsoid[bg_ellipsoid$Cell.Type != "Others" ,]
 plot3d(bg_heart$Cell.X.Position, 
        bg_heart$Cell.Y.Position, 
@@ -179,14 +187,18 @@ plot3d(bg_heart$Cell.X.Position,
        ylim = c(0, 100),
        zlim = c(0, 100))
 
-# bg_cluster <- simulate_clusters3D(bg_sample = bg, plot_categories = c("Others", "Tumour", "Endo", "Immune1"))
 
 
-
-## Ring
+###-------------------------------------------------------------------------###
+### Ring
+###-------------------------------------------------------------------------###
 bg_ring <- simulate_rings3D(bg_sample = bg)
 
 
+
+###-------------------------------------------------------------------------###
+### Heart with ring
+###-------------------------------------------------------------------------###
 bg_heart_ring <- simulate_rings3D(bg_sample = bg,
                                      bg_type = "Others",
                                      n_ring = 2,
@@ -230,21 +242,11 @@ bg_heart_ring <- simulate_rings3D(bg_sample = bg,
                                      plot_categories = c("Others", "Immune1", "Tumour"),
                                      plot_colours = NULL)
 
-bg_heart_ring1 <- bg_heart_ring[bg_heart_ring$Cell.Type != "Others" ,]
-color <- ifelse(bg_heart_ring1$Cell.Type == "Tumour", "red", "darkgreen")
-
-plot3d(bg_heart_ring1$Cell.X.Position, 
-       bg_heart_ring1$Cell.Y.Position, 
-       bg_heart_ring1$Cell.Z.Position, 
-       col = color, 
-       size = 4,
-       xlim = c(0, 100),
-       ylim = c(0, 100),
-       zlim = c(0, 100))
 
 
-
-
+###-------------------------------------------------------------------------###
+### Hollow cylinder
+###-------------------------------------------------------------------------###
 bg_cylinder_ring <- simulate_rings3D(bg_sample = bg,
                                   bg_type = "Others",
                                   n_ring = 1,
@@ -268,10 +270,18 @@ bg_cylinder_ring <- simulate_rings3D(bg_sample = bg,
                                   plot_colours = NULL)
 
 
-## Double rings
 
+###-------------------------------------------------------------------------###
+### Double rings
+###-------------------------------------------------------------------------###
 bg_dr <- simulate_double_rings3D(bg_sample = bg)
 
+
+
+
+###-------------------------------------------------------------------------###
+### Heart with double rings
+###-------------------------------------------------------------------------###
 bg_heart_dr <- simulate_double_rings3D(bg_sample = bg,
                                        bg_type = "Others",
                                        n_dr = 2,
@@ -323,23 +333,17 @@ bg_heart_dr <- simulate_double_rings3D(bg_sample = bg,
                                      plot_categories = c("Others", "Tumour", "Immune1", "Immune2"),
                                      plot_colours = NULL)
 
-bg_heart_dr1 <- bg_heart_dr[bg_heart_dr$Cell.Type != "Others" ,]
-color <- ifelse(bg_heart_dr1$Cell.Type == "Tumour", "darkgreen",
-                ifelse(bg_heart_dr1$Cell.Type == "Immune1", "red", "blue"))
-
-plot3d(bg_heart_dr1$Cell.X.Position, 
-       bg_heart_dr1$Cell.Y.Position, 
-       bg_heart_dr1$Cell.Z.Position, 
-       col = color, 
-       size = 4,
-       xlim = c(0, 100),
-       ylim = c(0, 100),
-       zlim = c(0, 100))
 
 
 
-## Plotting a slice of 3D data in 2D
-bg_slice <- bg_sphere[bg_sphere$Cell.Z.Position > 45 & bg_sphere$Cell.Z.Position < 55, ]
+
+
+###-------------------------------------------------------------------------###
+### Plotting a slice of 3D data in 2D
+###-------------------------------------------------------------------------###
+bg_chosen <- bg_sphere
+bg_slice <- bg_chosen[bg_chosen$Cell.Z.Position > 45 & 
+                      bg_chosen$Cell.Z.Position < 55, ]
 
 library(ggplot2)
 
