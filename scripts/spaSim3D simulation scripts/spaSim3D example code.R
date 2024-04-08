@@ -27,6 +27,10 @@ bg_mix <- simulate_mixing3D(bg)
 bg_sphere <- simulate_clusters3D(bg_sample = bg)
 bg_sphere$Cell.ID <- (paste("Cell_", seq(nrow(bg_sphere)), sep="")) ## adding Cell.ID column
 
+plot_cell_categories3D(bg_sphere,
+                       c("Tumour", "Immune", "Endo", "Others"),
+                       c("blue", "green", "red", "lightgray"))
+
 
 
 ###-------------------------------------------------------------------------###
