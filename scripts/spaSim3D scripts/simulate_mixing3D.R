@@ -32,34 +32,13 @@ simulate_mixing3D <- function(bg_sample,
     bg_sample[i, "Cell.Type"] <- pheno
   }
   
-  if (plot_image){
-    if (is.null(plot_colours)){
-      plot_colours <- c("gray","darkgreen", "red", "darkblue", "brown", "purple", "lightblue",
-                        "lightgreen", "yellow", "black", "pink")
-    }
-    
-    colors <- c()
-    for (i in 1:nrow(bg_sample)) {
-      for (j in 1:length(idents)) {
-        if (bg_sample$Cell.Type[i] == idents[j]) {
-          colors <- append(colors, plot_colours[j])
-          break
-        }
-      }
-    }
-    
-    plot3d(bg_sample$Cell.X.Position,
-           bg_sample$Cell.Y.Position,
-           bg_sample$Cell.Z.Position,
-           xlab = "x",
-           ylab = "y",
-           zlab = "z",
-           col = colors,
-           size = 4)
-    
-    # add legend
-    legend3d("topright", legend = idents, pch = 16, col = plot_colours[seq_len(length(idents))], inset = c(0.02))
+  if (plot_image) {
+    plot <- plot_cell_categories3D(bg_sample,
+                                   cell_types_of_interest = plot_categories,
+                                   colour_vector = plot_colours)
+    print(plot)
     
   }
+  
   return(bg_sample)
 }

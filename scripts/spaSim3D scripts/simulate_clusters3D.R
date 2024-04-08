@@ -1,27 +1,41 @@
 simulate_clusters3D <- function(bg_sample,
                                 bg_type = "Others",
-                                n_clusters = 2,
+                                n_clusters = 3,
                                 cluster_properties = list(
                                   C1 = list(
                                     name_of_cluster_cell = "Tumour",
-                                    infiltration_types = c("Immune1", "Others"),
-                                    infiltration_proportions = c(0.1, 0.05),
+                                    infiltration_types = c("Immune", "Others"),
+                                    infiltration_proportions = c(0.4, 0.05),
                                     shape = "Sphere",
-                                    radius = 40,
-                                    centre_loc = c(50, 50, 50)),
+                                    radius = 25,
+                                    centre_loc = c(40, 40, 40)
+                                  ),
                                   C2 = list(
-                                    name_of_cluster_cell = "Endo",
-                                    infiltration_types = c("Immune1", "Others"),
-                                    infiltration_proportions = c(0.1, 0.05),
+                                    name_of_cluster_cell = "Endothelial",
+                                    infiltration_types = c("Others"),
+                                    infiltration_proportions = c(0.05),
                                     shape = "Cylinder",
                                     radius = 10,
                                     start_loc = c(0, 0, 0),
-                                    end_loc   = c(40, 40 ,60)
+                                    end_loc   = c(20, 20 , 100)
+                                  ),
+                                  C3 = list(
+                                    name_of_cluster_cell = "Tumour",
+                                    infiltration_types = c("Immune", "Others"),
+                                    infiltration_proportions = c(0.3, 0.05),
+                                    shape = "Ellipsoid",
+                                    x_radius = 15,
+                                    y_radius = 20,
+                                    z_radius = 25,
+                                    centre_loc = c(70, 70, 70),
+                                    x_y_rotation = 0,
+                                    x_z_rotation = 0,
+                                    y_z_rotation = 0
                                   )
                                 ),
                                 plot_image = TRUE,
-                                plot_categories = c("Others", "Immune1", "Endo", "Tumour"),
-                                plot_colours = NULL) {
+                                plot_categories = c("Others", "Immune", "Endothelial", "Tumour"),
+                                plot_colours = c("lightgray", "skyblue", "#FF7F7F", "orange")) {
   
   
   for (k in seq_len(n_clusters)) { 
@@ -52,35 +66,11 @@ simulate_clusters3D <- function(bg_sample,
     }
   }
   
-  if (plot_image){
-    if(is.null(plot_categories)) plot_categories <- unique(bg_sample$Cell.Type)
-    if (is.null(plot_colours)){
-      plot_colours <- c("gray","darkgreen", "red", "darkblue", "brown", "purple", "lightblue",
-                        "lightgreen", "yellow", "black", "pink")
-    }
-    phenos <- plot_categories
-    
-    colors <- c()
-    for (i in 1:nrow(bg_sample)) {
-      for (j in 1:length(phenos)) {
-        if (bg_sample$Cell.Type[i] == phenos[j]) {
-          colors <- append(colors, plot_colours[j])
-          break
-        }
-      }
-    }
-    
-    plot3d(bg_sample$Cell.X.Position,
-           bg_sample$Cell.Y.Position,
-           bg_sample$Cell.Z.Position,
-           xlab = "x",
-           ylab = "y",
-           zlab = "z",
-           col = colors,
-           size = 4)
-    
-    # add legend
-    legend3d("topright", legend = phenos, pch = 16, col = plot_colours[seq_len(length(phenos))], inset = c(0.02))
+  if (plot_image) {
+    plot <- plot_cell_categories3D(bg_sample,
+                                   cell_types_of_interest = plot_categories,
+                                   colour_vector = plot_colours)
+    print(plot)
     
   }
   

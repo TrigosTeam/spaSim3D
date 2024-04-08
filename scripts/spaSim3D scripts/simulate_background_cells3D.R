@@ -135,17 +135,6 @@ simulate_background_cells3D <- function(n_cells,
       # Check next cell
       i <- i + 1
     }
-    
-    # Plot
-    if (plot_image == TRUE) {
-      plot3d(x, y, z, col = "lightgray", size = 4)
-    }
-    
-    df <- data.frame("Cell.X.Position" = x,
-                     "Cell.Y.Position" = y,
-                     "Cell.Z.Position" = z,
-                     "Cell.Type" = cell_type)
-    return(df)
   } 
   
   
@@ -212,24 +201,25 @@ simulate_background_cells3D <- function(n_cells,
     x <- x + jitter_x
     y <- y + jitter_y
     z <- z + jitter_z
-    
-    # Plot
-    if (plot_image == TRUE) {
-      # add legend
-      legend3d("topright", legend = c(cell_type), pch = 16, col = c("lightgray"), inset = c(0.02))
-      
-      plot3d(x, y, z, col = "lightgray", size = 4)
-      
-    }
-    
-    df <- data.frame("Cell.X.Position" = x,
-                     "Cell.Y.Position" = y,
-                     "Cell.Z.Position" = z,
-                     "Cell.Type" = cell_type)
-    return(df)
   } 
   
   else {
     stop("`method` should be 'tumour' or 'normal'")
   }
+  
+  
+  
+  df <- data.frame("Cell.X.Position" = x,
+                   "Cell.Y.Position" = y,
+                   "Cell.Z.Position" = z,
+                   "Cell.Type" = cell_type)
+  
+  # Plot
+  if (plot_image) {
+    plot <- plot_cell_categories3D(df,
+                                   colour_vector = "#F0F0F0")
+    print(plot)
+  }
+  
+  return (df)
 }

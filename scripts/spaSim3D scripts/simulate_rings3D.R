@@ -1,22 +1,53 @@
 simulate_rings3D <- function(bg_sample,
                              bg_type = "Others",
-                             n_ring = 1,
+                             n_ring = 3,
                              ring_properties = list(
                                R1 = list(
-                               name_of_cluster_cell = "Tumour",
-                               infiltration_types = c("Immune1", "Others"),
-                               infiltration_proportions = c(0.1, 0.05),
-                               shape = "Sphere",
-                               radius = 35,
-                               centre_loc = c(50, 50, 50),
-                               name_of_ring_cell = "Immune1",
-                               ring_width = 5,
-                               ring_infiltration_types = c("Others"),
-                               ring_infiltration_proportions = c(0.15))
+                                 name_of_cluster_cell = "Tumour",
+                                 infiltration_types = c("Others"),
+                                 infiltration_proportions = c(0.05),
+                                 shape = "Sphere",
+                                 radius = 20,
+                                 centre_loc = c(40, 40, 40),
+                                 name_of_ring_cell = "Immune",
+                                 ring_width = 5,
+                                 ring_infiltration_types = c("Others"),
+                                 ring_infiltration_proportions = c(0.15)
+                               ),
+                               R2 = list(
+                                 name_of_cluster_cell = "Void",
+                                 infiltration_types = NULL,
+                                 infiltration_proportions = NULL,
+                                 shape = "Cylinder",
+                                 radius = 8,
+                                 start_loc = c(0, 0, 0),
+                                 end_loc   = c(20, 20 , 100),
+                                 name_of_ring_cell = "Endothelial",
+                                 ring_width = 5,
+                                 ring_infiltration_types = c("Others"),
+                                 ring_infiltration_proportions = c(0.15)
+                               ),
+                               R3 = list(
+                                 name_of_cluster_cell = "Tumour",
+                                 infiltration_types = c("Others"),
+                                 infiltration_proportions = c(0.05),
+                                 shape = "Ellipsoid",
+                                 x_radius = 10,
+                                 y_radius = 15,
+                                 z_radius = 20,
+                                 centre_loc = c(70, 70, 70),
+                                 x_y_rotation = 0,
+                                 x_z_rotation = 0,
+                                 y_z_rotation = 0,
+                                 name_of_ring_cell = "Immune",
+                                 ring_width = 5,
+                                 ring_infiltration_types = c("Others"),
+                                 ring_infiltration_proportions = c(0.15)
+                               )
                              ),
                              plot_image = TRUE,
-                             plot_categories = c("Others", "Tumour", "Immune1"),
-                             plot_colours = NULL) {
+                             plot_categories = c("Others", "Tumour", "Immune", "Endothelial"),
+                             plot_colours = c("lightgray", "orange", "skyblue", "#FF7F7F")) {
   
   for (k in seq_len(n_ring)) { 
     
@@ -40,36 +71,13 @@ simulate_rings3D <- function(bg_sample,
     }
   }
   
-  if (plot_image){
-    if(is.null(plot_categories)) plot_categories <- unique(bg_sample$Cell.Type)
-    if (is.null(plot_colours)){
-      plot_colours <- c("gray","darkgreen", "red", "darkblue", "brown", "purple", "lightblue",
-                        "lightgreen", "yellow", "black", "pink")
-    }
-    phenos <- plot_categories
+  if (plot_image) {
+    plot <- plot_cell_categories3D(bg_sample,
+                                   cell_types_of_interest = plot_categories,
+                                   colour_vector = plot_colours)
+    print(plot)
     
-    colors <- c()
-    for (i in 1:nrow(bg_sample)) {
-      for (j in 1:length(phenos)) {
-        if (bg_sample$Cell.Type[i] == phenos[j]) {
-          colors <- append(colors, plot_colours[j])
-          break
-        }
-      }
-    }
-    
-    plot3d(bg_sample$Cell.X.Position,
-           bg_sample$Cell.Y.Position,
-           bg_sample$Cell.Z.Position,
-           xlab = "x",
-           ylab = "y",
-           zlab = "z",
-           col = colors,
-           size = 4)
-    
-    # add legend
-    legend3d("topright", legend = phenos, pch = 16, col = plot_colours[seq_len(length(phenos))], inset = c(0.02))
   }
   
-  return(bg_sample)
+  return (bg_sample)
 }
