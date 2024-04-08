@@ -1,14 +1,12 @@
-library(rgl)
-
-
 simulate_mixing3D <- function(bg_sample,
-                              idents = c("Others", "Immune", "Tumour"),
+                              cell_types = c("Others", "Immune", "Tumour"),
                               props = c(0.5, 0.2, 0.3),
                               plot_image = TRUE,
-                              plot_colours = NULL) {
+                              plot_categories = c("Others", "Immune", "Tumour"),
+                              plot_colours = c("lightgray", "skyblue", "orange")) {
   
   
-  n_types <- length(idents)
+  n_types <- length(cell_types)
   
   for (i in 1:nrow(bg_sample)) {
     x <- bg_sample$Cell.X.Position[i]
@@ -24,7 +22,7 @@ simulate_mixing3D <- function(bg_sample,
     while (n <= n_types){
       current_p <- current_p + props[n]
       if (random <= current_p) {
-        pheno <- idents[n]
+        pheno <- cell_types[n]
         break
       }
       n <- n+1
@@ -33,11 +31,37 @@ simulate_mixing3D <- function(bg_sample,
   }
   
   if (plot_image) {
-    plot <- plot_cell_categories3D(bg_sample,
-                                   cell_types_of_interest = plot_categories,
-                                   colour_vector = plot_colours)
-    print(plot)
     
+    if (is.null(plot_categories)) {
+      plot_categories <- unique(bg_sample$Cell.Type)
+    }
+    
+    if (is.null(plot_colours)) {
+      plot_colours <- c("red", "orange", "green", "blue", "skyblue", "pink", "purple", "lightgray")[1:length(plot_categories)]
+    }
+    
+    bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
+    
+    ## Factor for feature column
+    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
+                                  levels = plot_categories)
+    
+    
+    ## Plot
+    fig <- plot_ly(bg_sample,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~Cell.X.Position,
+                   y = ~Cell.Y.Position,
+                   z = ~Cell.Z.Position,
+                   color = ~Cell.Type,
+                   colors = plot_colours,
+                   marker = list(size = 2))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    print(fig)
   }
   
   return(bg_sample)

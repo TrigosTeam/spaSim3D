@@ -41,11 +41,36 @@ simulate_double_rings3D <- function(bg_sample,
   }
   
   if (plot_image) {
-    plot <- plot_cell_categories3D(bg_sample,
-                                   cell_types_of_interest = plot_categories,
-                                   colour_vector = plot_colours)
-    print(plot)
     
+    if (is.null(plot_categories)) {
+      plot_categories <- unique(bg_sample$Cell.Type)
+    }
+    
+    if (is.null(plot_colours)) {
+      plot_colours <- c("red", "orange", "green", "blue", "skyblue", "pink", "purple", "lightgray")[1:length(plot_categories)]
+    }
+    
+    bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
+    
+    ## Factor for feature column
+    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
+                                  levels = plot_categories)
+    
+    ## Plot
+    fig <- plot_ly(bg_sample,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~Cell.X.Position,
+                   y = ~Cell.Y.Position,
+                   z = ~Cell.Z.Position,
+                   color = ~Cell.Type,
+                   colors = plot_colours,
+                   marker = list(size = 2))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    print(fig)
   }
   
   return(bg_sample)

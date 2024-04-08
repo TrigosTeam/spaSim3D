@@ -4,8 +4,6 @@ library(plotly)
 
 
 ```{r include=FALSE}
-library(rgl)
-
 poisson_distribution3D <- function(n_cells, length, width, height)  {
   
   # Choose lambda
@@ -49,6 +47,8 @@ poisson_distribution3D <- function(n_cells, length, width, height)  {
                    z = z)
   return(df)
 }
+
+
 
 simulate_background_cells3D <- function(n_cells, 
                                         length, 
@@ -118,17 +118,6 @@ simulate_background_cells3D <- function(n_cells,
       # Check next cell
       i <- i + 1
     }
-    
-    # Plot
-    if (plot_image == TRUE) {
-      plot3d(x, y, z, col = "lightgray", size = 4)
-    }
-    
-    df <- data.frame("Cell.X.Position" = x,
-                     "Cell.Y.Position" = y,
-                     "Cell.Z.Position" = z,
-                     "Cell.Type" = cell_type)
-    return(df)
   } 
   
   
@@ -195,31 +184,48 @@ simulate_background_cells3D <- function(n_cells,
     x <- x + jitter_x
     y <- y + jitter_y
     z <- z + jitter_z
-    
-    # Plot
-    if (plot_image == TRUE) {
-      # add legend
-      legend3d("topright", legend = c(cell_type), pch = 16, col = c("lightgray"), inset = c(0.02))
-      
-      plot3d(x, y, z, col = "lightgray", size = 4)
-      
-    }
-    
-    df <- data.frame("Cell.X.Position" = x,
-                     "Cell.Y.Position" = y,
-                     "Cell.Z.Position" = z,
-                     "Cell.Type" = cell_type)
-    return(df)
   } 
   
   else {
     stop("`method` should be 'tumour' or 'normal'")
   }
+  
+  
+  
+  df <- data.frame("Cell.X.Position" = x,
+                   "Cell.Y.Position" = y,
+                   "Cell.Z.Position" = z,
+                   "Cell.Type" = cell_type)
+  
+  # Plot
+  if (plot_image) {
+    
+    ## Plot
+    fig <- plot_ly(df,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~Cell.X.Position,
+                   y = ~Cell.Y.Position,
+                   z = ~Cell.Z.Position,
+                   color = ~Cell.Type,
+                   colors = "lightgray",
+                   marker = list(size = 2))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    
+    print(fig)
+  }
+  
+  return (df)
 }
+
+
 
 simulate_clusters3D <- function(bg_sample,
                                 bg_type = "Others",
-                                n_clusters = 2,
+                                n_clusters = 3,
                                 cluster_properties = list(
                                   C1 = list(
                                     name_of_cluster_cell = "Tumour",
@@ -227,20 +233,34 @@ simulate_clusters3D <- function(bg_sample,
                                     infiltration_proportions = c(0.4, 0.05),
                                     shape = "Sphere",
                                     radius = 25,
-                                    centre_loc = c(50, 50, 50)),
+                                    centre_loc = c(40, 40, 40)
+                                  ),
                                   C2 = list(
-                                    name_of_cluster_cell = "Endo",
-                                    infiltration_types = c("Immune", "Others"),
-                                    infiltration_proportions = c(0.1, 0.05),
+                                    name_of_cluster_cell = "Endothelial",
+                                    infiltration_types = c("Others"),
+                                    infiltration_proportions = c(0.05),
                                     shape = "Cylinder",
                                     radius = 10,
                                     start_loc = c(0, 0, 0),
-                                    end_loc   = c(40, 40 ,60)
+                                    end_loc   = c(20, 20 , 100)
+                                  ),
+                                  C3 = list(
+                                    name_of_cluster_cell = "Tumour",
+                                    infiltration_types = c("Immune", "Others"),
+                                    infiltration_proportions = c(0.3, 0.05),
+                                    shape = "Ellipsoid",
+                                    x_radius = 15,
+                                    y_radius = 20,
+                                    z_radius = 25,
+                                    centre_loc = c(70, 70, 70),
+                                    x_y_rotation = 0,
+                                    x_z_rotation = 0,
+                                    y_z_rotation = 0
                                   )
                                 ),
                                 plot_image = TRUE,
-                                plot_categories = c("Others", "Immune", "Endo", "Tumour"),
-                                plot_colours = NULL) {
+                                plot_categories = c("Others", "Immune", "Endothelial", "Tumour"),
+                                plot_colours = c("lightgray", "skyblue", "#FF7F7F", "orange")) {
   
   
   for (k in seq_len(n_clusters)) { 
@@ -271,40 +291,44 @@ simulate_clusters3D <- function(bg_sample,
     }
   }
   
-  if (plot_image){
-    if(is.null(plot_categories)) plot_categories <- unique(bg_sample$Cell.Type)
-    if (is.null(plot_colours)){
-      plot_colours <- c("gray","darkgreen", "red", "darkblue", "brown", "purple", "lightblue",
-                        "lightgreen", "yellow", "black", "pink")
-    }
-    phenos <- plot_categories
+  if (plot_image) {
     
-    colors <- c()
-    for (i in 1:nrow(bg_sample)) {
-      for (j in 1:length(phenos)) {
-        if (bg_sample$Cell.Type[i] == phenos[j]) {
-          colors <- append(colors, plot_colours[j])
-          break
-        }
-      }
+    if (is.null(plot_categories)) {
+      plot_categories <- unique(bg_sample$Cell.Type)
     }
     
-    plot3d(bg_sample$Cell.X.Position,
-           bg_sample$Cell.Y.Position,
-           bg_sample$Cell.Z.Position,
-           xlab = "x",
-           ylab = "y",
-           zlab = "z",
-           col = colors,
-           size = 4)
+    if (is.null(plot_colours)) {
+      plot_colours <- c("red", "orange", "green", "blue", "skyblue", "pink", "purple", "lightgray")[1:length(plot_categories)]
+    }
     
-    # add legend
-    legend3d("topright", legend = phenos, pch = 16, col = plot_colours[seq_len(length(phenos))], inset = c(0.02))
+    bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
     
+    ## Factor for feature column
+    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
+                                      levels = plot_categories)
+    
+    
+    ## Plot
+    fig <- plot_ly(bg_sample,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~Cell.X.Position,
+                   y = ~Cell.Y.Position,
+                   z = ~Cell.Z.Position,
+                   color = ~Cell.Type,
+                   colors = plot_colours,
+                   marker = list(size = 2))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    print(fig)
   }
   
-  return(bg_sample)
+  return (bg_sample)
 }
+
+
 
 
 
@@ -377,6 +401,9 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
   }
   return(bg_sample)
 }
+
+
+
 
 simulate_cylinder_ring <- function(bg_sample, ring_properties) {
   
@@ -488,6 +515,8 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
   return(bg_sample)
 }
 
+
+
 simulate_double_rings3D <- function(bg_sample,
                                     bg_type = "Others",
                                     n_dr = 1,
@@ -511,7 +540,7 @@ simulate_double_rings3D <- function(bg_sample,
                                     ),
                                     plot_image = TRUE,
                                     plot_categories = c("Others", "Tumour", "Immune1", "Immune2"),
-                                    plot_colours = NULL) {
+                                    plot_colours = c("lightgray", "orange", "blue", "green")) {
   
   for (k in seq_len(n_dr)) { 
     
@@ -530,39 +559,42 @@ simulate_double_rings3D <- function(bg_sample,
     }
   }
   
-  if (plot_image){
-    if(is.null(plot_categories)) plot_categories <- unique(bg_sample$Cell.Type)
-    if (is.null(plot_colours)){
-      plot_colours <- c("gray","darkgreen", "red", "darkblue", "brown", "purple", "lightblue",
-                        "lightgreen", "yellow", "black", "pink")
-    }
-    phenos <- plot_categories
+  if (plot_image) {
     
-    colors <- c()
-    for (i in 1:nrow(bg_sample)) {
-      for (j in 1:length(phenos)) {
-        if (bg_sample$Cell.Type[i] == phenos[j]) {
-          colors <- append(colors, plot_colours[j])
-          break
-        }
-      }
+    if (is.null(plot_categories)) {
+      plot_categories <- unique(bg_sample$Cell.Type)
     }
     
-    plot3d(bg_sample$Cell.X.Position,
-           bg_sample$Cell.Y.Position,
-           bg_sample$Cell.Z.Position,
-           xlab = "x",
-           ylab = "y",
-           zlab = "z",
-           col = colors,
-           size = 4)
+    if (is.null(plot_colours)) {
+      plot_colours <- c("red", "orange", "green", "blue", "skyblue", "pink", "purple", "lightgray")[1:length(plot_categories)]
+    }
     
-    # add legend
-    legend3d("topright", legend = phenos, pch = 16, col = plot_colours[seq_len(length(phenos))], inset = c(0.02))
+    bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
+    
+    ## Factor for feature column
+    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
+                                  levels = plot_categories)
+    
+    ## Plot
+    fig <- plot_ly(bg_sample,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~Cell.X.Position,
+                   y = ~Cell.Y.Position,
+                   z = ~Cell.Z.Position,
+                   color = ~Cell.Type,
+                   colors = plot_colours,
+                   marker = list(size = 2))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    print(fig)
   }
   
   return(bg_sample)
 }
+
 
 
 simulate_ellipsoid_cluster <- function(bg_sample, cluster_properties) {
@@ -634,6 +666,7 @@ simulate_ellipsoid_cluster <- function(bg_sample, cluster_properties) {
   }
   return(bg_sample)
 }
+
 
 
 simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
@@ -767,6 +800,7 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
 }
 
 
+
 simulate_ellipsoid_ring <- function(bg_sample, ring_properties) {
   
   # Get ellipsoid properties
@@ -868,17 +902,16 @@ simulate_ellipsoid_ring <- function(bg_sample, ring_properties) {
 }
 
 
-library(rgl)
-
 
 simulate_mixing3D <- function(bg_sample,
-                              idents = c("Others", "Immune", "Tumour"),
+                              cell_types = c("Others", "Immune", "Tumour"),
                               props = c(0.5, 0.2, 0.3),
                               plot_image = TRUE,
-                              plot_colours = NULL) {
+                              plot_categories = c("Others", "Immune", "Tumour"),
+                              plot_colours = c("lightgray", "skyblue", "orange")) {
   
   
-  n_types <- length(idents)
+  n_types <- length(cell_types)
   
   for (i in 1:nrow(bg_sample)) {
     x <- bg_sample$Cell.X.Position[i]
@@ -894,7 +927,7 @@ simulate_mixing3D <- function(bg_sample,
     while (n <= n_types){
       current_p <- current_p + props[n]
       if (random <= current_p) {
-        pheno <- idents[n]
+        pheno <- cell_types[n]
         break
       }
       n <- n+1
@@ -902,58 +935,94 @@ simulate_mixing3D <- function(bg_sample,
     bg_sample[i, "Cell.Type"] <- pheno
   }
   
-  if (plot_image){
-    if (is.null(plot_colours)){
-      plot_colours <- c("gray","darkgreen", "red", "darkblue", "brown", "purple", "lightblue",
-                        "lightgreen", "yellow", "black", "pink")
+  if (plot_image) {
+    
+    if (is.null(plot_categories)) {
+      plot_categories <- unique(bg_sample$Cell.Type)
     }
     
-    colors <- c()
-    for (i in 1:nrow(bg_sample)) {
-      for (j in 1:length(idents)) {
-        if (bg_sample$Cell.Type[i] == idents[j]) {
-          colors <- append(colors, plot_colours[j])
-          break
-        }
-      }
+    if (is.null(plot_colours)) {
+      plot_colours <- c("red", "orange", "green", "blue", "skyblue", "pink", "purple", "lightgray")[1:length(plot_categories)]
     }
     
-    plot3d(bg_sample$Cell.X.Position,
-           bg_sample$Cell.Y.Position,
-           bg_sample$Cell.Z.Position,
-           xlab = "x",
-           ylab = "y",
-           zlab = "z",
-           col = colors,
-           size = 4)
+    bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
     
-    # add legend
-    legend3d("topright", legend = idents, pch = 16, col = plot_colours[seq_len(length(idents))], inset = c(0.02))
+    ## Factor for feature column
+    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
+                                  levels = plot_categories)
     
+    ## Plot
+    fig <- plot_ly(bg_sample,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~Cell.X.Position,
+                   y = ~Cell.Y.Position,
+                   z = ~Cell.Z.Position,
+                   color = ~Cell.Type,
+                   colors = plot_colours,
+                   marker = list(size = 2))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    print(fig)
   }
+  
   return(bg_sample)
 }
 
 
+
 simulate_rings3D <- function(bg_sample,
                              bg_type = "Others",
-                             n_ring = 1,
+                             n_ring = 3,
                              ring_properties = list(
                                R1 = list(
                                  name_of_cluster_cell = "Tumour",
-                                 infiltration_types = c("Immune1", "Others"),
-                                 infiltration_proportions = c(0.0, 0.00),
+                                 infiltration_types = c("Others"),
+                                 infiltration_proportions = c(0.05),
                                  shape = "Sphere",
-                                 radius = 35,
-                                 centre_loc = c(50, 50, 50),
-                                 name_of_ring_cell = "Immune1",
+                                 radius = 20,
+                                 centre_loc = c(40, 40, 40),
+                                 name_of_ring_cell = "Immune",
                                  ring_width = 5,
                                  ring_infiltration_types = c("Others"),
-                                 ring_infiltration_proportions = c(0.15))
+                                 ring_infiltration_proportions = c(0.15)
+                               ),
+                               R2 = list(
+                                 name_of_cluster_cell = "Void",
+                                 infiltration_types = NULL,
+                                 infiltration_proportions = NULL,
+                                 shape = "Cylinder",
+                                 radius = 8,
+                                 start_loc = c(0, 0, 0),
+                                 end_loc   = c(20, 20 , 100),
+                                 name_of_ring_cell = "Endothelial",
+                                 ring_width = 5,
+                                 ring_infiltration_types = c("Others"),
+                                 ring_infiltration_proportions = c(0.15)
+                               ),
+                               R3 = list(
+                                 name_of_cluster_cell = "Tumour",
+                                 infiltration_types = c("Others"),
+                                 infiltration_proportions = c(0.05),
+                                 shape = "Ellipsoid",
+                                 x_radius = 10,
+                                 y_radius = 15,
+                                 z_radius = 20,
+                                 centre_loc = c(70, 70, 70),
+                                 x_y_rotation = 0,
+                                 x_z_rotation = 0,
+                                 y_z_rotation = 0,
+                                 name_of_ring_cell = "Immune",
+                                 ring_width = 5,
+                                 ring_infiltration_types = c("Others"),
+                                 ring_infiltration_proportions = c(0.15)
+                               )
                              ),
                              plot_image = TRUE,
-                             plot_categories = c("Others", "Tumour", "Immune1"),
-                             plot_colours = NULL) {
+                             plot_categories = c("Others", "Tumour", "Immune", "Endothelial"),
+                             plot_colours = c("lightgray", "orange", "skyblue", "#FF7F7F")) {
   
   for (k in seq_len(n_ring)) { 
     
@@ -977,38 +1046,40 @@ simulate_rings3D <- function(bg_sample,
     }
   }
   
-  if (plot_image){
-    if(is.null(plot_categories)) plot_categories <- unique(bg_sample$Cell.Type)
-    if (is.null(plot_colours)){
-      plot_colours <- c("gray","darkgreen", "red", "darkblue", "brown", "purple", "lightblue",
-                        "lightgreen", "yellow", "black", "pink")
-    }
-    phenos <- plot_categories
+  if (plot_image) {
     
-    colors <- c()
-    for (i in 1:nrow(bg_sample)) {
-      for (j in 1:length(phenos)) {
-        if (bg_sample$Cell.Type[i] == phenos[j]) {
-          colors <- append(colors, plot_colours[j])
-          break
-        }
-      }
+    if (is.null(plot_categories)) {
+      plot_categories <- unique(bg_sample$Cell.Type)
     }
     
-    plot3d(bg_sample$Cell.X.Position,
-           bg_sample$Cell.Y.Position,
-           bg_sample$Cell.Z.Position,
-           xlab = "x",
-           ylab = "y",
-           zlab = "z",
-           col = colors,
-           size = 4)
+    if (is.null(plot_colours)) {
+      plot_colours <- c("red", "orange", "green", "blue", "skyblue", "pink", "purple", "lightgray")[1:length(plot_categories)]
+    }
     
-    # add legend
-    legend3d("topright", legend = phenos, pch = 16, col = plot_colours[seq_len(length(phenos))], inset = c(0.02))
+    bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
+    
+    ## Factor for feature column
+    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
+                                  levels = plot_categories)
+    
+    ## Plot
+    fig <- plot_ly(bg_sample,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~Cell.X.Position,
+                   y = ~Cell.Y.Position,
+                   z = ~Cell.Z.Position,
+                   color = ~Cell.Type,
+                   colors = plot_colours,
+                   marker = list(size = 2))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    print(fig)
   }
   
-  return(bg_sample)
+  return (bg_sample)
 }
 
 
@@ -1170,6 +1241,7 @@ simulate_sphere_dr <- function(bg_sample, dr_properties) {
 }
 
 
+
 simulate_sphere_ring <- function(bg_sample, ring_properties) {
   
   # Get sphere immune ring properties
@@ -1247,6 +1319,7 @@ simulate_sphere_ring <- function(bg_sample, ring_properties) {
   }
   return(bg_sample)
 }
+
 
 
 plot_cell_categories3D <- function(data,
@@ -1333,7 +1406,7 @@ bg <- simulate_background_cells3D(n_cells = 20000,
                                   plot_image = F)
 
 bg_mix <- simulate_mixing3D(bg,
-                            idents = c("Others", "Immune1"),
+                            cell_types = c("Others", "Immune1"),
                             props = c(0.95, 0.05),
                             plot_image = F)
 

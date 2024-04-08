@@ -216,9 +216,23 @@ simulate_background_cells3D <- function(n_cells,
   
   # Plot
   if (plot_image) {
-    plot <- plot_cell_categories3D(df,
-                                   colour_vector = "#F0F0F0")
-    print(plot)
+    
+    ## Plot
+    fig <- plot_ly(df,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~Cell.X.Position,
+                   y = ~Cell.Y.Position,
+                   z = ~Cell.Z.Position,
+                   color = ~Cell.Type,
+                   colors = "lightgray",
+                   marker = list(size = 2))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    
+    print(fig)
   }
   
   return (df)
