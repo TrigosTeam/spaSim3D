@@ -1,7 +1,7 @@
 plot_cell_categories3D <- function(data,
                                    cell_types_of_interest = NULL,
                                    colour_vector = NULL,
-                                   size = 3,
+                                   size = 2,
                                    include_cell_types_of_no_interest = FALSE,
                                    feature_colname = "Cell.Type") {
   
@@ -41,9 +41,6 @@ plot_cell_categories3D <- function(data,
   data[, feature_colname] <- factor(data[, feature_colname],
                                     levels = cell_types_of_interest)
   
-  ## Add a size column
-  data$Size <- size
-  
   ## Plot
   fig <- plot_ly(data,
                  type = "scatter3d",
@@ -53,7 +50,7 @@ plot_cell_categories3D <- function(data,
                  z = ~Cell.Z.Position,
                  color = ~Cell.Type,
                  colors = colour_vector,
-                 marker = list(size = ~Size))
+                 marker = list(size = size))
   
   fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
                                      yaxis = list(title = 'y'),
