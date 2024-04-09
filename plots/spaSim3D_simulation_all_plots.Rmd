@@ -225,7 +225,6 @@ simulate_background_cells3D <- function(n_cells,
 
 
 simulate_clusters3D <- function(bg_sample,
-                                bg_type = "Others",
                                 n_clusters = 3,
                                 cluster_properties = list(
                                   C1 = list(
@@ -519,7 +518,6 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
 
 
 simulate_double_rings3D <- function(bg_sample,
-                                    bg_type = "Others",
                                     n_dr = 1,
                                     dr_properties = list(
                                       D1 = list(
@@ -975,7 +973,6 @@ simulate_mixing3D <- function(bg_sample,
 
 
 simulate_rings3D <- function(bg_sample,
-                             bg_type = "Others",
                              n_ring = 3,
                              ring_properties = list(
                                R1 = list(
@@ -1438,7 +1435,6 @@ plot_cell_categories3D(bg_mix,
 ### 3. Cell aggregates: Geometric shapes
 ###---------------------------------------------------------------------------
 bg_cluster <- simulate_clusters3D(bg,
-                                  bg_type = "Others",
                                   n_clusters = 3,
                                   cluster_properties = list(
                                     C1 = list(
@@ -1488,7 +1484,6 @@ plot_cell_categories3D(bg_cluster,
 ### 4. Immune rings: Concentric circles
 ###---------------------------------------------------------------------------
 bg_ring <- simulate_rings3D(bg,
-                            bg_type = "Others",
                             n_ring = 3,
                             ring_properties = list(
                               R1 = list(

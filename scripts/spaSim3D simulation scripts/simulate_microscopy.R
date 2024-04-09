@@ -21,7 +21,6 @@ bg_mix <- simulate_mixing3D(bg,
 
 
 bg_cylinder_ring <- simulate_rings3D(bg_sample = bg_mix,
-                                     bg_type = "Others",
                                      n_ring = 4,
                                      ring_properties = list(
                                        R1 = list(
@@ -84,7 +83,6 @@ bg_cylinder_ring <- simulate_rings3D(bg_sample = bg_mix,
 
 
 bg_ring <- simulate_rings3D(bg_sample = bg_cylinder_ring,
-                                  bg_type = "Others",
                                   n_ring = 1,
                                   ring_properties = list(
                                     R1 = list(
@@ -112,7 +110,6 @@ bg_ring <- simulate_rings3D(bg_sample = bg_cylinder_ring,
 
 bg_cluster <- simulate_clusters3D(bg_sample = bg_ring,
                                     n_clusters = 1,
-                                    bg_type = "Others",
                                     cluster_properties = list(
                                       C1 = list(
                                           name_of_cluster_cell = "Tumour2",
@@ -185,7 +182,6 @@ ggplot(data = df_2d,
 # 
 # bgCluster <- simulate_clusters(bg_sample = bgMix,
 #                                n_clusters = 2,
-#                                bg_type = "Others",
 #                                cluster_properties = cluster_prop,
 #                                plot_image = T,
 #                                plot_categories = c("Others", "Immune1", "Immune2", "Tumour"),
@@ -202,7 +198,6 @@ ggplot(data = df_2d,
 #                           immune_ring_infiltration_proportions = c(0)))
 # 
 # bgRings <- simulate_immune_rings(bg_sample = bgCluster,
-#                                  bg_type =  "Others",
 #                                  n_ir = 1,
 #                                  ir_properties = ir_prop,
 #                                  plot_image = T,

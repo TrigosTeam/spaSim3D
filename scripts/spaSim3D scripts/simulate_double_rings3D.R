@@ -1,5 +1,4 @@
 simulate_double_rings3D <- function(bg_sample,
-                             bg_type = "Others",
                              n_dr = 1,
                              dr_properties = list(
                                D1 = list(

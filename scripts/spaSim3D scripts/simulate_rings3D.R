@@ -1,5 +1,4 @@
 simulate_rings3D <- function(bg_sample,
-                             bg_type = "Others",
                              n_ring = 3,
                              ring_properties = list(
                                R1 = list(

@@ -1,5 +1,4 @@
 simulate_clusters3D <- function(bg_sample,
-                                bg_type = "Others",
                                 n_clusters = 3,
                                 cluster_properties = list(
                                   C1 = list(

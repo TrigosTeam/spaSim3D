@@ -21,7 +21,6 @@ bg_mix <- simulate_mixing3D(bg,
 
 
 bg_ring <- simulate_rings3D(bg_sample = bg_mix,
-                            bg_type = "Others",
                             n_ring = 1,
                             ring_properties = list(
                               R1 = list(
@@ -50,7 +49,6 @@ bg_ring <- simulate_rings3D(bg_sample = bg_mix,
 
 bg_cluster <- simulate_clusters3D(bg_sample = bg_ring,
                                   n_clusters = 4,
-                                  bg_type = "Others",
                                   cluster_properties = list(
                                     C1 = list(
                                       name_of_cluster_cell = "Tumour",
@@ -102,7 +100,6 @@ bg_cluster <- simulate_clusters3D(bg_sample = bg_ring,
 
 
 bg_cylinder_ring <- simulate_rings3D(bg_sample = bg_cluster,
-                                     bg_type = "Others",
                                      n_ring = 4,
                                      ring_properties = list(
                                        R1 = list(
