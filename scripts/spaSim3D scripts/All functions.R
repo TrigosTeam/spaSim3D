@@ -309,12 +309,13 @@ simulate_clusters3D <- function(bg_sample,
     bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
     
     ## Factor for feature column
-    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
-                                      levels = plot_categories)
+    bg_sample_factored <- bg_sample
     
+    bg_sample_factored[, "Cell.Type"] <- factor(bg_sample_factored[, "Cell.Type"],
+                                                levels = plot_categories)
     
     ## Plot
-    fig <- plot_ly(bg_sample,
+    fig <- plot_ly(bg_sample_factored,
                    type = "scatter3d",
                    mode = 'markers',
                    x = ~Cell.X.Position,
@@ -576,11 +577,13 @@ simulate_double_rings3D <- function(bg_sample,
     bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
     
     ## Factor for feature column
-    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
-                                  levels = plot_categories)
+    bg_sample_factored <- bg_sample
+    
+    bg_sample_factored[, "Cell.Type"] <- factor(bg_sample_factored[, "Cell.Type"],
+                                                levels = plot_categories)
     
     ## Plot
-    fig <- plot_ly(bg_sample,
+    fig <- plot_ly(bg_sample_factored,
                    type = "scatter3d",
                    mode = 'markers',
                    x = ~Cell.X.Position,
@@ -952,11 +955,13 @@ simulate_mixing3D <- function(bg_sample,
     bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
     
     ## Factor for feature column
-    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
-                                  levels = plot_categories)
+    bg_sample_factored <- bg_sample
+    
+    bg_sample_factored[, "Cell.Type"] <- factor(bg_sample_factored[, "Cell.Type"],
+                                                levels = plot_categories)
     
     ## Plot
-    fig <- plot_ly(bg_sample,
+    fig <- plot_ly(bg_sample_factored,
                    type = "scatter3d",
                    mode = 'markers',
                    x = ~Cell.X.Position,
@@ -1062,11 +1067,13 @@ simulate_rings3D <- function(bg_sample,
     bg_sample <- bg_sample[bg_sample[["Cell.Type"]] %in% plot_categories, ]
     
     ## Factor for feature column
-    bg_sample[, "Cell.Type"] <- factor(bg_sample[, "Cell.Type"],
-                                  levels = plot_categories)
+    bg_sample_factored <- bg_sample
+    
+    bg_sample_factored[, "Cell.Type"] <- factor(bg_sample_factored[, "Cell.Type"],
+                                                levels = plot_categories)
     
     ## Plot
-    fig <- plot_ly(bg_sample,
+    fig <- plot_ly(bg_sample_factored,
                    type = "scatter3d",
                    mode = 'markers',
                    x = ~Cell.X.Position,
