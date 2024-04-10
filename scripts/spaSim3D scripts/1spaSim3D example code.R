@@ -1,5 +1,5 @@
 ### Add Cell.ID
-chosen_bg <- bg
+chosen_bg <- bg_spheres
 chosen_bg$Cell.ID <- (paste("Cell_", seq(nrow(chosen_bg)), sep="")) ## adding Cell.ID column
 
 
