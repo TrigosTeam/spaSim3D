@@ -5,6 +5,39 @@ calculate_Kcross3D <- function(data,
                                feature_colname = "Cell.Type", 
                                plot_results = TRUE) {
   
+  # If the columns are not correct, give error
+  required_colnames <- c("Cell.X.Position", 
+                         "Cell.Y.Position", 
+                         "Cell.Z.Position", 
+                         feature_colname,
+                         "Cell.ID")
+  
+  missing_colnames <- setdiff(required_colnames,
+                              colnames(data))
+  
+  if (length(missing_colnames) > 0) {
+    stop(paste(paste(missing_colnames, collapse = ', '),
+               "are missing as column names in your data")) 
+  }
+  
+  
+  # Check if reference_cell_type is in the data
+  if (!reference_cell_type %in% unique(data[[feature_colname]])) {
+    stop(paste(reference_cell_type, " reference_cell_type does not exist in data"))
+  }
+  
+  # Check if target_cell_type is in the data
+  if (!target_cell_type %in% unique(data[[feature_colname]])) {
+    stop(paste(target_cell_type, " target_cell_type does not exist in data"))
+  }
+  
+  
+  # Check if distance is numeric
+  if (!is.numeric(distance)) {
+    stop(paste(distance, " is not of type 'numeric'"))
+  }
+  
+  
   
   ## Get x, y, z coords for cells of reference cell type and target cell type
   reference_cell_data <- data[data[[feature_colname]] == reference_cell_type, ]
@@ -23,6 +56,13 @@ calculate_Kcross3D <- function(data,
   reference_cell_data$Border.Distance <- as.numeric(apply(reference_cell_data, 1, min))
   
   ## Only use reference cells which a far enough away from the border
+  if (sum(reference_cell_data$Border.Distance > distance) == 0) {
+    stop(paste(distance, " distance is too large, all reference cells have been deleted"))
+  }
+  else if (sum(reference_cell_data$Border.Distance > distance) < nrow(reference_cell_data)) {
+    warning("Some reference cells will be ignored due to border effects, consider reducing distance parameter")
+  }
+  
   chosen_rows <- rownames(reference_cell_data[reference_cell_data$Border.Distance > distance, ])
   reference_cell_data <- reference_cell_data[chosen_rows, c("Cell.X.Position",
                                                             "Cell.Y.Position",
@@ -33,6 +73,7 @@ calculate_Kcross3D <- function(data,
   ## Get number of reference and target cells
   n_reference_cells <- nrow(reference_cell_data)
   n_target_cells <- nrow(target_cell_data)
+  
   
   ## Combine together
   combined_cell_data <- rbind(reference_cell_data, target_cell_data)
@@ -46,7 +87,6 @@ calculate_Kcross3D <- function(data,
   # Ignore ref-ref or target-target distances (i.e. top right part of matrix)
   reference_target_distances <- reference_target_distances[1:n_reference_cells, 
                                                            (n_reference_cells + 1):ncol(reference_target_distances)]
-  
   
   # Calculate observed cross-k value for a sequence of distances
   # i.e. the number of ref-target distances less than the chosen distance
@@ -73,3 +113,4 @@ calculate_Kcross3D <- function(data,
   
   return (result)
 }
+

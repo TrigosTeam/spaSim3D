@@ -4,6 +4,41 @@ calculate_mixing_scores3D <- function(data,
                                       radius = 20, 
                                       feature_colname = "Cell.Type") {
   
+  # If the columns are not correct, give error
+  required_colnames <- c("Cell.X.Position", 
+                         "Cell.Y.Position", 
+                         "Cell.Z.Position", 
+                         feature_colname)
+  
+  missing_colnames <- setdiff(required_colnames,
+                              colnames(data))
+  
+  if (length(missing_colnames) > 0) {
+    stop(paste(paste(missing_colnames, collapse = ', '),
+               "are missing as column names in your data")) 
+  }
+  
+  
+  # Check if reference_cell_types has cells not found in the data
+  incorrect_cell_types <- setdiff(reference_cell_types, unique(data[[feature_colname]]))
+  if (length(incorrect_cell_types) > 0) {
+    stop(paste(paste(incorrect_cell_types, collapse = ', '),
+               "in reference_cell_types don't existin data."))
+  }
+  
+  # Check if target_cell_types has cells not found in the data
+  incorrect_cell_types <- setdiff(target_cell_types, unique(data[[feature_colname]]))
+  if (length(incorrect_cell_types) > 0) {
+    stop(paste(paste(incorrect_cell_types, collapse = ', '),
+               "in target_cell_types don't exist in data."))
+  }
+  
+  # Check if radius is numeric
+  if (!is.numeric(radius)) {
+    stop(paste(radius, " is not of type 'numeric'"))
+  }
+  
+  
   df <- data.frame(matrix(ncol=8, nrow=0))
   
   for (reference_cell_type in reference_cell_types) {

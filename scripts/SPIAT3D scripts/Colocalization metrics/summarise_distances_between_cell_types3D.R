@@ -28,5 +28,5 @@ summarise_distances_between_cell_types3D <- function(df) {
     summarised_dists[i, "Target"] <- cell_types[2]
   }
   
-  return(summarised_dists)
+  return (summarised_dists)
 }

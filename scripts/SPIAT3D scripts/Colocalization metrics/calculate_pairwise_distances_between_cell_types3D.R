@@ -5,15 +5,37 @@ calculate_pairwise_distances_between_cell_types3D <- function(data,
                                                               cell_types_of_interest = NULL,
                                                               feature_colname = "Cell.Type") {
  
+  # If the columns are not correct, give error
+  required_colnames <- c("Cell.X.Position", 
+                         "Cell.Y.Position", 
+                         "Cell.Z.Position", 
+                         feature_colname, 
+                         "Cell.ID")
+  
+  missing_colnames <- setdiff(required_colnames,
+                              colnames(data))
+  
+  if (length(missing_colnames) > 0) {
+    stop(paste(paste(missing_colnames, collapse = ', '),
+               "are missing as column names in your data")) 
+  }
+  
+  # If there are no cells, give error
+  if (nrow(data) == 0) {
+    stop("There are no cells in data")
+  }
+  
   # Select all rows in data which only contains the cells of interest
   if (!is.null(cell_types_of_interest)) {
+    
+    # Check if cell_types_of_interest has cells not found in the data
+    incorrect_cell_types <- setdiff(cell_types_of_interest, unique(data[[feature_colname]]))
+    if (length(incorrect_cell_types) > 0) {
+      stop(paste(paste(incorrect_cell_types, collapse = ', '),
+                 "in cell_types_of_interest don't exist."))
+    }
+    
     data <- data[data[ , feature_colname] %in% cell_types_of_interest, ]
-  }
-   
-  
-  # If there are no cells which match cell_types_of_interest, give error:
-  if (nrow(data) == 0) {
-    stop("There are no cells or no cells of specified cell types")
   }
   
   # Create a list of the number of cell types with their

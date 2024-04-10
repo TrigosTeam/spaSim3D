@@ -4,6 +4,33 @@ determine_entropy_grid_metrics3D <- function(data,
                                              feature_colname = "Cell.Type",
                                              plot_image = TRUE) {
   
+  # If the columns are not correct, give error
+  required_colnames <- c("Cell.X.Position", 
+                         "Cell.Y.Position", 
+                         "Cell.Z.Position", 
+                         feature_colname)
+  
+  missing_colnames <- setdiff(required_colnames,
+                              colnames(data))
+  
+  if (length(missing_colnames) > 0) {
+    stop(paste(paste(missing_colnames, collapse = ', '),
+               "are missing as column names in your data")) 
+  }
+  
+  # Check if n_split is numeric
+  if (!is.numeric(n_split)) {
+    stop(paste(n_split, " n_split is not of type 'numeric'"))
+  }
+  
+  # Check if target_cell_types has cells not found in the data
+  incorrect_cell_types <- setdiff(target_cell_types, unique(data[[feature_colname]]))
+  if (length(incorrect_cell_types) > 0) {
+    stop(paste(paste(incorrect_cell_types, collapse = ', '),
+               "in target_cell_types don't exist in data."))
+  }
+  
+  
   ## Get dimensions of the window
   length <- round(max(data$Cell.X.Position) - min(data$Cell.X.Position))
   width  <- round(max(data$Cell.Y.Position) - min(data$Cell.Y.Position))
@@ -30,9 +57,12 @@ determine_entropy_grid_metrics3D <- function(data,
     ## Get data of cells in the current grid_prism
     data_temp <- data[data$Prism.Num == grid_prism_num, ]
     
-    grid_prism_entropy <- calculate_entropy3D(data_temp,
-                                              target_cell_types = target_cell_types)
+    temp_target_cell_types <- intersect(target_cell_types, unique(data_temp[[feature_colname]]))
     
+    grid_prism_entropy <- calculate_entropy3D(data_temp,
+                                              target_cell_types = temp_target_cell_types,
+                                              log_base = length(target_cell_types))
+
     ## Get number of cells of each target cell type in each grid prism
     for (target_cell_type in target_cell_types) {
       cell_type_list[[target_cell_type]] <- append(cell_type_list[[target_cell_type]], 
@@ -69,9 +99,22 @@ determine_entropy_grid_metrics3D <- function(data,
     
     ## Color of each dot is related to its entropy
     pal <- colorRampPalette(hcl.colors(n = 5, palette = "Terrain", rev = TRUE))
-    plot_data$order = findInterval(plot_data$Entropy, sort(plot_data$Entropy), left.open = TRUE) + 1
     
-    plot3d(plot_data$x, plot_data$y, plot_data$z, size = 10, col = pal(nrow(plot_data))[plot_data$order])    
+    fig <- plot_ly(plot_data,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~x,
+                   y = ~y,
+                   z = ~z,
+                   color = ~Entropy,
+                   colors = pal(nrow(plot_data)),
+                   marker = list(size = 8))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    
+    print(fig)
     
   }
 
