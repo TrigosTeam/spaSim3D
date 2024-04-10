@@ -84,37 +84,46 @@ simulate_background_cells3D <- function(n_cells,
                                       length = length, 
                                       width = width, 
                                       height = height)
+    
+    rownames(pois_df) <- paste("Cell_", seq(nrow(pois_df)), sep = "")    
+    
+    
+    ### Check if all other cells are to close to the current cell 
+    # Use frNN function: for each point, get all points within min_d of it
+    pois_df_distances <- dbscan::frNN(pois_df, 
+                                      eps = min_d,
+                                      query = NULL, 
+                                      sort = FALSE)
+    
+    # Check only the cells, don't care about the exact distance (definitely smaller than min_d)
+    pois_df_distances_ids <- pois_df_distances$id
+    
+    
+    n_cells <- nrow(pois_df)
+    i <- 1
+    
+    while (i < n_cells) {
+      cells_too_close <- paste("Cell_", pois_df_distances_ids[[i]], sep = "")
+      
+      for (cell in cells_too_close) {
+        
+        ## Remove cell that is too close
+        if (!is.null(pois_df_distances_ids[[cell]])) {
+          pois_df_distances_ids[cell] <- NULL
+          n_cells <- n_cells - 1
+        }
+      }
+      i <- i + 1
+    }
+    # Left over cells are the cells we keep
+    chosen_cells <- names(pois_df_distances_ids)
+    
+    pois_df <- pois_df[chosen_cells, ]
+    
     x <- pois_df$x
     y <- pois_df$y
     z <- pois_df$z
     
-    
-    # Check if all other cells are to close to the current cell 
-    #   using distance formula: x^2 + y^2 + z^2 = d^2
-    # Other cells: x[(i+1):len]. 
-    # Current cell: x[i]
-    # Optimisation: No need to check the previous cells (no cells close to them, hence '(i+1):len')
-    i <- 1
-    len <- length(x)
-    
-    while (i < len) {
-      accepted_points <- ((x[(i+1):len] - x[i])^2 + 
-                            (y[(i+1):len] - y[i])^2 + 
-                            (z[(i+1):len] - z[i])^2 > min_d^2)
-      
-      accepted_points <- append(rep(TRUE, i), accepted_points)
-      
-      x <- x[accepted_points]
-      y <- y[accepted_points]
-      z <- z[accepted_points]
-      
-      
-      # Update len as number of cells has decreased
-      len <- sum(accepted_points)
-      
-      # Check next cell
-      i <- i + 1
-    }
   } 
   
   
