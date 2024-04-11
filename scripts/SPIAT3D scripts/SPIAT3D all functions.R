@@ -1083,12 +1083,12 @@ calculate_entropy_gradient_aggregated3D <- function(data,
   rownames(result) <- names(entropy_gradient_data)
   
   ## Get entropies for each element in the data frame
-  result_entropies <- result / result$Total
+  result_entropies <- result / result$Total # Make cell count values into cell proportion values
   result_entropies <- -1 * result_entropies  * log(result_entropies, length(target_cell_types))
+  result_entropies <- apply(result_entropies, 2, function(x) replace(x, is.nan(x), 0))
   
   ## Calculate total entropy for each row in result data frame
   result$Entropy <- apply(result_entropies, 1, sum)
-  result$Entropy <- replace(result$Entropy, is.nan(result$Entropy), 0)
   
   # Plot
   if (plot_image) {
@@ -1101,10 +1101,14 @@ calculate_entropy_gradient_aggregated3D <- function(data,
 
 
 
+
+
+
 determine_entropy_grid_metrics3D <- function(data, 
                                              n_split,
                                              target_cell_types,
                                              feature_colname = "Cell.Type",
+                                             size = NULL,
                                              plot_image = TRUE) {
   
   # If the columns are not correct, give error
@@ -1192,6 +1196,11 @@ determine_entropy_grid_metrics3D <- function(data,
   ## Plot
   if (plot_image) {
     
+    # Check if size is numeric or not
+    if (!is.numeric(size)) {
+      stop(paste(size, " size is not numeric"))
+    }
+    
     plot_data <- result
     
     ## Place a dot at the center of each grid prism to represent entropy
@@ -1211,7 +1220,7 @@ determine_entropy_grid_metrics3D <- function(data,
                    z = ~z,
                    color = ~Entropy,
                    colors = pal(nrow(plot_data)),
-                   marker = list(size = 8))
+                   marker = list(size = size))
     
     fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
                                        yaxis = list(title = 'y'),
@@ -1225,25 +1234,45 @@ determine_entropy_grid_metrics3D <- function(data,
 }
 
 
-determine_entropy_prevalence3D <- function(entropy_grid_data,
-                                           threshold,
-                                           above = TRUE) {
+
+determine_cell_proportion_grid_metrics3D <- function(data, 
+                                                     n_split,
+                                                     reference_cell_type,
+                                                     target_cell_type,
+                                                     feature_colname = "Cell.Type",
+                                                     size = NULL,
+                                                     plot_image = TRUE) {
   
-  if (above) {
-    p <- sum(entropy_grid_data$Entropy >= threshold) / nrow(entropy_grid_data) * 100
-  }
-  else {
-    p <- sum(entropy_grid_data$Entropy < threshold) / nrow(entropy_grid_data) * 100    
+  # If the columns are not correct, give error
+  required_colnames <- c("Cell.X.Position", 
+                         "Cell.Y.Position", 
+                         "Cell.Z.Position", 
+                         feature_colname)
+  
+  missing_colnames <- setdiff(required_colnames,
+                              colnames(data))
+  
+  if (length(missing_colnames) > 0) {
+    stop(paste(paste(missing_colnames, collapse = ', '),
+               "are missing as column names in your data")) 
   }
   
-  return (p)
-}
-
-
-
-determine_spatial_autocorrelation <- function(data,
-                                              entropy_grid_data, 
-                                              n_split) {
+  # Check if n_split is numeric
+  if (!is.numeric(n_split)) {
+    stop(paste(n_split, " n_split is not of type 'numeric'"))
+  }
+  
+  # Check if reference_cell_type is found in the data
+  if (!reference_cell_type %in% unique(data[[feature_colname]])) {
+    stop(paste(reference_cell_type, " reference_cell_type doesn't exist in data"))
+  }
+  # Check if target_cell_type is found in the data  
+  if (!target_cell_type %in% unique(data[[feature_colname]])) {
+    stop(paste(target_cell_type, " target_cell_type doesn't exist in data"))
+  }
+  
+  
+  
   
   ## Get dimensions of the window
   length <- round(max(data$Cell.X.Position) - min(data$Cell.X.Position))
@@ -1255,36 +1284,178 @@ determine_spatial_autocorrelation <- function(data,
   d_col <- width / n_split
   d_lay <- height / n_split
   
+  ## Figure out which 'grid prism number' each cell is inside
+  data$Prism.Num <- floor(data$Cell.X.Position / d_row) +
+    floor(data$Cell.Y.Position / d_col) * n_split + 
+    floor(data$Cell.Z.Position / d_lay) * n_split^2 + 1
+  
+  ## Calculate cell_proportions for each grid prism
+  n_grid_prisms <- n_split^3
+  cell_type_list <- vector(mode = 'list', length = 2)
+  grid_prism_cell_proportions <- c()
+  
+  for (grid_prism_num in seq(n_grid_prisms)) {
+    
+    ## Get data of cells in the current grid_prism
+    data_temp <- data[data$Prism.Num == grid_prism_num, ]
+    
+    
+    ## Get cell_proportion: n_target_cells / (n_target_cells + n_reference_cells)
+    n_target_cells <- sum(data_temp[[feature_colname]] == target_cell_type)
+    n_reference_cells <- sum(data_temp[[feature_colname]] == reference_cell_type)
+    
+    ## Case when there are no target or reference cell, result is NA
+    if (n_target_cells == 0 && n_reference_cells == 0) {
+      grid_prism_cell_proportion <- NA  
+    }
+    else {
+      grid_prism_cell_proportion <- n_target_cells / (n_target_cells + n_reference_cells)
+    }
+    
+    ## Get number of cells of reference cell type and target cell type in each grid prism
+    cell_type_list[[reference_cell_type]] <- append(cell_type_list[[reference_cell_type]], 
+                                                    sum(data_temp[[feature_colname]] == reference_cell_type))
+    cell_type_list[[target_cell_type]] <- append(cell_type_list[[target_cell_type]], 
+                                                 sum(data_temp[[feature_colname]] == target_cell_type))
+    
+    grid_prism_cell_proportions <- c(grid_prism_cell_proportions, grid_prism_cell_proportion)
+    
+  }
+  
+  result <- data.frame(row.names = seq(n_grid_prisms))
+  
+  ## Add column for reference cell type and target cell type representing the number of cells in each grid prism
+  result[[reference_cell_type]] <- cell_type_list[[reference_cell_type]]
+  result[[target_cell_type]] <- cell_type_list[[target_cell_type]]
+  
+  ## Add column for total cell count for each grid prism
+  result$Total <- apply(result, 1, sum)
+  
+  ## Add cell proportion column
+  result$Proportion = grid_prism_cell_proportions
+  
+  ## Plot
+  if (plot_image) {
+    
+    # Check if size is numeric or not
+    if (!is.numeric(size)) {
+      stop(paste(size, " size is not numeric"))
+    }
+    
+    plot_data <- result
+    
+    ## Place a dot at the center of each grid prism to represent cell proportion
+    ## Use the grid prism number to figure out their location...
+    plot_data$x <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
+    plot_data$y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
+    plot_data$z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
+    
+    ## Color of each dot is related to its cell proportion
+    pal <- colorRampPalette(hcl.colors(n = 5, palette = "Red-Blue", rev = TRUE))
+    
+    
+    ## Add size column and for NA cell proportion values, make the size small
+    plot_data$size <- ifelse(is.na(plot_data$Proportion), 3, size)
+    
+    fig <- plot_ly(plot_data,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~x,
+                   y = ~y,
+                   z = ~z,
+                   color = ~Proportion,
+                   colors = pal(nrow(plot_data)),
+                   marker = list(size = ~size))
+    
+    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                       yaxis = list(title = 'y'),
+                                       zaxis = list(title = 'z')))
+    
+    print(fig)
+    
+  }
+  
+  return (result)
+}
+
+
+
+determine_prevalence3D <- function(grid_data,
+                                   metric_colname = "Entropy",
+                                   threshold,
+                                   above = TRUE) {
+  
+  ## Exclude rows with NA values
+  grid_data <- grid_data[!is.na(grid_data[[metric_colname]]), ]
+  
+  if (above) {
+    p <- sum(grid_data[[metric_colname]] >= threshold) / nrow(grid_data) * 100
+  }
+  else {
+    p <- sum(grid_data[[metric_colname]] < threshold) / nrow(grid_data) * 100    
+  }
+  
+  return (p)
+}
+
+
+
+
+determine_spatial_autocorrelation <- function(grid_data,
+                                              metric_colname = "Entropy",
+                                              weight_method = "IDW") {
+  
+  
   ## Get number of grid prisms
-  n_grid_prisms <- nrow(entropy_grid_data)
+  n_grid_prisms <- nrow(grid_data)
+  
+  ## Get splitting number (should be the cube root of n_grid_prisms)
+  n_split <- (n_grid_prisms)^(1/3)
   
   ## Find the coordinates of each grid prism
-  x <- ((seq(n_grid_prisms) - 1) %% n_split) * d_row
-  y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split)) * d_col
-  z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2))) * d_lay
+  x <- ((seq(n_grid_prisms) - 1) %% n_split)
+  y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split))
+  z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)))
   grid_prism_coords <- data.frame(x = x, y = y, z = z)
   
-  ## Use the inverse distance between two points as the weight 
+  
   weight_matrix <- -1 * apcluster::negDistMat(grid_prism_coords)
-  weight_matrix <- 1 / weight_matrix
+  ## Use the inverse distance between two points as the weight (IDW is 'inverse distance weighting')
+  if (weight_method == "IDW") {
+    weight_matrix <- 1 / weight_matrix
+  }
+  ## Use binary method: adjacent points get a weight of 1, otherwise, weight of 0
+  ## Adjacent points are within sqrt(3) units apart. e.g. (0, 0, 0) vs (1, 1, 1)
+  else if (weight_method == "Binary") {
+    weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
+  }
+  
   ## Points along the diagonal are comparing the same point so its weight is zero
   diag(weight_matrix) <- 0
   
-  entropy_mean <- mean(entropy_grid_data$Entropy)
+  data_mean <- mean(grid_data[!is.na(grid_data[[metric_colname]]), metric_colname])
   
   numerator <- 0
   denominator <- 0
   
   for (i in seq(n_grid_prisms)) {
     
+    if (is.na(grid_data[i, metric_colname])) {
+      next
+    }
+    
     for (j in seq(n_grid_prisms)) {
       
+      if (is.na(grid_data[j, metric_colname])) {
+        next
+      }
+      
       numerator <- numerator + weight_matrix[i, j] * 
-        (entropy_grid_data[i, "Entropy"] - entropy_mean) * 
-        (entropy_grid_data[j, "Entropy"] - entropy_mean)
+        (grid_data[i, metric_colname] - data_mean) * 
+        (grid_data[j, metric_colname] - data_mean)
       
     }
-    denominator <- denominator + (entropy_grid_data[i, "Entropy"] - entropy_mean)^2
+    denominator <- denominator + (grid_data[i, metric_colname] - data_mean)^2
   }
   
   
@@ -1293,7 +1464,3 @@ determine_spatial_autocorrelation <- function(data,
   return (I)
   
 }
-
-
-
-

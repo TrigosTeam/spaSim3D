@@ -67,7 +67,7 @@ neighborhood_cells_summary <- summarise_cells_in_neighborhood3D(neighborhood_cel
 Kcross_results <- calculate_Kcross3D(data,
                                      reference_cell_type = "Tumour",
                                      target_cell_type = "Immune",
-                                     distance = 35)
+                                     distance = 20)
 
 
 Kcross_intersection <- calculate_Kcross_intersection3D(Kcross_results)
@@ -89,34 +89,57 @@ entropy_result <- calculate_entropy3D(data,
                                       log_base = NULL)
 
 entropy_gradient <- calculate_entropy_gradient3D(data,
-                                                 radii = 20,
+                                                 radii = 100,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_types = c("Tumour", "Immune", "Others"))
 
 
 entropy_gradient_aggregated <- calculate_entropy_gradient_aggregated3D(data,
-                                                                       radii = 40,
+                                                                       radii = 100,
                                                                        reference_cell_type = "Tumour",
-                                                                       target_cell_types = c("Tumour", "Immune", "Others"))
+                                                                       target_cell_types = c("Tumour", "Immune"))
 
 
 ### 3. Spatial Heterogeneity metrics ------------------------------------------
 
 ### Determine entropy grid metrics
 entropy_grid_metrics <- determine_entropy_grid_metrics3D(data,
-                                                         n_split = 5,
-                                                         target_cell_types = c("Tumour", "Immune", "Others"))
+                                                         n_split = 8,
+                                                         target_cell_types = c("Tumour", "Immune", "Others"),
+                                                         size = 10,
+                                                         plot_image = TRUE)
 
 ### Determine entropy prevalence
-entropy_prevalence <- determine_entropy_prevalence3D(entropy_grid_metrics,
-                                                     threshold = 0.5)
+entropy_prevalence <- determine_prevalence3D(entropy_grid_metrics,
+                                             metric_colname = "Entropy",
+                                             threshold = 0.5)
 
 ### Determine spatial autocorrelation
-spatial_autocorrelation <- determine_spatial_autocorrelation(data,
-                                                             entropy_grid_metrics,
-                                                             5)
+entropy_spatial_autocorrelation <- determine_spatial_autocorrelation(entropy_grid_metrics,
+                                                                     metric_colname = "Entropy",
+                                                                     weight_method = "IDW")
 
 
+
+
+### Determine cell proportion grid metrics
+cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(data,
+                                                                         n_split = 10,
+                                                                         reference_cell_type = "Tumour",
+                                                                         target_cell_type = "Immune",
+                                                                         size = 10,
+                                                                         plot_image = TRUE)
+
+### Determine cell proportion prevalence
+cell_proportion_prevalence <- determine_prevalence3D(cell_proportion_grid_metrics,
+                                                     metric_colname = "Proportion",
+                                                     threshold = 0.5)
+
+
+## Determine spatial autocorrelation for cell proportions
+cell_proportion_spatial_autocorrelation <- determine_spatial_autocorrelation(cell_proportion_grid_metrics,
+                                                                             metric_colname = "Proportion",
+                                                                             weight_method = "Binary")
 
 
 ### 4. Margin of structure metrics --------------------------------------------
@@ -125,3 +148,21 @@ spatial_autocorrelation <- determine_spatial_autocorrelation(data,
 
 
 ### 5. Presence of cluster metrics --------------------------------------------
+ANNI_result <- average_nearest_neighbor_index3D(data,
+                                                cell_types_of_interest = c("Tumour", "Immune"),
+                                                n_simulations = 10)
+
+library(ggplot2)
+df <- data.frame(x = 0,
+                 y = ANNI_result$ANNI_mean,
+                 low = ANNI_result$ANNI_95confidence_interval[1],
+                 up = ANNI_result$ANNI_95confidence_interval[2])
+
+ggplot(df, aes(x, y)) + geom_point() + geom_errorbar(aes(ymin = low, ymax = up))
+
+
+
+### 6. Plot data -------------------------------------------------------------
+plot_cell_categories3D(data,
+                       cell_types_of_interest = c("Tumour", "Immune", "Others"),
+                       colour_vector = c("orange", "skyblue", "lightgray"))
