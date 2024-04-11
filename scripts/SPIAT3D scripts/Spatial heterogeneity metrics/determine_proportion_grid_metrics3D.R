@@ -1,7 +1,7 @@
 determine_cell_proportion_grid_metrics3D <- function(data, 
                                                      n_split,
-                                                     reference_cell_type,
-                                                     target_cell_type,
+                                                     reference_cell_types,
+                                                     target_cell_types,
                                                      feature_colname = "Cell.Type",
                                                      size = NULL,
                                                      plot_image = TRUE) {
@@ -25,13 +25,21 @@ determine_cell_proportion_grid_metrics3D <- function(data,
     stop(paste(n_split, " n_split is not of type 'numeric'"))
   }
   
-  # Check if reference_cell_type is found in the data
-  if (!reference_cell_type %in% unique(data[[feature_colname]])) {
-    stop(paste(reference_cell_type, " reference_cell_type doesn't exist in data"))
+  # Check if reference_cell_types has cells not found in the data
+  incorrect_cell_types <- setdiff(reference_cell_types, unique(data[[feature_colname]]))
+  if (length(incorrect_cell_types) > 0) {
+    stop(paste(paste(incorrect_cell_types, collapse = ', '),
+               "in reference_cell_types don't existin data."))
   }
-  # Check if target_cell_type is found in the data  
-  if (!target_cell_type %in% unique(data[[feature_colname]])) {
-    stop(paste(target_cell_type, " target_cell_type doesn't exist in data"))
+  # Check if target_cell_types has cells not found in the data
+  incorrect_cell_types <- setdiff(target_cell_types, unique(data[[feature_colname]]))
+  if (length(incorrect_cell_types) > 0) {
+    stop(paste(paste(incorrect_cell_types, collapse = ', '),
+               "in target_cell_types don't exist in data."))
+  }
+  # Check if there is intersection between reference_cell_types and target_cell_types
+  if (length(intersect(reference_cell_types, target_cell_types)) > 0) {
+    stop("Cannot have same cells in both reference_cell_types and target_cell_types")
   }
   
   
@@ -54,7 +62,8 @@ determine_cell_proportion_grid_metrics3D <- function(data,
   
   ## Calculate cell_proportions for each grid prism
   n_grid_prisms <- n_split^3
-  cell_type_list <- vector(mode = 'list', length = 2)
+  n_reference_cells_vec <- c()
+  n_target_cells_vec <- c()
   grid_prism_cell_proportions <- c()
   
   for (grid_prism_num in seq(n_grid_prisms)) {
@@ -62,10 +71,9 @@ determine_cell_proportion_grid_metrics3D <- function(data,
     ## Get data of cells in the current grid_prism
     data_temp <- data[data$Prism.Num == grid_prism_num, ]
     
-    
     ## Get cell_proportion: n_target_cells / (n_target_cells + n_reference_cells)
-    n_target_cells <- sum(data_temp[[feature_colname]] == target_cell_type)
-    n_reference_cells <- sum(data_temp[[feature_colname]] == reference_cell_type)
+    n_target_cells <- sum(data_temp[[feature_colname]] %in% target_cell_types)
+    n_reference_cells <- sum(data_temp[[feature_colname]] %in% reference_cell_types)
     
     ## Case when there are no target or reference cell, result is NA
     if (n_target_cells == 0 && n_reference_cells == 0) {
@@ -75,11 +83,8 @@ determine_cell_proportion_grid_metrics3D <- function(data,
       grid_prism_cell_proportion <- n_target_cells / (n_target_cells + n_reference_cells)
     }
     
-    ## Get number of cells of reference cell type and target cell type in each grid prism
-    cell_type_list[[reference_cell_type]] <- append(cell_type_list[[reference_cell_type]], 
-                                                 sum(data_temp[[feature_colname]] == reference_cell_type))
-    cell_type_list[[target_cell_type]] <- append(cell_type_list[[target_cell_type]], 
-                                                 sum(data_temp[[feature_colname]] == target_cell_type))
+    n_reference_cells_vec <- c(n_reference_cells_vec, n_reference_cells)
+    n_target_cells_vec <- c(n_target_cells_vec, n_target_cells)
     
     grid_prism_cell_proportions <- c(grid_prism_cell_proportions, grid_prism_cell_proportion)
     
@@ -88,8 +93,8 @@ determine_cell_proportion_grid_metrics3D <- function(data,
   result <- data.frame(row.names = seq(n_grid_prisms))
   
   ## Add column for reference cell type and target cell type representing the number of cells in each grid prism
-  result[[reference_cell_type]] <- cell_type_list[[reference_cell_type]]
-  result[[target_cell_type]] <- cell_type_list[[target_cell_type]]
+  result[["reference"]] <- n_reference_cells_vec
+  result[["target"]] <- n_target_cells_vec
   
   ## Add column for total cell count for each grid prism
   result$Total <- apply(result, 1, sum)
