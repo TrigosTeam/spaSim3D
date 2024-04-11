@@ -6,14 +6,14 @@ average_nearest_neighbor_index3D <- function(data,
   
   
   ## Subset for cell types of interest
-  data <- data[which(data[, feature_colname] %in% cell_types_of_interest), ]
+  cells_data <- data[data[[feature_colname]] %in% cell_types_of_interest, ]
   
   ## Assume all cell types of interest are the same
   ## Aiming to find the nearest neighbor for each cell, disregarding cell type
-  data[feature_colname] <- "temp"
+  cells_data[feature_colname] <- "temp"
   
   ## Calculate nearest neighbor and minimum distance for each cell
-  nearest_neighbor_data <- calculate_minimum_distances_between_cell_types3D(data,
+  nearest_neighbor_data <- calculate_minimum_distances_between_cell_types3D(cells_data,
                                                                             "temp",
                                                                             feature_colname)
   
@@ -30,24 +30,33 @@ average_nearest_neighbor_index3D <- function(data,
   width  <- round(max(data$Cell.Y.Position) - min(data$Cell.Y.Position))
   height <- round(max(data$Cell.Z.Position) - min(data$Cell.Z.Position))
   
-  # Need to think about the min_d parameter
+  
+  ## Assume minimum distance between cell_types is the absolute minimum of nearest_neighbor_data
+  min_d <- min(nearest_neighbor_data$Distance)
+  
   for (i in 1:n_simulations) {
+    ## Get background cells
     simulation <- simulate_background_cells3D(n_cells = nrow(data),
                                               length = length,
                                               width  = width,
                                               height = height,
                                               method = "tumour",
-                                              min_d = 2,
-                                              oversampling_rate = 1,
-                                              jitter_prop = 0,
-                                              cell_type = "Others",
+                                              min_d = min_d,
                                               plot_image = F)
+    
+    ## Determine proportion of cell_types_of_interest in original data and apply mixing
+    proportion <- nrow(cells_data) / n_cells
+    
+    simulation <- simulate_mixing3D(simulation,
+                                    cell_types = c("temp", "Others"),
+                                    props = c(proportion, 1 - proportion),
+                                    plot_image = F)
     
     ## Adding Cell.ID column
     simulation$Cell.ID <- (paste("Cell_", seq(nrow(simulation)), sep="")) 
     
     simulation_nearest_neighbor_data <- calculate_minimum_distances_between_cell_types3D(simulation,
-                                                                                         "Others",
+                                                                                         "temp",
                                                                                          "Cell.Type")
     
     expected_average_distances <- c(expected_average_distances, 
@@ -59,8 +68,8 @@ average_nearest_neighbor_index3D <- function(data,
   position <- which(expected_average_distances >= observed_average_distance)[1]
   
   ## Calculate p_value
-  p_value <- ifelse(position < n_simulations/2, 
-                    position/n_simulations, (n_simulations-position)/n_simulations)
+  p_value <- ifelse(position <= n_simulations / 2, 
+                    position/n_simulations, (n_simulations - position)/n_simulations)
   
   
   ## Calculate average nearest neighbor index for each expected_average_distance simulated
