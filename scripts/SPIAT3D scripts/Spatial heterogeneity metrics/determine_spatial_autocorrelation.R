@@ -1,47 +1,58 @@
-determine_spatial_autocorrelation <- function(data,
-                                              entropy_grid_data, 
-                                              n_split) {
+determine_spatial_autocorrelation <- function(grid_data,
+                                              metric_colname = "Entropy",
+                                              weight_method = "IDW") {
   
-  ## Get dimensions of the window
-  length <- round(max(data$Cell.X.Position) - min(data$Cell.X.Position))
-  width  <- round(max(data$Cell.Y.Position) - min(data$Cell.Y.Position))
-  height <- round(max(data$Cell.Z.Position) - min(data$Cell.Z.Position))
-  
-  ## Get distance of row, col and lay
-  d_row <- length / n_split
-  d_col <- width / n_split
-  d_lay <- height / n_split
   
   ## Get number of grid prisms
-  n_grid_prisms <- nrow(entropy_grid_data)
+  n_grid_prisms <- nrow(grid_data)
+  
+  ## Get splitting number (should be the cube root of n_grid_prisms)
+  n_split <- (n_grid_prisms)^(1/3)
   
   ## Find the coordinates of each grid prism
-  x <- ((seq(n_grid_prisms) - 1) %% n_split) * d_row
-  y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split)) * d_col
-  z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2))) * d_lay
+  x <- ((seq(n_grid_prisms) - 1) %% n_split)
+  y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split))
+  z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)))
   grid_prism_coords <- data.frame(x = x, y = y, z = z)
   
-  ## Use the inverse distance between two points as the weight 
+  
   weight_matrix <- -1 * apcluster::negDistMat(grid_prism_coords)
-  weight_matrix <- 1 / weight_matrix
+  ## Use the inverse distance between two points as the weight (IDW is 'inverse distance weighting')
+  if (weight_method == "IDW") {
+    weight_matrix <- 1 / weight_matrix
+  }
+  ## Use binary method: adjacent points get a weight of 1, otherwise, weight of 0
+  ## Adjacent points are within sqrt(3) units apart. e.g. (0, 0, 0) vs (1, 1, 1)
+  else if (weight_method == "Binary") {
+    weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
+  }
+  
   ## Points along the diagonal are comparing the same point so its weight is zero
   diag(weight_matrix) <- 0
   
-  entropy_mean <- mean(entropy_grid_data$Entropy)
+  data_mean <- mean(grid_data[!is.na(grid_data[[metric_colname]]), metric_colname])
   
   numerator <- 0
   denominator <- 0
   
   for (i in seq(n_grid_prisms)) {
     
+    if (is.na(grid_data[i, metric_colname])) {
+      next
+    }
+    
     for (j in seq(n_grid_prisms)) {
       
+      if (is.na(grid_data[j, metric_colname])) {
+        next
+      }
+      
       numerator <- numerator + weight_matrix[i, j] * 
-                              (entropy_grid_data[i, "Entropy"] - entropy_mean) * 
-                              (entropy_grid_data[j, "Entropy"] - entropy_mean)
+                              (grid_data[i, metric_colname] - data_mean) * 
+                              (grid_data[j, metric_colname] - data_mean)
       
     }
-    denominator <- denominator + (entropy_grid_data[i, "Entropy"] - entropy_mean)^2
+    denominator <- denominator + (grid_data[i, metric_colname] - data_mean)^2
   }
   
   
