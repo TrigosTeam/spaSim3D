@@ -572,6 +572,47 @@ calculate_mixing_scores3D <- function(data,
 }
 
 
+
+calculate_mixing_scores_gradient3D <- function(data, 
+                                               reference_cell_type, 
+                                               target_cell_type, 
+                                               radii = 20, 
+                                               feature_colname = "Cell.Type",
+                                               plot_image = TRUE) {
+  
+  
+  df <- data.frame(matrix(nrow = radii, ncol = 8))
+  df.cols <- c("Reference", 
+               "Target", 
+               "Number_of_reference_cells",
+               "Number_of_target_cells", 
+               "Reference_target_interaction",
+               "Reference_reference_interaction", 
+               "Mixing_score", 
+               "Normalised_mixing_score")
+  colnames(df) <- df.cols
+  
+  for (radius in seq(radii)) {
+    mixing_scores <- calculate_mixing_scores3D(data,
+                                               reference_cell_type,
+                                               target_cell_type,
+                                               radius,
+                                               feature_colname)
+    
+    df[radius, ] <- mixing_scores
+  }
+  
+  
+  if (plot_image) {
+    plot(seq(radii), df[["Normalised_mixing_score"]], type = "l", xlab = "Radius", ylab = "Normalised Mixing Score")
+    abline(a = 1, b = 0, col = "red", lwd = 2, lty = 2)
+  }
+  
+  return (df)
+}
+
+
+
 calculate_cells_in_neighborhood3D <- function(data, 
                                               reference_cell_types, 
                                               target_cell_types, 
@@ -646,6 +687,48 @@ calculate_cells_in_neighborhood3D <- function(data,
   }
   
   return (result)
+}
+
+
+
+## For scales parameter, use "free_x" or "free". "free_y" looks silly
+plot_cells_in_neighborhood_violin3D <- function(cells_in_neighborhood, scales = "free_x") {
+  
+  df <- data.frame(matrix(nrow = 0, ncol = 3))
+  colnames(df) <- c("Target", "Count", "Reference")
+  
+  for (i in seq(length(cells_in_neighborhood))) {
+    
+    # Get reference cell type for current index
+    reference_cell_type <- names(cells_in_neighborhood)[i]
+    
+    # Get data for current index
+    cells_in_neighborhood_df <- cells_in_neighborhood[[i]]
+    
+    # Get columns which contain cell count data (4th column onwards)
+    cells_in_neighborhood_df <- cells_in_neighborhood_df[ , 4:ncol(cells_in_neighborhood_df)]
+    
+    # Melt
+    cells_in_neighborhood_df <- reshape2::melt(cells_in_neighborhood_df, id.vars = 0)
+    colnames(cells_in_neighborhood_df) <- c("Target", "Count")
+    
+    # Add reference cell type column
+    cells_in_neighborhood_df$Reference <- reference_cell_type
+    
+    # Add result to main df
+    df <- rbind(df, cells_in_neighborhood_df)
+    
+  }
+  
+  
+  # setting these variables to NULL as otherwise get "no visible binding for global variable" in R check
+  Reference <- Count <- Target <- NULL
+  
+  ggplot(df, aes(x = Reference, y = Count, fill = Target)) + geom_violin() +
+    facet_wrap(~Reference, scales=scales) +
+    theme_bw() +
+    theme(axis.text.x=element_blank())
+  
 }
 
 
@@ -813,7 +896,8 @@ calculate_Kcross_intersection3D <- function(Kcross_df) {
   observed_goes_below_indices <- which(change_of_sign == -2)
   
   if (length(observed_goes_above_indices) + length(observed_goes_below_indices) == 0) {
-    stop("No cross-K intersections occur")
+    warning("No cross-K intersections occur")
+    return (0)
   }
   
   above_distance <- c()
@@ -1212,6 +1296,9 @@ determine_entropy_grid_metrics3D <- function(data,
     ## Color of each dot is related to its entropy
     pal <- colorRampPalette(hcl.colors(n = 5, palette = "Terrain", rev = TRUE))
     
+    ## Add size column and for 0 cell proportion values, make the size small
+    plot_data$size <- ifelse(plot_data$Entropy == 0, 5, size)
+    
     fig <- plot_ly(plot_data,
                    type = "scatter3d",
                    mode = 'markers',
@@ -1220,7 +1307,7 @@ determine_entropy_grid_metrics3D <- function(data,
                    z = ~z,
                    color = ~Entropy,
                    colors = pal(nrow(plot_data)),
-                   marker = list(size = size))
+                   marker = list(size = ~size))
     
     fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
                                        yaxis = list(title = 'y'),
@@ -1237,8 +1324,8 @@ determine_entropy_grid_metrics3D <- function(data,
 
 determine_cell_proportion_grid_metrics3D <- function(data, 
                                                      n_split,
-                                                     reference_cell_type,
-                                                     target_cell_type,
+                                                     reference_cell_types,
+                                                     target_cell_types,
                                                      feature_colname = "Cell.Type",
                                                      size = NULL,
                                                      plot_image = TRUE) {
@@ -1262,13 +1349,21 @@ determine_cell_proportion_grid_metrics3D <- function(data,
     stop(paste(n_split, " n_split is not of type 'numeric'"))
   }
   
-  # Check if reference_cell_type is found in the data
-  if (!reference_cell_type %in% unique(data[[feature_colname]])) {
-    stop(paste(reference_cell_type, " reference_cell_type doesn't exist in data"))
+  # Check if reference_cell_types has cells not found in the data
+  incorrect_cell_types <- setdiff(reference_cell_types, unique(data[[feature_colname]]))
+  if (length(incorrect_cell_types) > 0) {
+    stop(paste(paste(incorrect_cell_types, collapse = ', '),
+               "in reference_cell_types don't existin data."))
   }
-  # Check if target_cell_type is found in the data  
-  if (!target_cell_type %in% unique(data[[feature_colname]])) {
-    stop(paste(target_cell_type, " target_cell_type doesn't exist in data"))
+  # Check if target_cell_types has cells not found in the data
+  incorrect_cell_types <- setdiff(target_cell_types, unique(data[[feature_colname]]))
+  if (length(incorrect_cell_types) > 0) {
+    stop(paste(paste(incorrect_cell_types, collapse = ', '),
+               "in target_cell_types don't exist in data."))
+  }
+  # Check if there is intersection between reference_cell_types and target_cell_types
+  if (length(intersect(reference_cell_types, target_cell_types)) > 0) {
+    stop("Cannot have same cells in both reference_cell_types and target_cell_types")
   }
   
   
@@ -1291,7 +1386,8 @@ determine_cell_proportion_grid_metrics3D <- function(data,
   
   ## Calculate cell_proportions for each grid prism
   n_grid_prisms <- n_split^3
-  cell_type_list <- vector(mode = 'list', length = 2)
+  n_reference_cells_vec <- c()
+  n_target_cells_vec <- c()
   grid_prism_cell_proportions <- c()
   
   for (grid_prism_num in seq(n_grid_prisms)) {
@@ -1299,10 +1395,9 @@ determine_cell_proportion_grid_metrics3D <- function(data,
     ## Get data of cells in the current grid_prism
     data_temp <- data[data$Prism.Num == grid_prism_num, ]
     
-    
     ## Get cell_proportion: n_target_cells / (n_target_cells + n_reference_cells)
-    n_target_cells <- sum(data_temp[[feature_colname]] == target_cell_type)
-    n_reference_cells <- sum(data_temp[[feature_colname]] == reference_cell_type)
+    n_target_cells <- sum(data_temp[[feature_colname]] %in% target_cell_types)
+    n_reference_cells <- sum(data_temp[[feature_colname]] %in% reference_cell_types)
     
     ## Case when there are no target or reference cell, result is NA
     if (n_target_cells == 0 && n_reference_cells == 0) {
@@ -1312,11 +1407,8 @@ determine_cell_proportion_grid_metrics3D <- function(data,
       grid_prism_cell_proportion <- n_target_cells / (n_target_cells + n_reference_cells)
     }
     
-    ## Get number of cells of reference cell type and target cell type in each grid prism
-    cell_type_list[[reference_cell_type]] <- append(cell_type_list[[reference_cell_type]], 
-                                                    sum(data_temp[[feature_colname]] == reference_cell_type))
-    cell_type_list[[target_cell_type]] <- append(cell_type_list[[target_cell_type]], 
-                                                 sum(data_temp[[feature_colname]] == target_cell_type))
+    n_reference_cells_vec <- c(n_reference_cells_vec, n_reference_cells)
+    n_target_cells_vec <- c(n_target_cells_vec, n_target_cells)
     
     grid_prism_cell_proportions <- c(grid_prism_cell_proportions, grid_prism_cell_proportion)
     
@@ -1325,8 +1417,8 @@ determine_cell_proportion_grid_metrics3D <- function(data,
   result <- data.frame(row.names = seq(n_grid_prisms))
   
   ## Add column for reference cell type and target cell type representing the number of cells in each grid prism
-  result[[reference_cell_type]] <- cell_type_list[[reference_cell_type]]
-  result[[target_cell_type]] <- cell_type_list[[target_cell_type]]
+  result[["Reference"]] <- n_reference_cells_vec
+  result[["Target"]] <- n_target_cells_vec
   
   ## Add column for total cell count for each grid prism
   result$Total <- apply(result, 1, sum)
@@ -1380,6 +1472,7 @@ determine_cell_proportion_grid_metrics3D <- function(data,
 
 
 
+
 determine_prevalence3D <- function(grid_data,
                                    metric_colname = "Entropy",
                                    threshold,
@@ -1428,6 +1521,9 @@ determine_spatial_autocorrelation <- function(grid_data,
   ## Adjacent points are within sqrt(3) units apart. e.g. (0, 0, 0) vs (1, 1, 1)
   else if (weight_method == "Binary") {
     weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
+  }
+  else {
+    stop(paste(weight_method, " weight_method is not an appropriate method"))
   }
   
   ## Points along the diagonal are comparing the same point so its weight is zero
