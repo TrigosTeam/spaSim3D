@@ -93,8 +93,8 @@ determine_cell_proportion_grid_metrics3D <- function(data,
   result <- data.frame(row.names = seq(n_grid_prisms))
   
   ## Add column for reference cell type and target cell type representing the number of cells in each grid prism
-  result[["reference"]] <- n_reference_cells_vec
-  result[["target"]] <- n_target_cells_vec
+  result[["Reference"]] <- n_reference_cells_vec
+  result[["Target"]] <- n_target_cells_vec
   
   ## Add column for total cell count for each grid prism
   result$Total <- apply(result, 1, sum)
