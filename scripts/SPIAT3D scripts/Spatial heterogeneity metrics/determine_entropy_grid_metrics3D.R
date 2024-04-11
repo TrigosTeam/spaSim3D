@@ -107,7 +107,7 @@ determine_entropy_grid_metrics3D <- function(data,
     pal <- colorRampPalette(hcl.colors(n = 5, palette = "Red-Blue", rev = TRUE))
     
     ## Add size column and for 0 cell proportion values, make the size small
-    plot_data$size <- ifelse(plot_data$Entropy == 0, 3, size)
+    plot_data$size <- ifelse(plot_data$Entropy == 0, 5, size)
     
     fig <- plot_ly(plot_data,
                    type = "scatter3d",
