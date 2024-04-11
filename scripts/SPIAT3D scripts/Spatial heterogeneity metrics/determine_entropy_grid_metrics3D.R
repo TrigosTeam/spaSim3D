@@ -2,6 +2,7 @@ determine_entropy_grid_metrics3D <- function(data,
                                              n_split,
                                              target_cell_types,
                                              feature_colname = "Cell.Type",
+                                             size = NULL,
                                              plot_image = TRUE) {
   
   # If the columns are not correct, give error
@@ -62,11 +63,11 @@ determine_entropy_grid_metrics3D <- function(data,
     grid_prism_entropy <- calculate_entropy3D(data_temp,
                                               target_cell_types = temp_target_cell_types,
                                               log_base = length(target_cell_types))
-
+    
     ## Get number of cells of each target cell type in each grid prism
     for (target_cell_type in target_cell_types) {
       cell_type_list[[target_cell_type]] <- append(cell_type_list[[target_cell_type]], 
-                                                   sum(data_temp$Cell.Type == target_cell_type))
+                                                   sum(data_temp[[feature_colname]] == target_cell_type))
     }
     
     grid_prism_entropies <- c(grid_prism_entropies, grid_prism_entropy)
@@ -88,7 +89,12 @@ determine_entropy_grid_metrics3D <- function(data,
   
   ## Plot
   if (plot_image) {
-
+    
+    # Check if size is numeric or not
+    if (!is.numeric(size)) {
+      stop(paste(size, " size is not numeric"))
+    }
+    
     plot_data <- result
     
     ## Place a dot at the center of each grid prism to represent entropy
@@ -98,7 +104,10 @@ determine_entropy_grid_metrics3D <- function(data,
     plot_data$z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
     
     ## Color of each dot is related to its entropy
-    pal <- colorRampPalette(hcl.colors(n = 5, palette = "Terrain", rev = TRUE))
+    pal <- colorRampPalette(hcl.colors(n = 5, palette = "Red-Blue", rev = TRUE))
+    
+    ## Add size column and for 0 cell proportion values, make the size small
+    plot_data$size <- ifelse(plot_data$Entropy == 0, 3, size)
     
     fig <- plot_ly(plot_data,
                    type = "scatter3d",
@@ -108,7 +117,7 @@ determine_entropy_grid_metrics3D <- function(data,
                    z = ~z,
                    color = ~Entropy,
                    colors = pal(nrow(plot_data)),
-                   marker = list(size = 8))
+                   marker = list(size = ~size))
     
     fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
                                        yaxis = list(title = 'y'),
@@ -117,6 +126,6 @@ determine_entropy_grid_metrics3D <- function(data,
     print(fig)
     
   }
-
+  
   return (result)
 }
