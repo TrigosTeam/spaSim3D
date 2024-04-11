@@ -10,7 +10,8 @@ calculate_Kcross_intersection3D <- function(Kcross_df) {
   observed_goes_below_indices <- which(change_of_sign == -2)
   
   if (length(observed_goes_above_indices) + length(observed_goes_below_indices) == 0) {
-    stop("No cross-K intersections occur")
+    warning("No cross-K intersections occur")
+    return (0)
   }
 
   above_distance <- c()
