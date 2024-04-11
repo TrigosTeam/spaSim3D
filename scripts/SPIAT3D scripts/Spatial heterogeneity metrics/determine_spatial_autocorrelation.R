@@ -26,6 +26,9 @@ determine_spatial_autocorrelation <- function(grid_data,
   else if (weight_method == "Binary") {
     weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
   }
+  else {
+    stop(paste(weight_method, " weight_method is not an appropriate method"))
+  }
   
   ## Points along the diagonal are comparing the same point so its weight is zero
   diag(weight_matrix) <- 0
