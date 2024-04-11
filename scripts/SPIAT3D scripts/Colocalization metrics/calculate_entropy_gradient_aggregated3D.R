@@ -35,12 +35,12 @@ calculate_entropy_gradient_aggregated3D <- function(data,
   rownames(result) <- names(entropy_gradient_data)
   
   ## Get entropies for each element in the data frame
-  result_entropies <- result / result$Total
+  result_entropies <- result / result$Total # Make cell count values into cell proportion values
   result_entropies <- -1 * result_entropies  * log(result_entropies, length(target_cell_types))
+  result_entropies <- apply(result_entropies, 2, function(x) replace(x, is.nan(x), 0))
   
   ## Calculate total entropy for each row in result data frame
   result$Entropy <- apply(result_entropies, 1, sum)
-  result$Entropy <- replace(result$Entropy, is.nan(result$Entropy), 0)
   
   # Plot
   if (plot_image) {
@@ -50,4 +50,5 @@ calculate_entropy_gradient_aggregated3D <- function(data,
   return (result)
     
 }
+
 
