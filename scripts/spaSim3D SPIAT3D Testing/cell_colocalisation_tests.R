@@ -195,7 +195,7 @@ setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/
 bg_clusters <- readRDS(file="bg_clusters.rda")
 
 
-### Using SPIAT3D -------------------------------------------------------------
+### Using SPIAT3D for basic metrics ------------------------------------------
 metrics_list <- vector(mode = "list", length = 7)
 names(metrics_list) <- c("APD", "AMD", "MS", "NMS", "CKI", "CKAUC", "CIN")
 
@@ -264,8 +264,7 @@ metrics_list$MS <- as.numeric(metrics_list$MS)
 metrics_list$NMS <- as.numeric(metrics_list$NMS)
 
 
-
-### Plotting -----------------------------------------------------------------
+### Plotting 
 library(ggplot2)
 
 result <- reshape2::melt(metrics_list)
@@ -279,3 +278,100 @@ ggplot(result, aes(Cluster_number, Value)) +
   geom_point() +
   facet_wrap(~ Metric, nrow = 7, scales = "free_y") +
   scale_x_continuous("Cluster Number", breaks = 1:7)
+
+
+### Using SPIAT3D for gradient metrics ---------------------------------------
+
+gradient_metrics_list <- vector(mode = "list", length = 3)
+names(gradient_metrics_list) <- c("MSG", "CKG", "EGA")
+
+radii <- 50
+gradient_metrics_list[["MSG"]] <- data.frame(matrix(nrow = 0, ncol = radii))
+
+
+for (cluster_data in bg_clusters) {
+ 
+  ## Get mixing score gradient
+  MSG_data <- calculate_mixing_scores_gradient3D(cluster_data,
+                                                 reference_cell_type = "Immune",
+                                                 target_cell_type = "Tumour",
+                                                 radii = radii,
+                                                 plot_image = F)
+  MSG_data <- MSG_data$Normalised_mixing_score
+  gradient_metrics_list[["MSG"]] <- rbind(gradient_metrics_list[["MSG"]], MSG_data)
+  
+}
+
+colnames(gradient_metrics_list[["MSG"]]) <- seq(radii)
+
+
+
+## Graph Mixing score gradient
+df <- t(gradient_metrics_list[["MSG"]])
+df <- reshape2::melt(df)
+colnames(df) <- c("Radius", "Cluster_number", "Value")
+df$Value <- as.numeric(df$Value)
+
+ggplot(df, aes(Radius, Value)) +
+  geom_line(color = "blue") +
+  geom_hline(yintercept=1, linetype="dashed", color = "red") +
+  facet_wrap(~ Cluster_number, nrow = 7, scales = "free_y") +
+  scale_x_continuous("Radius", breaks = 1:radii, labels = NULL)
+
+
+
+
+gradient_metrics_list[["EGA"]] <- data.frame(matrix(nrow = 0, ncol = radii))
+
+
+for (cluster_data in bg_clusters) {
+  
+  ## Get Entropy gradient aggregated
+  EGA_data <- calculate_entropy_gradient_aggregated3D(cluster_data,
+                                                      radii = radii,
+                                                      reference_cell_type = "Tumour",
+                                                      target_cell_types = c("Tumour", "Immune"), #Need both
+                                                      plot_image = FALSE)
+  EGA_data <- EGA_data$Entropy
+  gradient_metrics_list[["EGA"]] <- rbind(gradient_metrics_list[["EGA"]], EGA_data)  
+}
+
+colnames(gradient_metrics_list[["EGA"]]) <- seq(radii)
+
+
+## Graph Entropy gradient aggregated
+df <- t(gradient_metrics_list[["EGA"]])
+df <- reshape2::melt(df)
+colnames(df) <- c("Radius", "Cluster_number", "Value")
+df$Value <- as.numeric(df$Value)
+
+ggplot(df, aes(Radius, Value)) +
+  geom_line(color = "blue") +
+  geom_hline(yintercept=1, linetype="dashed", color = "red") +
+  facet_wrap(~ Cluster_number, nrow = 7, scales = "free_y") +
+  scale_x_continuous("Radius", breaks = 1:radii, labels = NULL)
+
+
+
+
+
+
+gradient_metrics_list[["CKG"]] <- list()
+radii <- 30
+i <- 1
+for (cluster_data in bg_clusters) {
+  
+  # Get Cross-K gradient
+  CKG_data <- calculate_Kcross3D(cluster_data,
+                                 reference_cell_type = reference_cell_type,
+                                 target_cell_type = target_cell_type,
+                                 distance = radii,
+                                 plot_results = F)
+
+  gradient_metrics_list[["CKG"]][[i]] <- CKG_data
+  i <- i + 1
+  
+}
+
+
+
