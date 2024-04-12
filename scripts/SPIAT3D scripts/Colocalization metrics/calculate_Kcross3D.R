@@ -90,7 +90,7 @@ calculate_Kcross3D <- function(data,
   
   # Calculate observed cross-k value for a sequence of distances
   # i.e. the number of ref-target distances less than the chosen distance
-  distances <- seq(1, distance, 0.25)
+  distances <- seq(distance)
   observed_k <- unlist(lapply(distances, function(x) sum(reference_target_distances < x)))
   
   # Get volume of the window the cells are in
