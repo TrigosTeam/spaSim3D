@@ -29,7 +29,7 @@ plot_cell_distances_violin3D(pairwise_distances,
 pairwise_distances_summary <- summarise_distances_between_cell_types3D(pairwise_distances)
 
 plot_cell_distances_summary_heatmap3D(pairwise_distances_summary,
-                                      metric = "Mean")
+                                      metric = "Std.Dev")
 
 
 ### Calculate Minimum Distances between cells
@@ -55,7 +55,7 @@ mixing_scores <- calculate_mixing_scores3D(data,
 mixing_scores_gradient <- calculate_mixing_scores_gradient3D(data,
                                                              reference_cell_type = "Immune",
                                                              target_cell_type = "Tumour",
-                                                             radii = 100)
+                                                             radii = 20)
 
 
 ### Calculate Cells in the Neighborhood
@@ -106,7 +106,7 @@ entropy_gradient <- calculate_entropy_gradient3D(data,
 entropy_gradient_aggregated <- calculate_entropy_gradient_aggregated3D(data,
                                                                        radii = 100,
                                                                        reference_cell_type = "Tumour",
-                                                                       target_cell_types = c("Tumour", "Immune", "Others"))
+                                                                       target_cell_types = c("Tumour", "Immune"))
 
 
 ### 3. Spatial Heterogeneity metrics ------------------------------------------
@@ -134,9 +134,9 @@ print(entropy_spatial_autocorrelation)
 
 ### Determine cell proportion grid metrics
 cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(data,
-                                                                         n_split = 10,
-                                                                         reference_cell_types = c("Tumour"),
-                                                                         target_cell_types = c("Immune"),
+                                                                         n_split = 8,
+                                                                         reference_cell_types = c("Immune"),
+                                                                         target_cell_types = c("Tumour"),
                                                                          size = 10,
                                                                          plot_image = TRUE)
 
