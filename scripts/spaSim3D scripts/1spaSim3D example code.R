@@ -161,6 +161,31 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
 
 
 
+
+###-------------------------------------------------------------------------###
+### Network
+###-------------------------------------------------------------------------###
+bg_network <- simulate_clusters3D(bg,
+                                  n_clusters = 1,
+                                  cluster_properties = list(
+                                    C1 = list(
+                                      shape = "Network",
+                                      n_edges = 15,
+                                      name_of_cluster_cell = "Immune1",
+                                      infiltration_types = c("Immune2", "Immune3"),
+                                      infiltration_proportions = c(0.10, 0.05),
+                                      width = 8,
+                                      centre_loc = c(50, 50, 50), # Rough centre of network cluster
+                                      radius = 50 # Rough radius spanned by the network cluster
+                                    )
+                                  ),
+                                  plot_image = TRUE,
+                                  plot_categories = c("Others", "Immune1", "Immune2", "Immune3"),
+                                  plot_colours = c("lightgray", "skyblue", "green", "tomato"))
+
+
+
+
 ###-------------------------------------------------------------------------###
 ### Ring
 ###-------------------------------------------------------------------------###
@@ -238,6 +263,34 @@ bg_cylinder_ring <- simulate_rings3D(bg_sample = bg,
                                   plot_image = TRUE,
                                   plot_categories = c("Others", "Endothelial"),
                                   plot_colours = c("lightgray", "red"))
+
+
+
+
+###-------------------------------------------------------------------------###
+### Network with ring
+###-------------------------------------------------------------------------###
+bg_network <- simulate_rings3D(bg,
+                               n_ring = 1,
+                               ring_properties = list(
+                                 R1 = list(
+                                   shape = "Network",
+                                   n_edges = 15,
+                                   name_of_cluster_cell = "Immune1",
+                                   infiltration_types = NULL,
+                                   infiltration_proportions = NULL,
+                                   width = 8,
+                                   centre_loc = c(50, 50, 50), # Rough centre of network cluster
+                                   radius = 50, # Rough radius spanned by the network cluster
+                                   name_of_ring_cell = "Immune2",
+                                   ring_width = 2,
+                                   ring_infiltration_types = NULL,
+                                   ring_infiltration_proportions = NULL
+                                 )
+                               ),
+                               plot_image = TRUE,
+                               plot_categories = c("Others", "Immune1", "Immune2"),
+                               plot_colours = c("lightgray", "skyblue", "green"))
 
 
 
