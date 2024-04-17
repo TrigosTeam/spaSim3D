@@ -75,13 +75,14 @@ neighborhood_cells_summary <- summarise_cells_in_neighborhood3D(neighborhood_cel
 Kcross_results <- calculate_Kcross3D(data,
                                      reference_cell_type = "Immune",
                                      target_cell_type = "Tumour",
-                                     distance = 40)
+                                     distance = 60)
 
 
 Kcross_intersection <- calculate_Kcross_intersection3D(Kcross_results)
 
 Kcross_AUC <- calculate_AUC_of_Kcross3D(Kcross_results)
 print(Kcross_AUC)
+
 
 ### Calculate entropy
 entropy_entire_image <- calculate_entropy3D(data,
