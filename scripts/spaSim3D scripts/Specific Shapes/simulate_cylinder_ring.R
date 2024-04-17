@@ -1,6 +1,6 @@
 simulate_cylinder_ring <- function(bg_sample, ring_properties) {
   
-  # Get sphere immune ring properties
+  # Get cylinder ring properties
   cell_type <- ring_properties$name_of_cluster_cell
   infiltration_types <- ring_properties$infiltration_types
   infiltration_proportions <- ring_properties$infiltration_proportions
@@ -59,7 +59,7 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
       n_infiltration_types <- length(infiltration_types)
       
       # default `Cell.Type` is cell type of interest of this cluster
-      pheno <- cell_type
+      pheno <- cell_type 
       # if the random number falls in the range of an infiltration proportion,
       # pheno will be the corresponding infiltraiton type
       n <- 1 # start from the first proportion
@@ -94,8 +94,8 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
         n <- n + 1
       }
     }
-    
-    if (pheno == "Void") {
+
+    if (pheno == "Void") { 
       bg_sample <- bg_sample[-c(i), ]
       n_cells <- n_cells - 1
         
