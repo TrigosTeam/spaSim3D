@@ -1,35 +1,34 @@
-simulate_cylinder_tentacles <- function(bg_sample = bg,
-                                        n_cylinders = 15,
-                                        main_cell_type = "Immune1",
-                                        infiltration_types = c("Immune2", "Immune3"),
-                                        infiltration_proportions = c(0.10, 0.05),
-                                        thickness = 8,
-                                        cluster_centre = c(50, 50, 50), # Rough centre of cylinder tentacle cluster
-                                        cluster_radius = 50, # Rough radius of cylinder tentacle cluster
-                                        plot_image = T,
-                                        plot_categories = c("Others", "Immune1", "Immune2", "Immune3"),
-                                        plot_colours = c("lightgray", "skyblue", "green", "tomato")) {  
+simulate_network_cluster <- function(bg_sample, cluster_properties) {  
+  
+  # Get network properties
+  n_edges <- cluster_properties$n_edges
+  cell_type <- cluster_properties$name_of_cluster_cell
+  infiltration_types <- cluster_properties$infiltration_types
+  infiltration_proportions <- cluster_properties$infiltration_proportions
+  width <- cluster_properties$width
+  centre_loc <- cluster_properties$centre_loc
+  radius <- cluster_properties$radius
   
   
-  ### Use graph theory language: edges and vertices
-  n_edges <- n_cylinders
+  # number of vertices is always one more than the number of edges for the MST will we make
+  n_vertices <- n_edges + 1 
+
+  ## Subset coordinate within the radius of the centre_loc
+  R <- radius^2
   
-  n_vertices <- n_edges + 1 # number of vertices is always one more than the number of edges for the MST will we make
-  
-  ## Subset coordinate within the cluster_radius of the cluster_centre
-  R <- cluster_radius^2
-  
-  D <- (bg_sample$Cell.X.Position - cluster_centre[1])^2 +
-       (bg_sample$Cell.Y.Position - cluster_centre[2])^2 +
-       (bg_sample$Cell.Z.Position - cluster_centre[3])^2
+  D <- (bg_sample$Cell.X.Position - centre_loc[1])^2 +
+    (bg_sample$Cell.Y.Position - centre_loc[2])^2 +
+    (bg_sample$Cell.Z.Position - centre_loc[3])^2
   
   chosen_cells <- bg_sample[D <= R, ]
   
+  
   ## Subset further and pick n_vertices number of cells to represent the vertices
   chosen_rows <- sample(seq(nrow(chosen_cells)), n_vertices)
+
   chosen_cells <- chosen_cells[chosen_rows,
                                c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
-  
+
   
   ## Get adjacency matrix from points (pairwise distance between points)
   # Assume all points have an edge between each other
@@ -41,7 +40,7 @@ simulate_cylinder_tentacles <- function(bg_sample = bg,
   
   
   
-  ### Determine thickness of cylinders so that cylinders further away are thinner
+  ### Determine width of cylinders so that cylinders further away are thinner
   tree_edges <- data.frame(tree_edges)
   colnames(tree_edges) <- c("Cell1", "Cell2")
   tree_edges$Depth <- NA # If tree_edge is not NA, we have already accounted for it
@@ -95,33 +94,27 @@ simulate_cylinder_tentacles <- function(bg_sample = bg,
   for (i in seq(n_vertices - 1)) {
     start_loc <- as.numeric(chosen_cells[tree_edges[i, "Cell1"], ])
     end_loc <- as.numeric(chosen_cells[tree_edges[i, "Cell2"], ])
-    curr_thickness <- (1 - 0.10 * (max_depth - tree_edges[i, "Depth"])) * thickness # 10% decrease with each depth
+    curr_width <- (1 - 0.10 * (max_depth - tree_edges[i, "Depth"])) * width # 10% decrease with each depth
     
-    # Very unlikely case when thickness is negative, just ignore these cylinders
-    if (thickness < 0) {
-      thickness <- 0
+    # Very unlikely case when width is negative, just ignore these cylinders
+    if (width < 0) {
+      width <- 0
     }
     
-    cluster_properties[[i]] <- list(name_of_cluster_cell = main_cell_type,
+    cluster_properties[[i]] <- list(name_of_cluster_cell = cell_type,
                                     infiltration_types = infiltration_types,
                                     infiltration_proportions = infiltration_proportions,
                                     shape = "Cylinder",
-                                    radius = curr_thickness,
+                                    radius = curr_width,
                                     start_loc = start_loc,
                                     end_loc = end_loc)
   }
-
-  tentacles_bg <- simulate_clusters3D(bg,
-                                      n_clusters = n_cylinders,
-                                      cluster_properties = cluster_properties,
-                                      plot_image = F)
-  if (plot_image) {
-    plot <- plot_cell_categories3D(tentacles_bg,
-                                   plot_categories,
-                                   plot_colours)  
-    print(plot)
-  }
   
-  return (tentacles_bg)
+  network_bg <- simulate_clusters3D(bg_sample,
+                                    n_clusters = n_edges,
+                                    cluster_properties = cluster_properties,
+                                    plot_image = F)
+  
+  return (network_bg)
   
 }
