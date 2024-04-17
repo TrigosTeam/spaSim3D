@@ -283,7 +283,7 @@ ggplot(result, aes(Cluster_number, Value)) +
 ### Using SPIAT3D for gradient metrics ---------------------------------------
 
 gradient_metrics_list <- vector(mode = "list", length = 3)
-names(gradient_metrics_list) <- c("MSG", "CKG", "EGA")
+names(gradient_metrics_list) <- c("MSG", "CKG", "EGA") # Mixing score gradient, CrossK gradient, Entropy gradient aggregated
 
 radii <- 50
 gradient_metrics_list[["MSG"]] <- data.frame(matrix(nrow = 0, ncol = radii))
