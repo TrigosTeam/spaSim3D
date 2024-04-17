@@ -1307,7 +1307,9 @@ determine_entropy_grid_metrics3D <- function(data,
                    z = ~z,
                    color = ~Entropy,
                    colors = pal(nrow(plot_data)),
-                   marker = list(size = ~size))
+                   marker = list(size = ~size),
+                   symbol = 1,
+                   symbols = "square")
     
     fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
                                        yaxis = list(title = 'y'),
@@ -1457,7 +1459,9 @@ determine_cell_proportion_grid_metrics3D <- function(data,
                    z = ~z,
                    color = ~Proportion,
                    colors = pal(nrow(plot_data)),
-                   marker = list(size = ~size))
+                   marker = list(size = ~size),
+                   symbol = 1,
+                   symbols = "square")
     
     fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
                                        yaxis = list(title = 'y'),
