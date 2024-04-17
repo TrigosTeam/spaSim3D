@@ -68,6 +68,11 @@ simulate_rings3D <- function(bg_sample,
     if (shape == "Cylinder") {
       bg_sample <- simulate_cylinder_ring(bg_sample = bg_sample, ring_properties = ring_properties[[k]])
     }
+    
+    ### Network shape + ring
+    if (shape == "Network") {
+      bg_sample <- simulate_network_ring(bg_sample = bg_sample, ring_properties = ring_properties[[k]])
+    }
   }
   
   if (plot_image) {
