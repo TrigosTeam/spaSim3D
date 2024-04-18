@@ -57,10 +57,10 @@ for (cluster_type in cluster_types) {
 # Shape:          small,                medium,             large
 # Sphere:         r = 15,               r = 20,             r = 25
 # Ellipsoid:  rxyz = (10, 15, 20), rxyz = (15, 20, 25), rxyz = (20, 25, 30) 
-# Network:     Cr = 15, r = 10,      CR = 20, r = 15,    CR = 25, r = 20     # CR = cluster radius
+# Network:     Cr = 35, r = 5,      CR = 40, r = 7.5,    CR = 45, r = 10     # CR = cluster radius
 
 # Cluster type: Separate1,  Separate2,  Separate3,   Ring1,    Ring2,    Ring3,    Mixing1,    Mixing2,    Mixing3
-#               ~20 apart   ~10 apart   ~0 apart    4 width   6 width   8 width   0.2 prop    0.4 prop    0.6 prop
+#               ~20 apart   ~10 apart   ~0 apart    2 width   4 width   6 width   0.2 prop    0.4 prop    0.6 prop
 
 
 shape_size_data <- list(
@@ -75,9 +75,9 @@ shape_size_data <- list(
     l = c(20, 25, 30)
   ),
   N = list(
-    s = c(15, 10),
-    m = c(10, 15),
-    l = c(25, 20)
+    s = c(35, 4),
+    m = c(40, 7.5),
+    l = c(45, 10)
   )
 )
 
@@ -87,16 +87,16 @@ cluster_data <- list(
     cell2_centre = c(110, 110, 110)
   ),
   Separate2 = list(
-    cell1_centre = c(45, 45, 45),
-    cell2_centre = c(105, 105, 105)
-  ),
-  Separate3 = list(
     cell1_centre = c(50, 50, 50),
     cell2_centre = c(100, 100, 100)
   ),
-  Ring1 = 4,
-  Ring2 = 6,
-  Ring3 = 8,
+  Separate3 = list(
+    cell1_centre = c(60, 60, 60),
+    cell2_centre = c(90, 90, 90)
+  ),
+  Ring1 = 2,
+  Ring2 = 4,
+  Ring3 = 6,
   Mixing1 = 0.2,
   Mixing2 = 0.4,
   Mixing3 = 0.6
@@ -145,11 +145,13 @@ for (i in 1:nrow(plots_meta_data)) {
     # Get cluster1 properties
     size_data <- shape_size_data[[shape1]][[size1]]
     centre <- cluster_data[[cluster_type]][["cell1_centre"]]
+    if (shape1 != "N") centre <- adjust_centre(centre, size1, TRUE)
     cluster_properties <- get_cluster_properties(list(), shape1, cell_type1, size_data, centre)
   
     # Get cluster2 properties
     size_data <- shape_size_data[[shape2]][[size2]]
     centre <- cluster_data[[cluster_type]][["cell2_centre"]]
+    if (shape2 != "N") centre <- adjust_centre(centre, size2, FALSE)
     cluster_properties <- get_cluster_properties(cluster_properties, shape2, cell_type2, size_data, centre)
     
     plot_data[[i]] <- simulate_clusters3D(bg,
@@ -162,6 +164,7 @@ for (i in 1:nrow(plots_meta_data)) {
   else if (grepl("Ring", cluster_type) == TRUE) {
     size_data <- shape_size_data[[shape]][[size]]
     ring_width <- cluster_data[[cluster_type]]
+    if (shape == "N") ring_width <- ring_width / 2
     
     ring_properties <- get_ring_properties(shape,
                                            cell_type1,
@@ -195,6 +198,9 @@ for (i in 1:nrow(plots_meta_data)) {
   }
   
 }
+
+setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/Code/spaSim 3D/objects")
+all_plot_data <- readRDS(file="all_plot_test_data.rda")
 
 
 
@@ -324,4 +330,36 @@ get_shape <- function(shape) {
     "N" = "Network"
   )
   return (answer)
+}
+
+
+adjust_centre <- function(centre, size, increase) {
+  
+  # Increase centre
+  if (increase == T) {
+    if (size == "s") {
+      centre <- centre + 8
+    }
+    else if (size == "m") {
+      centre <- centre + 4
+    }
+    else if (size == "l") {
+      # centre remains unchanged
+    }
+  }
+  
+  # Decrease centre
+  else {
+    if (size == "s") {
+      centre <- centre - 8
+    }
+    else if (size == "m") {
+      centre <- centre - 4
+    }
+    else if (size == "l") {
+      # centre remains unchanged
+    }
+  }
+  
+  return (centre)
 }
