@@ -199,10 +199,6 @@ for (i in 1:nrow(plots_meta_data)) {
   
 }
 
-setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/Code/spaSim 3D/objects")
-all_plot_data <- readRDS(file="all_plot_test_data.rda")
-
-
 
 get_cluster_properties <- function(cluster_properties, 
                                    shape, 
