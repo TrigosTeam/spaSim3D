@@ -36,6 +36,8 @@ all_plots_data <- all_plots_data[as.numeric(rownames(all_plots_meta_data))]
 
 library(ggplot2)
 
+### Compare 1 variable with metrics ------------------------------------------
+
 ## 'shape' is the variable to test
 result <- get_metrics_list(all_plots_data,
                            all_plots_meta_data,
@@ -220,7 +222,7 @@ get_metrics_list <- function(plots_data,
 
 
 
-
+### Compare 2 variables with metrics ------------------------------------------
 
 library(ggplot2)
 ## 'shape' and 'size' is the variable to test
@@ -420,20 +422,15 @@ get_metrics_list1 <- function(plots_data,
 
 
 
+### Compare 3 variables with metrics ------------------------------------------
+
+# Compare all 3
+plots_meta_data <- get_metrics_list2(all_plots_data,
+                                     all_plots_meta_data,
+                                     reference_cell_type = "Immune")
 
 
-## 'shape' and 'cluster_type' is the variable to test
-result <- get_metrics_list2(all_plots_data,
-                            all_plots_meta_data,
-                            reference_cell_type = "Immune")
-
-
-## Get plot_data and metrics_list
-plot_data <- result[[1]]
-metrics_list <- result[[2]]
-
-
-### Create a new function which compares all parameters: shape size & cluster_type
+### Create a new function which compares all parameters: shape, size & cluster_type
 
 get_metrics_list2 <- function(plots_data, 
                               plots_meta_data,
@@ -528,10 +525,138 @@ get_metrics_list2 <- function(plots_data,
   }
   
   
-  ## return both chosen plots_data and metrics_list
-  answer <- list()
-  answer[[1]] <- plots_data
-  answer[[2]] <- metrics_list
+  return (plots_meta_data)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Compare separate clusters data -------------------------------------------
+
+setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/Code/spaSim 3D/objects")
+all_plots_data <- readRDS(file="all_plots_test_data.rda")
+all_plots_meta_data <- readRDS(file="all_plots_meta_data.rda")
+
+all_plots_meta_data <-
+  all_plots_meta_data[all_plots_meta_data$cluster_type %in% c("S1", "S2", "S3"), ]
+
+all_plots_data <- all_plots_data[as.numeric(rownames(all_plots_meta_data))]
+
+
+plots_meta_data <- get_metrics_list3(all_plots_data,
+                                     all_plots_meta_data,
+                                     reference_cell_type = "Immune")
+
+
+library(plotly)
+plot_cell_categories3D(all_plots_data[[7]],
+                       c("Others", "Tumour", "Immune"),
+                       c("lightgray", "orange", "skyblue"))
+
+
+
+
+get_metrics_list3 <- function(plots_data, 
+                              plots_meta_data,
+                              reference_cell_type,
+                              plot_image = TRUE) {
   
-  return (answer)
+  n_metrics <- 7
+  metrics_list <- vector(mode = "list", length = n_metrics)
+  metrics_list_names <- c("APD", "AMD", "MS", "NMS", "CKI", "CKAUC", "CIN")
+  names(metrics_list) <- metrics_list_names
+  
+  # Get target cell type
+  if (reference_cell_type == "Tumour") {
+    target_cell_type <- "Immune"
+  }
+  else {
+    target_cell_type <- "Tumour" 
+  }
+  
+  ### Get metrics data
+  radius <- 30
+  
+  for (plot_data in plots_data) {
+    ## Get average pairwise distance data
+    APD_data <- calculate_pairwise_distances_between_cell_types3D(plot_data, cell_types_of_interest = c("Tumour", "Immune"))
+    metrics_list$APD <- append(metrics_list$APD, mean(APD_data[APD_data$Pair %in% c("Tumour/Immune", "Immune/Tumour"), "Distance"]))
+    
+    ## Get average minimum distance data
+    AMD_data <- calculate_minimum_distances_between_cell_types3D(plot_data, cell_types_of_interest = c("Tumour", "Immune"))
+    metrics_list$AMD <- append(metrics_list$AMD, mean(AMD_data[AMD_data$Pair == "Tumour/Immune", "Distance"]))
+    
+    ## Get mixing score and normalised mixing score data
+    MS_data <- calculate_mixing_scores3D(plot_data,
+                                         reference_cell_types = reference_cell_type,
+                                         target_cell_types = target_cell_type,
+                                         radius = radius)
+    
+    metrics_list$MS <- append(metrics_list$MS, MS_data[["Mixing_score"]])
+    metrics_list$NMS <- append(metrics_list$NMS, MS_data[["Normalised_mixing_score"]])
+    
+    ## Get cross K intersection and cross K AUC data
+    cross_k_data <- calculate_Kcross3D(plot_data,
+                                       reference_cell_type = reference_cell_type,
+                                       target_cell_type = target_cell_type,
+                                       distance = radius,
+                                       plot_results = FALSE)
+    
+    CKI_data <- calculate_Kcross_intersection3D(cross_k_data)
+    if (length(CKI_data) == 2) {
+      CKI_data <- CKI_data$Distance[1] ## Choose the first distance when crossing occurs
+    }
+    
+    CKAUC_data <- calculate_AUC_of_Kcross3D(cross_k_data)
+    
+    metrics_list$CKI <- append(metrics_list$CKI, CKI_data)
+    metrics_list$CKAUC <- append(metrics_list$CKAUC, CKAUC_data)
+    
+    ## Get cells in neighborhood data
+    CIN_data <- calculate_cells_in_neighborhood3D(plot_data,
+                                                  reference_cell_types = reference_cell_type,
+                                                  target_cell_types = target_cell_type,
+                                                  radius = radius)
+    
+    metrics_list$CIN <- append(metrics_list$CIN, mean(CIN_data[[reference_cell_type]][[target_cell_type]]))
+  }
+  
+  metrics_list$MS <- as.numeric(metrics_list$MS)
+  metrics_list$NMS <- as.numeric(metrics_list$NMS)
+  
+  ## Combine meta data and metrics list data
+  plots_meta_data <- cbind(plots_meta_data, metrics_list)
+  
+  # Plot results
+  if (plot_image == TRUE) {
+    
+    ## Melt
+    result <- reshape2::melt(plots_meta_data, measure.vars = metrics_list_names)
+    
+    colnames(result) <- c('cluster_type', 'shape', 'size', 'metric', 'value')
+    
+    result$cluster_type <- ordered(result$cluster_type, levels = unique(result$cluster_type))
+    result$shape <- ordered(result$shape, levels = c("SS", "SE", "ES", "SN", "NS", "EE", "EN", "NE", "NN"))
+    result$size <- ordered(result$size, levels = c("ss", "sm", "ms", "sl", "ls", "mm", "ml", "lm", "ll"))
+    result$metric <- ordered(result$metric, levels = names(metrics_list))
+    
+    plot <- ggplot(result, aes(x = size, y = value, group = cluster_type)) +
+      facet_grid(rows = vars(metric), cols = vars(shape), scales = "free_y") +
+      geom_line(aes(color = cluster_type)) + 
+      scale_color_manual(values = RColorBrewer::brewer.pal(length(unique(result$cluster_type)), "Set1"))
+    
+    print(plot)
+  }
+  
+  return (plots_meta_data)
 }
