@@ -427,7 +427,7 @@ get_metrics_list1 <- function(plots_data,
 # Compare all 3
 plots_meta_data <- get_metrics_list2(all_plots_data,
                                      all_plots_meta_data,
-                                     reference_cell_type = "Immune")
+                                     reference_cell_type = "Tumour")
 
 
 ### Create a new function which compares all parameters: shape, size & cluster_type
@@ -555,7 +555,10 @@ all_plots_data <- all_plots_data[as.numeric(rownames(all_plots_meta_data))]
 
 plots_meta_data <- get_metrics_list3(all_plots_data,
                                      all_plots_meta_data,
-                                     reference_cell_type = "Immune")
+                                     reference_cell_type = "Tumour")
+
+# setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/Code/spaSim 3D/scripts/spaSim3D SPIAT3D Testing")
+# plots_meta_data <- readRDS("separateClusters_immuneRef.rds")
 
 
 library(plotly)
@@ -660,3 +663,51 @@ get_metrics_list3 <- function(plots_data,
   
   return (plots_meta_data)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Get number of tumour and immune cells for each cluster -------------------
+all_plots_meta_data$Tumour <- 0
+all_plots_meta_data$Immune <- 0
+
+i <- 1
+
+for (plot in all_plots_data) {
+  n_tumour <- sum(plot$Cell.Type == "Tumour")
+  n_immune <- sum(plot$Cell.Type == "Immune")
+  
+  all_plots_meta_data[i, "Tumour"] <- n_tumour
+  all_plots_meta_data[i, "Immune"] <- n_immune
+  
+  i <- i + 1
+}
+
+library(ggplot2)
+
+result <- reshape2::melt(all_plots_meta_data, measure.vars = c("Tumour", "Immune"))
+colnames(result) <- c('cluster_type', 'shape', 'size', 'cell_type', 'count')
+
+result$cluster_type <- ordered(result$cluster_type, levels = c("S1", "S2", "S3", "R1", "R2", "R3", "M1", "M2", "M3"))
+result$shape <- ordered(result$shape, levels = c("S", "E", "N"))
+result$size <- ordered(result$size, levels = c("s", "m", "l"))
+
+plot <- ggplot(result, aes(x = cluster_type, y = count, color = size)) +
+  geom_point() + 
+  scale_color_manual(values = RColorBrewer::brewer.pal(length(unique(result$cluster_type)), "Set1")) +
+  facet_grid(rows = vars(cell_type), cols = vars(shape))
+
+  # facet_grid(rows = vars(cell_type), cols = vars(size), scales = "free_x")
+  # scale_color_manual(values = RColorBrewer::brewer.pal(length(unique(result$size)), "Set1"))
+
+plot
+
