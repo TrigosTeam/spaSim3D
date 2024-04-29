@@ -706,8 +706,43 @@ plot <- ggplot(result, aes(x = cluster_type, y = count, color = size)) +
   scale_color_manual(values = RColorBrewer::brewer.pal(length(unique(result$cluster_type)), "Set1")) +
   facet_grid(rows = vars(cell_type), cols = vars(shape))
 
-  # facet_grid(rows = vars(cell_type), cols = vars(size), scales = "free_x")
-  # scale_color_manual(values = RColorBrewer::brewer.pal(length(unique(result$size)), "Set1"))
-
 plot
 
+
+
+
+### Combining metrics with count data ----------------------------------------
+plots_meta_data$nTumour <- 0
+plots_meta_data$nImmune <- 0
+
+i <- 1
+
+for (plot in all_plots_data) {
+  n_tumour <- sum(plot$Cell.Type == "Tumour")
+  n_immune <- sum(plot$Cell.Type == "Immune")
+  
+  plots_meta_data[i, "nTumour"] <- n_tumour
+  plots_meta_data[i, "nImmune"] <- n_immune
+  
+  i <- i + 1
+}
+
+result <- reshape2::melt(plots_meta_data, 
+                         measure.vars = c("APD", "AMD", "MS", "NMS", "CKI", "CKAUC", "CIN", "nTumour", "nImmune"))
+colnames(result) <- c('cluster_type', 'shape', 'size', 'metric', 'value')
+
+result$cluster_type <- ordered(result$cluster_type, levels = c("S1", "S2", "S3", "R1", "R2", "R3", "M1", "M2", "M3"))
+result$shape <- ordered(result$shape, levels = c("S", "E", "N"))
+result$size <- ordered(result$size, levels = c("s", "m", "l"))
+
+# Plot 1 (size as legend)
+ggplot(result, aes(x = cluster_type, y = value, color = size, group = size)) +
+  geom_line() + 
+  scale_color_manual(values = RColorBrewer::brewer.pal(length(unique(result$cluster_type)), "Set1")) +
+  facet_grid(rows = vars(metric), cols = vars(shape), scales = "free_y")
+
+# Plot 2 (shape as legend)
+ggplot(result, aes(x = cluster_type, y = value, color = shape, group = shape)) +
+  geom_line() + 
+  scale_color_manual(values = RColorBrewer::brewer.pal(length(unique(result$cluster_type)), "Set1")) +
+  facet_grid(rows = vars(metric), cols = vars(size), scales = "free_y")
