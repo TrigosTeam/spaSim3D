@@ -1,9 +1,13 @@
+library(SPIAT)
+library(plotly)
+library(ggplot2)
+
 setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/Code/spaSim 3D/objects")
 all_plots_data <- readRDS(file="all_plots_test_data.rda")
 all_plots_meta_data <- readRDS(file="all_plots_meta_data.rda")
 
 
-data_index <- 291
+data_index <- 108
 
 metrics_data <- get_all_data(all_plots_data = all_plots_data,
                              all_plots_meta_data = all_plots_meta_data,
@@ -11,9 +15,14 @@ metrics_data <- get_all_data(all_plots_data = all_plots_data,
                              reference_cell_type = "Tumour",
                              plot_image = TRUE)
 
+plot_slice_3D(all_plots_data = all_plots_data,
+              all_plots_meta_data = all_plots_meta_data,
+              data_index = data_index,
+              slice_num = 3)
 
-## Build function that can take slice of 3D data, and plot 3D data for chosen slice number (1 - 7)
-## Build another function that can plot all 7 2D slice data at once.
+plot_slices_2D(all_plots_data = all_plots_data,
+               all_plots_meta_data = all_plots_meta_data,
+               data_index = data_index)
 
 
 
@@ -36,12 +45,12 @@ get_all_data <- function(all_plots_data,
     ## Separate clusters
     if (substr(plots_meta_data$cluster_type, 1, 1) == "S") {
       slice_data[[i]] <-  plots_data[0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position > -delta - thickness &
-                                       0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position < -delta + thickness, ]  
+                                     0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position < -delta + thickness, ]  
     }
     ## Ring or Mixed clusters
     else {
       slice_data[[i]] <-  plots_data[plots_data$Cell.Z.Position > 75 + delta - thickness &
-                                       plots_data$Cell.Z.Position < 75 + delta + thickness, ]   
+                                     plots_data$Cell.Z.Position < 75 + delta + thickness, ]   
     }
     delta <- delta + 2 * thickness
   }
@@ -218,8 +227,86 @@ get_metrics_data_2D <- function(plots_data,
 
 
 
+## Build function that can take slice of 3D data, and plot 3D data for chosen slice number (1 - 7)
+plot_slice_3D <- function(all_plots_data = all_plots_data,
+                          all_plots_meta_data = all_plots_meta_data,
+                          data_index = data_index,
+                          slice_num) {
+  
+  plots_data <- all_plots_data[[data_index]]
+  plots_meta_data <- all_plots_meta_data[data_index, ]
+  
+  thickness <- 5 # Thickness of slice
+  delta <- -30 + (slice_num - 1) * (2 * thickness) # Position of slice
+  
+  ## Separate clusters
+  if (substr(plots_meta_data$cluster_type, 1, 1) == "S") {
+    plots_data[0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position > -delta - thickness &
+               0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position < -delta + thickness, "Cell.Type"] <- "Slice"  
+  }
+  ## Ring or Mixed clusters
+  else {
+    plots_data[plots_data$Cell.Z.Position > 75 + delta - thickness &
+               plots_data$Cell.Z.Position < 75 + delta + thickness, "Cell.Type"] <- "Slice"   
+  }
+  
+  plot_cell_categories3D(plots_data, 
+                         c("Tumour", "Immune", "Slice"),
+                         c("orange", "skyblue", "tomato"))
+}
 
 
+
+
+
+## Build another function that can plot all 7 2D slice data at once.
+
+plot_slices_2D <- function(all_plots_data = all_plots_data,
+                           all_plots_meta_data = all_plots_meta_data,
+                           data_index = data_index) {
+  
+  plots_data <- all_plots_data[[data_index]]
+  plots_meta_data <- all_plots_meta_data[data_index, ]
+  
+  ## Get slice data for 7 slices
+  slice_data <- vector(mode = "list", length = 7)
+  
+  delta <- -30 # Position of slice
+  thickness <- 5 # Thickness of slice
+  
+  for (i in 1:7) {
+    ## Separate clusters
+    if (substr(plots_meta_data$cluster_type, 1, 1) == "S") {
+      slice_data[[i]] <-  plots_data[0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position > -delta - thickness &
+                                     0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position < -delta + thickness, 
+                                     c("Cell.X.Position", "Cell.Y.Position", "Cell.Type")]  
+    }
+    ## Ring or Mixed clusters
+    else {
+      slice_data[[i]] <-  plots_data[plots_data$Cell.Z.Position > 75 + delta - thickness &
+                                     plots_data$Cell.Z.Position < 75 + delta + thickness,
+                                     c("Cell.X.Position", "Cell.Y.Position", "Cell.Type")]   
+    }
+    
+    delta <- delta + 2 * thickness
+  }
+  
+  
+  result <- reshape2::melt(slice_data,
+                           measure.vars = "Cell.Type")
+  
+  result[["variable"]] <- NULL
+  colnames(result) <- c("Cell.X.Position", "Cell.Y.Position", "Cell.Type", "Slice.Num")
+  result$Cell.Type <- ordered(result$Cell.Type, c("Others", "Tumour", "Immune"))
+  
+  p <- ggplot(result, aes(Cell.X.Position, Cell.Y.Position, color = Cell.Type)) +
+        geom_point() +
+        scale_colour_manual(values = c("lightgray","orange", "skyblue")) +
+        facet_wrap(~Slice.Num, nrow = 3, ncol = 3)
+  
+  return (p)
+}
+  
 
 
 
