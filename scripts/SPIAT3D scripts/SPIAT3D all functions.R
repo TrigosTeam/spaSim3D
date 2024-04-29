@@ -568,6 +568,9 @@ calculate_mixing_scores3D <- function(data,
                "Normalised_mixing_score")
   colnames(df) <- df.cols
   
+  df$Mixing_score <- as.numeric(df$Mixing_score)
+  df$Normalised_mixing_score <- as.numeric(df$Normalised_mixing_score)
+  
   return(df)
 }
 
