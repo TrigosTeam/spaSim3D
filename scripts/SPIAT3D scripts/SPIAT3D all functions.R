@@ -1622,9 +1622,13 @@ plot_cell_categories3D <- function(data,
                  colors = colour_vector,
                  marker = list(size = size))
   
-  fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
-                                     yaxis = list(title = 'y'),
-                                     zaxis = list(title = 'z')))
+  # fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+  #                                    yaxis = list(title = 'y'),
+  #                                    zaxis = list(title = 'z')))
+  
+  fig <- fig %>% layout(scene = list(xaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F),
+                                     yaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F),
+                                     zaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F)))
   
   return (fig)
   
