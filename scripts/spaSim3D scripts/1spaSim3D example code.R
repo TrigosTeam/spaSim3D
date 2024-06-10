@@ -39,7 +39,7 @@ bg_spheres <- simulate_clusters3D(bg_sample = bg,
                                       infiltration_types = NULL,
                                       infiltration_proportions = NULL,
                                       shape = "Sphere",
-                                      radius = 20,
+                                      radius = 30,
                                       centre_loc = c(30, 30, 30)
                                     ),
                                     C2 = list(
@@ -47,7 +47,7 @@ bg_spheres <- simulate_clusters3D(bg_sample = bg,
                                       infiltration_types = NULL,
                                       infiltration_proportions = NULL,
                                       shape = "Sphere",
-                                      radius = 20,
+                                      radius = 25,
                                       centre_loc = c(70, 70, 70)
                                     )
                                   ),
