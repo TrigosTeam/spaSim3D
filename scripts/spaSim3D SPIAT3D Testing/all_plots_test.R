@@ -256,6 +256,52 @@ result <- get_metrics_list1(all_plots_data,
 plot_data <- result[[1]]
 metrics_list <- result[[2]]
 
+# plot_data <- plot_data[metrics_list$cluster_type %in% c("S2", "R2", "M2")]
+
+plot_cell_categories3D(plot_data[[9]],
+                       c("Others", "Tumour", "Immune"),
+                       c("lightgray", "orange", "skyblue"))
+
+# metrics_list$CKI <- NULL
+# colnames(metrics_list)[9] <- "ACIN"
+# 
+# metrics_list_names <- c("APD", "AMD", "MS", "NMS", "ACIN", "CKAUC")
+# 
+# 
+# ## Melt
+# result <- reshape2::melt(metrics_list, measure.vars = metrics_list_names)
+# 
+# colnames(result) <- c('cluster_type', 'shape', 'size', 'metric', 'value')
+# 
+# result$value <- as.numeric(result$value)
+# result$metric <- factor(result$metric, levels = metrics_list_names)
+# 
+# result1 <- result[result$cluster_type %in% c("S2", "R2", "M2"), ]
+# result1$cluster_type[result1$cluster_type == "S2"] <- "Separate Clusters"
+# result1$cluster_type[result1$cluster_type == "R2"] <- "Ringed Clusters"
+# result1$cluster_type[result1$cluster_type == "M2"] <- "Mixed Clusters"
+# result1$cluster_type <- factor(result1$cluster_type, levels = c("Separate Clusters", "Ringed Clusters", "Mixed Clusters"))
+# 
+# result1$shape[result1$shape == "S"] <- "Sphere"
+# result1$shape[result1$shape == "E"] <- "Ellipsoid"
+# result1$shape[result1$shape == "N"] <- "Network"
+# result1$shape <- factor(result1$shape, levels = c("Sphere", "Ellipsoid", "Network"))
+# 
+# plot <- ggplot(result1, aes(x = cluster_type, y = value, group = shape)) +
+#   facet_wrap(~metric, nrow = 6, scales = "free_y") +
+#   geom_line(aes(color = shape)) + 
+#   geom_point(aes(color = shape)) +
+#   scale_color_manual(values = RColorBrewer::brewer.pal(3, "Set1")) +
+#   scale_y_continuous(n.breaks = 4)
+# 
+# print(plot)
+
+
+
+
+
+
+
 
 ### Create a new function which makes two of the parameters variables, and the other one constant
 ## e.g. cluster_type <- 'test1', shape <- 'test2' and size <- 's'
@@ -399,7 +445,7 @@ get_metrics_list1 <- function(plots_data,
   ## return both chosen plots_data and metrics_list
   answer <- list()
   answer[[1]] <- plots_data
-  answer[[2]] <- metrics_list
+  answer[[2]] <- plots_meta_data
   
   return (answer)
 }
