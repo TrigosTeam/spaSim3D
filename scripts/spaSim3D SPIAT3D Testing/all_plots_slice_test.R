@@ -7,7 +7,38 @@ all_plots_data <- readRDS(file="all_plots_test_data.rda")
 all_plots_meta_data <- readRDS(file="all_plots_meta_data.rda")
 
 
-data_index <- 108
+data_index <- 279
+## Plot 3D data normally
+plot_cell_categories3D(all_plots_data[[data_index]],
+                       c("Others", "Tumour", "Immune"),
+                       c("lightgray", "orange", "skyblue"))
+
+
+## Bar plot for comparison between 3D and a single 2D slice
+metrics_data1 <- metrics_data[metrics_data$name %in% c("3D", "slice4"), ]
+metrics_data1$name[2] <- "2D"
+colnames(metrics_data1)[6] <- "ACIN"
+metrics_list_names <- c("APD", "AMD", "MS", "NMS", "ACIN", "CKAUC")
+
+plot_result <- reshape2::melt(metrics_data1, id.vars = "name", mesaure.vars = metrics_list_names)
+colnames(plot_result) <- c("name", "metric", "value")
+
+plot_result$metric <- factor(plot_result$metric, levels = metrics_list_names)
+plot <- ggplot(plot_result, aes(name, value, fill = name)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~metric, scales = "free_y", ncol = 3)
+plot
+
+# 
+# ggplot(metrics_data1, aes(name, APD, fill = name, ymin = APD - 2, ymax = APD + 2)) +
+#   geom_bar(stat = "identity") +
+#   scale_y_continuous(limits = c(0, 50)) +
+#   labs(title = "APD", y= "value", x = "") +
+#   theme(plot.title = element_text(hjust = 0.5)) +
+#   geom_errorbar(width = 0.2)
+
+
+
 
 metrics_data <- get_all_data(all_plots_data = all_plots_data,
                              all_plots_meta_data = all_plots_meta_data,
@@ -18,7 +49,7 @@ metrics_data <- get_all_data(all_plots_data = all_plots_data,
 plot_slice_3D(all_plots_data = all_plots_data,
               all_plots_meta_data = all_plots_meta_data,
               data_index = data_index,
-              slice_num = 3)
+              slice_num = 4)
 
 plot_slices_2D(all_plots_data = all_plots_data,
                all_plots_meta_data = all_plots_meta_data,
@@ -231,28 +262,30 @@ get_metrics_data_2D <- function(plots_data,
 plot_slice_3D <- function(all_plots_data = all_plots_data,
                           all_plots_meta_data = all_plots_meta_data,
                           data_index = data_index,
-                          slice_num) {
+                          slice_nums) {
   
   plots_data <- all_plots_data[[data_index]]
   plots_meta_data <- all_plots_meta_data[data_index, ]
   
   thickness <- 5 # Thickness of slice
-  delta <- -30 + (slice_num - 1) * (2 * thickness) # Position of slice
   
-  ## Separate clusters
-  if (substr(plots_meta_data$cluster_type, 1, 1) == "S") {
-    plots_data[0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position > -delta - thickness &
-               0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position < -delta + thickness, "Cell.Type"] <- "Slice"  
+  for (slice_num in slice_nums) {
+    delta <- -30 + (slice_num - 1) * (2 * thickness) # Position of slice
+    
+    ## Separate clusters
+    if (substr(plots_meta_data$cluster_type, 1, 1) == "S") {
+      plots_data[0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position > -delta - thickness &
+                   0.5 * plots_data$Cell.X.Position + 0.5 * plots_data$Cell.Y.Position - plots_data$Cell.Z.Position < -delta + thickness, "Cell.Type"] <- "Slice"  
+    }
+    ## Ring or Mixed clusters
+    else {
+      plots_data[plots_data$Cell.Z.Position > 75 + delta - thickness &
+                   plots_data$Cell.Z.Position < 75 + delta + thickness, "Cell.Type"] <- "Slice"   
+    }
   }
-  ## Ring or Mixed clusters
-  else {
-    plots_data[plots_data$Cell.Z.Position > 75 + delta - thickness &
-               plots_data$Cell.Z.Position < 75 + delta + thickness, "Cell.Type"] <- "Slice"   
-  }
-  
   plot_cell_categories3D(plots_data, 
-                         c("Tumour", "Immune", "Slice"),
-                         c("orange", "skyblue", "tomato"))
+                         c("Tumour", "Immune", "Slice", "Others"),
+                         c("orange", "skyblue", "tomato", "lightgray"))
 }
 
 
@@ -302,7 +335,7 @@ plot_slices_2D <- function(all_plots_data = all_plots_data,
   p <- ggplot(result, aes(Cell.X.Position, Cell.Y.Position, color = Cell.Type)) +
         geom_point() +
         scale_colour_manual(values = c("lightgray","orange", "skyblue")) +
-        facet_wrap(~Slice.Num, nrow = 3, ncol = 3)
+        facet_wrap(~Slice.Num, nrow = 2, ncol = 4)
   
   return (p)
 }
