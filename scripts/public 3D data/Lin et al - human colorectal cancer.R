@@ -2,7 +2,19 @@
 setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/3D public spatial data/Lin et al - human colorectal cancer/CRC1 data")
 
 ## Read data
-data <- read.csv("WD-76845-002.csv")
+slice_nums <- c("002", "007", "014", "020", "025", "029",
+                "034", "039", "044", "049", "050", "051",
+                "052", "054", "059", "064", "069", "074",
+                "078", "084", "086", "091", "097", "102", "106")
+file_names <- paste("WD-76845-", slice_nums, ".csv", sep = "")
+
+dataset <- vector(mode = "list", length = length(file_names))
+
+for (i in seq(length(file_names))) {
+  dataset[[i]] <- read.csv(file_names[i])
+}
+
+data <- dataset[[1]]
 
 ## Get relevant cell markers
 all_cell_markers <- c("Keratin", "Ki67", "CD3", "CD20", 
@@ -158,14 +170,11 @@ setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/
 cell_type_dict <- read.csv("cell_type_dictionary.csv")
 
 # format column names of dictionary
-n_markers <- ncol(cell_type_dict) - 3 # Last 3 columns are not markers
-
 all_cell_markers <- c("Keratin", "Ki67", "CD3", "CD20", 
                       "CD45RO", "CD4", "CD8a", "CD68", 
                       "CD163", "FOXP3", "PD1", "PDL1", 
                       "CD31", "aSMA", "Desmin", "CD45")
-colnames(cell_type_dict)[1:n_markers] <- all_cell_markers 
-
+colnames(cell_type_dict)[1:length(all_cell_markers)] <- all_cell_markers 
 
 # Get phenotype for each row
 get_phenotype <- function(num_vec) {
@@ -181,8 +190,7 @@ get_phenotype <- function(num_vec) {
   return (phenotype)
 }
 
-cell_type_dict$phenotype <- apply(cell_type_dict[, 1:16], 1, get_phenotype)
-
+cell_type_dict$phenotype <- apply(cell_type_dict[, 1:length(all_cell_markers)], 1, get_phenotype)
 
 ### 3. Use cell type dictionary to determine cell identities (Tumour, Immune or Stroma) ------------------
 
@@ -309,3 +317,84 @@ ggplot(sample_n(plot_data, 2000), aes(Cell.X.Position, Cell.Y.Position, colour =
   geom_point()
 
 
+
+### 5. Use cell type dictionary to determine cell identities (multiple slices) ---------
+
+library(SPIAT)
+
+# Get chosen cell markers
+all_cell_markers <- c("Keratin", "Ki67", "CD3", "CD20", 
+                      "CD45RO", "CD4", "CD8a", "CD68", 
+                      "CD163", "FOXP3", "PD1", "PDL1", 
+                      "CD31", "aSMA", "Desmin", "CD45")
+
+
+spatial_data_3D <- data.frame(matrix(nrow = 0, ncol = 4))
+colnames(spatial_data_3D) <- c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position", "Cell.Type")
+
+## Loop through each slice
+
+for (i in seq(length(dataset))) {
+  data <- dataset[[i]]
+  
+  if (is.null(data)) {
+    next
+  }
+  
+  ## Get intensity matrix
+  intensity_matrix <- t(data[, all_cell_markers])
+  colnames(intensity_matrix) <- paste("Cell_", seq(ncol(intensity_matrix)), sep="")
+  
+  ## Get x, y and z coords
+  coord_x <- data[ , "X"]
+  coord_y <- data[ , "Y"]
+  coord_z <- as.integer(slice_nums[i])
+  coord_z <- rep(5 * coord_z, nrow(data)) # 5 microns between slices
+  
+  # Format into spe object
+  general_format_image <- format_image_to_spe(format = "general",
+                                              intensity_matrix = intensity_matrix,
+                                              phenotypes = "unknown",
+                                              coord_x = coord_x,
+                                              coord_y = coord_y)
+  
+  # Predict phenotypes
+  predicted_image <- predict_phenotypes(spe_object = general_format_image,
+                                        thresholds = NULL,
+                                        tumour_marker = "Keratin",
+                                        baseline_markers = all_cell_markers[all_cell_markers != "Keratin"],
+                                        reference_phenotype = FALSE)
+  
+  # Get cell type from phenotypes
+  phenotypes <- unique(predicted_image$Phenotype)
+  cell_types <- ifelse(phenotypes %in% cell_type_dict$phenotype, cell_type_dict$Category, "Other")
+  
+  all_phenotypes <- predicted_image$Phenotype
+  all_cell_types <- names[match(all_phenotypes, phenotypes)]
+  
+  # Add data to spatial_data_3D
+  df <- data.frame(Cell.X.Position = coord_x,
+                   Cell.Y.Position = coord_y,
+                   Cell.Z.Position = coord_z,
+                   Cell.Type = all_cell_types)
+  
+  spatial_data_3D <- rbind(spatial_data_3D, df)
+}
+
+# Get Cell.ID column
+spatial_data_3D$Cell.ID <- paste("Cell_", seq(nrow(spatial_data_3D)), sep = "")
+
+## Plot data
+library(plotly)
+library(dplyr)
+
+my_colours <- c("lightgray", "red", "blue", "darkgreen")
+chosen_cell_types <- c("Other", "Tumor", "Immune", "Stroma")
+
+plot_cell_categories3D(sample_n(spatial_data_3D, 4000),
+                       chosen_cell_types,
+                       my_colours)
+
+
+table(spatial_data_3D[spatial_data_3D$Cell.Z.Position == 170, "Cell.Type"])
+# spatial_data_3D$Cell.Z.Position <- spatial_data_3D$Cell.Z.Position / 5
