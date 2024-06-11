@@ -1,26 +1,26 @@
 simulate_double_rings3D <- function(bg_sample,
-                             n_dr = 1,
-                             dr_properties = list(
-                               D1 = list(
-                                 name_of_cluster_cell = "Tumour",
-                                 infiltration_types = c("Immune1", "Others"),
-                                 infiltration_proportions = c(0.1, 0.05),
-                                 shape = "Sphere",
-                                 radius = 35,
-                                 centre_loc = c(50, 50, 50),
-                                 name_of_inner_ring_cell = "Immune1",
-                                 inner_ring_width = 6,
-                                 inner_ring_infiltration_types = c("Others"),
-                                 inner_ring_infiltration_proportions = c(0.15),
-                                 name_of_outer_ring_cell = "Immune2",
-                                 outer_ring_width = 3,
-                                 outer_ring_infiltration_types = c("Others"),
-                                 outer_ring_infiltration_proportions = c(0.15)
-                               )
-                             ),
-                             plot_image = TRUE,
-                             plot_categories = c("Others", "Tumour", "Immune1", "Immune2"),
-                             plot_colours = c("lightgray", "orange", "blue", "green")) {
+                                    n_dr = 1,
+                                    dr_properties = list(
+                                      D1 = list(
+                                        name_of_cluster_cell = "Tumour",
+                                        infiltration_types = c("Immune1", "Others"),
+                                        infiltration_proportions = c(0.1, 0.05),
+                                        shape = "Sphere",
+                                        radius = 35,
+                                        centre_loc = c(50, 50, 50),
+                                        name_of_inner_ring_cell = "Immune1",
+                                        inner_ring_width = 6,
+                                        inner_ring_infiltration_types = c("Others"),
+                                        inner_ring_infiltration_proportions = c(0.15),
+                                        name_of_outer_ring_cell = "Immune2",
+                                        outer_ring_width = 3,
+                                        outer_ring_infiltration_types = c("Others"),
+                                        outer_ring_infiltration_proportions = c(0.15)
+                                      )
+                                    ),
+                                    plot_image = TRUE,
+                                    plot_categories = c("Others", "Tumour", "Immune1", "Immune2"),
+                                    plot_colours = c("lightgray", "orange", "blue", "green")) {
   
   for (k in seq_len(n_dr)) { 
     
