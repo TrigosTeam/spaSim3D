@@ -36,7 +36,7 @@ simulate_network_cluster <- function(bg_sample, cluster_properties) {
   adj_mat <- -1 * apcluster::negDistMat(chosen_cells)
   
   ## Use prim's algorithm to get edges (i.e. the cells connected by each edge)
-  tree_edges <- prim(adj_mat)
+  tree_edges <- prims_algorithm(adj_mat)
   
   
   

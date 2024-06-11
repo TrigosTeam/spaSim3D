@@ -1,6 +1,6 @@
 ## Prim's algorithm function
 # Input is the adjacency matrix of the graph (i.e. output from -1 * apcluster::negDistMat(df of coords))
-prim <- function(graph) {
+prims_algorithm <- function(graph) {
   
   # Number of vertices is number of points
   num_vertices <- nrow(graph)
