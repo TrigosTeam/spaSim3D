@@ -12,7 +12,6 @@ poisson_distribution3D <- function(n_cells, length, width, height)  {
   # Get pois vector
   pois <- rpois(nCubes, lambda)
   
-  
   # Get points for each square region
   x <- c()
   y <- c()
@@ -28,7 +27,6 @@ poisson_distribution3D <- function(n_cells, length, width, height)  {
         x <- append(x, runif(pois[current_cube_index], row - 1, row))
         y <- append(y, runif(pois[current_cube_index], col - 1, col))
         z <- append(z, runif(pois[current_cube_index], lay - 1, lay))
-        
       }
     }
   }
@@ -36,8 +34,7 @@ poisson_distribution3D <- function(n_cells, length, width, height)  {
   y <- y * width / nCols
   z <- z * height / nLays
   
-  df <- data.frame(x = x,
-                   y = y,
-                   z = z)
+  df <- data.frame(x = x, y = y, z = z)
+  
   return(df)
 }
