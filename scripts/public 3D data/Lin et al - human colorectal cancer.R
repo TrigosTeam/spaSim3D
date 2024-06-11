@@ -370,7 +370,7 @@ for (i in seq(length(dataset))) {
   cell_types <- ifelse(phenotypes %in% cell_type_dict$phenotype, cell_type_dict$Category, "Other")
   
   all_phenotypes <- predicted_image$Phenotype
-  all_cell_types <- names[match(all_phenotypes, phenotypes)]
+  all_cell_types <- cell_types[match(all_phenotypes, phenotypes)]
   
   # Add data to spatial_data_3D
   df <- data.frame(Cell.X.Position = coord_x,
@@ -381,12 +381,80 @@ for (i in seq(length(dataset))) {
   spatial_data_3D <- rbind(spatial_data_3D, df)
 }
 
-# Get Cell.ID column
-spatial_data_3D$Cell.ID <- paste("Cell_", seq(nrow(spatial_data_3D)), sep = "")
 
-## Plot data
+### 5.1. Plotting multiple slices (tumour, immune, stroma) --------------------
+
+setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/3D public spatial data/Lin et al - human colorectal cancer")
+spatial_data_3D <- readRDS("spatial_data_3D.rds")
+
 library(plotly)
 library(dplyr)
+
+plot_cell_categories3D <- function(data,
+                                   cell_types_of_interest = NULL,
+                                   colour_vector = NULL,
+                                   size = 2,
+                                   include_cell_types_of_no_interest = FALSE,
+                                   feature_colname = "Cell.Type") {
+  
+  if (is.null(cell_types_of_interest)) {
+    cell_types_of_interest <- unique(data$Cell.Type)
+  }
+  
+  if (is.null(colour_vector)) {
+    colour_vector <- hcl.colors(length(cell_types_of_interest), "Batlow")
+  }
+  
+  if (length(cell_types_of_interest) != length(colour_vector)) {
+    stop("Length of cell_types_of_interest is not equal to length of colour_vector")
+  }
+  
+  ## Including non-interest cell types
+  ## Define cell.id of non-interest cell types as "No Interest"
+  cell_types_of_non_interest <- c()
+  if (include_cell_types_of_no_interest) {
+    cell_types_of_non_interest <- setdiff(unique(data[[feature_colname]]), cell_types_of_interest)
+    
+    data[data[[feature_colname]] %in% cell_types_of_non_interest, feature_colname] <- "No Interest"
+    
+    ## Add "No Interest" as a cell type of interest
+    cell_types_of_interest <- c(cell_types_of_interest, "No Interest")
+    
+    ## Use lightgray for "No Interest" cell types
+    colour_vector <- c(colour_vector, "#F0F0F0")
+  }
+  ## Excluding non-interest cell types
+  ## Subset data to only include cell types of interest
+  else {
+    data <- data[data[[feature_colname]] %in% cell_types_of_interest, ]
+  }
+  
+  ## Factor for feature column
+  data[, feature_colname] <- factor(data[, feature_colname],
+                                    levels = cell_types_of_interest)
+  
+  ## Plot
+  fig <- plot_ly(data,
+                 type = "scatter3d",
+                 mode = 'markers',
+                 x = ~Cell.X.Position,
+                 y = ~Cell.Y.Position,
+                 z = ~Cell.Z.Position,
+                 color = ~Cell.Type,
+                 colors = colour_vector,
+                 marker = list(size = size))
+  
+  fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                     yaxis = list(title = 'y'),
+                                     zaxis = list(title = 'z')))
+  
+  # fig <- fig %>% layout(scene = list(xaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F),
+  #                                    yaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F),
+  #                                    zaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F)))
+  
+  return (fig)
+  
+}
 
 my_colours <- c("lightgray", "red", "blue", "darkgreen")
 chosen_cell_types <- c("Other", "Tumor", "Immune", "Stroma")
@@ -394,7 +462,3 @@ chosen_cell_types <- c("Other", "Tumor", "Immune", "Stroma")
 plot_cell_categories3D(sample_n(spatial_data_3D, 4000),
                        chosen_cell_types,
                        my_colours)
-
-
-table(spatial_data_3D[spatial_data_3D$Cell.Z.Position == 170, "Cell.Type"])
-# spatial_data_3D$Cell.Z.Position <- spatial_data_3D$Cell.Z.Position / 5
