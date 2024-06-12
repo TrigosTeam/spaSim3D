@@ -7,28 +7,28 @@ data <- chosen_bg
 ###-------------------------------------------------------------------------###
 ### Background
 ###-------------------------------------------------------------------------###
-bg <- simulate_random_background_cells3D(n_cells = 10000,
-                                         length = 100,
-                                         width = 100,
-                                         height = 100,
-                                         minimum_distance_between_cells = 2,
-                                         background_cell_type = "Others",
-                                         plot_image = TRUE)
+bg_r <- simulate_random_background_cells3D(n_cells = 10000,
+                                          length = 100,
+                                          width = 100,
+                                          height = 100,
+                                          minimum_distance_between_cells = 2,
+                                          background_cell_type = "Others",
+                                          plot_image = TRUE)
 
-bg_normal <- simulate_normal_background_cells3D(n_cells = 3000,
-                                                length = 100,
-                                                width = 100,
-                                                height = 100,
-                                                jitter_proportion = 0,
-                                                background_cell_type = "Others",
-                                                plot_image = TRUE)
+bg_n <- simulate_normal_background_cells3D(n_cells = 10000,
+                                           length = 100,
+                                           width = 100,
+                                           height = 100,
+                                           jitter_proportion = 0,
+                                           background_cell_type = "Others",
+                                           plot_image = TRUE)
 
 ###-------------------------------------------------------------------------###
 ### Mixing
 ###-------------------------------------------------------------------------###
-bg_mix <- simulate_mixing3D(bg,
+bg_mix <- simulate_mixing3D(bg_sample = bg_n,
                             cell_types = c("Others", "Immune", "Tumour"),
-                            props = c(0.5, 0.2, 0.3),
+                            cell_proportions = c(0.5, 0.25, 0.25),
                             plot_image = TRUE,
                             plot_categories = c("Others", "Immune", "Tumour"),
                             plot_colours = c("lightgray", "skyblue", "orange"))
@@ -36,31 +36,28 @@ bg_mix <- simulate_mixing3D(bg,
 ###-------------------------------------------------------------------------###
 ### Clusters
 ###-------------------------------------------------------------------------###
-bg_cluster <- simulate_clusters3D(bg,
+bg_cluster <- simulate_clusters3D(bg_r,
                                   n_clusters = 3,
                                   cluster_properties = list(
                                     C1 = list(
-                                      name_of_cluster_cell = "Tumour",
-                                      infiltration_types = c("Immune", "Others"),
-                                      infiltration_proportions = c(0.4, 0.05),
                                       shape = "Sphere",
+                                      cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                      cluster_cell_proportions = c(0.55, 0.4, 0.05),
                                       radius = 25,
                                       centre_loc = c(40, 40, 40)
                                     ),
                                     C2 = list(
-                                      name_of_cluster_cell = "Endothelial",
-                                      infiltration_types = c("Others"),
-                                      infiltration_proportions = c(0.05),
                                       shape = "Cylinder",
+                                      cluster_cell_types = c("Endothelial", "Others"),
+                                      cluster_cell_proportions = c(0.95, 0.05),
                                       radius = 10,
                                       start_loc = c(0, 0, 0),
                                       end_loc   = c(20, 20 , 100)
                                     ),
                                     C3 = list(
-                                      name_of_cluster_cell = "Tumour",
-                                      infiltration_types = c("Immune", "Others"),
-                                      infiltration_proportions = c(0.3, 0.05),
                                       shape = "Ellipsoid",
+                                      cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                      cluster_cell_proportions = c(0.65, 0.3, 0.05),
                                       x_radius = 15,
                                       y_radius = 20,
                                       z_radius = 25,
@@ -77,22 +74,20 @@ bg_cluster <- simulate_clusters3D(bg,
 ###-------------------------------------------------------------------------###
 ### Two separate spheres
 ###-------------------------------------------------------------------------###
-bg_spheres <- simulate_clusters3D(bg_sample = bg,
+bg_spheres <- simulate_clusters3D(bg_sample = bg_r,
                                   n_clusters = 2,
                                   cluster_properties = list(
                                     C1 = list(
-                                      name_of_cluster_cell = "Tumour",
-                                      infiltration_types = NULL,
-                                      infiltration_proportions = NULL,
                                       shape = "Sphere",
+                                      cluster_cell_types = c("Tumour"),
+                                      cluster_cell_proportions = c(1),
                                       radius = 30,
                                       centre_loc = c(30, 30, 30)
                                     ),
                                     C2 = list(
-                                      name_of_cluster_cell = "Immune",
-                                      infiltration_types = NULL,
-                                      infiltration_proportions = NULL,
                                       shape = "Sphere",
+                                      cluster_cell_types = c("Immune"),
+                                      cluster_cell_proportions = c(1),
                                       radius = 25,
                                       centre_loc = c(70, 70, 70)
                                     )
@@ -104,14 +99,13 @@ bg_spheres <- simulate_clusters3D(bg_sample = bg,
 ###-------------------------------------------------------------------------###
 ### One sphere with mixing
 ###-------------------------------------------------------------------------###
-bg_sphere <-  simulate_clusters3D(bg_sample = bg,
+bg_sphere <-  simulate_clusters3D(bg_sample = bg_r,
                                   n_clusters = 1,
                                   cluster_properties = list(
                                     C1 = list(
-                                      name_of_cluster_cell = "Tumour",
-                                      infiltration_types = "Immune",
-                                      infiltration_proportions = 0.5,
                                       shape = "Sphere",
+                                      cluster_cell_types = c("Tumour", "Immune"),
+                                      cluster_cell_proportions = c(0.5, 0.5),
                                       radius = 30,
                                       centre_loc = c(50, 50, 50)
                                     )
@@ -124,41 +118,37 @@ bg_sphere <-  simulate_clusters3D(bg_sample = bg,
 ###-------------------------------------------------------------------------###
 ### Cylinder
 ###-------------------------------------------------------------------------###
-bg_cylinder <- simulate_clusters3D(bg_sample = bg,
+bg_cylinder <- simulate_clusters3D(bg_sample = bg_r,
                                    n_clusters = 4,
                                    cluster_properties = list(
                                      C1 = list(
-                                       name_of_cluster_cell = "Endothelial",
-                                       infiltration_types = c("Immune", "Others"),
-                                       infiltration_proportions = c(0.1, 0.05),
                                        shape = "Cylinder",
+                                       cluster_cell_types = c("Endothelial", "Immune", "Others"),
+                                       cluster_cell_proportions = c(0.85, 0.1, 0.05),
                                        radius = 8,
                                        start_loc = c(0, 0, 0),
                                        end_loc   = c(30, 30 ,30)
                                      ),
                                      C2 = list(
-                                       name_of_cluster_cell = "Endothelial",
-                                       infiltration_types = c("Immune", "Others"),
-                                       infiltration_proportions = c(0.1, 0.05),
                                        shape = "Cylinder",
+                                       cluster_cell_types = c("Endothelial", "Immune", "Others"),
+                                       cluster_cell_proportions = c(0.85, 0.1, 0.05),
                                        radius = 5,
                                        start_loc = c(30, 30, 30),
                                        end_loc   = c(30, 30 ,70)
                                      ),
                                      C3 = list(
-                                       name_of_cluster_cell = "Endothelial",
-                                       infiltration_types = c("Immune", "Others"),
-                                       infiltration_proportions = c(0.1, 0.05),
                                        shape = "Cylinder",
+                                       cluster_cell_types = c("Endothelial", "Immune", "Others"),
+                                       cluster_cell_proportions = c(0.85, 0.1, 0.05),
                                        radius = 5,
                                        start_loc = c(30, 30, 30),
                                        end_loc   = c(60, 40 ,30)
                                      ),
                                      C4 = list(
-                                       name_of_cluster_cell = "Endothelial",
-                                       infiltration_types = c("Immune", "Others"),
-                                       infiltration_proportions = c(0.1, 0.05),
                                        shape = "Cylinder",
+                                       cluster_cell_types = c("Endothelial", "Immune", "Others"),
+                                       cluster_cell_proportions = c(0.85, 0.1, 0.05),
                                        radius = 4,
                                        start_loc = c(60, 40, 30),
                                        end_loc   = c(100, 100 ,100)
@@ -171,39 +161,37 @@ bg_cylinder <- simulate_clusters3D(bg_sample = bg,
 ###-------------------------------------------------------------------------###
 ### Ellipsoid
 ###-------------------------------------------------------------------------###
-bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
-                                   n_clusters = 2,
-                                   cluster_properties = list(
-                                     C1 = list(
-                                       name_of_cluster_cell = "Tumour",
-                                       infiltration_types = c("Immune", "Others"),
-                                       infiltration_proportions = c(0.1, 0.05),
-                                       shape = "Ellipsoid",
-                                       x_radius = 20,
-                                       y_radius = 20,
-                                       z_radius = 30,
-                                       centre_loc = c(50, 50, 50),
-                                       y_z_rotation = pi/4,
-                                       x_z_rotation = 0,
-                                       x_y_rotation = 0
-                                     ), 
-                                     C2 = list(
-                                       name_of_cluster_cell = "Tumour",
-                                       infiltration_types = c("Immune", "Others"),
-                                       infiltration_proportions = c(0.1, 0.05),
-                                       shape = "Ellipsoid",
-                                       x_radius = 20,
-                                       y_radius = 20,
-                                       z_radius = 30,
-                                       centre_loc = c(50, 66, 50),
-                                       y_z_rotation = -pi/4,
-                                       x_z_rotation = 0,
-                                       x_y_rotation = 0
-                                     )
-                                   ),
-                                   plot_image = TRUE,
-                                   plot_categories = c("Others", "Immune", "Tumour"),
-                                   plot_colours = c("lightgray", "skyblue", "red"))
+bg_ellipsoid <- simulate_clusters3D(bg_sample = bg_r,
+                                    n_clusters = 2,
+                                    cluster_properties = list(
+                                      C1 = list(
+                                        shape = "Ellipsoid",
+                                        cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                        cluster_cell_proportions = c(0.85, 0.1, 0.05),
+                                        x_radius = 20,
+                                        y_radius = 20,
+                                        z_radius = 30,
+                                        centre_loc = c(50, 50, 50),
+                                        y_z_rotation = pi/4,
+                                        x_z_rotation = 0,
+                                        x_y_rotation = 0
+                                      ), 
+                                      C2 = list(
+                                        shape = "Ellipsoid",
+                                        cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                        cluster_cell_proportions = c(0.85, 0.1, 0.05),
+                                        x_radius = 20,
+                                        y_radius = 20,
+                                        z_radius = 30,
+                                        centre_loc = c(50, 66, 50),
+                                        y_z_rotation = -pi/4,
+                                        x_z_rotation = 0,
+                                        x_y_rotation = 0
+                                      )
+                                    ),
+                                    plot_image = TRUE,
+                                    plot_categories = c("Others", "Immune", "Tumour"),
+                                    plot_colours = c("lightgray", "skyblue", "red"))
 
 
 
@@ -211,15 +199,14 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg,
 ###-------------------------------------------------------------------------###
 ### Network
 ###-------------------------------------------------------------------------###
-bg_network <- simulate_clusters3D(bg,
+bg_network <- simulate_clusters3D(bg_r,
                                   n_clusters = 1,
                                   cluster_properties = list(
                                     C1 = list(
                                       shape = "Network",
+                                      cluster_cell_types = c("Immune1", "Immune2", "Immune3"),
+                                      cluster_cell_proportions = c(0.85, 0.10, 0.05),
                                       n_edges = 15,
-                                      name_of_cluster_cell = "Immune1",
-                                      infiltration_types = c("Immune2", "Immune3"),
-                                      infiltration_proportions = c(0.10, 0.05),
                                       width = 8,
                                       centre_loc = c(50, 50, 50), # Rough centre of network cluster
                                       radius = 50 # Rough radius spanned by the network cluster
@@ -235,39 +222,34 @@ bg_network <- simulate_clusters3D(bg,
 ###-------------------------------------------------------------------------###
 ### Ring
 ###-------------------------------------------------------------------------###
-bg_ring <- simulate_rings3D(bg,
+bg_ring <- simulate_rings3D(bg_sample = bg_r,
                             n_ring = 3,
                             ring_properties = list(
                               R1 = list(
-                                name_of_cluster_cell = "Tumour",
-                                infiltration_types = c("Others"),
-                                infiltration_proportions = c(0.05),
                                 shape = "Sphere",
+                                cluster_cell_types = c("Tumour", "Others"),
+                                cluster_cell_proportions = c(0.95, 0.05),
                                 radius = 20,
                                 centre_loc = c(40, 40, 40),
-                                name_of_ring_cell = "Immune",
-                                ring_width = 5,
-                                ring_infiltration_types = c("Others"),
-                                ring_infiltration_proportions = c(0.15)
+                                ring_cell_types = c("Immune", "Others"),
+                                ring_cell_proportions = c(0.85, 0.15),
+                                ring_width = 5
                               ),
                               R2 = list(
-                                name_of_cluster_cell = "Void",
-                                infiltration_types = NULL,
-                                infiltration_proportions = NULL,
                                 shape = "Cylinder",
+                                cluster_cell_types = c("Void"),
+                                cluster_cell_proportions = c(1),
                                 radius = 8,
                                 start_loc = c(0, 0, 0),
                                 end_loc   = c(20, 20 , 100),
-                                name_of_ring_cell = "Endothelial",
-                                ring_width = 5,
-                                ring_infiltration_types = c("Others"),
-                                ring_infiltration_proportions = c(0.15)
+                                ring_cell_types = c("Endothelial", "Others"),
+                                ring_cell_proportions = c(0.85, 0.15),
+                                ring_width = 5
                               ),
                               R3 = list(
-                                name_of_cluster_cell = "Tumour",
-                                infiltration_types = c("Others"),
-                                infiltration_proportions = c(0.05),
                                 shape = "Ellipsoid",
+                                cluster_cell_types = c("Tumour", "Others"),
+                                cluster_cell_proportions = c(0.95, 0.05),
                                 x_radius = 10,
                                 y_radius = 15,
                                 z_radius = 20,
@@ -275,10 +257,9 @@ bg_ring <- simulate_rings3D(bg,
                                 x_y_rotation = 0,
                                 x_z_rotation = 0,
                                 y_z_rotation = 0,
-                                name_of_ring_cell = "Immune",
-                                ring_width = 5,
-                                ring_infiltration_types = c("Others"),
-                                ring_infiltration_proportions = c(0.15)
+                                ring_cell_types = c("Immune", "Others"),
+                                ring_cell_proportions = c(0.85, 0.15),
+                                ring_width = 5
                               )
                             ),
                             plot_image = TRUE,
@@ -290,42 +271,38 @@ bg_ring <- simulate_rings3D(bg,
 ###-------------------------------------------------------------------------###
 ### Heart with ring
 ###-------------------------------------------------------------------------###
-bg_heart_ring <- simulate_rings3D(bg_sample = bg,
+bg_heart_ring <- simulate_rings3D(bg_sample = bg_r,
                                      n_ring = 2,
                                      ring_properties = list(
                                        R1 = list(
-                                          name_of_cluster_cell = "Tumour",
-                                          infiltration_types = c("Immune", "Others"),
-                                          infiltration_proportions = c(0.1, 0.05),
-                                          shape = "Ellipsoid",
-                                          x_radius = 15,
-                                          y_radius = 15,
-                                          z_radius = 25,
-                                          centre_loc = c(50, 50, 50),
-                                          y_z_rotation = pi/4,
-                                          x_z_rotation = 0,
-                                          x_y_rotation = 0,
-                                          name_of_ring_cell = "Immune",
-                                          ring_width = 5,
-                                          ring_infiltration_types = c("Others"),
-                                          ring_infiltration_proportions = c(0.15)
+                                         shape = "Ellipsoid",
+                                         cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                         cluster_cell_proportions = c(0.85, 0.1, 0.05),
+                                         x_radius = 15,
+                                         y_radius = 15,
+                                         z_radius = 25,
+                                         centre_loc = c(50, 50, 50),
+                                         y_z_rotation = pi/4,
+                                         x_z_rotation = 0,
+                                         x_y_rotation = 0,
+                                         ring_cell_types = c("Immune", "Others"),
+                                         ring_cell_proportions = c(0.85, 0.15),
+                                         ring_width = 5
                                        ), 
                                        R2 = list(
-                                          name_of_cluster_cell = "Tumour",
-                                          infiltration_types = c("Immune", "Others"),
-                                          infiltration_proportions = c(0.1, 0.05),
-                                          shape = "Ellipsoid",
-                                          x_radius = 15,
-                                          y_radius = 15,
-                                          z_radius = 25,
-                                          centre_loc = c(50, 66, 50),
-                                          y_z_rotation = -pi/4,
-                                          x_z_rotation = 0,
-                                          x_y_rotation = 0,
-                                          name_of_ring_cell = "Immune",
-                                          ring_width = 5,
-                                          ring_infiltration_types = c("Others"),
-                                          ring_infiltration_proportions = c(0.15)
+                                         shape = "Ellipsoid",
+                                         cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                         cluster_cell_proportions = c(0.85, 0.1, 0.05),
+                                         x_radius = 15,
+                                         y_radius = 15,
+                                         z_radius = 25,
+                                         centre_loc = c(50, 66, 50),
+                                         y_z_rotation = -pi/4,
+                                         x_z_rotation = 0,
+                                         x_y_rotation = 0,
+                                         ring_cell_types = c("Immune", "Others"),
+                                         ring_cell_proportions = c(0.85, 0.15),
+                                         ring_width = 5
                                        )
                                      ),
                                      plot_image = TRUE,
@@ -337,26 +314,24 @@ bg_heart_ring <- simulate_rings3D(bg_sample = bg,
 ###-------------------------------------------------------------------------###
 ### Hollow cylinder
 ###-------------------------------------------------------------------------###
-bg_cylinder_ring <- simulate_rings3D(bg_sample = bg,
-                                  n_ring = 1,
-                                  ring_properties = list(
-                                    R1 = list(
-                                      name_of_cluster_cell = "Void",
-                                      infiltration_types = NULL,
-                                      infiltration_proportions = NULL,
-                                      shape = "Cylinder",
-                                      radius = 10,
-                                      start_loc = c(0, 0, 0),
-                                      end_loc = c(100, 80, 60),
-                                      name_of_ring_cell = "Endothelial",
-                                      ring_width = 5,
-                                      ring_infiltration_types = c("Others"),
-                                      ring_infiltration_proportions = c(0.15)
-                                    )
-                                  ),
-                                  plot_image = TRUE,
-                                  plot_categories = c("Others", "Endothelial"),
-                                  plot_colours = c("lightgray", "red"))
+bg_cylinder_ring <- simulate_rings3D(bg_sample = bg_r,
+                                     n_ring = 1,
+                                     ring_properties = list(
+                                       R1 = list(
+                                         shape = "Cylinder",
+                                         cell_types = c("Void"),
+                                         cell_proportions = c("1"),
+                                         radius = 10,
+                                         start_loc = c(0, 0, 0),
+                                         end_loc = c(100, 80, 60),
+                                         ring_cell_types = c("Endothelial", "Others"),
+                                         ring_cell_proportions = c(0.85, 0.15),
+                                         ring_width = 5
+                                       )
+                                     ),
+                                     plot_image = TRUE,
+                                     plot_categories = c("Others", "Endothelial"),
+                                     plot_colours = c("lightgray", "red"))
 
 
 
@@ -364,22 +339,20 @@ bg_cylinder_ring <- simulate_rings3D(bg_sample = bg,
 ###-------------------------------------------------------------------------###
 ### Network with ring
 ###-------------------------------------------------------------------------###
-bg_network <- simulate_rings3D(bg,
+bg_network <- simulate_rings3D(bg_r,
                                n_ring = 1,
                                ring_properties = list(
                                  R1 = list(
                                    shape = "Network",
+                                   cluster_cell_types = c("Immune1"),
+                                   cluster_cell_proportions = c(1),
                                    n_edges = 15,
-                                   name_of_cluster_cell = "Immune1",
-                                   infiltration_types = NULL,
-                                   infiltration_proportions = NULL,
                                    width = 8,
                                    centre_loc = c(50, 50, 50), # Rough centre of network cluster
                                    radius = 50, # Rough radius spanned by the network cluster
-                                   name_of_ring_cell = "Immune2",
-                                   ring_width = 2,
-                                   ring_infiltration_types = NULL,
-                                   ring_infiltration_proportions = NULL
+                                   ring_cell_types = c("Immune2"),
+                                   ring_cell_proportions = c(1),
+                                   ring_width = 2
                                  )
                                ),
                                plot_image = TRUE,
@@ -391,24 +364,21 @@ bg_network <- simulate_rings3D(bg,
 ###-------------------------------------------------------------------------###
 ### Double rings
 ###-------------------------------------------------------------------------###
-bg_dr <- simulate_double_rings3D(bg,
+bg_dr <- simulate_double_rings3D(bg_sample = bg_n,
                                  n_dr = 1,
                                  dr_properties = list(
                                    D1 = list(
-                                     name_of_cluster_cell = "Tumour",
-                                     infiltration_types = c("Immune1", "Others"),
-                                     infiltration_proportions = c(0.1, 0.05),
                                      shape = "Sphere",
+                                     cluster_cell_types = c("Tumour", "Immune1", "Others"),
+                                     cluster_cell_proportions = c(0.85, 0.1, 0.05),
                                      radius = 35,
                                      centre_loc = c(50, 50, 50),
-                                     name_of_inner_ring_cell = "Immune1",
+                                     inner_ring_cell_types = c("Immune1", "Others"),
+                                     inner_ring_cell_proportions = c(0.85, 0.15),
                                      inner_ring_width = 6,
-                                     inner_ring_infiltration_types = c("Others"),
-                                     inner_ring_infiltration_proportions = c(0.15),
-                                     name_of_outer_ring_cell = "Immune2",
-                                     outer_ring_width = 3,
-                                     outer_ring_infiltration_types = c("Others"),
-                                     outer_ring_infiltration_proportions = c(0.15)
+                                     outer_ring_cell_types = c("Immune2", "Others"),
+                                     outer_ring_cell_proportions = c(0.85, 0.15),
+                                     outer_ring_width = 3
                                    )
                                  ),
                                  plot_image = TRUE,
@@ -421,14 +391,13 @@ bg_dr <- simulate_double_rings3D(bg,
 ###-------------------------------------------------------------------------###
 ### Heart with double rings
 ###-------------------------------------------------------------------------###
-bg_heart_dr <- simulate_double_rings3D(bg_sample = bg,
+bg_heart_dr <- simulate_double_rings3D(bg_sample = bg_r,
                                        n_dr = 2,
                                        dr_properties = list(
                                        D1 = list(
-                                         name_of_cluster_cell = "Tumour",
-                                         infiltration_types = c("Immune1", "Others"),
-                                         infiltration_proportions = c(0.1, 0.05),
                                          shape = "Ellipsoid",
+                                         cluster_cell_types = c("Tumour", "Immune1", "Others"),
+                                         cluster_cell_proportions = c(0.85, 0.1, 0.05),
                                          x_radius = 15,
                                          y_radius = 15,
                                          z_radius = 25,
@@ -436,20 +405,17 @@ bg_heart_dr <- simulate_double_rings3D(bg_sample = bg,
                                          y_z_rotation = pi/4,
                                          x_z_rotation = 0,
                                          x_y_rotation = 0,
-                                         name_of_inner_ring_cell = "Immune1",
+                                         inner_ring_cell_types = c("Immune1", "Others"),
+                                         inner_ring_cell_proportions = c(0.85, 0.15),
                                          inner_ring_width = 3,
-                                         inner_ring_infiltration_types = c("Others"),
-                                         inner_ring_infiltration_proportions = c(0.15),
-                                         name_of_outer_ring_cell = "Immune2",
-                                         outer_ring_width = 2,
-                                         outer_ring_infiltration_types = c("Others"),
-                                         outer_ring_infiltration_proportions = c(0.15)
+                                         outer_ring_cell_types = c("Immune2", "Others"),
+                                         outer_ring_cell_proportions = c(0.85, 0.15),
+                                         outer_ring_width = 2
                                        ), 
                                        D2 = list(
-                                         name_of_cluster_cell = "Tumour",
-                                         infiltration_types = c("Immune1", "Others"),
-                                         infiltration_proportions = c(0.1, 0.05),
                                          shape = "Ellipsoid",
+                                         cluster_cell_types = c("Tumour", "Immune1", "Others"),
+                                         cluster_cell_proportions = c(0.85, 0.1, 0.05),
                                          x_radius = 15,
                                          y_radius = 15,
                                          z_radius = 25,
@@ -457,14 +423,12 @@ bg_heart_dr <- simulate_double_rings3D(bg_sample = bg,
                                          y_z_rotation = -pi/4,
                                          x_z_rotation = 0,
                                          x_y_rotation = 0,
-                                         name_of_inner_ring_cell = "Immune1",
+                                         inner_ring_cell_types = c("Immune1", "Others"),
+                                         inner_ring_cell_proportions = c(0.85, 0.15),
                                          inner_ring_width = 3,
-                                         inner_ring_infiltration_types = c("Others"),
-                                         inner_ring_infiltration_proportions = c(0.15),
-                                         name_of_outer_ring_cell = "Immune2",
-                                         outer_ring_width = 2,
-                                         outer_ring_infiltration_types = c("Others"),
-                                         outer_ring_infiltration_proportions = c(0.15)
+                                         outer_ring_cell_types = c("Immune2", "Others"),
+                                         outer_ring_cell_proportions = c(0.85, 0.15),
+                                         outer_ring_width = 2
                                        )
                                      ),
                                      plot_image = TRUE,

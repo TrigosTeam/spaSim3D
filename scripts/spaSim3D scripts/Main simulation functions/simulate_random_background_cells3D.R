@@ -15,14 +15,11 @@ simulate_random_background_cells3D <- function(n_cells,
   if (!is.character(background_cell_type)) {
     stop("`background_cell_type` should be of character type!")
   }
-  
-  
-  # Check
   if(!is.numeric(minimum_distance_between_cells) | !is.numeric(oversampling_rate)){
     stop("One or more of `minimum_distance_between_cells`, `oversampling_rate` is not numeric!")
   }
   
-  # Need to oversample as we will be removing cells too close later
+  # Need to over-sample as cells which are too close will be removed later
   n_cells_inflated <- n_cells * oversampling_rate
   
   # Use poisson distribution to sample points
@@ -31,8 +28,8 @@ simulate_random_background_cells3D <- function(n_cells,
                                     width = width, 
                                     height = height)
   
+  # Give cells a unique ID
   rownames(pois_df) <- paste("Cell_", seq(nrow(pois_df)), sep = "")    
-  
   
   ### Check if all other cells are to close to the current cell 
   # Use frNN function: for each point, get all points within min_d of it
@@ -41,9 +38,8 @@ simulate_random_background_cells3D <- function(n_cells,
                                     query = NULL, 
                                     sort = FALSE)
   
-  # Check only the cells, don't care about the exact distance (definitely smaller than min_d)
+  # For each cell, get all other cells which were within 'minimum_distance_between_cells'
   pois_df_distances_ids <- pois_df_distances$id
-  
   
   n_cells <- nrow(pois_df)
   i <- 1
@@ -61,15 +57,15 @@ simulate_random_background_cells3D <- function(n_cells,
     }
     i <- i + 1
   }
-  # Left over cells are the cells we keep
-  chosen_cells <- names(pois_df_distances_ids)
   
-  pois_df <- pois_df[chosen_cells, ]
+  # Left over cells are the cells we choose
+  cells_chosen <- names(pois_df_distances_ids)
+  
+  pois_df <- pois_df[cells_chosen, ]
   
   x <- pois_df$x
   y <- pois_df$y
   z <- pois_df$z
-  
   
   # Put data into data frame
   df <- data.frame("Cell.X.Position" = x,
@@ -79,8 +75,6 @@ simulate_random_background_cells3D <- function(n_cells,
   
   # Plot
   if (plot_image) {
-    
-    ## Plot
     fig <- plot_ly(df,
                    type = "scatter3d",
                    mode = 'markers',
@@ -94,7 +88,6 @@ simulate_random_background_cells3D <- function(n_cells,
     fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
                                        yaxis = list(title = 'y'),
                                        zaxis = list(title = 'z')))
-    
     print(fig)
   }
   

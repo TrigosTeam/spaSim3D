@@ -1,48 +1,42 @@
 simulate_network_ring <- function(bg_sample, ring_properties) {  
   
   # Get network ring properties
+  cluster_cell_types <- ring_properties$cluster_cell_types
+  cluster_cell_proportions <- ring_properties$cluster_cell_proportions
   n_edges <- ring_properties$n_edges
-  cell_type <- ring_properties$name_of_cluster_cell
-  infiltration_types <- ring_properties$infiltration_types
-  infiltration_proportions <- ring_properties$infiltration_proportions
   width <- ring_properties$width
   centre_loc <- ring_properties$centre_loc
   radius <- ring_properties$radius
   
-  ring_cell_type <- ring_properties$name_of_ring_cell
+  ring_cell_types <- ring_properties$ring_cell_types
+  ring_cell_proportions <- ring_properties$ring_cell_proportions
   ring_width <- ring_properties$ring_width
-  ring_infiltration_types <- ring_properties$ring_infiltration_types
-  ring_infiltration_proportions <- ring_properties$ring_infiltration_proportions
-  
   
   # number of vertices is always one more than the number of edges for the MST will we make
   n_vertices <- n_edges + 1 
-  
   
   ## Subset coordinate within the radius of the centre_loc
   R <- radius^2
   
   D <- (bg_sample$Cell.X.Position - centre_loc[1])^2 +
-    (bg_sample$Cell.Y.Position - centre_loc[2])^2 +
-    (bg_sample$Cell.Z.Position - centre_loc[3])^2
+       (bg_sample$Cell.Y.Position - centre_loc[2])^2 +
+       (bg_sample$Cell.Z.Position - centre_loc[3])^2
   
-  chosen_cells <- bg_sample[D <= R, ]
+  cells_chosen <- bg_sample[D <= R, ]
   
-  ## Subset further and pick n_vertices number of cells to represent the vertices
-  chosen_rows <- sample(seq(nrow(chosen_cells)), n_vertices)
-  chosen_cells <- chosen_cells[chosen_rows,
-                               c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+  ## Subset further and pick 'n_vertices' cells to represent the vertices
+  cells_chosen <- sample_n(cells_chosen, n_vertices)
   
+  ## Get coordinates of cells chosen for vertices
+  cells_chosen <- cells_chosen[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
   
   ## Get adjacency matrix from points (pairwise distance between points)
   # Assume all points have an edge between each other
   # Assume weight of each edge is equal to the distance between points
-  adj_mat <- -1 * apcluster::negDistMat(chosen_cells)
+  adj_mat <- -1 * apcluster::negDistMat(cells_chosen)
   
   ## Use prim's algorithm to get edges (i.e. the cells connected by each edge)
   tree_edges <- prims_algorithm(adj_mat)
-  
-  
   
   ### Determine width of cylinders so that cylinders further away are thinner
   tree_edges <- data.frame(tree_edges)
@@ -88,16 +82,13 @@ simulate_network_ring <- function(bg_sample, ring_properties) {
     curr_vertices <- new_vertices
   }
   
-  
-  
-  
   ## Get cluster properties using edge data
   ring_properties <- list()
   max_depth <- max(tree_edges[["Depth"]])
   
   for (i in seq(n_edges)) {
-    start_loc <- as.numeric(chosen_cells[tree_edges[i, "Cell1"], ])
-    end_loc <- as.numeric(chosen_cells[tree_edges[i, "Cell2"], ])
+    start_loc <- as.numeric(cells_chosen[tree_edges[i, "Cell1"], ])
+    end_loc <- as.numeric(cells_chosen[tree_edges[i, "Cell2"], ])
     curr_width <- (1 - 0.10 * (max_depth - tree_edges[i, "Depth"])) * width # 10% decrease with each depth
     
     # Very unlikely case when width is negative, just ignore these cylinders
@@ -105,17 +96,15 @@ simulate_network_ring <- function(bg_sample, ring_properties) {
       width <- 0
     }
     
-    ring_properties[[i]] <- list(name_of_cluster_cell = cell_type,
-                                 infiltration_types = infiltration_types,
-                                 infiltration_proportions = infiltration_proportions,
-                                 shape = "Cylinder",
+    ring_properties[[i]] <- list(shape = "Cylinder",
+                                 cluster_cell_types = cluster_cell_types,
+                                 cluster_cell_proportions = cluster_cell_proportions,
                                  radius = curr_width,
                                  start_loc = start_loc,
                                  end_loc = end_loc,
-                                 name_of_ring_cell = ring_cell_type,
-                                 ring_width = ring_width,
-                                 ring_infiltration_types = ring_infiltration_types,
-                                 ring_infiltration_proportions = ring_infiltration_proportions)
+                                 ring_cell_types = ring_cell_types,
+                                 ring_cell_proportions = ring_cell_proportions,
+                                 ring_width = ring_width)
   }
   
   network_bg <- simulate_rings3D(bg_sample,

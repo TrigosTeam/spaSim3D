@@ -1,22 +1,25 @@
 simulate_cylinder_ring <- function(bg_sample, ring_properties) {
   
   # Get cylinder ring properties
-  cell_type <- ring_properties$name_of_cluster_cell
-  infiltration_types <- ring_properties$infiltration_types
-  infiltration_proportions <- ring_properties$infiltration_proportions
+  cluster_cell_types <- ring_properties$cluster_cell_types
+  cluster_cell_proportions <- ring_properties$cluster_cell_proportions
   radius <- ring_properties$radius
   start_loc <- ring_properties$start_loc
   end_loc <- ring_properties$end_loc
   
-  ring_cell_type <- ring_properties$name_of_ring_cell
+  ring_cell_types <- ring_properties$ring_cell_types
+  ring_cell_proportions <- ring_properties$ring_cell_proportions
   ring_width <- ring_properties$ring_width
-  ring_infiltration_types <- ring_properties$ring_infiltration_types
-  ring_infiltration_proportions <- ring_properties$ring_infiltration_proportions
-  
   
   # Get number of cells
   n_cells <- nrow(bg_sample)
 
+  # Get number of unique cluster cell types
+  n_cluster_cell_types <- length(cluster_cell_types)
+  
+  # Get number of unique ring cell types
+  n_ring_cell_types <- length(ring_cell_types)
+  
   # Get directional vector
   v1 <- end_loc - start_loc
   
@@ -27,11 +30,10 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
   i <- 1
   
   while (i <= n_cells) {
-    # Get x, y, z and phenotype of ith cell
+    # Get x, y, z coordinate of current cell
     x <- bg_sample[i, "Cell.X.Position"]
     y <- bg_sample[i, "Cell.Y.Position"]
     z <- bg_sample[i, "Cell.Z.Position"]
-    pheno <- bg_sample[i, "Cell.Type"]
     
     # Ignore points outside of these planes
     if (sum(v1 *  c(x, y, z)) < d1 || sum(v1 * c(x, y, z)) > d2) {
@@ -44,66 +46,56 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
     
     # Get perpendicular distance squared between point and line
     D <- ((v1[2]*v2[3] - v1[3]*v2[2])^2 + 
-            (v1[1]*v2[3] - v1[3]*v2[1])^2 + 
-            (v1[1]*v2[2] - v1[2]*v2[1])^2)/
-      (v1[1]^2 + v1[2]^2 + v1[3]^2)
+          (v1[1]*v2[3] - v1[3]*v2[1])^2 + 
+          (v1[1]*v2[2] - v1[2]*v2[1])^2) / (v1[1]^2 + v1[2]^2 + v1[3]^2)
     
     # Get maximum distance without and with ring squared
     R1 <- radius^2
     R2 <- (radius + ring_width)^2
     
     if (D < R1) { 
-      # in the region of cluster, generate random number to decide the `Cell.Type`
+      # Random number will determine the cluster_cell_type of the cell
       random <- stats::runif(1)
       
-      n_infiltration_types <- length(infiltration_types)
+      # Start with the first cell
+      n <- 1
+      current_proportion <- 0
       
-      # default `Cell.Type` is cell type of interest of this cluster
-      pheno <- cell_type 
-      # if the random number falls in the range of an infiltration proportion,
-      # pheno will be the corresponding infiltraiton type
-      n <- 1 # start from the first proportion
-      current_p <- 0
-      while (n <= n_infiltration_types){
-        current_p <- current_p + infiltration_proportions[n]
-        if (random <= current_p) {
-          pheno <- infiltration_types[n]
+      while (n <= n_cluster_cell_types){
+        current_proportion <- current_proportion + cluster_cell_proportions[n]
+        if (random <= current_proportion) {
+          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
       }
     }
     else if (D < R2) {
-      # in the region of ring, generate random number to decide the `Cell.Type`
+      # Random number will determine the ring_cell_type of the cell
       random <- stats::runif(1)
       
-      n_ring_infiltration_types <- length(ring_infiltration_types)
+      # Start with the first cell
+      n <- 1
+      current_proportion <- 0
       
-      # default `Cell.Type` is cell type of interest of this ring
-      pheno <- ring_cell_type
-      # if the random number falls in the range of an infiltration proportion,
-      # pheno will be the corresponding infiltraiton type
-      n <- 1 # start from the first proportion
-      current_p <- 0
-      while (n <= n_ring_infiltration_types){
-        current_p <- current_p + ring_infiltration_proportions[n]
-        if (random <= current_p) {
-          pheno <- ring_infiltration_types[n]
+      while (n <= n_ring_cell_types){
+        current_proportion <- current_proportion + ring_cell_proportions[n]
+        if (random <= current_proportion) {
+          bg_sample[i, "Cell.Type"] <- ring_cell_types[n]
           break
         }
         n <- n + 1
       }
     }
 
-    if (pheno == "Void") { 
+    if (bg_sample[i, "Cell.Type"] == "Void") { 
       bg_sample <- bg_sample[-c(i), ]
       n_cells <- n_cells - 1
         
     } else {
-      bg_sample[i, "Cell.Type"] <- pheno  
       i <- i + 1
     }
-  
   }
+  
   return(bg_sample)
 }
