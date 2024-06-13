@@ -29,7 +29,7 @@ plot_cell_distances_violin3D(pairwise_distances,
 pairwise_distances_summary <- summarise_distances_between_cell_types3D(pairwise_distances)
 
 plot_cell_distances_summary_heatmap3D(pairwise_distances_summary,
-                                      metric = "Std.Dev")
+                                      metric = "Mean")
 
 
 ### Calculate Minimum Distances between cells
@@ -55,7 +55,7 @@ mixing_scores <- calculate_mixing_scores3D(data,
 mixing_scores_gradient <- calculate_mixing_scores_gradient3D(data,
                                                              reference_cell_type = "Immune",
                                                              target_cell_type = "Tumour",
-                                                             radii = 20)
+                                                             radii = 30)
 
 
 ### Calculate Cells in the Neighborhood
@@ -67,15 +67,14 @@ neighborhood_cells <- calculate_cells_in_neighborhood3D(data,
 plot_cells_in_neighborhood_violin3D(neighborhood_cells,
                                     scales = "free_x")
 
-
 neighborhood_cells_summary <- summarise_cells_in_neighborhood3D(neighborhood_cells)
 
 
 ### Calculate cross-K function
 Kcross_results <- calculate_Kcross3D(data,
-                                     reference_cell_type = "Immune",
-                                     target_cell_type = "Tumour",
-                                     distance = 60)
+                                     reference_cell_type = "Tumour",
+                                     target_cell_type = "Immune",
+                                     distance = 20)
 
 
 Kcross_intersection <- calculate_Kcross_intersection3D(Kcross_results)

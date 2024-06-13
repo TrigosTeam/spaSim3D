@@ -80,7 +80,7 @@ calculate_cell_proportions3D <- function(data,
   if (plot.image) {
     g <- ggplot(cell_proportions, aes(x=Cell.Type, y=Percentage)) +
       geom_bar(stat='identity') + theme_bw()
-    methods::show(g)
+    print(g)
   }
   
   return (cell_proportions)
