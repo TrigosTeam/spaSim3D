@@ -11,7 +11,7 @@ bg_r <- simulate_random_background_cells3D(n_cells = 10000,
                                           length = 100,
                                           width = 100,
                                           height = 100,
-                                          minimum_distance_between_cells = 2,
+                                          minimum_distance_between_cells = 0.5,
                                           background_cell_type = "Others",
                                           plot_image = TRUE)
 
@@ -365,25 +365,57 @@ bg_network <- simulate_rings3D(bg_r,
 ### Double rings
 ###-------------------------------------------------------------------------###
 bg_dr <- simulate_double_rings3D(bg_sample = bg_n,
-                                 n_dr = 1,
+                                 n_dr = 3,
                                  dr_properties = list(
                                    D1 = list(
                                      shape = "Sphere",
-                                     cluster_cell_types = c("Tumour", "Immune1", "Others"),
-                                     cluster_cell_proportions = c(0.85, 0.1, 0.05),
-                                     radius = 35,
-                                     centre_loc = c(50, 50, 50),
+                                     cluster_cell_types = c("Tumour", "Others"),
+                                     cluster_cell_proportions = c(0.95, 0.05),
+                                     radius = 20,
+                                     centre_loc = c(40, 40, 40),
                                      inner_ring_cell_types = c("Immune1", "Others"),
                                      inner_ring_cell_proportions = c(0.85, 0.15),
-                                     inner_ring_width = 6,
-                                     outer_ring_cell_types = c("Immune2", "Others"),
-                                     outer_ring_cell_proportions = c(0.85, 0.15),
+                                     inner_ring_width = 5,
+                                     outer_ring_cell_types = c("Immune2"),
+                                     outer_ring_cell_proportions = c(1),
+                                     outer_ring_width = 3
+                                   ),
+                                   D2 = list(
+                                     shape = "Cylinder",
+                                     cluster_cell_types = c("Void"),
+                                     cluster_cell_proportions = c(1),
+                                     radius = 8,
+                                     start_loc = c(0, 0, 0),
+                                     end_loc   = c(20, 20 , 100),
+                                     inner_ring_cell_types = c("Endothelial", "Others"),
+                                     inner_ring_cell_proportions = c(0.85, 0.15),
+                                     inner_ring_width = 5,
+                                     outer_ring_cell_types = c("Immune2"),
+                                     outer_ring_cell_proportions = c(1),
+                                     outer_ring_width = 3
+                                   ),
+                                   D3 = list(
+                                     shape = "Ellipsoid",
+                                     cluster_cell_types = c("Tumour", "Others"),
+                                     cluster_cell_proportions = c(0.95, 0.05),
+                                     x_radius = 10,
+                                     y_radius = 15,
+                                     z_radius = 20,
+                                     centre_loc = c(70, 70, 70),
+                                     x_y_rotation = 0,
+                                     x_z_rotation = 0,
+                                     y_z_rotation = 0,
+                                     inner_ring_cell_types = c("Immune1", "Others"),
+                                     inner_ring_cell_proportions = c(0.85, 0.15),
+                                     inner_ring_width = 5,
+                                     outer_ring_cell_types = c("Immune2"),
+                                     outer_ring_cell_proportions = c(1),
                                      outer_ring_width = 3
                                    )
                                  ),
                                  plot_image = TRUE,
-                                 plot_categories = c("Others", "Tumour", "Immune1", "Immune2"),
-                                 plot_colours = c("lightgray", "orange", "blue", "green"))
+                                 plot_categories = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
+                                 plot_colours = c("lightgray", "orange", "skyblue", "blue", "#FF7F7F")) 
 
 
 
@@ -435,3 +467,57 @@ bg_heart_dr <- simulate_double_rings3D(bg_sample = bg_r,
                                      plot_categories = c("Others", "Tumour", "Immune1", "Immune2"),
                                      plot_colours = c("lightgray", "orange", "skyblue", "blue"))
 
+
+
+###-------------------------------------------------------------------------###
+### Cylinder with double rings
+###-------------------------------------------------------------------------###
+bg_cylinder_dr <- simulate_double_rings3D(bg_n,
+                                          n_dr = 1,
+                                          dr_properties = list(
+                                            D1 = list(
+                                              shape = "Cylinder",
+                                              cluster_cell_types = c("Tumour"),
+                                              cluster_cell_proportions = c(1),
+                                              radius = 10,
+                                              start_loc = c(0, 0, 0),
+                                              end_loc = c(100, 100, 100),
+                                              inner_ring_cell_types = c("Endothelial"),
+                                              inner_ring_cell_proportions = c(1),
+                                              inner_ring_width = 8,
+                                              outer_ring_cell_types = c("Immune"),
+                                              outer_ring_cell_proportions = c(1),
+                                              outer_ring_width = 5
+                                            )
+                                          ),
+                                          plot_image = TRUE,
+                                          plot_categories = c("Others", "Tumour", "Immune", "Endothelial"),
+                                          plot_colours = c("lightgray", "orange", "skyblue", "tomato"))
+
+
+
+###-------------------------------------------------------------------------###
+### Network with double rings
+###-------------------------------------------------------------------------###
+bg_network_dr <- simulate_double_rings3D(bg_r,
+                                         n_dr = 1,
+                                         dr_properties = list(
+                                           D1 = list(
+                                             shape = "Network",
+                                             cluster_cell_types = c("Tumour"),
+                                             cluster_cell_proportions = c(1),
+                                             n_edges = 15,
+                                             width = 5,
+                                             centre_loc = c(50, 50, 50),
+                                             radius = 50,
+                                             inner_ring_cell_types = c("Endothelial"),
+                                             inner_ring_cell_proportions = c(1),
+                                             inner_ring_width = 2,
+                                             outer_ring_cell_types = c("Immune"),
+                                             outer_ring_cell_proportions = c(1),
+                                             outer_ring_width = 2
+                                           )
+                                         ),
+                                         plot_image = TRUE,
+                                         plot_categories = c("Others", "Tumour", "Immune", "Endothelial"),
+                                         plot_colours = c("lightgray", "orange", "skyblue", "tomato"))

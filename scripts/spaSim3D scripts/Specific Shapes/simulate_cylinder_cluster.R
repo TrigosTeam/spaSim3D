@@ -61,5 +61,5 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
     }
   }
   
-  return(bg_sample)
+  return (bg_sample)
 }
