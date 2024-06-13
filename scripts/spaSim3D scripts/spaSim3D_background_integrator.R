@@ -123,9 +123,12 @@ spaSim3D_background_integrator <- function() {
     cell_types <- c()
     user_input <- ""
     while (user_input != "stop") {
-      ## Add inputted cell type to cell_types vector
       user_input <- readline(prompt = prompt_get_cell_types)
-      if (user_input != "stop") {
+      if (user_input == "") {
+        
+      }
+      ## Add inputted cell type to cell_types vector
+      else if (user_input != "stop") {
         cell_types <- c(cell_types, user_input)
         message(paste("Cell type added:", user_input))
       }
