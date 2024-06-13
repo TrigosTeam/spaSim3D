@@ -158,8 +158,29 @@ bg_cylinder <- simulate_clusters3D(bg_sample = bg_r,
                                    plot_categories = c("Others", "Immune", "Endothelial"),
                                    plot_colours = c("lightgray", "skyblue", "tomato"))
 
+
 ###-------------------------------------------------------------------------###
-### Ellipsoid
+### Void Cylinder
+###-------------------------------------------------------------------------###
+bg_void_cylinder <- simulate_clusters3D(bg_sample = bg_r,
+                                        n_clusters = 1,
+                                        cluster_properties = list(
+                                          C1 = list(
+                                            shape = "Cylinder",
+                                            cluster_cell_types = c("Void", "Immune"),
+                                            cluster_cell_proportions = c(0.95, 0.05),
+                                            radius = 20,
+                                            start_loc = c(0, 0, 0),
+                                            end_loc   = c(100, 100 , 100)
+                                          )
+                                        ),
+                                        plot_image = TRUE,
+                                        plot_categories = c("Others", "Immune"),
+                                        plot_colours = c("lightgray", "skyblue"))
+
+
+###-------------------------------------------------------------------------###
+### Ellipsoid heart
 ###-------------------------------------------------------------------------###
 bg_ellipsoid <- simulate_clusters3D(bg_sample = bg_r,
                                     n_clusters = 2,
@@ -319,8 +340,8 @@ bg_cylinder_ring <- simulate_rings3D(bg_sample = bg_r,
                                      ring_properties = list(
                                        R1 = list(
                                          shape = "Cylinder",
-                                         cell_types = c("Void"),
-                                         cell_proportions = c("1"),
+                                         cluster_cell_types = c("Void"),
+                                         cluster_cell_proportions = c(1),
                                          radius = 10,
                                          start_loc = c(0, 0, 0),
                                          end_loc = c(100, 80, 60),
@@ -499,7 +520,7 @@ bg_cylinder_dr <- simulate_double_rings3D(bg_n,
 ###-------------------------------------------------------------------------###
 ### Network with double rings
 ###-------------------------------------------------------------------------###
-bg_network_dr <- simulate_double_rings3D(bg_r,
+bg_network_dr <- simulate_double_rings3D(bg_n,
                                          n_dr = 1,
                                          dr_properties = list(
                                            D1 = list(

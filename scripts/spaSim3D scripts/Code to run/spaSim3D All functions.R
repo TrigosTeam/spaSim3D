@@ -1206,7 +1206,9 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
   d1 <- sum(v1 * start_loc)
   d2 <- sum(v1 * end_loc)
   
-  for (i in seq_len(n_cells)) {
+  i <- 1
+  
+  while (i <= n_cells) {
     # Get x, y, z coordinate of current cell
     x <- bg_sample[i, "Cell.X.Position"]
     y <- bg_sample[i, "Cell.Y.Position"]
@@ -1214,6 +1216,7 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
     
     # Ignore points outside of these planes
     if (sum(v1 *  c(x, y, z)) < d1 || sum(v1 * c(x, y, z)) > d2) {
+      i <- i + 1
       next
     }
     
@@ -1245,9 +1248,17 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
         n <- n + 1
       }
     }
+    
+    if (bg_sample[i, "Cell.Type"] == "Void") { 
+      bg_sample <- bg_sample[-c(i), ]
+      n_cells <- n_cells - 1
+      
+    } else {
+      i <- i + 1
+    }
   }
   
-  return(bg_sample)
+  return (bg_sample)
 }
 
 simulate_cylinder_ring <- function(bg_sample, ring_properties) {
