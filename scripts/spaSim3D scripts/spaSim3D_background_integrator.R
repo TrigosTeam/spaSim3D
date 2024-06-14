@@ -25,36 +25,42 @@ message_background_normal <- paste("We will need a few parameters before we can 
 
 message_mixing <- paste("Would you like to MIX the background cells with chosen cell types randomly?\n")
 
-prompt_get_cell_types <- "Keep entering the name of cell types you want mixed in the background cells, enter 'stop' to move on: "
+message_get_cell_types <- "Keep entering the name of cell types you would like.\n    enter 'stop' to move on."
 
 ### Functions -----------------------------------------------------------------
 spaSim3D_background_integrator <- function() {
   
+  # Ask if user wants a 'random' or 'normal' patterned background
   message(message_background)
   user_input_background <- get_integer_input_from_options(c(1, 2))
   
   ### Simulate random pattern
   if (user_input_background == 1) {
-    message(message_background_random)
     
+    # Get required parameters for a random background from user
+    message(message_background_random)
     parameter_values <- list("length" = get_positive_numeric_input("length"),
                              "width" = get_positive_numeric_input("width"),
                              "height" = get_positive_numeric_input("height"),
                              "number of cells" = get_positive_numeric_input("number of cells"),
                              "minimum distance between cells" = get_positive_numeric_input("minimum distance between cells"))
-    
     display_parameters(parameter_values)
+    
+    # Generate random background simulation using these parameters
     message("Generating simulation...")
     simulated_data <- simulate_random_background_cells3D(parameter_values[["number of cells"]],
                                                          parameter_values[["length"]],
                                                          parameter_values[["width"]],
                                                          parameter_values[["height"]],
                                                          parameter_values[["minimum distance between cells"]])
-    message("Would you like to change your inputs?\n")
-    user_input_y_or_n <- get_y_or_n_input()
     
-    while (user_input_y_or_n == "y") {
-      user_input_parameter_choice <- get_integer_input_from_options(seq(length(parameter_values))) # 5 different parameters
+    # Allow user the option to change their input parameters
+    message("Would you like to change your input parameters?\n")
+    change_input_parameters_y_or_n <- get_y_or_n_input()
+    while (change_input_parameters_y_or_n == "y") {
+      
+      # Determine which parameter the user wants to change
+      user_input_parameter_choice <- get_integer_input_from_options(seq(length(parameter_values)))
       
       if (user_input_parameter_choice == 1) parameter_values[["length"]] <- get_positive_numeric_input("length")
       if (user_input_parameter_choice == 2) parameter_values[["width"]] <- get_positive_numeric_input("width")
@@ -62,6 +68,7 @@ spaSim3D_background_integrator <- function() {
       if (user_input_parameter_choice == 4) parameter_values[["number of cells"]] <- get_positive_numeric_input("number of cells")
       if (user_input_parameter_choice == 5) parameter_values[["minimum distance between cells"]] <- get_positive_numeric_input("minimum distance between cells")
       
+      # Generate random background simulation using updated parameters
       display_parameters(parameter_values)
       message("Generating simulation...")
       simulated_data <- simulate_random_background_cells3D(parameter_values[["number of cells"]],
@@ -69,31 +76,37 @@ spaSim3D_background_integrator <- function() {
                                                            parameter_values[["width"]],
                                                            parameter_values[["height"]],
                                                            parameter_values[["minimum distance between cells"]])
-      message("Would you like to change your inputs?")
-      user_input_y_or_n <- get_y_or_n_input()
+      
+      message("Would you like to change your inputs?\n")
+      change_input_parameters_y_or_n <- get_y_or_n_input()
     }
   }
   ### Simulate normal pattern
   else if (user_input_background == 2) {
+
+    # Get required parameters for a normal background from user
     message(message_background_normal)
-    
     parameter_values <- list("length" = get_positive_numeric_input("length"),
                              "width" = get_positive_numeric_input("width"),
                              "height" = get_positive_numeric_input("height"),
                              "number of cells" = get_positive_numeric_input("number of cells"),
                              "amount of jitter" = get_numeric_between_input("amount of jitter", 0, 1))
-    
     display_parameters(parameter_values)
+    
+    # Generate normal background simulation using these parameters
     message("Generating simulation...")
     simulated_data <- simulate_normal_background_cells3D(parameter_values[["number of cells"]],
                                                          parameter_values[["length"]],
                                                          parameter_values[["width"]],
                                                          parameter_values[["height"]],
                                                          parameter_values[["amount of jitter"]])
-    message("Would you like to change your inputs?")
-    user_input_y_or_n <- get_y_or_n_input()
     
-    while (user_input_y_or_n == "y") {
+    # Allow user the option to change their input parameters
+    message("Would you like to change your inputs?\n")
+    change_input_parameters_y_or_n <- get_y_or_n_input()
+    while (change_input_parameters_y_or_n == "y") {
+
+      # Determine which parameter the user wants to change
       user_input_parameter_choice <- get_integer_input_from_options(seq(length(parameter_values))) # 5 different parameters
       
       if (user_input_parameter_choice == 1) parameter_values[["length"]] <- get_positive_numeric_input("length")
@@ -102,6 +115,7 @@ spaSim3D_background_integrator <- function() {
       if (user_input_parameter_choice == 4) parameter_values[["number of cells"]] <- get_positive_numeric_input("number of cells")
       if (user_input_parameter_choice == 5) parameter_values[["amount of jitter"]] <- get_numeric_between_input("amount of jitter", 0, 1)
       
+      # Generate normal background simulation using updated parameters
       display_parameters(parameter_values)
       message("Generating simulation...")
       simulated_data <- simulate_normal_background_cells3D(parameter_values[["number of cells"]],
@@ -110,79 +124,13 @@ spaSim3D_background_integrator <- function() {
                                                            parameter_values[["height"]],
                                                            parameter_values[["amount of jitter"]])
       message("Would you like to change your inputs?\n")
-      user_input_y_or_n <- get_y_or_n_input()
+      change_input_parameters_y_or_n <- get_y_or_n_input()
     }
   }
   
-  ### Simulate mixing (add more error checking, e.g. empty strings)
+  ### Simulate mixing
   message(message_mixing)
-  user_input_y_or_n <- get_y_or_n_input()
-  if (user_input_y_or_n == "y") {
-    
-    ## Get cell types
-    cell_types <- c()
-    user_input <- ""
-    while (user_input != "stop") {
-      user_input <- readline(prompt = prompt_get_cell_types)
-      if (user_input == "") {
-        
-      }
-      ## Add inputted cell type to cell_types vector
-      else if (user_input != "stop") {
-        cell_types <- c(cell_types, user_input)
-        message(paste("Cell type added:", user_input))
-      }
-      else {
-        ## User wants to stop
-        message(paste("Your cell types chosen are:", paste(cell_types, collapse = ", ")))
-        
-        ## Allow user to re-choose cell types
-        message("Would like to re-choose these cell types?\n")
-        user_input_y_or_n <- get_y_or_n_input()
-        if (user_input_y_or_n == "y") {
-          cell_types <- c()
-          user_input <- ""
-        }
-      }
-    }
-    
-    ## Get cell proportions
-    cell_proportions <- c()
-    max_proportion <- 1
-    i <- 1
-    while (i <= length(cell_types)) {
-      ## Last cell types has the remaining cell proportions
-      if (i == length(cell_types)) {
-        cell_proportions <- c(cell_proportions, max_proportion)
-        message("Cell proportion for ", cell_types[i], " must be ", max_proportion)
-      }
-      ## Add inputted cell proportion to cell_proportions vector
-      else {
-        cell_proportion <- get_numeric_between_input(paste("cell proportion of", cell_types[i], "cells"), 0, max_proportion)
-        cell_proportions <- c(cell_proportions, cell_proportion)
-        max_proportion <- 1 - sum(cell_proportions)
-        message("Cell proportion for ", cell_types[i], " is ", cell_proportion)
-      }
-      i <- i + 1
-      
-      ## Allow user to re-choose cell proportions      
-      if (i > length(cell_types)) {
-        simulated_data <- simulate_mixing3D(simulated_data,
-                                            cell_types,
-                                            cell_proportions,
-                                            plot_categories = cell_types,
-                                            plot_colours = NULL)
-        
-        message("Would like to re-choose these cell proportions?")
-        user_input_y_or_n <- get_y_or_n_input()
-        if (user_input_y_or_n == "y") {
-          cell_proportions <- c()
-          max_proportion <- 1
-          i <- 1
-        }
-      }
-    }
-  }
+  simulated_data <- get_cell_types_and_proportions_for_mixing(simulated_data)
   
   message("All done!")
   
@@ -300,6 +248,96 @@ get_y_or_n_input <- function() {
   }
   
   return (user_input)
+}
+
+get_cell_types_and_proportions_for_mixing <- function(simulated_data) {
+  
+  choose_cell_types_y_or_n <- get_y_or_n_input()
+  if (choose_cell_types_y_or_n == "y") {
+    
+    ## Get cell types from user
+    cell_types <- c()
+    user_input <- ""
+    message(message_get_cell_types)
+    while (user_input != "stop") {
+      
+      user_input <- readline(prompt = "Enter a cell type, or enter 'stop': ")
+      
+      ## Ignore if user enters a blank string
+      if (user_input == "") {
+        
+      }
+      ## Add inputted cell type to cell_types vector
+      else if (user_input != "stop") {
+        cell_types <- c(cell_types, user_input)
+        message(paste("Cell type added:", user_input))
+      }
+      ## User wants to stop but hasn't entered any cell types
+      else if (user_input == "stop" && length(cell_types) == 0) {
+        message("You have not entered any cell types. Try again\n")
+        user_input <- ""
+      }
+      ## User wants to stop
+      else {
+        message(paste("Your cell types chosen are:", paste(cell_types, collapse = ", ")))
+        
+        ## Allow user to re-choose cell types
+        message("Would like to re-choose these cell types?\n")
+        user_input_y_or_n <- get_y_or_n_input()
+        if (user_input_y_or_n == "y") {
+          cell_types <- c()
+          message(message_get_cell_types)
+          user_input <- ""
+        }
+      }
+    }
+    
+    ## Get cell proportions from user
+    cell_proportions <- c()
+    max_proportion <- 1
+    i <- 1
+    message("For each cell type, choose their proportion in the simulation. They must add to 1.\n")
+    while (i <= length(cell_types)) {
+      
+      ## For the last cell type, we can figure out what the cell proportion must be
+      if (i == length(cell_types)) {
+        cell_proportions <- c(cell_proportions, max_proportion)
+        message("Cell proportion for ", cell_types[i], " must be ", max_proportion)
+      }
+      ## Add inputted cell proportion to cell_proportions vector
+      else {
+        cell_proportion <- get_numeric_between_input(paste("cell proportion of", cell_types[i], "cells"), 0, max_proportion)
+        cell_proportions <- c(cell_proportions, cell_proportion)
+        max_proportion <- 1 - sum(cell_proportions)
+        message("Cell proportion for ", cell_types[i], " is ", cell_proportion)
+      }
+      i <- i + 1
+      
+      if (i > length(cell_types)) {
+        ## Generate simulation
+        message("Generating simulation...")
+        simulated_data <- simulate_mixing3D(simulated_data,
+                                            cell_types,
+                                            cell_proportions,
+                                            plot_image = F)
+        
+        fig <- plot_cell_categories3D(simulated_data)
+        print(fig)
+        
+        ## Allow user to re-choose cell proportions  
+        message("Would like to re-choose these cell proportions?\n")
+        user_input_y_or_n <- get_y_or_n_input()
+        if (user_input_y_or_n == "y") {
+          cell_proportions <- c()
+          max_proportion <- 1
+          i <- 1
+          message("For each cell type, choose their proportion in the simulation. They must add to 1.\n")
+        }
+      }
+    }
+    
+    return (simulated_data)
+  }
 }
 
 
