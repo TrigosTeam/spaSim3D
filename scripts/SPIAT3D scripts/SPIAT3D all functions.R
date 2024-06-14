@@ -1580,7 +1580,7 @@ plot_cell_categories3D <- function(data,
   }
   
   if (is.null(colour_vector)) {
-    colour_vector <- hcl.colors(length(cell_types_of_interest), "Batlow")
+    colour_vector <- rainbow(length(cell_types_of_interest))
   }
   
   if (length(cell_types_of_interest) != length(colour_vector)) {
