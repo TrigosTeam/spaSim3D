@@ -1,5 +1,5 @@
 ### Example code to run -------------------------------------------------------
-# simulated_cluster_data <- spaSim3D_cluster_integrator(simulated_background_data)
+simulated_cluster_data <- spaSim3D_cluster_integrator(simulated_background_data)
 
 #
 
@@ -39,7 +39,7 @@ message_network_cluster <- paste("We will need a few parameters to generate a ne
                                  "If you want to change your inputs, you'll be able to at the end.\n", sep = "")
 
 
-message_get_cell_types <- "Keep entering the name of cell types you would like.\n    enter 'stop' to move on."
+message_get_cell_types <- "Keep entering the name of cell types you would like.\n    enter 'stop' to move on.\n"
 
 
 message_cluster_choice <- paste("You can customise your cluster further if you'd like:\n
@@ -58,6 +58,10 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
     return (NULL)
   }
   
+  ## Plot the user's data so they can see what they already have
+  fig <- plot_cell_categories3D(simulated_data)
+  print(fig)
+  
   ## Get user's choice for shape type (sphere, ellipsoid, cylinder or network)
   message(message_shape_choice)
   user_input_shape <- get_integer_input_from_options(1:4)
@@ -74,7 +78,7 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
 
     # Generate sphere cluster simulation using these parameters
     cluster_properties <- list(list(shape = "Sphere",
-                                    cluster_cell_types = "Sphere cluster",
+                                    cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     radius = parameter_values[["radius"]],
                                     centre_loc = c(parameter_values[["centre x coordinate"]],
@@ -105,7 +109,7 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
 
       # Generate sphere cluster simulation using updated parameters
       cluster_properties <- list(list(shape = "Sphere",
-                                      cluster_cell_types = "Sphere cluster",
+                                      cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       radius = parameter_values[["radius"]],
                                       centre_loc = c(parameter_values[["centre x coordinate"]],
@@ -140,7 +144,7 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
     
     # Generate ellipsoid cluster simulation using these parameters
     cluster_properties <- list(list(shape = "Ellipsoid",
-                                    cluster_cell_types = "Ellipsoid cluster",
+                                    cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     x_radius = parameter_values[["x radius"]],
                                     y_radius = parameter_values[["y radius"]],
@@ -182,7 +186,7 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
       
       # Generate ellipsoid cluster simulation using updated parameters
       cluster_properties <- list(list(shape = "Ellipsoid",
-                                      cluster_cell_types = "Ellipsoid cluster",
+                                      cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       x_radius = parameter_values[["x radius"]],
                                       y_radius = parameter_values[["y radius"]],
@@ -221,7 +225,7 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
     
     # Generate cylinder cluster simulation using these parameters
     cluster_properties <- list(list(shape = "Cylinder",
-                                    cluster_cell_types = "Cylinder cluster",
+                                    cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     radius = parameter_values[["radius"]],
                                     start_loc = c(parameter_values[["start x coordinate"]],
@@ -258,7 +262,7 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
       
       # Generate cylinder cluster simulation using updated parameters
       cluster_properties <- list(list(shape = "Cylinder",
-                                      cluster_cell_types = "Cylinder cluster",
+                                      cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       radius = parameter_values[["radius"]],
                                       start_loc = c(parameter_values[["start x coordinate"]],
@@ -293,7 +297,7 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
     
     # Generate network cluster simulation using these parameters
     cluster_properties <- list(list(shape = "Network",
-                                    cluster_cell_types = "Network cluster",
+                                    cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     n_edges = parameter_values[["number of branches"]],
                                     width = parameter_values[["width of branch"]],
@@ -328,7 +332,7 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
       
       # Generate sphere cluster simulation using updated parameters
       cluster_properties <- list(list(shape = "Network",
-                                      cluster_cell_types = "Network cluster",
+                                      cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       n_edges = parameter_values[["number of branches"]],
                                       width = parameter_values[["width of network branch"]],
@@ -351,11 +355,12 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
 
   # Allow user to change the cell composition of the cluster
   message("Let's change the cell composition of this cluster")
-  simulated_data_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_data,
+  simulated_data_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_data_new,
                                                                                    simulate_clusters3D,
                                                                                    cluster_properties,
                                                                                    "cluster_cell_types",
-                                                                                   "cluster_cell_proportions")
+                                                                                   "cluster_cell_proportions",
+                                                                                   "Cluster")
   simulated_data_new <- simulated_data_new_and_properties[["data"]]
   cluster_properties <- simulated_data_new_and_properties[["properties"]]
   
@@ -406,11 +411,12 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
     # Allow user to change the cell composition of the ring
     message("Let's change the cell composition of the ring")
     
-    simulated_data_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_data,
+    simulated_data_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_data_new,
                                                                                      simulate_rings3D,
                                                                                      cluster_properties,
                                                                                      "ring_cell_types",
-                                                                                     "ring_cell_proportions")
+                                                                                     "ring_cell_proportions",
+                                                                                     "Ring")
     
     simulated_data_new <- simulated_data_new_and_properties[["data"]]
   }
@@ -467,22 +473,24 @@ spaSim3D_cluster_integrator <- function(simulated_data = NULL) {
     
     # Allow user to change the cell composition of the inner ring
     message("Let's change the cell composition of the inner ring")
-    simulated_data_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_data,
+    simulated_data_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_data_new,
                                                                                      simulate_double_rings3D,
                                                                                      cluster_properties,
                                                                                      "inner_ring_cell_types",
-                                                                                     "inner_ring_cell_proportions")
+                                                                                     "inner_ring_cell_proportions",
+                                                                                     "Inner ring")
     
     simulated_data_new <- simulated_data_new_and_properties[["data"]]
     cluster_properties <- simulated_data_new_and_properties[["properties"]]
     
     # Allow user to change the cell composition of the outer ring
     message("Let's change the cell composition of the outer ring")
-    simulated_data_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_data,
+    simulated_data_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_data_new,
                                                                                      simulate_double_rings3D,
                                                                                      cluster_properties,
                                                                                      "outer_ring_cell_types",
-                                                                                     "outer_ring_cell_proportions")
+                                                                                     "outer_ring_cell_proportions",
+                                                                                     "Outer ring")
     
     simulated_data_new <- simulated_data_new_and_properties[["data"]]
   }
@@ -612,7 +620,7 @@ get_non_negative_numeric_input <- function(parameter) {
   return (non_negative_value)
 }
 
-get_cell_types_and_proportions_for_clusters <- function(simulated_data, simulate_function, properties, cell_type_option, cell_proportion_option) {
+get_cell_types_and_proportions_for_clusters <- function(simulated_data, simulate_function, properties, cell_type_option, cell_proportion_option, temp_cell_type) {
     
   ## Get cell types from user
   cell_types <- c()
@@ -678,11 +686,14 @@ get_cell_types_and_proportions_for_clusters <- function(simulated_data, simulate
       
       ## Generate simulation
       message("Generating simulation...")
-      simulated_data_new <- simulate_function(simulated_data,
-                                              1,
-                                              properties,
-                                              plot_image = F)
+      simulated_data_new <- simulated_data
       
+      ## Just change the cell type of the temp_cell_type, no need to actually re-simulate
+      for (i in seq(nrow(simulated_data_new))) {
+        if (simulated_data_new[j, "Cell.Type"] == temp_cell_type) {
+          simulated_data_new[j, "Cell.Type"] <- get_random_cell_type(cell_types, cell_proportions)
+        }
+      }
       fig <- plot_cell_categories3D(simulated_data_new)
       print(fig)
       
@@ -701,4 +712,19 @@ get_cell_types_and_proportions_for_clusters <- function(simulated_data, simulate
   }
   
   return (list(data = simulated_data_new, properties = properties))
+}
+
+get_random_cell_type <- function(cell_types, cell_proportions) {
+  random <- runif(n = 1, min = 0, max = 1)
+  
+  i <- 1
+  current_proportion <- 0
+  
+  while (i <= length(cell_types)){
+    current_proportion <- current_proportion + cell_proportions[i]
+    if (random <= current_proportion) {
+      return (cell_types[i])
+    }
+    i <- i + 1
+  }
 }
