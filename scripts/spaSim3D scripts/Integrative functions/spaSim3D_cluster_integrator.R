@@ -690,8 +690,8 @@ get_cell_types_and_proportions_for_clusters <- function(simulated_data, simulate
       
       ## Just change the cell type of the temp_cell_type, no need to actually re-simulate
       for (i in seq(nrow(simulated_data_new))) {
-        if (simulated_data_new[j, "Cell.Type"] == temp_cell_type) {
-          simulated_data_new[j, "Cell.Type"] <- get_random_cell_type(cell_types, cell_proportions)
+        if (simulated_data_new[i, "Cell.Type"] == temp_cell_type) {
+          simulated_data_new[i, "Cell.Type"] <- get_random_cell_type(cell_types, cell_proportions)
         }
       }
       fig <- plot_cell_categories3D(simulated_data_new)
