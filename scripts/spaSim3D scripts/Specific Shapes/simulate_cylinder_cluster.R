@@ -42,6 +42,9 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
           (v1[1]*v2[3] - v1[3]*v2[1])^2 + 
           (v1[1]*v2[2] - v1[2]*v2[1])^2) / (v1[1]^2 + v1[2]^2 + v1[3]^2)
     
+    # Dumb case where the start and end loc is the same
+    if (is.nan(D)) D <- Inf
+    
     # Get maximum distance squared
     R <- radius^2
     
