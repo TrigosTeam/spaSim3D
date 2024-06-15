@@ -621,6 +621,10 @@ get_non_negative_numeric_input <- function(parameter) {
 }
 
 get_cell_types_and_proportions_for_clusters <- function(simulated_data, simulate_function, properties, cell_type_option, cell_proportion_option, temp_cell_type) {
+  
+  ## Display the cell types currently found in simulated_data to the user
+  current_cell_types <- setdiff(unique(simulated_data[["Cell.Type"]]), temp_cell_type)
+  message("Your data currently has the following cell types:\n", paste(current_cell_types, collapse = ", "), "\n")
     
   ## Get cell types from user
   cell_types <- c()
@@ -652,6 +656,7 @@ get_cell_types_and_proportions_for_clusters <- function(simulated_data, simulate
       message("Would like to re-choose these cell types?\n")
       user_input_y_or_n <- get_y_or_n_input()
       if (user_input_y_or_n == "y") {
+        message("Your data currently has the following cell types:\n", paste(current_cell_types, collapse = ", "), "\n")
         cell_types <- c()
         message(message_get_cell_types)
         user_input <- ""
