@@ -17,9 +17,9 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
   outer_ring_width <- dr_properties$outer_ring_width
   
   # Rotation angles
-  theta <- dr_properties$y_z_rotation # rotation in x-axis
-  alpha <- dr_properties$x_z_rotation # rotation in y-axis
-  beta  <- dr_properties$x_y_rotation # rotation in z-axis
+  theta <- dr_properties$y_z_rotation * (pi/180) # rotation in x-axis
+  alpha <- dr_properties$x_z_rotation * (pi/180) # rotation in y-axis
+  beta  <- dr_properties$x_y_rotation * (pi/180) # rotation in z-axis
   
   # 3x3 Transformation matrix using rotation angles
   T_M <- matrix(data = c(cos(alpha) * cos(beta), 

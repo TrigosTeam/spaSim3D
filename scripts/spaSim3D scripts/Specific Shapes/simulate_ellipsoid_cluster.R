@@ -9,9 +9,9 @@ simulate_ellipsoid_cluster <- function(bg_sample, cluster_properties) {
   centre_loc <- cluster_properties$centre_loc
   
   # Rotation angles
-  theta <- cluster_properties$y_z_rotation # rotation in x-axis
-  alpha <- cluster_properties$x_z_rotation # rotation in y-axis
-  beta  <- cluster_properties$x_y_rotation # rotation in z-axis
+  theta <- cluster_properties$y_z_rotation * (pi/180) # rotation in x-axis
+  alpha <- cluster_properties$x_z_rotation * (pi/180) # rotation in y-axis
+  beta  <- cluster_properties$x_y_rotation * (pi/180) # rotation in z-axis
   
   # 3x3 Transformation matrix (T_M) using rotation angles
   T_M <- matrix(data = c(cos(alpha) * cos(beta), 
