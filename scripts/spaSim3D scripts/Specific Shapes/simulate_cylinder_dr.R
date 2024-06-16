@@ -1,4 +1,7 @@
-simulate_cylinder_dr <- function(bg_sample, dr_properties) {
+simulate_cylinder_dr <- function(bg_spe, dr_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get cylinder double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -16,7 +19,7 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
   outer_ring_width <- dr_properties$outer_ring_width
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cluster cell types
   n_cluster_cell_types <- length(cluster_cell_types)
@@ -38,9 +41,9 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
   
   while (i <= n_cells) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"]
-    y <- bg_sample[i, "Cell.Y.Position"]
-    z <- bg_sample[i, "Cell.Z.Position"]
+    x <- df[i, "Cell.X.Position"]
+    y <- df[i, "Cell.Y.Position"]
+    z <- df[i, "Cell.Z.Position"]
     
     # Ignore points outside of these planes
     if (sum(v1 *  c(x, y, z)) < d1 || sum(v1 * c(x, y, z)) > d2) {
@@ -75,7 +78,7 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -92,7 +95,7 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
       while (n <= n_inner_ring_cell_types){
         current_proportion <- current_proportion + inner_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- inner_ring_cell_types[n]
+          df[i, "Cell.Type"] <- inner_ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -109,15 +112,15 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
       while (n <= n_outer_ring_cell_types){
         current_proportion <- current_proportion + outer_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- outer_ring_cell_types[n]
+          df[i, "Cell.Type"] <- outer_ring_cell_types[n]
           break
         }
         n <- n + 1
       }
     }
     
-    if (bg_sample[i, "Cell.Type"] == "Void") { 
-      bg_sample <- bg_sample[-c(i), ]
+    if (df[i, "Cell.Type"] == "Void") { 
+      df <- df[-c(i), ]
       n_cells <- n_cells - 1
       
     } else {
@@ -125,5 +128,20 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
     }
   }
   
-  return (bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }

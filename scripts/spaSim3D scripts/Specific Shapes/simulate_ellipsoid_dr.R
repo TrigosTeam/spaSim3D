@@ -1,4 +1,7 @@
-simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
+simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get ellipsoid double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -36,7 +39,7 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
                 byrow = TRUE)
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cluster cell types
   n_cluster_cell_types <- length(cluster_cell_types)
@@ -49,9 +52,9 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
   
   for (i in seq_len(n_cells)) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"] - centre_loc[1]
-    y <- bg_sample[i, "Cell.Y.Position"] - centre_loc[2]
-    z <- bg_sample[i, "Cell.Z.Position"] - centre_loc[3]
+    x <- df[i, "Cell.X.Position"] - centre_loc[1]
+    y <- df[i, "Cell.Y.Position"] - centre_loc[2]
+    z <- df[i, "Cell.Z.Position"] - centre_loc[3]
     
     x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
     y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
@@ -83,7 +86,7 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -100,7 +103,7 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
       while (n <= n_inner_ring_cell_types){
         current_proportion <- current_proportion + inner_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- inner_ring_cell_types[n]
+          df[i, "Cell.Type"] <- inner_ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -117,7 +120,7 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
       while (n <= n_outer_ring_cell_types){
         current_proportion <- current_proportion + outer_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- outer_ring_cell_types[n]
+          df[i, "Cell.Type"] <- outer_ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -125,5 +128,20 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
     }
   }
   
-  return (bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }

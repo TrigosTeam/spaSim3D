@@ -1,17 +1,19 @@
-simulate_mixing3D <- function(bg_sample,
-                              cell_types = c("Others", "Immune", "Tumour"),
-                              cell_proportions = c(0.5, 0.2, 0.3),
+simulate_mixing3D <- function(bg_spe,
+                              cell_types,
+                              cell_proportions,
                               plot_image = TRUE,
-                              plot_categories = c("Others", "Immune", "Tumour"),
-                              plot_colours = c("lightgray", "skyblue", "orange")) {
+                              plot_cell_types = NULL,
+                              plot_colours = NULL) {
   
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   n_cell_types <- length(cell_types)
   
-  for (i in 1:nrow(bg_sample)) {
-    x <- bg_sample$Cell.X.Position[i]
-    y <- bg_sample$Cell.Y.Position[i]
-    z <- bg_sample$Cell.Z.Position[i]
+  for (i in 1:nrow(df)) {
+    x <- df$Cell.X.Position[i]
+    y <- df$Cell.Y.Position[i]
+    z <- df$Cell.Z.Position[i]
     
     # Random number will determine the cell_type of the cell
     random <- runif(n = 1, min = 0, max = 1)
@@ -28,19 +30,31 @@ simulate_mixing3D <- function(bg_sample,
       }
       n <- n + 1
     }
-    bg_sample[i, "Cell.Type"] <- chosen_cell_type
+    df[i, "Cell.Type"] <- chosen_cell_type
   }
+  
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Get meta data
+  metadata <- bg_spe@metadata
+  metadata[["cell types"]] <- cell_types
+  metadata[["cell proportions"]] <- cell_proportions
+  
+  # Convert data frame to spe object
+  mixed_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = list(background = metadata))
   
   # Plot
   if (plot_image) {
-    fig <- plot_cell_categories3D(data = bg_sample,
-                                  cell_types_of_interest = plot_categories,
-                                  colour_vector = plot_colours,
-                                  size = 2,
-                                  include_cell_types_of_no_interest = FALSE,
-                                  feature_colname = "Cell.Type")
+    fig <- plot_cells3D(mixed_spe,
+                        plot_cell_types,
+                        plot_colours)
     print(fig)
   }
     
-  return(bg_sample)
+  return(mixed_spe)
 }

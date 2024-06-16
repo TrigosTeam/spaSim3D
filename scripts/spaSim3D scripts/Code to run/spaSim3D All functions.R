@@ -86,73 +86,53 @@ prims_algorithm <- function(graph) {
     selected[min_vertex] <- TRUE
     num_edges <- num_edges + 1
   }
-  return (tree_edges)
+  return(tree_edges)
 }
 
-plot_cell_categories3D <- function(data,
-                                   cell_types_of_interest = NULL,
-                                   colour_vector = NULL,
-                                   size = 2,
-                                   include_cell_types_of_no_interest = FALSE,
-                                   feature_colname = "Cell.Type") {
+plot_cells3D <- function(spe,
+                         plot_cell_types = NULL,
+                         plot_colours = NULL,
+                         feature_colname = "Cell.Type") {
   
-  if (is.null(cell_types_of_interest)) {
-    cell_types_of_interest <- unique(data$Cell.Type)
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe), "Cell.Type" = spe[[feature_colname]])
+  
+  ## If no cell types chosen, use all cell types found in data frame
+  if (is.null(plot_cell_types)) {
+    plot_cell_types <- unique(df[["Cell.Type"]])
   }
   
-  if (is.null(colour_vector)) {
-    colour_vector <- rainbow(length(cell_types_of_interest))
+  ## If no colours inputted, use rainbow palette
+  if (is.null(plot_colours)) {
+    plot_colours <- rainbow(length(plot_cell_types))
   }
   
-  if (length(cell_types_of_interest) != length(colour_vector)) {
-    stop("Length of cell_types_of_interest is not equal to length of colour_vector")
-  }
-  
-  ## Including non-interest cell types
-  ## Define cell.id of non-interest cell types as "No Interest"
-  cell_types_of_non_interest <- c()
-  if (include_cell_types_of_no_interest) {
-    cell_types_of_non_interest <- setdiff(unique(data[[feature_colname]]), cell_types_of_interest)
-    
-    data[data[[feature_colname]] %in% cell_types_of_non_interest, feature_colname] <- "No Interest"
-    
-    ## Add "No Interest" as a cell type of interest
-    cell_types_of_interest <- c(cell_types_of_interest, "No Interest")
-    
-    ## Use lightgray for "No Interest" cell types
-    colour_vector <- c(colour_vector, "#F0F0F0")
-  }
-  ## Excluding non-interest cell types
-  ## Subset data to only include cell types of interest
-  else {
-    data <- data[data[[feature_colname]] %in% cell_types_of_interest, ]
+  ## User inputs mismatching cell types and colours
+  if (length(plot_cell_types) != length(plot_colours)) {
+    stop("Length of plot_cell_types is not equal to length of plot_colours")
   }
   
   ## Factor for feature column
-  data[, feature_colname] <- factor(data[, feature_colname],
-                                    levels = cell_types_of_interest)
+  df[, "Cell.Type"] <- factor(df[, "Cell.Type"],
+                              levels = plot_cell_types)
   
   ## Plot
-  fig <- plot_ly(data,
+  fig <- plot_ly(df,
                  type = "scatter3d",
                  mode = 'markers',
                  x = ~Cell.X.Position,
                  y = ~Cell.Y.Position,
                  z = ~Cell.Z.Position,
                  color = ~Cell.Type,
-                 colors = colour_vector,
-                 marker = list(size = size))
+                 colors = plot_colours,
+                 marker = list(size = 2))
   
   fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
                                      yaxis = list(title = 'y'),
                                      zaxis = list(title = 'z')))
   
-  # fig <- fig %>% layout(scene = list(xaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F),
-  #                                    yaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F),
-  #                                    zaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F)))
-  
   return (fig)
-  
 }
 
 
@@ -161,7 +141,7 @@ simulate_random_background_cells3D <- function(n_cells,
                                                length, 
                                                width, 
                                                height, 
-                                               minimum_distance_between_cells = 2, 
+                                               minimum_distance_between_cells, 
                                                oversampling_rate = 1.2, 
                                                background_cell_type = "Others", 
                                                plot_image = TRUE) {
@@ -231,26 +211,34 @@ simulate_random_background_cells3D <- function(n_cells,
                    "Cell.Y.Position" = y,
                    "Cell.Z.Position" = z,
                    "Cell.Type" = background_cell_type)
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Get meta data
+  background_metadata <- list("background type" = "random",
+                              "number of cells" = n_cells,
+                              "length" = length,
+                              "width" = width,
+                              "height" = height,
+                              "minimum distance between cells" = minimum_distance_between_cells,
+                              "cell types" = background_cell_type,
+                              "cell proportions" = 1)
+  
+  ## Convert data frame to spe object
+  spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = list(background = background_metadata))
   
   # Plot
   if (plot_image) {
-    fig <- plot_ly(df,
-                   type = "scatter3d",
-                   mode = 'markers',
-                   x = ~Cell.X.Position,
-                   y = ~Cell.Y.Position,
-                   z = ~Cell.Z.Position,
-                   color = ~Cell.Type,
-                   colors = "lightgray",
-                   marker = list(size = 2))
-    
-    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
-                                       yaxis = list(title = 'y'),
-                                       zaxis = list(title = 'z')))
+    fig <- plot_cells3D(spe,
+                        background_cell_type,
+                        "lightgray")
     print(fig)
   }
   
-  return (df)
+  return (spe)
 }
 
 simulate_normal_background_cells3D <- function(n_cells, 
@@ -323,44 +311,53 @@ simulate_normal_background_cells3D <- function(n_cells,
                    "Cell.Y.Position" = y,
                    "Cell.Z.Position" = z,
                    "Cell.Type" = background_cell_type)
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Get meta data
+  background_metadata <- list("background type" = "normal",
+                              "number of cells" = n_cells,
+                              "length" = length,
+                              "width" = width,
+                              "height" = height,
+                              "amount of jitter" = jitter_proportion,
+                              "cell types" = background_cell_type,
+                              "cell proportions" = 1)
+  
+  ## Convert data frame to spe object
+  spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = list(background = background_metadata))
   
   # Plot
   if (plot_image) {
-    fig <- plot_ly(df,
-                   type = "scatter3d",
-                   mode = 'markers',
-                   x = ~Cell.X.Position,
-                   y = ~Cell.Y.Position,
-                   z = ~Cell.Z.Position,
-                   color = ~Cell.Type,
-                   colors = "lightgray",
-                   marker = list(size = 2))
-    
-    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
-                                       yaxis = list(title = 'y'),
-                                       zaxis = list(title = 'z')))
+    fig <- plot_cells3D(spe,
+                        background_cell_type,
+                        "lightgray")
     print(fig)
-    
   }
   
-  return (df)
+  return(spe)
 }
 
 
-simulate_mixing3D <- function(bg_sample,
-                              cell_types = c("Others", "Immune", "Tumour"),
-                              cell_proportions = c(0.5, 0.2, 0.3),
+simulate_mixing3D <- function(bg_spe,
+                              cell_types,
+                              cell_proportions,
                               plot_image = TRUE,
-                              plot_categories = c("Others", "Immune", "Tumour"),
-                              plot_colours = c("lightgray", "skyblue", "orange")) {
+                              plot_cell_types = NULL,
+                              plot_colours = NULL) {
   
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   n_cell_types <- length(cell_types)
   
-  for (i in 1:nrow(bg_sample)) {
-    x <- bg_sample$Cell.X.Position[i]
-    y <- bg_sample$Cell.Y.Position[i]
-    z <- bg_sample$Cell.Z.Position[i]
+  for (i in 1:nrow(df)) {
+    x <- df$Cell.X.Position[i]
+    y <- df$Cell.Y.Position[i]
+    z <- df$Cell.Z.Position[i]
     
     # Random number will determine the cell_type of the cell
     random <- runif(n = 1, min = 0, max = 1)
@@ -377,166 +374,110 @@ simulate_mixing3D <- function(bg_sample,
       }
       n <- n + 1
     }
-    bg_sample[i, "Cell.Type"] <- chosen_cell_type
+    df[i, "Cell.Type"] <- chosen_cell_type
   }
+  
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Get meta data
+  metadata <- bg_spe@metadata
+  metadata[["cell types"]] <- cell_types
+  metadata[["cell proportions"]] <- cell_proportions
+  
+  # Convert data frame to spe object
+  mixed_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = list(background = metadata))
   
   # Plot
   if (plot_image) {
-    fig <- plot_cell_categories3D(data = bg_sample,
-                                  cell_types_of_interest = plot_categories,
-                                  colour_vector = plot_colours,
-                                  size = 2,
-                                  include_cell_types_of_no_interest = FALSE,
-                                  feature_colname = "Cell.Type")
+    fig <- plot_cells3D(mixed_spe,
+                        plot_cell_types,
+                        plot_colours)
     print(fig)
   }
   
-  return(bg_sample)
+  return(mixed_spe)
 }
 
-simulate_clusters3D <- function(bg_sample,
-                                n_clusters = 3,
-                                cluster_properties = list(
-                                  C1 = list(
-                                    shape = "Sphere",
-                                    cluster_cell_types = c("Tumour", "Immune", "Others"),
-                                    cluster_cell_proportions = c(0.55, 0.4, 0.05),
-                                    radius = 25,
-                                    centre_loc = c(40, 40, 40)
-                                  ),
-                                  C2 = list(
-                                    shape = "Cylinder",
-                                    cluster_cell_types = c("Endothelial", "Others"),
-                                    cluster_cell_proportions = c(0.95, 0.05),
-                                    radius = 10,
-                                    start_loc = c(0, 0, 0),
-                                    end_loc   = c(20, 20 , 100)
-                                  ),
-                                  C3 = list(
-                                    shape = "Ellipsoid",
-                                    cluster_cell_types = c("Tumour", "Immune", "Others"),
-                                    cluster_cell_proportions = c(0.65, 0.3, 0.05),
-                                    x_radius = 15,
-                                    y_radius = 20,
-                                    z_radius = 25,
-                                    centre_loc = c(70, 70, 70),
-                                    x_y_rotation = 0,
-                                    x_z_rotation = 0,
-                                    y_z_rotation = 0
-                                  )
-                                ),
+
+simulate_clusters3D <- function(bg_spe,
+                                cluster_properties,
                                 plot_image = TRUE,
-                                plot_categories = c("Others", "Immune", "Endothelial", "Tumour"),
-                                plot_colours = c("lightgray", "skyblue", "#FF7F7F", "orange")) {
+                                plot_cell_types = NULL,
+                                plot_colours = NULL) {
   
   
-  for (k in seq_len(n_clusters)) { 
+  for (k in seq(length(cluster_properties))) { 
     
     # For each cluster, get the shape
     shape <- cluster_properties[[k]]$shape
     
     ### Sphere shape
     if (shape == "Sphere") {
-      bg_sample <- simulate_sphere_cluster(bg_sample = bg_sample, cluster_properties = cluster_properties[[k]])
+      bg_spe <- simulate_sphere_cluster(bg_spe, cluster_properties[[k]])
     } 
     
     ### Ellipsoid shape
     if (shape == "Ellipsoid") {
-      bg_sample <- simulate_ellipsoid_cluster(bg_sample = bg_sample, cluster_properties = cluster_properties[[k]])
+      bg_spe <- simulate_ellipsoid_cluster(bg_spe, cluster_properties[[k]])
     }
     
     ### Cylinder shape
     if (shape == "Cylinder") {
-      bg_sample <- simulate_cylinder_cluster(bg_sample = bg_sample, cluster_properties = cluster_properties[[k]])
+      bg_spe <- simulate_cylinder_cluster(bg_spe, cluster_properties[[k]])
     }
     
     ### Network shape
     if (shape == "Network") {
-      bg_sample <- simulate_network_cluster(bg_sample = bg_sample, cluster_properties = cluster_properties[[k]])
+      bg_spe <- simulate_network_cluster(bg_spe, cluster_properties[[k]])
     }
   }
   
   # Plot
   if (plot_image) {
-    fig <- plot_cell_categories3D(bg_sample,
-                                  cell_types_of_interest = plot_categories,
-                                  colour_vector = plot_colours,
-                                  size = 2,
-                                  include_cell_types_of_no_interest = FALSE,
-                                  feature_colname = "Cell.Type")
+    fig <- plot_cells3D(bg_spe, 
+                        plot_cell_types,
+                        plot_colours)
     print(fig)
   }
   
-  return(bg_sample)
+  return(bg_spe)
 }
 
-simulate_rings3D <- function(bg_sample,
-                             n_ring = 3,
-                             ring_properties = list(
-                               R1 = list(
-                                 shape = "Sphere",
-                                 cluster_cell_types = c("Tumour", "Others"),
-                                 cluster_cell_proportions = c(0.95, 0.05),
-                                 radius = 20,
-                                 centre_loc = c(40, 40, 40),
-                                 ring_cell_types = c("Immune", "Others"),
-                                 ring_cell_proportions = c(0.85, 0.15),
-                                 ring_width = 5
-                               ),
-                               R2 = list(
-                                 shape = "Cylinder",
-                                 cluster_cell_types = c("Void"),
-                                 cluster_cell_proportions = c(1),
-                                 radius = 8,
-                                 start_loc = c(0, 0, 0),
-                                 end_loc   = c(20, 20 , 100),
-                                 ring_cell_types = c("Endothelial", "Others"),
-                                 ring_cell_proportions = c(0.85, 0.15),
-                                 ring_width = 5
-                               ),
-                               R3 = list(
-                                 shape = "Ellipsoid",
-                                 cluster_cell_types = c("Tumour", "Others"),
-                                 cluster_cell_proportions = c(0.95, 0.05),
-                                 x_radius = 10,
-                                 y_radius = 15,
-                                 z_radius = 20,
-                                 centre_loc = c(70, 70, 70),
-                                 x_y_rotation = 0,
-                                 x_z_rotation = 0,
-                                 y_z_rotation = 0,
-                                 ring_cell_types = c("Immune", "Others"),
-                                 ring_cell_proportions = c(0.85, 0.15),
-                                 ring_width = 5
-                               )
-                             ),
+
+simulate_rings3D <- function(bg_spe,
+                             ring_properties,
                              plot_image = TRUE,
-                             plot_categories = c("Others", "Tumour", "Immune", "Endothelial"),
-                             plot_colours = c("lightgray", "orange", "skyblue", "#FF7F7F")) {
+                             plot_cell_types = NULL,
+                             plot_colours = NULL) {
   
-  for (k in seq_len(n_ring)) { 
+  for (k in seq(length(ring_properties))) { 
     
     # For each cluster, get the shape
     shape <- ring_properties[[k]]$shape
     
     ### Sphere shape +  ring
     if (shape == "Sphere") {
-      bg_sample <- simulate_sphere_ring(bg_sample = bg_sample, ring_properties = ring_properties[[k]])
+      bg_spe <- simulate_sphere_ring(bg_spe, ring_properties[[k]])
     } 
     
     ### Ellipsoid shape + ring
     else if (shape == "Ellipsoid") {
-      bg_sample <- simulate_ellipsoid_ring(bg_sample = bg_sample, ring_properties = ring_properties[[k]])
+      bg_spe <- simulate_ellipsoid_ring(bg_spe, ring_properties[[k]])
     }
     
     ### Cylinder shape + ring
     else if (shape == "Cylinder") {
-      bg_sample <- simulate_cylinder_ring(bg_sample = bg_sample, ring_properties = ring_properties[[k]])
+      bg_spe <- simulate_cylinder_ring(bg_spe, ring_properties[[k]])
     }
     
     ### Network shape + ring
     else if (shape == "Network") {
-      bg_sample <- simulate_network_ring(bg_sample = bg_sample, ring_properties = ring_properties[[k]])
+      bg_spe <- simulate_network_ring(bg_spe, ring_properties[[k]])
     }
     
     else {
@@ -546,115 +487,67 @@ simulate_rings3D <- function(bg_sample,
   
   # Plot
   if (plot_image) {
-    fig <- plot_cell_categories3D(bg_sample,
-                                  cell_types_of_interest = plot_categories,
-                                  colour_vector = plot_colours,
-                                  size = 2,
-                                  include_cell_types_of_no_interest = FALSE,
-                                  feature_colname = "Cell.Type")
+    fig <- plot_cells3D(bg_spe, 
+                        plot_cell_types,
+                        plot_colours)
     print(fig)
   }
   
-  return (bg_sample)
+  return(bg_spe)
 }
 
-simulate_double_rings3D <- function(bg_sample,
-                                    n_dr = 3,
-                                    dr_properties = list(
-                                      D1 = list(
-                                        shape = "Sphere",
-                                        cluster_cell_types = c("Tumour", "Others"),
-                                        cluster_cell_proportions = c(0.95, 0.05),
-                                        radius = 20,
-                                        centre_loc = c(40, 40, 40),
-                                        inner_ring_cell_types = c("Immune1", "Others"),
-                                        inner_ring_cell_proportions = c(0.85, 0.15),
-                                        inner_ring_width = 5,
-                                        outer_ring_cell_types = c("Immune2"),
-                                        outer_ring_cell_proportions = c(1),
-                                        outer_ring_width = 3
-                                      ),
-                                      D2 = list(
-                                        shape = "Cylinder",
-                                        cluster_cell_types = c("Void"),
-                                        cluster_cell_proportions = c(1),
-                                        radius = 8,
-                                        start_loc = c(0, 0, 0),
-                                        end_loc   = c(20, 20 , 100),
-                                        inner_ring_cell_types = c("Endothelial", "Others"),
-                                        inner_ring_cell_proportions = c(0.85, 0.15),
-                                        inner_ring_width = 5,
-                                        outer_ring_cell_types = c("Immune2"),
-                                        outer_ring_cell_proportions = c(1),
-                                        outer_ring_width = 3
-                                      ),
-                                      D3 = list(
-                                        shape = "Ellipsoid",
-                                        cluster_cell_types = c("Tumour", "Others"),
-                                        cluster_cell_proportions = c(0.95, 0.05),
-                                        x_radius = 10,
-                                        y_radius = 15,
-                                        z_radius = 20,
-                                        centre_loc = c(70, 70, 70),
-                                        x_y_rotation = 0,
-                                        x_z_rotation = 0,
-                                        y_z_rotation = 0,
-                                        inner_ring_cell_types = c("Immune1", "Others"),
-                                        inner_ring_cell_proportions = c(0.85, 0.15),
-                                        inner_ring_width = 5,
-                                        outer_ring_cell_types = c("Immune2"),
-                                        outer_ring_cell_proportions = c(1),
-                                        outer_ring_width = 3
-                                      )
-                                    ),
+
+simulate_double_rings3D <- function(bg_spe,
+                                    dr_properties,
                                     plot_image = TRUE,
-                                    plot_categories = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
-                                    plot_colours = c("lightgray", "orange", "skyblue", "blue", "#FF7F7F")) {
+                                    plot_cell_types = NULL,
+                                    plot_colours = NULL) {
   
-  for (k in seq_len(n_dr)) { 
+  for (k in seq(length(dr_properties))) { 
     
     # For each cluster, get the shape
     shape <- dr_properties[[k]]$shape
     
     ### Sphere double ring shape
     if (shape == "Sphere") {
-      bg_sample <- simulate_sphere_dr(bg_sample = bg_sample, dr_properties = dr_properties[[k]])
+      bg_spe <- simulate_sphere_dr(bg_spe, dr_properties[[k]])
     } 
     
     ### Ellipsoid double ring shape
     if (shape == "Ellipsoid") {
-      bg_sample <- simulate_ellipsoid_dr(bg_sample = bg_sample, dr_properties = dr_properties[[k]])
+      bg_spe <- simulate_ellipsoid_dr(bg_spe, dr_properties[[k]])
     }
     
     ### Cylinder double ring shape
     if (shape == "Cylinder") {
-      bg_sample <- simulate_cylinder_dr(bg_sample = bg_sample, dr_properties = dr_properties[[k]])
+      bg_spe <- simulate_cylinder_dr(bg_spe, dr_properties[[k]])
     }
     
     ### Network double ring shape
     if (shape == "Network") {
-      bg_sample <- simulate_network_dr(bg_sample = bg_sample, dr_properties = dr_properties[[k]])
+      bg_spe <- simulate_network_dr(bg_spe, dr_properties[[k]])
     }
   }
   
   # Plot
   if (plot_image) {
-    fig <- plot_cell_categories3D(bg_sample,
-                                  cell_types_of_interest = plot_categories,
-                                  colour_vector = plot_colours,
-                                  size = 2,
-                                  include_cell_types_of_no_interest = FALSE,
-                                  feature_colname = "Cell.Type")
+    fig <- plot_cells3D(bg_spe, 
+                        plot_cell_types,
+                        plot_colours)
     print(fig)
   }
   
-  return(bg_sample)
+  return(bg_spe)
 }
 
 
 
+
 ### Sphere --------------------------------------------------------------------
-simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
+simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get sphere properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -663,16 +556,16 @@ simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
   centre_loc <- cluster_properties$centre_loc
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cell types
   n_cluster_cell_types <- length(cluster_cell_types)
   
   for (i in seq_len(n_cells)) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"]
-    y <- bg_sample[i, "Cell.Y.Position"]
-    z <- bg_sample[i, "Cell.Z.Position"]
+    x <- df[i, "Cell.X.Position"]
+    y <- df[i, "Cell.Y.Position"]
+    z <- df[i, "Cell.Z.Position"]
     
     # Add noise to the radius of the sphere
     R <- (radius * runif(1, min = 0.7, max = 1.3))^2
@@ -691,7 +584,7 @@ simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -699,10 +592,28 @@ simulate_sphere_cluster <- function(bg_sample, cluster_properties) {
     }
   }
   
-  return(bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
-simulate_sphere_ring <- function(bg_sample, ring_properties) {
+simulate_sphere_ring <- function(bg_spe, ring_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get sphere ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -715,7 +626,7 @@ simulate_sphere_ring <- function(bg_sample, ring_properties) {
   ring_width <- ring_properties$ring_width
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cluster cell types
   n_cluster_cell_types <- length(cluster_cell_types)
@@ -725,9 +636,9 @@ simulate_sphere_ring <- function(bg_sample, ring_properties) {
   
   for (i in seq_len(n_cells)) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"]
-    y <- bg_sample[i, "Cell.Y.Position"]
-    z <- bg_sample[i, "Cell.Z.Position"]
+    x <- df[i, "Cell.X.Position"]
+    y <- df[i, "Cell.Y.Position"]
+    z <- df[i, "Cell.Z.Position"]
     
     # Using radius of sphere
     R1 <- radius^2
@@ -749,7 +660,7 @@ simulate_sphere_ring <- function(bg_sample, ring_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -766,7 +677,7 @@ simulate_sphere_ring <- function(bg_sample, ring_properties) {
       while (n <= n_ring_cell_types){
         current_proportion <- current_proportion + ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- ring_cell_types[n]
+          df[i, "Cell.Type"] <- ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -774,10 +685,28 @@ simulate_sphere_ring <- function(bg_sample, ring_properties) {
     }
   }
   
-  return(bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  ring_properties <- append(list(cluster_type = "ring"), ring_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
-simulate_sphere_dr <- function(bg_sample, dr_properties) {
+simulate_sphere_dr <- function(bg_spe, dr_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get sphere double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -794,7 +723,7 @@ simulate_sphere_dr <- function(bg_sample, dr_properties) {
   outer_ring_width <- dr_properties$outer_ring_width
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cluster cell types
   n_cluster_cell_types <- length(cluster_cell_types)
@@ -807,9 +736,9 @@ simulate_sphere_dr <- function(bg_sample, dr_properties) {
   
   for (i in seq_len(n_cells)) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"]
-    y <- bg_sample[i, "Cell.Y.Position"]
-    z <- bg_sample[i, "Cell.Z.Position"]
+    x <- df[i, "Cell.X.Position"]
+    y <- df[i, "Cell.Y.Position"]
+    z <- df[i, "Cell.Z.Position"]
     
     # Using radius of sphere
     R1 <- radius^2
@@ -834,7 +763,7 @@ simulate_sphere_dr <- function(bg_sample, dr_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -851,7 +780,7 @@ simulate_sphere_dr <- function(bg_sample, dr_properties) {
       while (n <= n_inner_ring_cell_types){
         current_proportion <- current_proportion + inner_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- inner_ring_cell_types[n]
+          df[i, "Cell.Type"] <- inner_ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -868,7 +797,7 @@ simulate_sphere_dr <- function(bg_sample, dr_properties) {
       while (n <= n_outer_ring_cell_types){
         current_proportion <- current_proportion + outer_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- outer_ring_cell_types[n]
+          df[i, "Cell.Type"] <- outer_ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -876,11 +805,29 @@ simulate_sphere_dr <- function(bg_sample, dr_properties) {
     }
   }
   
-  return (bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
 ### Ellipsoid -----------------------------------------------------------------
-simulate_ellipsoid_cluster <- function(bg_sample, cluster_properties) {
+simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get ellipsoid properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -910,16 +857,16 @@ simulate_ellipsoid_cluster <- function(bg_sample, cluster_properties) {
                 byrow = TRUE)
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cell types
   n_cluster_cell_types <- length(cluster_cell_types)
   
   for (i in seq_len(n_cells)) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"] - centre_loc[1]
-    y <- bg_sample[i, "Cell.Y.Position"] - centre_loc[2]
-    z <- bg_sample[i, "Cell.Z.Position"] - centre_loc[3]
+    x <- df[i, "Cell.X.Position"] - centre_loc[1]
+    y <- df[i, "Cell.Y.Position"] - centre_loc[2]
+    z <- df[i, "Cell.Z.Position"] - centre_loc[3]
     
     x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
     y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
@@ -940,7 +887,7 @@ simulate_ellipsoid_cluster <- function(bg_sample, cluster_properties) {
       while (n <= n_cluster_cell_types) {
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -948,10 +895,28 @@ simulate_ellipsoid_cluster <- function(bg_sample, cluster_properties) {
     }
   }
   
-  return (bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
-simulate_ellipsoid_ring <- function(bg_sample, ring_properties) {
+simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get ellipsoid ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -985,7 +950,7 @@ simulate_ellipsoid_ring <- function(bg_sample, ring_properties) {
                 byrow = TRUE)
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cluster cell types
   n_cluster_cell_types <- length(cluster_cell_types)
@@ -995,9 +960,9 @@ simulate_ellipsoid_ring <- function(bg_sample, ring_properties) {
   
   for (i in seq_len(n_cells)) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"] - centre_loc[1]
-    y <- bg_sample[i, "Cell.Y.Position"] - centre_loc[2]
-    z <- bg_sample[i, "Cell.Z.Position"] - centre_loc[3]
+    x <- df[i, "Cell.X.Position"] - centre_loc[1]
+    y <- df[i, "Cell.Y.Position"] - centre_loc[2]
+    z <- df[i, "Cell.Z.Position"] - centre_loc[3]
     
     x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
     y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
@@ -1024,7 +989,7 @@ simulate_ellipsoid_ring <- function(bg_sample, ring_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -1041,7 +1006,7 @@ simulate_ellipsoid_ring <- function(bg_sample, ring_properties) {
       while (n <= n_ring_cell_types){
         current_proportion <- current_proportion + ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- ring_cell_types[n]
+          df[i, "Cell.Type"] <- ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -1049,10 +1014,28 @@ simulate_ellipsoid_ring <- function(bg_sample, ring_properties) {
     }
   }
   
-  return(bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  ring_properties <- append(list(cluster_type = "ring"), ring_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
-simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
+simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get ellipsoid double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -1090,7 +1073,7 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
                 byrow = TRUE)
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cluster cell types
   n_cluster_cell_types <- length(cluster_cell_types)
@@ -1103,9 +1086,9 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
   
   for (i in seq_len(n_cells)) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"] - centre_loc[1]
-    y <- bg_sample[i, "Cell.Y.Position"] - centre_loc[2]
-    z <- bg_sample[i, "Cell.Z.Position"] - centre_loc[3]
+    x <- df[i, "Cell.X.Position"] - centre_loc[1]
+    y <- df[i, "Cell.Y.Position"] - centre_loc[2]
+    z <- df[i, "Cell.Z.Position"] - centre_loc[3]
     
     x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
     y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
@@ -1137,7 +1120,7 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -1154,7 +1137,7 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
       while (n <= n_inner_ring_cell_types){
         current_proportion <- current_proportion + inner_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- inner_ring_cell_types[n]
+          df[i, "Cell.Type"] <- inner_ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -1171,7 +1154,7 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
       while (n <= n_outer_ring_cell_types){
         current_proportion <- current_proportion + outer_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- outer_ring_cell_types[n]
+          df[i, "Cell.Type"] <- outer_ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -1179,12 +1162,30 @@ simulate_ellipsoid_dr <- function(bg_sample, dr_properties) {
     }
   }
   
-  return (bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
 
 ### Cylinder ------------------------------------------------------------------
-simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
+simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get cylinder properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -1194,7 +1195,7 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
   end_loc <- cluster_properties$end_loc
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cell types
   n_cluster_cell_types <- length(cluster_cell_types)
@@ -1210,9 +1211,9 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
   
   while (i <= n_cells) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"]
-    y <- bg_sample[i, "Cell.Y.Position"]
-    z <- bg_sample[i, "Cell.Z.Position"]
+    x <- df[i, "Cell.X.Position"]
+    y <- df[i, "Cell.Y.Position"]
+    z <- df[i, "Cell.Z.Position"]
     
     # Ignore points outside of these planes
     if (sum(v1 *  c(x, y, z)) < d1 || sum(v1 * c(x, y, z)) > d2) {
@@ -1245,15 +1246,15 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
       }
     }
     
-    if (bg_sample[i, "Cell.Type"] == "Void") { 
-      bg_sample <- bg_sample[-c(i), ]
+    if (df[i, "Cell.Type"] == "Void") { 
+      df <- df[-c(i), ]
       n_cells <- n_cells - 1
       
     } else {
@@ -1261,10 +1262,28 @@ simulate_cylinder_cluster <- function(bg_sample, cluster_properties) {
     }
   }
   
-  return (bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
-simulate_cylinder_ring <- function(bg_sample, ring_properties) {
+simulate_cylinder_ring <- function(bg_spe, ring_properties) {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get cylinder ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -1278,7 +1297,7 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
   ring_width <- ring_properties$ring_width
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cluster cell types
   n_cluster_cell_types <- length(cluster_cell_types)
@@ -1297,9 +1316,9 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
   
   while (i <= n_cells) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"]
-    y <- bg_sample[i, "Cell.Y.Position"]
-    z <- bg_sample[i, "Cell.Z.Position"]
+    x <- df[i, "Cell.X.Position"]
+    y <- df[i, "Cell.Y.Position"]
+    z <- df[i, "Cell.Z.Position"]
     
     # Ignore points outside of these planes
     if (sum(v1 *  c(x, y, z)) < d1 || sum(v1 * c(x, y, z)) > d2) {
@@ -1333,7 +1352,7 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -1350,15 +1369,15 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
       while (n <= n_ring_cell_types){
         current_proportion <- current_proportion + ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- ring_cell_types[n]
+          df[i, "Cell.Type"] <- ring_cell_types[n]
           break
         }
         n <- n + 1
       }
     }
     
-    if (bg_sample[i, "Cell.Type"] == "Void") { 
-      bg_sample <- bg_sample[-c(i), ]
+    if (df[i, "Cell.Type"] == "Void") { 
+      df <- df[-c(i), ]
       n_cells <- n_cells - 1
       
     } else {
@@ -1366,12 +1385,30 @@ simulate_cylinder_ring <- function(bg_sample, ring_properties) {
     }
   }
   
-  return(bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  ring_properties <- append(list(cluster_type = "ring"), ring_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
-simulate_cylinder_dr <- function(bg_sample, dr_properties) {
+simulate_cylinder_dr <- function(bg_spe, dr_properties) {
   
-  # Get cylinder ring properties
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  
+  # Get cylinder double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
   cluster_cell_proportions <- dr_properties$cluster_cell_proportions
   radius <- dr_properties$radius
@@ -1387,7 +1424,7 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
   outer_ring_width <- dr_properties$outer_ring_width
   
   # Get number of cells
-  n_cells <- nrow(bg_sample)
+  n_cells <- nrow(df)
   
   # Get number of unique cluster cell types
   n_cluster_cell_types <- length(cluster_cell_types)
@@ -1409,9 +1446,9 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
   
   while (i <= n_cells) {
     # Get x, y, z coordinate of current cell
-    x <- bg_sample[i, "Cell.X.Position"]
-    y <- bg_sample[i, "Cell.Y.Position"]
-    z <- bg_sample[i, "Cell.Z.Position"]
+    x <- df[i, "Cell.X.Position"]
+    y <- df[i, "Cell.Y.Position"]
+    z <- df[i, "Cell.Z.Position"]
     
     # Ignore points outside of these planes
     if (sum(v1 *  c(x, y, z)) < d1 || sum(v1 * c(x, y, z)) > d2) {
@@ -1446,7 +1483,7 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
       while (n <= n_cluster_cell_types){
         current_proportion <- current_proportion + cluster_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- cluster_cell_types[n]
+          df[i, "Cell.Type"] <- cluster_cell_types[n]
           break
         }
         n <- n + 1
@@ -1463,7 +1500,7 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
       while (n <= n_inner_ring_cell_types){
         current_proportion <- current_proportion + inner_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- inner_ring_cell_types[n]
+          df[i, "Cell.Type"] <- inner_ring_cell_types[n]
           break
         }
         n <- n + 1
@@ -1480,15 +1517,15 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
       while (n <= n_outer_ring_cell_types){
         current_proportion <- current_proportion + outer_ring_cell_proportions[n]
         if (random <= current_proportion) {
-          bg_sample[i, "Cell.Type"] <- outer_ring_cell_types[n]
+          df[i, "Cell.Type"] <- outer_ring_cell_types[n]
           break
         }
         n <- n + 1
       }
     }
     
-    if (bg_sample[i, "Cell.Type"] == "Void") { 
-      bg_sample <- bg_sample[-c(i), ]
+    if (df[i, "Cell.Type"] == "Void") { 
+      df <- df[-c(i), ]
       n_cells <- n_cells - 1
       
     } else {
@@ -1496,11 +1533,30 @@ simulate_cylinder_dr <- function(bg_sample, dr_properties) {
     }
   }
   
-  return (bg_sample)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
+
 ### Network -------------------------------------------------------------------
-simulate_network_cluster <- function(bg_sample, cluster_properties) {  
+simulate_network_cluster <- function(bg_spe, cluster_properties) {  
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get network properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -1516,11 +1572,11 @@ simulate_network_cluster <- function(bg_sample, cluster_properties) {
   ## Choose cells within the radius of the centre_loc
   R <- radius^2
   
-  D <- (bg_sample$Cell.X.Position - centre_loc[1])^2 +
-    (bg_sample$Cell.Y.Position - centre_loc[2])^2 +
-    (bg_sample$Cell.Z.Position - centre_loc[3])^2
+  D <- (df$Cell.X.Position - centre_loc[1])^2 +
+    (df$Cell.Y.Position - centre_loc[2])^2 +
+    (df$Cell.Z.Position - centre_loc[3])^2
   
-  cells_chosen <- bg_sample[D <= R, ]
+  cells_chosen <- df[D <= R, ]
   
   ## Subset further and pick 'n_vertices' cells to represent the vertices
   cells_chosen <- sample_n(cells_chosen, n_vertices)
@@ -1581,7 +1637,7 @@ simulate_network_cluster <- function(bg_sample, cluster_properties) {
   }
   
   ## Get cluster properties using edge data
-  cluster_properties <- list()
+  network_cluster_properties <- list()
   max_depth <- max(tree_edges[["Depth"]])
   
   for (i in seq(n_vertices - 1)) {
@@ -1594,24 +1650,42 @@ simulate_network_cluster <- function(bg_sample, cluster_properties) {
       width <- 0
     }
     
-    cluster_properties[[i]] <- list(shape = "Cylinder",
-                                    cluster_cell_types = cluster_cell_types,
-                                    cluster_cell_proportions = cluster_cell_proportions,
-                                    radius = curr_width,
-                                    start_loc = start_loc,
-                                    end_loc = end_loc)
+    network_cluster_properties[[i]] <- list(shape = "Cylinder",
+                                            cluster_cell_types = cluster_cell_types,
+                                            cluster_cell_proportions = cluster_cell_proportions,
+                                            radius = curr_width,
+                                            start_loc = start_loc,
+                                            end_loc = end_loc)
   }
   
-  network_bg <- simulate_clusters3D(bg_sample,
-                                    n_clusters = n_edges,
-                                    cluster_properties = cluster_properties,
-                                    plot_image = F)
+  network_spe <- simulate_clusters3D(bg_spe,
+                                     cluster_properties = network_cluster_properties,
+                                     plot_image = F)
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]])
   
-  return (network_bg)
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
   
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
 }
 
-simulate_network_ring <- function(bg_sample, ring_properties) {  
+simulate_network_ring <- function(bg_spe, ring_properties) {  
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get network ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -1631,11 +1705,11 @@ simulate_network_ring <- function(bg_sample, ring_properties) {
   ## Subset coordinate within the radius of the centre_loc
   R <- radius^2
   
-  D <- (bg_sample$Cell.X.Position - centre_loc[1])^2 +
-    (bg_sample$Cell.Y.Position - centre_loc[2])^2 +
-    (bg_sample$Cell.Z.Position - centre_loc[3])^2
+  D <- (df$Cell.X.Position - centre_loc[1])^2 +
+    (df$Cell.Y.Position - centre_loc[2])^2 +
+    (df$Cell.Z.Position - centre_loc[3])^2
   
-  cells_chosen <- bg_sample[D <= R, ]
+  cells_chosen <- df[D <= R, ]
   
   ## Subset further and pick 'n_vertices' cells to represent the vertices
   cells_chosen <- sample_n(cells_chosen, n_vertices)
@@ -1696,7 +1770,7 @@ simulate_network_ring <- function(bg_sample, ring_properties) {
   }
   
   ## Get cluster properties using edge data
-  ring_properties <- list()
+  network_ring_properties <- list()
   max_depth <- max(tree_edges[["Depth"]])
   
   for (i in seq(n_edges)) {
@@ -1709,27 +1783,47 @@ simulate_network_ring <- function(bg_sample, ring_properties) {
       width <- 0
     }
     
-    ring_properties[[i]] <- list(shape = "Cylinder",
-                                 cluster_cell_types = cluster_cell_types,
-                                 cluster_cell_proportions = cluster_cell_proportions,
-                                 radius = curr_width,
-                                 start_loc = start_loc,
-                                 end_loc = end_loc,
-                                 ring_cell_types = ring_cell_types,
-                                 ring_cell_proportions = ring_cell_proportions,
-                                 ring_width = ring_width)
+    network_ring_properties[[i]] <- list(shape = "Cylinder",
+                                         cluster_cell_types = cluster_cell_types,
+                                         cluster_cell_proportions = cluster_cell_proportions,
+                                         radius = curr_width,
+                                         start_loc = start_loc,
+                                         end_loc = end_loc,
+                                         ring_cell_types = ring_cell_types,
+                                         ring_cell_proportions = ring_cell_proportions,
+                                         ring_width = ring_width)
   }
   
-  network_bg <- simulate_rings3D(bg_sample,
-                                 n_ring = n_edges,
-                                 ring_properties = ring_properties,
-                                 plot_image = F)
+  network_spe <- simulate_rings3D(bg_spe,
+                                  ring_properties = network_ring_properties,
+                                  plot_image = F)
   
-  return (network_bg)
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]])
+  
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  ring_properties <- append(list(cluster_type = "ring"), ring_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
   
 }
 
-simulate_network_dr <- function(bg_sample, dr_properties) {  
+simulate_network_dr <- function(bg_spe, dr_properties) {  
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get network double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -1753,11 +1847,11 @@ simulate_network_dr <- function(bg_sample, dr_properties) {
   ## Subset coordinate within the radius of the centre_loc
   R <- radius^2
   
-  D <- (bg_sample$Cell.X.Position - centre_loc[1])^2 +
-    (bg_sample$Cell.Y.Position - centre_loc[2])^2 +
-    (bg_sample$Cell.Z.Position - centre_loc[3])^2
+  D <- (df$Cell.X.Position - centre_loc[1])^2 +
+    (df$Cell.Y.Position - centre_loc[2])^2 +
+    (df$Cell.Z.Position - centre_loc[3])^2
   
-  cells_chosen <- bg_sample[D <= R, ]
+  cells_chosen <- df[D <= R, ]
   
   ## Subset further and pick 'n_vertices' cells to represent the vertices
   cells_chosen <- sample_n(cells_chosen, n_vertices)
@@ -1818,7 +1912,7 @@ simulate_network_dr <- function(bg_sample, dr_properties) {
   }
   
   ## Get cluster properties using edge data
-  dr_properties <- list()
+  network_dr_properties <- list()
   max_depth <- max(tree_edges[["Depth"]])
   
   for (i in seq(n_edges)) {
@@ -1831,25 +1925,43 @@ simulate_network_dr <- function(bg_sample, dr_properties) {
       width <- 0
     }
     
-    dr_properties[[i]] <- list(shape = "Cylinder",
-                               cluster_cell_types = cluster_cell_types,
-                               cluster_cell_proportions = cluster_cell_proportions,
-                               radius = curr_width,
-                               start_loc = start_loc,
-                               end_loc = end_loc,
-                               inner_ring_cell_types = inner_ring_cell_types,
-                               inner_ring_cell_proportions = inner_ring_cell_proportions,
-                               inner_ring_width = inner_ring_width,
-                               outer_ring_cell_types = outer_ring_cell_types,
-                               outer_ring_cell_proportions = outer_ring_cell_proportions,
-                               outer_ring_width = outer_ring_width)
+    network_dr_properties[[i]] <- list(shape = "Cylinder",
+                                       cluster_cell_types = cluster_cell_types,
+                                       cluster_cell_proportions = cluster_cell_proportions,
+                                       radius = curr_width,
+                                       start_loc = start_loc,
+                                       end_loc = end_loc,
+                                       inner_ring_cell_types = inner_ring_cell_types,
+                                       inner_ring_cell_proportions = inner_ring_cell_proportions,
+                                       inner_ring_width = inner_ring_width,
+                                       outer_ring_cell_types = outer_ring_cell_types,
+                                       outer_ring_cell_proportions = outer_ring_cell_proportions,
+                                       outer_ring_width = outer_ring_width)
   }
   
-  network_bg <- simulate_double_rings3D(bg_sample,
-                                        n_dr = n_edges,
-                                        dr_properties = dr_properties,
-                                        plot_image = F)
+  network_spe <- simulate_double_rings3D(bg_spe,
+                                         dr_properties = network_dr_properties,
+                                         plot_image = F)
   
-  return (network_bg)
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]])
+  
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
   
 }
+

@@ -68,26 +68,33 @@ simulate_normal_background_cells3D <- function(n_cells,
                    "Cell.Y.Position" = y,
                    "Cell.Z.Position" = z,
                    "Cell.Type" = background_cell_type)
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Get meta data
+  background_metadata <- list("background type" = "normal",
+                              "number of cells" = n_cells,
+                              "length" = length,
+                              "width" = width,
+                              "height" = height,
+                              "amount of jitter" = jitter_proportion,
+                              "cell types" = background_cell_type,
+                              "cell proportions" = 1)
+  
+  ## Convert data frame to spe object
+  spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = list(background = background_metadata))
   
   # Plot
   if (plot_image) {
-    fig <- plot_ly(df,
-                   type = "scatter3d",
-                   mode = 'markers',
-                   x = ~Cell.X.Position,
-                   y = ~Cell.Y.Position,
-                   z = ~Cell.Z.Position,
-                   color = ~Cell.Type,
-                   colors = "lightgray",
-                   marker = list(size = 2))
-    
-    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
-                                       yaxis = list(title = 'y'),
-                                       zaxis = list(title = 'z')))
+    fig <- plot_cells3D(spe,
+                        background_cell_type,
+                        "lightgray")
     print(fig)
-  
   }
   
-  return (df)
+  return(spe)
 }
 

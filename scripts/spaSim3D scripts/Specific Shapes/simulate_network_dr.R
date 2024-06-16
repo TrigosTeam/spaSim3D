@@ -1,4 +1,7 @@
-simulate_network_dr <- function(bg_sample, dr_properties) {  
+simulate_network_dr <- function(bg_spe, dr_properties) {  
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
   
   # Get network double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -22,11 +25,11 @@ simulate_network_dr <- function(bg_sample, dr_properties) {
   ## Subset coordinate within the radius of the centre_loc
   R <- radius^2
   
-  D <- (bg_sample$Cell.X.Position - centre_loc[1])^2 +
-       (bg_sample$Cell.Y.Position - centre_loc[2])^2 +
-       (bg_sample$Cell.Z.Position - centre_loc[3])^2
+  D <- (df$Cell.X.Position - centre_loc[1])^2 +
+       (df$Cell.Y.Position - centre_loc[2])^2 +
+       (df$Cell.Z.Position - centre_loc[3])^2
   
-  cells_chosen <- bg_sample[D <= R, ]
+  cells_chosen <- df[D <= R, ]
   
   ## Subset further and pick 'n_vertices' cells to represent the vertices
   cells_chosen <- sample_n(cells_chosen, n_vertices)
@@ -87,7 +90,7 @@ simulate_network_dr <- function(bg_sample, dr_properties) {
   }
   
   ## Get cluster properties using edge data
-  dr_properties <- list()
+  network_dr_properties <- list()
   max_depth <- max(tree_edges[["Depth"]])
   
   for (i in seq(n_edges)) {
@@ -100,25 +103,42 @@ simulate_network_dr <- function(bg_sample, dr_properties) {
       width <- 0
     }
     
-    dr_properties[[i]] <- list(shape = "Cylinder",
-                               cluster_cell_types = cluster_cell_types,
-                               cluster_cell_proportions = cluster_cell_proportions,
-                               radius = curr_width,
-                               start_loc = start_loc,
-                               end_loc = end_loc,
-                               inner_ring_cell_types = inner_ring_cell_types,
-                               inner_ring_cell_proportions = inner_ring_cell_proportions,
-                               inner_ring_width = inner_ring_width,
-                               outer_ring_cell_types = outer_ring_cell_types,
-                               outer_ring_cell_proportions = outer_ring_cell_proportions,
-                               outer_ring_width = outer_ring_width)
+    network_dr_properties[[i]] <- list(shape = "Cylinder",
+                                       cluster_cell_types = cluster_cell_types,
+                                       cluster_cell_proportions = cluster_cell_proportions,
+                                       radius = curr_width,
+                                       start_loc = start_loc,
+                                       end_loc = end_loc,
+                                       inner_ring_cell_types = inner_ring_cell_types,
+                                       inner_ring_cell_proportions = inner_ring_cell_proportions,
+                                       inner_ring_width = inner_ring_width,
+                                       outer_ring_cell_types = outer_ring_cell_types,
+                                       outer_ring_cell_proportions = outer_ring_cell_proportions,
+                                       outer_ring_width = outer_ring_width)
   }
   
-  network_bg <- simulate_double_rings3D(bg_sample,
-                                        n_dr = n_edges,
-                                        dr_properties = dr_properties,
+  network_spe <- simulate_double_rings3D(bg_spe,
+                                        dr_properties = network_dr_properties,
                                         plot_image = F)
   
-  return (network_bg)
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]])
+  
+  # Add Cell.ID column
+  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+  # Update current meta data
+  metadata <- bg_spe@metadata
+  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  
+  # Convert data frame to spe object
+  cluster_spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = metadata)
+  
+  return(cluster_spe)
   
 }

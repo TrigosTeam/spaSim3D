@@ -43,5 +43,5 @@ prims_algorithm <- function(graph) {
     selected[min_vertex] <- TRUE
     num_edges <- num_edges + 1
   }
-  return (tree_edges)
+  return(tree_edges)
 }
