@@ -26,18 +26,17 @@ bg_n <- simulate_normal_background_cells3D(n_cells = 10000,
 ###-------------------------------------------------------------------------###
 ### Mixing
 ###-------------------------------------------------------------------------###
-bg_mix <- simulate_mixing3D(bg_sample = bg_n,
+bg_mix <- simulate_mixing3D(bg_n,
                             cell_types = c("Others", "Immune", "Tumour"),
                             cell_proportions = c(0.5, 0.25, 0.25),
                             plot_image = TRUE,
-                            plot_categories = c("Others", "Immune", "Tumour"),
+                            plot_cell_types = c("Others", "Immune", "Tumour"),
                             plot_colours = c("lightgray", "skyblue", "orange"))
 
 ###-------------------------------------------------------------------------###
 ### Clusters
 ###-------------------------------------------------------------------------###
 bg_cluster <- simulate_clusters3D(bg_r,
-                                  n_clusters = 3,
                                   cluster_properties = list(
                                     C1 = list(
                                       shape = "Sphere",
@@ -68,14 +67,13 @@ bg_cluster <- simulate_clusters3D(bg_r,
                                     )
                                   ),
                                   plot_image = TRUE,
-                                  plot_categories = c("Others", "Immune", "Endothelial", "Tumour"),
+                                  plot_cell_types = c("Others", "Immune", "Endothelial", "Tumour"),
                                   plot_colours = c("lightgray", "skyblue", "#FF7F7F", "orange"))
 
 ###-------------------------------------------------------------------------###
 ### Two separate spheres
 ###-------------------------------------------------------------------------###
-bg_spheres <- simulate_clusters3D(bg_sample = bg_r,
-                                  n_clusters = 2,
+bg_spheres <- simulate_clusters3D(bg_r,
                                   cluster_properties = list(
                                     C1 = list(
                                       shape = "Sphere",
@@ -93,14 +91,13 @@ bg_spheres <- simulate_clusters3D(bg_sample = bg_r,
                                     )
                                   ),
                                   plot_image = TRUE,
-                                  plot_categories = c("Others", "Tumour", "Immune"),
+                                  plot_cell_types = c("Others", "Tumour", "Immune"),
                                   plot_colours = c("lightgray", "orange", "skyblue"))
 
 ###-------------------------------------------------------------------------###
 ### One sphere with mixing
 ###-------------------------------------------------------------------------###
-bg_sphere <-  simulate_clusters3D(bg_sample = bg_r,
-                                  n_clusters = 1,
+bg_sphere <-  simulate_clusters3D(bg_r,
                                   cluster_properties = list(
                                     C1 = list(
                                       shape = "Sphere",
@@ -111,15 +108,14 @@ bg_sphere <-  simulate_clusters3D(bg_sample = bg_r,
                                     )
                                   ),
                                   plot_image = TRUE,
-                                  plot_categories = c("Others", "Tumour", "Immune"),
+                                  plot_cell_types = c("Others", "Tumour", "Immune"),
                                   plot_colours = c("lightgray", "orange", "skyblue"))
 
 
 ###-------------------------------------------------------------------------###
 ### Cylinder
 ###-------------------------------------------------------------------------###
-bg_cylinder <- simulate_clusters3D(bg_sample = bg_r,
-                                   n_clusters = 4,
+bg_cylinder <- simulate_clusters3D(bg_r,
                                    cluster_properties = list(
                                      C1 = list(
                                        shape = "Cylinder",
@@ -155,15 +151,14 @@ bg_cylinder <- simulate_clusters3D(bg_sample = bg_r,
                                      )
                                    ),
                                    plot_image = TRUE,
-                                   plot_categories = c("Others", "Immune", "Endothelial"),
+                                   plot_cell_types = c("Others", "Immune", "Endothelial"),
                                    plot_colours = c("lightgray", "skyblue", "tomato"))
 
 
 ###-------------------------------------------------------------------------###
 ### Void Cylinder
 ###-------------------------------------------------------------------------###
-bg_void_cylinder <- simulate_clusters3D(bg_sample = bg_r,
-                                        n_clusters = 1,
+bg_void_cylinder <- simulate_clusters3D(bg_r,
                                         cluster_properties = list(
                                           C1 = list(
                                             shape = "Cylinder",
@@ -175,15 +170,14 @@ bg_void_cylinder <- simulate_clusters3D(bg_sample = bg_r,
                                           )
                                         ),
                                         plot_image = TRUE,
-                                        plot_categories = c("Others", "Immune"),
+                                        plot_cell_types = c("Others", "Immune"),
                                         plot_colours = c("lightgray", "skyblue"))
 
 
 ###-------------------------------------------------------------------------###
 ### Ellipsoid heart
 ###-------------------------------------------------------------------------###
-bg_ellipsoid <- simulate_clusters3D(bg_sample = bg_r,
-                                    n_clusters = 2,
+bg_ellipsoid <- simulate_clusters3D(bg_r,
                                     cluster_properties = list(
                                       C1 = list(
                                         shape = "Ellipsoid",
@@ -211,7 +205,7 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg_r,
                                       )
                                     ),
                                     plot_image = TRUE,
-                                    plot_categories = c("Others", "Immune", "Tumour"),
+                                    plot_cell_types = c("Others", "Immune", "Tumour"),
                                     plot_colours = c("lightgray", "skyblue", "red"))
 
 
@@ -221,7 +215,6 @@ bg_ellipsoid <- simulate_clusters3D(bg_sample = bg_r,
 ### Network
 ###-------------------------------------------------------------------------###
 bg_network <- simulate_clusters3D(bg_r,
-                                  n_clusters = 1,
                                   cluster_properties = list(
                                     C1 = list(
                                       shape = "Network",
@@ -234,7 +227,7 @@ bg_network <- simulate_clusters3D(bg_r,
                                     )
                                   ),
                                   plot_image = TRUE,
-                                  plot_categories = c("Others", "Immune1", "Immune2", "Immune3"),
+                                  plot_cell_types = c("Others", "Immune1", "Immune2", "Immune3"),
                                   plot_colours = c("lightgray", "skyblue", "green", "tomato"))
 
 
@@ -243,8 +236,7 @@ bg_network <- simulate_clusters3D(bg_r,
 ###-------------------------------------------------------------------------###
 ### Ring
 ###-------------------------------------------------------------------------###
-bg_ring <- simulate_rings3D(bg_sample = bg_r,
-                            n_ring = 3,
+bg_ring <- simulate_rings3D(bg_r,
                             ring_properties = list(
                               R1 = list(
                                 shape = "Sphere",
@@ -284,7 +276,7 @@ bg_ring <- simulate_rings3D(bg_sample = bg_r,
                               )
                             ),
                             plot_image = TRUE,
-                            plot_categories = c("Others", "Tumour", "Immune", "Endothelial"),
+                            plot_cell_types = c("Others", "Tumour", "Immune", "Endothelial"),
                             plot_colours = c("lightgray", "orange", "skyblue", "#FF7F7F"))
 
 
@@ -292,51 +284,49 @@ bg_ring <- simulate_rings3D(bg_sample = bg_r,
 ###-------------------------------------------------------------------------###
 ### Heart with ring
 ###-------------------------------------------------------------------------###
-bg_heart_ring <- simulate_rings3D(bg_sample = bg_r,
-                                     n_ring = 2,
-                                     ring_properties = list(
-                                       R1 = list(
-                                         shape = "Ellipsoid",
-                                         cluster_cell_types = c("Tumour", "Immune", "Others"),
-                                         cluster_cell_proportions = c(0.85, 0.1, 0.05),
-                                         x_radius = 15,
-                                         y_radius = 15,
-                                         z_radius = 25,
-                                         centre_loc = c(50, 50, 50),
-                                         y_z_rotation = pi/4,
-                                         x_z_rotation = 0,
-                                         x_y_rotation = 0,
-                                         ring_cell_types = c("Immune", "Others"),
-                                         ring_cell_proportions = c(0.85, 0.15),
-                                         ring_width = 5
-                                       ), 
-                                       R2 = list(
-                                         shape = "Ellipsoid",
-                                         cluster_cell_types = c("Tumour", "Immune", "Others"),
-                                         cluster_cell_proportions = c(0.85, 0.1, 0.05),
-                                         x_radius = 15,
-                                         y_radius = 15,
-                                         z_radius = 25,
-                                         centre_loc = c(50, 66, 50),
-                                         y_z_rotation = -pi/4,
-                                         x_z_rotation = 0,
-                                         x_y_rotation = 0,
-                                         ring_cell_types = c("Immune", "Others"),
-                                         ring_cell_proportions = c(0.85, 0.15),
-                                         ring_width = 5
-                                       )
-                                     ),
-                                     plot_image = TRUE,
-                                     plot_categories = c("Others", "Immune", "Tumour"),
-                                     plot_colours = c("lightgray", "skyblue", "red"))
+bg_heart_ring <- simulate_rings3D(bg_r,
+                                  ring_properties = list(
+                                    R1 = list(
+                                      shape = "Ellipsoid",
+                                      cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                      cluster_cell_proportions = c(0.85, 0.1, 0.05),
+                                      x_radius = 15,
+                                      y_radius = 15,
+                                      z_radius = 25,
+                                      centre_loc = c(50, 50, 50),
+                                      y_z_rotation = pi/4,
+                                      x_z_rotation = 0,
+                                      x_y_rotation = 0,
+                                      ring_cell_types = c("Immune", "Others"),
+                                      ring_cell_proportions = c(0.85, 0.15),
+                                      ring_width = 5
+                                    ), 
+                                    R2 = list(
+                                      shape = "Ellipsoid",
+                                      cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                      cluster_cell_proportions = c(0.85, 0.1, 0.05),
+                                      x_radius = 15,
+                                      y_radius = 15,
+                                      z_radius = 25,
+                                      centre_loc = c(50, 66, 50),
+                                      y_z_rotation = -pi/4,
+                                      x_z_rotation = 0,
+                                      x_y_rotation = 0,
+                                      ring_cell_types = c("Immune", "Others"),
+                                      ring_cell_proportions = c(0.85, 0.15),
+                                      ring_width = 5
+                                    )
+                                  ),
+                                  plot_image = TRUE,
+                                  plot_cell_types = c("Others", "Immune", "Tumour"),
+                                  plot_colours = c("lightgray", "skyblue", "red"))
 
 
 
 ###-------------------------------------------------------------------------###
 ### Hollow cylinder
 ###-------------------------------------------------------------------------###
-bg_cylinder_ring <- simulate_rings3D(bg_sample = bg_r,
-                                     n_ring = 1,
+bg_cylinder_ring <- simulate_rings3D(bg_r,
                                      ring_properties = list(
                                        R1 = list(
                                          shape = "Cylinder",
@@ -351,7 +341,7 @@ bg_cylinder_ring <- simulate_rings3D(bg_sample = bg_r,
                                        )
                                      ),
                                      plot_image = TRUE,
-                                     plot_categories = c("Others", "Endothelial"),
+                                     plot_cell_types = c("Others", "Endothelial"),
                                      plot_colours = c("lightgray", "red"))
 
 
@@ -361,7 +351,6 @@ bg_cylinder_ring <- simulate_rings3D(bg_sample = bg_r,
 ### Network with ring
 ###-------------------------------------------------------------------------###
 bg_network <- simulate_rings3D(bg_r,
-                               n_ring = 1,
                                ring_properties = list(
                                  R1 = list(
                                    shape = "Network",
@@ -377,7 +366,7 @@ bg_network <- simulate_rings3D(bg_r,
                                  )
                                ),
                                plot_image = TRUE,
-                               plot_categories = c("Others", "Immune1", "Immune2"),
+                               plot_cell_types = c("Others", "Immune1", "Immune2"),
                                plot_colours = c("lightgray", "skyblue", "green"))
 
 
@@ -385,8 +374,7 @@ bg_network <- simulate_rings3D(bg_r,
 ###-------------------------------------------------------------------------###
 ### Double rings
 ###-------------------------------------------------------------------------###
-bg_dr <- simulate_double_rings3D(bg_sample = bg_n,
-                                 n_dr = 3,
+bg_dr <- simulate_double_rings3D(bg_r,
                                  dr_properties = list(
                                    D1 = list(
                                      shape = "Sphere",
@@ -435,7 +423,7 @@ bg_dr <- simulate_double_rings3D(bg_sample = bg_n,
                                    )
                                  ),
                                  plot_image = TRUE,
-                                 plot_categories = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
+                                 plot_cell_types = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
                                  plot_colours = c("lightgray", "orange", "skyblue", "blue", "#FF7F7F")) 
 
 
@@ -444,8 +432,7 @@ bg_dr <- simulate_double_rings3D(bg_sample = bg_n,
 ###-------------------------------------------------------------------------###
 ### Heart with double rings
 ###-------------------------------------------------------------------------###
-bg_heart_dr <- simulate_double_rings3D(bg_sample = bg_r,
-                                       n_dr = 2,
+bg_heart_dr <- simulate_double_rings3D(bg_r,
                                        dr_properties = list(
                                        D1 = list(
                                          shape = "Ellipsoid",
@@ -485,7 +472,7 @@ bg_heart_dr <- simulate_double_rings3D(bg_sample = bg_r,
                                        )
                                      ),
                                      plot_image = TRUE,
-                                     plot_categories = c("Others", "Tumour", "Immune1", "Immune2"),
+                                     plot_cell_types = c("Others", "Tumour", "Immune1", "Immune2"),
                                      plot_colours = c("lightgray", "orange", "skyblue", "blue"))
 
 
@@ -494,7 +481,6 @@ bg_heart_dr <- simulate_double_rings3D(bg_sample = bg_r,
 ### Cylinder with double rings
 ###-------------------------------------------------------------------------###
 bg_cylinder_dr <- simulate_double_rings3D(bg_n,
-                                          n_dr = 1,
                                           dr_properties = list(
                                             D1 = list(
                                               shape = "Cylinder",
@@ -512,7 +498,7 @@ bg_cylinder_dr <- simulate_double_rings3D(bg_n,
                                             )
                                           ),
                                           plot_image = TRUE,
-                                          plot_categories = c("Others", "Tumour", "Immune", "Endothelial"),
+                                          plot_cell_types = c("Others", "Tumour", "Immune", "Endothelial"),
                                           plot_colours = c("lightgray", "orange", "skyblue", "tomato"))
 
 
@@ -520,8 +506,7 @@ bg_cylinder_dr <- simulate_double_rings3D(bg_n,
 ###-------------------------------------------------------------------------###
 ### Network with double rings
 ###-------------------------------------------------------------------------###
-bg_network_dr <- simulate_double_rings3D(bg_n,
-                                         n_dr = 1,
+bg_network_dr <- simulate_double_rings3D(bg_r,
                                          dr_properties = list(
                                            D1 = list(
                                              shape = "Network",
@@ -540,5 +525,6 @@ bg_network_dr <- simulate_double_rings3D(bg_n,
                                            )
                                          ),
                                          plot_image = TRUE,
-                                         plot_categories = c("Others", "Tumour", "Immune", "Endothelial"),
+                                         plot_cell_types = c("Others", "Tumour", "Immune", "Endothelial"),
                                          plot_colours = c("lightgray", "orange", "skyblue", "tomato"))
+
