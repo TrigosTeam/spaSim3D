@@ -1,4 +1,4 @@
-## Remember to add Cell.Id column if you haven't already
+## Remember to add Cell.ID column if you haven't already
 data <- chosen_bg
 
 
