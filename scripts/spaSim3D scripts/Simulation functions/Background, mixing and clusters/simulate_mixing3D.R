@@ -38,15 +38,15 @@ simulate_mixing3D <- function(bg_spe,
   
   # Get meta data
   metadata <- bg_spe@metadata
-  metadata[["cell types"]] <- cell_types
-  metadata[["cell proportions"]] <- cell_proportions
+  metadata[["background"]][["cell_types"]] <- cell_types
+  metadata[["background"]][["cell_proportions"]] <- cell_proportions
   
   # Convert data frame to spe object
   mixed_spe <- SpatialExperiment(
     assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
     colData = df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = list(background = metadata))
+    metadata = metadata)
   
   # Plot
   if (plot_image) {

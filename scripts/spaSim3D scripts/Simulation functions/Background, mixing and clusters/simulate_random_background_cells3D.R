@@ -2,8 +2,7 @@ simulate_random_background_cells3D <- function(n_cells,
                                                length, 
                                                width, 
                                                height, 
-                                               minimum_distance_between_cells, 
-                                               oversampling_rate = 1.2, 
+                                               minimum_distance_between_cells,
                                                background_cell_type = "Others", 
                                                plot_image = TRUE) {
   
@@ -15,12 +14,12 @@ simulate_random_background_cells3D <- function(n_cells,
   if (!is.character(background_cell_type)) {
     stop("`background_cell_type` should be of character type!")
   }
-  if(!is.numeric(minimum_distance_between_cells) | !is.numeric(oversampling_rate)){
-    stop("One or more of `minimum_distance_between_cells`, `oversampling_rate` is not numeric!")
+  if(!is.numeric(minimum_distance_between_cells)) {
+    stop("`minimum_distance_between_cells` is not numeric!")
   }
   
   # Need to over-sample as cells which are too close will be removed later
-  n_cells_inflated <- n_cells * oversampling_rate
+  n_cells_inflated <- n_cells * 1.2
   
   # Use poisson distribution to sample points
   pois_df <- poisson_distribution3D(n_cells = n_cells_inflated, 
@@ -75,14 +74,14 @@ simulate_random_background_cells3D <- function(n_cells,
   df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
   
   # Get meta data
-  background_metadata <- list("background type" = "random",
-                              "number of cells" = n_cells,
+  background_metadata <- list("background_type" = "random",
+                              "n_cells" = n_cells,
                               "length" = length,
                               "width" = width,
                               "height" = height,
-                              "minimum distance between cells" = minimum_distance_between_cells,
-                              "cell types" = background_cell_type,
-                              "cell proportions" = 1)
+                              "minimum_distance_between_cells" = minimum_distance_between_cells,
+                              "cell_types" = background_cell_type,
+                              "cell_proportions" = 1)
   
   ## Convert data frame to spe object
   spe <- SpatialExperiment(

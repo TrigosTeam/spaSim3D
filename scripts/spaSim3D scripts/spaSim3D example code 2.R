@@ -1,0 +1,67 @@
+### Using the scripts found in the "MAIN USER FUNCTIONS" folder
+
+
+### Using the integrator functions --------------------------------------------
+spe_bg <- spaSim3D_background_integrator()
+
+spe_cluster <- spaSim3D_cluster_integrator(spe_bg)
+
+# Plot with chosen colours
+plot_cells3D(spe_bg, 
+             plot_cell_types = c("Others", "Stromal"),
+             plot_colours = c("lightgray", "lightgreen"))
+
+plot_cells3D(spe_cluster,
+             plot_cell_types = c("Tumour", "Immune", "Stromal", "Others"),
+             plot_colours = c("orange", "skyblue", "lightgreen", "lightgray"))
+
+### Using the metadata-based functions ----------------------------------------
+
+# Generating duplicate simulation using metadata from previous simulation
+prev_spe <- spe_cluster
+prev_metadata <- prev_spe@metadata
+spe_cluster_dup <- simulate_spe_metadata3D(prev_metadata)
+
+
+# Get default background metadata
+metadata_bg_r <- spe_metadata_background_template("random")
+
+metadata_bg_n <- spe_metadata_background_template("normal")
+
+# Change background metadata
+metadata_bg_n$background$jitter_proportion <- 0
+metadata_bg_n$background$n_cells <- 12000
+View(metadata_bg_n)
+
+# Get spe from background metadata
+spe_bg1 <- simulate_spe_metadata3D(metadata_bg_n)
+
+
+
+# Add to background metadata to get cluster metadata
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_n, "regular", "Sphere")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "ring", "Ellipsoid")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "double ring", "Cylinder")
+# metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "regular", "Network")
+
+# Change cluster metadata
+metadata_bg_clusters$cluster_3$outer_ring_cell_types <- c("Immune", "Others")
+# metadata_bg_clusters$cluster_4$width <- 10
+# metadata_bg_clusters$cluster_4$cluster_cell_types <- "Immune"
+# metadata_bg_clusters$cluster_4$cluster_cell_proportions <- 1
+
+
+# Get spe from updated metadata
+spe_clusters <- simulate_spe_metadata3D(metadata_bg_clusters)
+plot_cells3D(spe_clusters,
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "tomato"))
+
+
+# Add metadata to spe
+metadata_new <- spe_metadata_cluster_template(metadata_bg_r, "regular", "Network")
+metadata_new$cluster_1$width <- 10
+metadata_new$cluster_1$cluster_cell_types <- "Immune"
+metadata_new$cluster_1$cluster_cell_proportions <- 1
+
+spe_clusters <- add_spe_metadata3D(spe_clusters, metadata_new)

@@ -328,11 +328,12 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       n_edges = parameter_values[["number of branches"]],
-                                      width = parameter_values[["width of network branch"]],
+                                      width = parameter_values[["width of branch"]],
                                       radius = parameter_values[["radius spanned by network"]],
                                       centre_loc = c(parameter_values[["centre x coordinate"]],
                                                      parameter_values[["centre y coordinate"]],
                                                      parameter_values[["centre z coordinate"]])))
+      
       message("Generating simulation...")
       simulated_spe_new <- simulate_clusters3D(simulated_spe,
                                                cluster_properties,

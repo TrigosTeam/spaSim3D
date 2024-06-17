@@ -71,14 +71,14 @@ simulate_normal_background_cells3D <- function(n_cells,
   df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
   
   # Get meta data
-  background_metadata <- list("background type" = "normal",
-                              "number of cells" = n_cells,
+  background_metadata <- list("background_type" = "normal",
+                              "n_cells" = n_cells,
                               "length" = length,
                               "width" = width,
                               "height" = height,
-                              "amount of jitter" = jitter_proportion,
-                              "cell types" = background_cell_type,
-                              "cell proportions" = 1)
+                              "jitter_proportion" = jitter_proportion,
+                              "cell_types" = background_cell_type,
+                              "cell_proportions" = 1)
   
   ## Convert data frame to spe object
   spe <- SpatialExperiment(

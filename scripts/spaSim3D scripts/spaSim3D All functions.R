@@ -1,4 +1,5 @@
 library(plotly)
+library(SpatialExperiment)
 library(dplyr)
 
 ### Utility -------------------------------------------------------------------
@@ -142,7 +143,6 @@ simulate_random_background_cells3D <- function(n_cells,
                                                width, 
                                                height, 
                                                minimum_distance_between_cells, 
-                                               oversampling_rate = 1.2, 
                                                background_cell_type = "Others", 
                                                plot_image = TRUE) {
   
@@ -154,12 +154,12 @@ simulate_random_background_cells3D <- function(n_cells,
   if (!is.character(background_cell_type)) {
     stop("`background_cell_type` should be of character type!")
   }
-  if(!is.numeric(minimum_distance_between_cells) | !is.numeric(oversampling_rate)){
-    stop("One or more of `minimum_distance_between_cells`, `oversampling_rate` is not numeric!")
+  if(!is.numeric(minimum_distance_between_cells)){
+    stop("`minimum_distance_between_cells` is not numeric!")
   }
   
   # Need to over-sample as cells which are too close will be removed later
-  n_cells_inflated <- n_cells * oversampling_rate
+  n_cells_inflated <- n_cells * 1.2
   
   # Use poisson distribution to sample points
   pois_df <- poisson_distribution3D(n_cells = n_cells_inflated, 
@@ -214,14 +214,14 @@ simulate_random_background_cells3D <- function(n_cells,
   df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
   
   # Get meta data
-  background_metadata <- list("background type" = "random",
-                              "number of cells" = n_cells,
+  background_metadata <- list("background_type" = "random",
+                              "n_cells" = n_cells,
                               "length" = length,
                               "width" = width,
                               "height" = height,
-                              "minimum distance between cells" = minimum_distance_between_cells,
-                              "cell types" = background_cell_type,
-                              "cell proportions" = 1)
+                              "minimum_distance_between_cells" = minimum_distance_between_cells,
+                              "cell_types" = background_cell_type,
+                              "cell_proportions" = 1)
   
   ## Convert data frame to spe object
   spe <- SpatialExperiment(
@@ -241,11 +241,12 @@ simulate_random_background_cells3D <- function(n_cells,
   return (spe)
 }
 
+
 simulate_normal_background_cells3D <- function(n_cells, 
                                                length, 
                                                width, 
                                                height,
-                                               jitter_proportion = 0.25,
+                                               jitter_proportion,
                                                background_cell_type = "Others", 
                                                plot_image = TRUE) {
   
@@ -314,14 +315,14 @@ simulate_normal_background_cells3D <- function(n_cells,
   df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
   
   # Get meta data
-  background_metadata <- list("background type" = "normal",
-                              "number of cells" = n_cells,
+  background_metadata <- list("background_type" = "normal",
+                              "n_cells" = n_cells,
                               "length" = length,
                               "width" = width,
                               "height" = height,
-                              "amount of jitter" = jitter_proportion,
-                              "cell types" = background_cell_type,
-                              "cell proportions" = 1)
+                              "jitter_proportion" = jitter_proportion,
+                              "cell_types" = background_cell_type,
+                              "cell_proportions" = 1)
   
   ## Convert data frame to spe object
   spe <- SpatialExperiment(
@@ -340,6 +341,7 @@ simulate_normal_background_cells3D <- function(n_cells,
   
   return(spe)
 }
+
 
 
 simulate_mixing3D <- function(bg_spe,
@@ -382,15 +384,15 @@ simulate_mixing3D <- function(bg_spe,
   
   # Get meta data
   metadata <- bg_spe@metadata
-  metadata[["cell types"]] <- cell_types
-  metadata[["cell proportions"]] <- cell_proportions
+  metadata[["background"]][["cell_types"]] <- cell_types
+  metadata[["background"]][["cell_proportions"]] <- cell_proportions
   
   # Convert data frame to spe object
   mixed_spe <- SpatialExperiment(
     assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
     colData = df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = list(background = metadata))
+    metadata = metadata)
   
   # Plot
   if (plot_image) {
@@ -402,6 +404,7 @@ simulate_mixing3D <- function(bg_spe,
   
   return(mixed_spe)
 }
+
 
 
 simulate_clusters3D <- function(bg_spe,

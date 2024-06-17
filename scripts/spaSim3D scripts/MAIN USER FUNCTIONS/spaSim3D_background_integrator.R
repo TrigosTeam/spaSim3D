@@ -353,6 +353,8 @@ get_cell_types_and_proportions_for_mixing <- function(simulated_spe) {
       fig <- plot_cells3D(simulated_spe)
       print(fig)
       
+      if (length(cell_types) == 1) break # If there is only one cell type, proportion is always 1
+      
       ## Allow user to re-choose cell proportions  
       message("Would like to re-choose these cell proportions?\n")
       user_input_y_or_n <- get_y_or_n_input()
