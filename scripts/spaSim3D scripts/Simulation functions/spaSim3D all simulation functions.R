@@ -103,6 +103,12 @@ plot_cells3D <- function(spe,
   if (is.null(plot_cell_types)) {
     plot_cell_types <- unique(df[["Cell.Type"]])
   }
+  ## If cell types have been chosen, check they are found in the spe object
+  unknown_cell_types <- setdiff(plot_cell_types, spe[[feature_colname]])
+  if (length(unknown_cell_types) != 0) {
+    stop(paste("The following plot_cell_types are not found in the spe object:\n   ",
+               paste(unknown_cell_types, collapse = ", ")))
+  }
   
   ## If no colours inputted, use rainbow palette
   if (is.null(plot_colours)) {
@@ -135,6 +141,7 @@ plot_cells3D <- function(spe,
   
   return (fig)
 }
+
 
 
 ### Main simulation functions -------------------------------------------------
@@ -352,7 +359,9 @@ simulate_mixing3D <- function(bg_spe,
                               plot_colours = NULL) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   n_cell_types <- length(cell_types)
   
@@ -379,8 +388,8 @@ simulate_mixing3D <- function(bg_spe,
     df[i, "Cell.Type"] <- chosen_cell_type
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Get meta data
   metadata <- bg_spe@metadata
@@ -550,7 +559,9 @@ simulate_double_rings3D <- function(bg_spe,
 simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get sphere properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -595,12 +606,12 @@ simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
+  if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
   
   # Convert data frame to spe object
@@ -616,7 +627,9 @@ simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
 simulate_sphere_ring <- function(bg_spe, ring_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get sphere ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -688,12 +701,12 @@ simulate_sphere_ring <- function(bg_spe, ring_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  ring_properties <- append(list(cluster_type = "ring"), ring_properties)
+  if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
   
   # Convert data frame to spe object
@@ -709,7 +722,9 @@ simulate_sphere_ring <- function(bg_spe, ring_properties) {
 simulate_sphere_dr <- function(bg_spe, dr_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get sphere double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -808,12 +823,12 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
   
   # Convert data frame to spe object
@@ -830,7 +845,9 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
 simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get ellipsoid properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -898,12 +915,12 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
+  if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
   
   # Convert data frame to spe object
@@ -919,7 +936,9 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
 simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get ellipsoid ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -1017,12 +1036,12 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  ring_properties <- append(list(cluster_type = "ring"), ring_properties)
+  if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
   
   # Convert data frame to spe object
@@ -1038,7 +1057,9 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
 simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get ellipsoid double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -1165,12 +1186,12 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
   
   # Convert data frame to spe object
@@ -1188,7 +1209,9 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
 simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get cylinder properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -1265,12 +1288,12 @@ simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
+  if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
   
   # Convert data frame to spe object
@@ -1286,7 +1309,9 @@ simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
 simulate_cylinder_ring <- function(bg_spe, ring_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get cylinder ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -1388,12 +1413,12 @@ simulate_cylinder_ring <- function(bg_spe, ring_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  ring_properties <- append(list(cluster_type = "ring"), ring_properties)
+  if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
   
   # Convert data frame to spe object
@@ -1409,7 +1434,9 @@ simulate_cylinder_ring <- function(bg_spe, ring_properties) {
 simulate_cylinder_dr <- function(bg_spe, dr_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get cylinder double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -1536,12 +1563,12 @@ simulate_cylinder_dr <- function(bg_spe, dr_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
   
   # Convert data frame to spe object
@@ -1559,7 +1586,9 @@ simulate_cylinder_dr <- function(bg_spe, dr_properties) {
 simulate_network_cluster <- function(bg_spe, cluster_properties) {  
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get network properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -1667,12 +1696,12 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]])
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
+  if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
   
   # Convert data frame to spe object
@@ -1688,7 +1717,9 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
 simulate_network_ring <- function(bg_spe, ring_properties) {  
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get network ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -1804,12 +1835,12 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]])
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  ring_properties <- append(list(cluster_type = "ring"), ring_properties)
+  if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
   
   # Convert data frame to spe object
@@ -1826,7 +1857,9 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
 simulate_network_dr <- function(bg_spe, dr_properties) {  
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get network double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -1949,12 +1982,12 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]])
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  
+
   
   # Update current meta data
   metadata <- bg_spe@metadata
-  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
   
   # Convert data frame to spe object
