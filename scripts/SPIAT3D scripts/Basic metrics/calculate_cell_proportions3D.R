@@ -1,87 +1,61 @@
-calculate_cell_proportions3D <- function(data,
-                                         reference_cell_types = NULL, 
-                                         cell_types_to_exclude = NULL, 
+calculate_cell_proportions3D <- function(spe,
+                                         cell_types_chosen = NULL, 
                                          feature_colname = "Cell.Type",
-                                         plot.image = TRUE) {
+                                         plot_image = TRUE) {
   
-  # If the columns are not correct, give error
-  required_colnames <- c("Cell.X.Position", 
-                         "Cell.Y.Position", 
-                         "Cell.Z.Position", 
-                         feature_colname)
-  
-  missing_colnames <- setdiff(required_colnames,
-                              colnames(data))
-  
-  if (length(missing_colnames) > 0) {
-    stop(paste(paste(missing_colnames, collapse = ', '),
-               "are missing as column names in your data")) 
-  }
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe), "Cell.Type" = spe[[feature_colname]])
   
   # Check
-  if (nrow(data) == 0) {
-    stop("No cells found for calculating cell proportions")
-  }
+  if (nrow(df) == 0) stop("No cells found for calculating cell proportions")
   
   # Creates frequency/bar plot of all cell types in the entire image
-  cell_proportions <- as.data.frame(table(data[, feature_colname]))
+  cell_proportions <- data.frame(table(data[, feature_colname]))
   names(cell_proportions) <- c("Cell.Type", 'Frequency')
   
-  # Exclude any cell types not wanted
-  if (!is.null(cell_types_to_exclude)) {
+  # Only include cell types the user has chosen
+  if (!is.null(cell_types_chosen)) {
     
-    # Check
-    incorrect_cell_types <- setdiff(cell_types_to_exclude, cell_proportions$Cell.Type)
-    if (length(incorrect_cell_types) > 0) {
-      stop(paste(paste(incorrect_cell_types, collapse = ', '),
-                 "in cell_types_to_exclude don't exist."))
+    ## If cell types have been chosen, check they are found in the spe object
+    unknown_cell_types <- setdiff(cell_types_chosen, cell_proportions$Cell.Type)
+    if (length(unknown_cell_types) != 0) {
+      stop(paste("The following cell types in cell_types_chosen are not found in the spe object:\n   ",
+                 paste(unknown_cell_types, collapse = ", ")))
     }
     
-    cell_proportions <- cell_proportions[!(cell_proportions$Cell.Type %in% cell_types_to_exclude), ]
+    # Subset for 
+    cell_proportions <- cell_proportions[(cell_proportions$Cell.Type %in% cell_types_chosen), ]
     
-    # Check
+    # Check if the user has excluded all cell types
     if (nrow(cell_proportions) == 0) {
       stop("All cells have been excluded")
     }
   }
   
-  # Find proportion of each cell type against all cells
-  if (is.null(reference_cell_types)) {
-    
-    # Get frequency total for all cells
-    cell_type_frequency_total <- sum(cell_proportions$Frequency)
-    
-    cell_proportions$Proportion <- cell_proportions$Frequency / cell_type_frequency_total
-    cell_proportions$Percentage <- cell_proportions$Proportion * 100
-    cell_proportions$Proportion_Name <- "/Total"
-  }
-  # Find proportion of each cell type against the chosen reference cell types
-  else {
-    
-    # Check
-    incorrect_cell_types <- setdiff(reference_cell_types, cell_proportions$Cell.Type)
-    if (length(incorrect_cell_types) > 0) {
-      stop(paste(paste(incorrect_cell_types, collapse = ', '),
-                 "in reference_cell_types have been excluded or don't exist."))
-    }
-    
-    # Get frequency total for chosen reference cells
-    cell_type_frequency_total <- sum(cell_proportions$Frequency[cell_proportions[['Cell.Type']] %in% reference_cell_types])
+  # Get frequency total for all cells
+  cell_type_frequency_total <- sum(cell_proportions$Frequency)
   
-    cell_proportions$Proportion <- cell_proportions$Frequency/cell_type_frequency_total
-    cell_proportions$Percentage <- cell_proportions$Proportion * 100
-    cell_proportions$Proportion_Name <- "/Custom"  
-    cell_proportions$Reference <- paste(reference_cell_types, collapse=",")
-  }
-  
-  # Order by Reference cell type (reverse to have Total first if present) then by highest proportion
+  # Get proportions and percentages
+  cell_proportions$Proportion <- cell_proportions$Frequency / cell_type_frequency_total
+  cell_proportions$Percentage <- cell_proportions$Proportion * 100
+
+  # Order the cell types by proportion (highest cell proportion is first)
   cell_proportions <- cell_proportions[rev(order(cell_proportions$Proportion)), ]
   
-  if (plot.image) {
-    g <- ggplot(cell_proportions, aes(x=Cell.Type, y=Percentage)) +
-      geom_bar(stat='identity') + theme_bw()
+  if (plot_image) {
+    
+    labels <- paste(round(cell_proportions$Percentage, 1), "%", sep = "")
+    
+    g <- ggplot(cell_proportions, aes(x = factor(Cell.Type, Cell.Type), y = Percentage, fill = Cell.Type)) +
+      geom_bar(stat='identity') + 
+      theme_bw() +
+      labs(title="Cell proportions", x = "Cell type", y = "Percentage") +
+      theme(plot.title = element_text(hjust = 0.5), 
+            legend.position = "none") +
+      geom_text(aes(label = labels), vjust = 0)
+    
     methods::show(g)
   }
   
-  return (cell_proportions)
+  return(cell_proportions)
 }
