@@ -1,5 +1,5 @@
 spe_metadata_background_template <- function(background_type) {
- 
+  
   if (background_type == "random") {
     background_metadata <- list(background = list(background_type = "random",
                                                   n_cells = 10000,
