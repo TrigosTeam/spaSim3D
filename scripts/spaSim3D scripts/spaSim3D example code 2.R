@@ -8,8 +8,8 @@ spe_cluster <- spaSim3D_cluster_integrator(spe_bg)
 
 # Plot with chosen colours
 plot_cells3D(spe_bg, 
-             plot_cell_types = c("Others", "Stromal"),
-             plot_colours = c("lightgray", "lightgreen"))
+             plot_cell_types = c("Others", "Tumour"),
+             plot_colours = c("lightgray", "orange"))
 
 plot_cells3D(spe_cluster,
              plot_cell_types = c("Tumour", "Immune", "Stromal", "Others"),
@@ -58,10 +58,15 @@ plot_cells3D(spe_clusters,
              plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "tomato"))
 
 
+
 # Add metadata to spe
 metadata_new <- spe_metadata_cluster_template(metadata_bg_r, "regular", "Network")
 metadata_new$cluster_1$width <- 10
 metadata_new$cluster_1$cluster_cell_types <- "Immune"
 metadata_new$cluster_1$cluster_cell_proportions <- 1
 
-spe_clusters <- add_spe_metadata3D(spe_clusters, metadata_new)
+spe_clusters1 <- add_spe_metadata3D(spe_clusters, metadata_new)
+plot_cells3D(spe_clusters1,
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "tomato"))
+
