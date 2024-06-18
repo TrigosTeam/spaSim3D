@@ -72,16 +72,16 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
     cell_type2_cell_IDs <- df[df[ , "Cell.Type"] == name2, "Cell.ID"]
     
     local_dist_mins <- data.frame(
-      RefCell = cell_types[[name1]],
-      RefType = name1,
-      NearestCell = cell_type2_cell_IDs[as.vector(all_closest$nn.idx)],
-      NearestType = name2,
-      Distance = all_closest$nn.dists
+      ref_cell_id = cell_types[[name1]],
+      ref_cell_type = name1,
+      nearest_cell_id = cell_type2_cell_IDs[as.vector(all_closest$nn.idx)],
+      nearest_cell_type = name2,
+      distance = all_closest$nn.dists
     )
     result <- rbind(result, local_dist_mins)
   }
   
-  result$Pair <- paste(result$RefType, result$NearestType,sep = "/")
+  result$pair <- paste(result$ref_cell_type, result$nearest_cell_type,sep = "/")
   
   # Plot
   if (plot_image) {

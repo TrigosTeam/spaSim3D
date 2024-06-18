@@ -72,7 +72,7 @@ calculate_mixing_scores3D <- function(data,
       
       # Can't get mixing scores if there are no target cells
       else if (nrow(target_cells) == 0) {
-        methods::show(paste("There are no unique target cells of specified celltype", target_cell_type, "for reference cell", reference_cell_type))
+        methods::show(paste("There are no unique target cells of specified cell type", target_cell_type, "for reference cell", reference_cell_type))
         
         reference_cell_coords <- reference_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
         reference_reference_result <- dbscan::frNN(reference_cell_coords, 

@@ -1,4 +1,4 @@
-data <- data.frame(spatialCoords(spe_clusters), Cell.Type = spe_clusters[["Cell.Type"]], Cell.ID = spe_clusters[["Cell.ID"]])
+data1 <- data.frame(spatialCoords(spe_clusters), Cell.Type = spe_clusters[["Cell.Type"]], Cell.ID = spe_clusters[["Cell.ID"]])
 spe <- spe_clusters
 
 
@@ -32,12 +32,12 @@ minimum_distances <- calculate_minimum_distances_between_cell_types3D(spe,
 
 
 ### Calculate Mixing Scores
-mixing_scores <- calculate_mixing_scores3D(data,
+mixing_scores <- calculate_mixing_scores3D(data1,
                                            reference_cell_types = c("Tumour", "Immune"),
                                            target_cell_types = c("Tumour", "Immune"),
                                            radius = 20)
 
-mixing_scores_gradient <- calculate_mixing_scores_gradient3D(data,
+mixing_scores_gradient <- calculate_mixing_scores_gradient3D(data1,
                                                              reference_cell_type = "Immune",
                                                              target_cell_type = "Tumour",
                                                              radii = 30)

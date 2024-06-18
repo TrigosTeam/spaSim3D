@@ -11,42 +11,42 @@ calculate_cell_proportions3D <- function(spe,
   
   # Creates frequency/bar plot of all cell types in the entire image
   cell_proportions <- data.frame(table(df[, feature_colname]))
-  names(cell_proportions) <- c("Cell.Type", 'Frequency')
+  names(cell_proportions) <- c("cell_type", 'frequency')
   
   # Only include cell types the user has chosen
   if (!is.null(cell_types_of_interest)) {
     
     ## If cell types have been chosen, check they are found in the spe object
-    unknown_cell_types <- setdiff(cell_types_of_interest, cell_proportions$Cell.Type)
+    unknown_cell_types <- setdiff(cell_types_of_interest, cell_proportions$cell_type)
     if (length(unknown_cell_types) != 0) {
       stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                  paste(unknown_cell_types, collapse = ", ")))
     }
     
     # Subset for cell types chosen by user
-    cell_proportions <- cell_proportions[(cell_proportions$Cell.Type %in% cell_types_of_interest), ]
+    cell_proportions <- cell_proportions[(cell_proportions$cell_type %in% cell_types_of_interest), ]
     
     # Check if the user has excluded all cell types
     if (nrow(cell_proportions) == 0) stop("All cells have been excluded")
   }
   
   # Get frequency total for all cells
-  cell_type_frequency_total <- sum(cell_proportions$Frequency)
+  cell_type_frequency_total <- sum(cell_proportions$frequency)
   
   # Get proportions and percentages
-  cell_proportions$Proportion <- cell_proportions$Frequency / cell_type_frequency_total
-  cell_proportions$Percentage <- cell_proportions$Proportion * 100
+  cell_proportions$proportion <- cell_proportions$frequency / cell_type_frequency_total
+  cell_proportions$percentage <- cell_proportions$proportion * 100
 
   # Order the cell types by proportion (highest cell proportion is first)
-  cell_proportions <- cell_proportions[rev(order(cell_proportions$Proportion)), ]
+  cell_proportions <- cell_proportions[rev(order(cell_proportions$proportion)), ]
   rownames(cell_proportions) <- seq(nrow(cell_proportions))
   
   # Plot
   if (plot_image) {
     
-    labels <- paste(round(cell_proportions$Percentage, 1), "%", sep = "")
+    labels <- paste(round(cell_proportions$percentage, 1), "%", sep = "")
     
-    g <- ggplot(cell_proportions, aes(x = factor(Cell.Type, Cell.Type), y = Percentage, fill = Cell.Type)) +
+    g <- ggplot(cell_proportions, aes(x = factor(cell_type, cell_type), y = percentage, fill = cell_type)) +
       geom_bar(stat='identity') + 
       theme_bw() +
       labs(title="Cell proportions", x = "Cell type", y = "Percentage") +
@@ -58,7 +58,7 @@ calculate_cell_proportions3D <- function(spe,
   }
   
   # Print short summary description
-  print(cell_proportions[ , c("Cell.Type", "Frequency", "Percentage")])
+  print(cell_proportions[ , c("cell_type", "frequency", "percentage")])
   
   return(cell_proportions)
 }

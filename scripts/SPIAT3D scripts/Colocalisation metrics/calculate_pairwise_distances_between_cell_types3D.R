@@ -70,16 +70,16 @@ calculate_pairwise_distances_between_cell_types3D <- function(data,
       # Melts dist_all to produce dataframe of target and nearest 
       # cell ID's columns and distance column
       cell_to_cell_dist <- reshape2::melt(cell_to_cell, na.rm = TRUE)
-      cell_to_cell_dist$Type1 <- cell_name1
-      cell_to_cell_dist$Type2 <- cell_name2
-      cell_to_cell_dist$Pair <- paste(cell_name1, cell_name2, sep="/")
+      cell_to_cell_dist$cell_type1 <- cell_name1
+      cell_to_cell_dist$cell_type2 <- cell_name2
+      cell_to_cell_dist$pair <- paste(cell_name1, cell_name2, sep="/")
       
       cell_to_cell_dist_all <- rbind(cell_to_cell_dist_all, 
                                      cell_to_cell_dist)
     }
   }
   
-  colnames(cell_to_cell_dist_all)[c(1,2,3)] <- c("Cell1", "Cell2", "Distance")
+  colnames(cell_to_cell_dist_all)[c(1,2,3)] <- c("cell_id1", "cell_id2", "distance")
  
   # Plot
   if (plot_image) {
