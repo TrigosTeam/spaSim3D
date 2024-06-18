@@ -1,48 +1,33 @@
-## Remember to add Cell.ID column if you haven't already
-data <- chosen_bg
+data <- data.frame(spatialCoords(spe_clusters), Cell.Type = spe_clusters[["Cell.Type"]], Cell.ID = spe_clusters[["Cell.ID"]])
+spe <- spe_clusters
 
 
 ### 1. Basic Metrics ----------------------------------------------------------
 
 # Calculate Cell Proportions
-cell_props1 <- calculate_cell_proportions3D(data = data,
-                                            reference_cell_types = NULL,
-                                            cell_types_to_exclude = NULL)
+cell_props1 <- calculate_cell_proportions3D(spe,
+                                            cell_types_of_interest = NULL,
+                                            plot_image = TRUE)
 
-
-cell_props2 <- calculate_cell_proportions3D(data = data,
-                                            reference_cell_types = c("Tumour"),
-                                            cell_types_to_exclude = c( "Others"))
-
-plot_cell_percentages_bar3D(cell_props2)
+cell_props2 <- calculate_cell_proportions3D(spe,
+                                            cell_types_of_interest = c("Tumour", "Immune"),
+                                            plot_image = TRUE)
 
 
 ### 2. Colocalization metrics -------------------------------------------------
 
 ### Calculate Pairwise Distances between Cells
-pairwise_distances <- calculate_pairwise_distances_between_cell_types3D(data,
-                                                                        c("Tumour", "Immune"))
-
-plot_cell_distances_violin3D(pairwise_distances,
-                             scales = "free_x")
-
-pairwise_distances_summary <- summarise_distances_between_cell_types3D(pairwise_distances)
-
-plot_cell_distances_summary_heatmap3D(pairwise_distances_summary,
-                                      metric = "Mean")
+pairwise_distances <- calculate_pairwise_distances_between_cell_types3D(spe,
+                                                                        cell_types_of_interest = c("Tumour", "Immune"),
+                                                                        plot_image = TRUE)
 
 
 ### Calculate Minimum Distances between cells
-minimum_distances <- calculate_minimum_distances_between_cell_types3D(data,
-                                                                      c("Tumour", "Immune"))
+minimum_distances <- calculate_minimum_distances_between_cell_types3D(spe,
+                                                                      cell_types_of_interest = c("Tumour", "Immune"),
+                                                                      plot_image = TRUE)
 
-plot_cell_distances_violin3D(minimum_distances,
-                             scales = "free_x")
 
-minimum_distances_summary <- summarise_distances_between_cell_types3D(minimum_distances)
-
-plot_cell_distances_summary_heatmap3D(minimum_distances_summary,
-                                      metric = "Mean")
 
 
 

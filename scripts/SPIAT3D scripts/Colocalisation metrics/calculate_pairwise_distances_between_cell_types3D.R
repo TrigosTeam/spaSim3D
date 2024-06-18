@@ -1,56 +1,45 @@
-## data is a dataframe with colnames:
-## "Cell.X.Position" "Cell.Y.Position" "Cell.Z.Position" "Cell.Type" "Cell.ID"     
 
 calculate_pairwise_distances_between_cell_types3D <- function(data,
                                                               cell_types_of_interest = NULL,
-                                                              feature_colname = "Cell.Type") {
+                                                              feature_colname = "Cell.Type",
+                                                              plot_image = TRUE) {
  
-  # If the columns are not correct, give error
-  required_colnames <- c("Cell.X.Position", 
-                         "Cell.Y.Position", 
-                         "Cell.Z.Position", 
-                         feature_colname, 
-                         "Cell.ID")
-  
-  missing_colnames <- setdiff(required_colnames,
-                              colnames(data))
-  
-  if (length(missing_colnames) > 0) {
-    stop(paste(paste(missing_colnames, collapse = ', '),
-               "are missing as column names in your data")) 
-  }
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe), 
+                   "Cell.Type" = spe[[feature_colname]], 
+                   "Cell.ID" = spe[["Cell.ID"]])
   
   # If there are no cells, give error
-  if (nrow(data) == 0) {
+  if (nrow(df) == 0) {
     stop("There are no cells in data")
   }
   
-  # Select all rows in data which only contains the cells of interest
+  # Select all rows in data frame which only contains the cells of interest
   if (!is.null(cell_types_of_interest)) {
     
-    # Check if cell_types_of_interest has cells not found in the data
-    incorrect_cell_types <- setdiff(cell_types_of_interest, unique(data[[feature_colname]]))
-    if (length(incorrect_cell_types) > 0) {
-      stop(paste(paste(incorrect_cell_types, collapse = ', '),
-                 "in cell_types_of_interest don't exist."))
+    ## If cell types have been chosen, check they are found in the spe object
+    unknown_cell_types <- setdiff(cell_types_of_interest, df$Cell.Type)
+    if (length(unknown_cell_types) != 0) {
+      stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
+                 paste(unknown_cell_types, collapse = ", ")))
     }
     
-    data <- data[data[ , feature_colname] %in% cell_types_of_interest, ]
+    df <- df[df[["Cell.Type"]] %in% cell_types_of_interest, ]
   }
   
   # Create a list of the number of cell types with their
   # corresponding cell ID's
   cell_types <- list()
-  for (eachType in unique(data[ , feature_colname])) {
-    cell_types[[eachType]] <- as.character(data$Cell.ID[data[, feature_colname] == eachType])
+  for (eachType in unique(df[ , feature_colname])) {
+    cell_types[[eachType]] <- as.character(df$Cell.ID[df[, feature_colname] == eachType])
   }
   
   # Calculate cell to cell distances
-  dist_all <- -1 * apcluster::negDistMat(data[, c("Cell.X.Position",
-                                                  "Cell.Y.Position",
-                                                  "Cell.Z.Position")])
+  dist_all <- -1 * apcluster::negDistMat(df[, c("Cell.X.Position",
+                                                "Cell.Y.Position",
+                                                "Cell.Z.Position")])
   
-  cell_id_vector <- data$Cell.ID
+  cell_id_vector <- df$Cell.ID
   colnames(dist_all) <- cell_id_vector
   rownames(dist_all) <- cell_id_vector
   
@@ -92,5 +81,14 @@ calculate_pairwise_distances_between_cell_types3D <- function(data,
   
   colnames(cell_to_cell_dist_all)[c(1,2,3)] <- c("Cell1", "Cell2", "Distance")
  
-  return (cell_to_cell_dist_all)
+  # Plot
+  if (plot_image) {
+    fig <- plot_cell_distances_violin3D(cell_to_cell_dist_all)
+    methods::show(fig)
+  }
+  
+  # Print summary
+  print(summarise_distances_between_cell_types3D(cell_to_cell_dist_all))
+  
+  return(cell_to_cell_dist_all)
 }
