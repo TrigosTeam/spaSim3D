@@ -189,7 +189,7 @@ get_phenotype <- function(num_vec) {
   temp_cell_markers <- temp_cell_markers[num_vec == 1]
   phenotype <- paste(temp_cell_markers, collapse = ',')
   
-  return (phenotype)
+  return(phenotype)
 }
 
 cell_type_dict$phenotype <- apply(cell_type_dict[, 1:length(all_cell_markers)], 1, get_phenotype)
@@ -458,7 +458,7 @@ plot_cell_categories3D <- function(data,
   #                                    yaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F),
   #                                    zaxis = list(title = '', showgrid = F, showaxeslabels = F, showticklabels = F)))
   
-  return (fig)
+  return(fig)
   
 }
 
