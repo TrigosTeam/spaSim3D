@@ -11,6 +11,12 @@ plot_cells3D <- function(spe,
   if (is.null(plot_cell_types)) {
     plot_cell_types <- unique(df[["Cell.Type"]])
   }
+  ## If cell types have been chosen, check they are found in the spe object
+  unknown_cell_types <- setdiff(plot_cell_types, spe[[feature_colname]])
+  if (length(unknown_cell_types) != 0) {
+    stop(paste("The following plot_cell_types are not found in the spe object:\n   ",
+               paste(unknown_cell_types, collapse = ", ")))
+  }
   
   ## If no colours inputted, use rainbow palette
   if (is.null(plot_colours)) {
