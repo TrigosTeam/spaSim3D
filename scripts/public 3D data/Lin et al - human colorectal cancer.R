@@ -14,8 +14,6 @@ for (i in seq(length(file_names))) {
   dataset[[i]] <- read.csv(file_names[i])
 }
 
-data <- dataset[[1]]
-
 ## Get relevant cell markers
 all_cell_markers <- c("Keratin", "Ki67", "CD3", "CD20", 
                       "CD45RO", "CD4", "CD8a", "CD68", 
@@ -31,6 +29,8 @@ all_cell_markers %in% colnames(data)
 # Tumour: Keratin+
 # Immune: CD45+
 # Other: ??
+
+data <- dataset[[1]]
 
 ## Get chosen cell markers
 chosen_cell_markers <- c("Keratin", "CD45")
@@ -98,6 +98,8 @@ ggplot(sample_n(plot_data, 5000), aes(Cell.X.Position, Cell.Y.Position, colour =
 # Immune: CD45+
 # Stroma: CD31+, aSMA+
 # Other: ??
+
+data <- dataset[[1]]
 
 ## Get chosen cell markers
 chosen_cell_markers <- c("Keratin", "CD45", "CD31", "aSMA")
@@ -192,7 +194,9 @@ get_phenotype <- function(num_vec) {
 
 cell_type_dict$phenotype <- apply(cell_type_dict[, 1:length(all_cell_markers)], 1, get_phenotype)
 
-### 3. Use cell type dictionary to determine cell identities (Tumour, Immune or Stroma) ------------------
+### 3. Use cell type dictionary to determine cell identities (Tumour, Immune or Stroma, one slice) ------------------
+
+data <- dataset[[1]]
 
 # Get chosen cell markers
 all_cell_markers <- c("Keratin", "Ki67", "CD3", "CD20", 
@@ -257,7 +261,9 @@ ggplot(sample_n(plot_data, 5000), aes(Cell.X.Position, Cell.Y.Position, colour =
 
 
 
-### 4. Use cell type dictionary to determine cell identities (all cell types) ------------------
+### 4. Use cell type dictionary to determine cell identities (all cell types, one slice) ------------------
+
+data <- dataset[[1]]
 
 # Get chosen cell markers
 all_cell_markers <- c("Keratin", "Ki67", "CD3", "CD20", 
@@ -318,7 +324,7 @@ ggplot(sample_n(plot_data, 2000), aes(Cell.X.Position, Cell.Y.Position, colour =
 
 
 
-### 5. Use cell type dictionary to determine cell identities (multiple slices) ---------
+### 5. Use cell type dictionary to determine cell identities (Tumour, Immune or Stroma, all slices) ---------
 
 library(SPIAT)
 
@@ -462,3 +468,5 @@ chosen_cell_types <- c("Other", "Tumor", "Immune", "Stroma")
 plot_cell_categories3D(sample_n(spatial_data_3D, 4000),
                        chosen_cell_types,
                        my_colours)
+
+### 6. Use cell type dictionary to determine cell identities (all cell types, all slices)
