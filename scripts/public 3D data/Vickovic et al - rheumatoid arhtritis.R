@@ -9,7 +9,7 @@ for (i in 1:5) {
 }
 
 
-## Combine x, y, z coords and cell_type info into one dataframe
+## Combine x, y, z coords and cell_type info into one data frame
 x <- c()
 y <- c()
 z <- c()
