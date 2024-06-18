@@ -18,15 +18,19 @@ plot_cell_categories3D(all_plots_data[[data_index]],
 metrics_data1 <- metrics_data[metrics_data$name %in% c("3D", "slice4"), ]
 metrics_data1$name[2] <- "2D"
 colnames(metrics_data1)[6] <- "ACIN"
-metrics_list_names <- c("APD", "AMD", "MS", "NMS", "ACIN", "CKAUC")
+# metrics_list_names <- c("APD", "AMD", "MS", "NMS", "ACIN", "CKAUC")
+metrics_list_names <- c("APD", "MS", "ACIN",
+                        "AMD", "NMS", "CKAUC")
 
 plot_result <- reshape2::melt(metrics_data1, id.vars = "name", mesaure.vars = metrics_list_names)
-colnames(plot_result) <- c("name", "metric", "value")
-
+colnames(plot_result) <- c("dimension", "metric", "value")
 plot_result$metric <- factor(plot_result$metric, levels = metrics_list_names)
-plot <- ggplot(plot_result, aes(name, value, fill = name)) +
+plot_result$dimension <- factor(plot_result$dimension, levels = c("3D", "2D"))
+
+plot <- ggplot(plot_result, aes(dimension, value, fill = dimension)) +
   geom_bar(stat = "identity") +
-  facet_wrap(~metric, scales = "free_y", ncol = 3)
+  facet_wrap(~metric, scales = "free_y", ncol = 3) + 
+  theme(legend.position = "left")
 plot
 
 # 
