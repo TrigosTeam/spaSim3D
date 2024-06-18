@@ -12,8 +12,8 @@ plot_cells3D(spe_bg,
              plot_colours = c("lightgray", "orange"))
 
 plot_cells3D(spe_cluster,
-             plot_cell_types = c("Tumour", "Immune", "Stromal", "Others"),
-             plot_colours = c("orange", "skyblue", "lightgreen", "lightgray"))
+             plot_cell_types = c("Tumour", "Immune", "Others"),
+             plot_colours = c("orange", "skyblue", "lightgray"))
 
 ### Using the metadata-based functions ----------------------------------------
 
