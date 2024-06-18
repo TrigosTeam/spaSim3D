@@ -6,7 +6,9 @@ simulate_mixing3D <- function(bg_spe,
                               plot_colours = NULL) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   n_cell_types <- length(cell_types)
   
@@ -32,9 +34,6 @@ simulate_mixing3D <- function(bg_spe,
     }
     df[i, "Cell.Type"] <- chosen_cell_type
   }
-  
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
   
   # Get meta data
   metadata <- bg_spe@metadata

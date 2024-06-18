@@ -1,7 +1,9 @@
 simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get ellipsoid properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -69,12 +71,9 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
-  
   # Update current meta data
   metadata <- bg_spe@metadata
-  cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
+  if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
   
   # Convert data frame to spe object

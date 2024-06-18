@@ -1,7 +1,9 @@
 simulate_network_dr <- function(bg_spe, dr_properties) {  
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get network double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -124,12 +126,9 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]])
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
-  
   # Update current meta data
   metadata <- bg_spe@metadata
-  dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
+  if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
   
   # Convert data frame to spe object

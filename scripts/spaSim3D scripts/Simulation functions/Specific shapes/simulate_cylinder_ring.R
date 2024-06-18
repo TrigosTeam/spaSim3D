@@ -1,7 +1,9 @@
 simulate_cylinder_ring <- function(bg_spe, ring_properties) {
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), "Cell.Type" = bg_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get cylinder ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -103,12 +105,9 @@ simulate_cylinder_ring <- function(bg_spe, ring_properties) {
     }
   }
   
-  # Add Cell.ID column
-  df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
-  
   # Update current meta data
   metadata <- bg_spe@metadata
-  ring_properties <- append(list(cluster_type = "ring"), ring_properties)
+  if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
   metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
   
   # Convert data frame to spe object
