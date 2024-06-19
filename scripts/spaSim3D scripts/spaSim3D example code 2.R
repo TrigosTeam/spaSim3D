@@ -29,17 +29,17 @@ metadata_bg_r <- spe_metadata_background_template("random")
 metadata_bg_n <- spe_metadata_background_template("normal")
 
 # Change background metadata
-metadata_bg_n$background$jitter_proportion <- 0
-metadata_bg_n$background$n_cells <- 12000
+metadata_bg_r$background$minimum_distance_between_cells <- 0
+metadata_bg_r$background$n_cells <- 11000
 View(metadata_bg_n)
 
 # Get spe from background metadata
-spe_bg1 <- simulate_spe_metadata3D(metadata_bg_n)
+spe_bg1 <- simulate_spe_metadata3D(metadata_bg_r)
 
 
 
 # Add to background metadata to get cluster metadata
-metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_n, "regular", "Sphere")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_r, "regular", "Sphere")
 metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "ring", "Ellipsoid")
 metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "double ring", "Cylinder")
 # metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "regular", "Network")
