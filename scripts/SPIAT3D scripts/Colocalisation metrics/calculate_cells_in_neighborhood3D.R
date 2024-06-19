@@ -1,37 +1,25 @@
-calculate_cells_in_neighborhood3D <- function(data, 
-                                              reference_cell_types, 
+calculate_cells_in_neighborhood3D <- function(spe, 
+                                              reference_cell_type, 
                                               target_cell_types, 
-                                              radius = 20, 
-                                              feature_colname = "Cell.Type") {
+                                              radius, 
+                                              feature_colname = "Cell.Type",
+                                              plot_image = TRUE) {
   
-  # If the columns are not correct, give error
-  required_colnames <- c("Cell.X.Position", 
-                         "Cell.Y.Position", 
-                         "Cell.Z.Position", 
-                         feature_colname,
-                         "Cell.ID")
-  
-  missing_colnames <- setdiff(required_colnames,
-                              colnames(data))
-  
-  if (length(missing_colnames) > 0) {
-    stop(paste(paste(missing_colnames, collapse = ', '),
-               "are missing as column names in your data")) 
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe), 
+                   "Cell.Type" = spe[[feature_colname]], 
+                   "Cell.ID" = spe[["Cell.ID"]])
+
+  ## For reference_cell_type, check it is found in the spe object
+  if (!(reference_cell_type %in% df$Cell.Type)) {
+    stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
   }
   
-  
-  # Check if reference_cell_types has cells not found in the data
-  incorrect_cell_types <- setdiff(reference_cell_types, unique(data[[feature_colname]]))
-  if (length(incorrect_cell_types) > 0) {
-    stop(paste(paste(incorrect_cell_types, collapse = ', '),
-               "in reference_cell_types don't existin data."))
-  }
-  
-  # Check if target_cell_types has cells not found in the data
-  incorrect_cell_types <- setdiff(target_cell_types, unique(data[[feature_colname]]))
-  if (length(incorrect_cell_types) > 0) {
-    stop(paste(paste(incorrect_cell_types, collapse = ', '),
-               "in target_cell_types don't exist in data."))
+  ## For target_cell_types, check they are found in the spe object
+  unknown_cell_types <- setdiff(target_cell_types, df$Cell.Type)
+  if (length(unknown_cell_types) != 0) {
+    stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
+               paste(unknown_cell_types, collapse = ", ")))
   }
   
   # Check if radius is numeric
@@ -39,37 +27,39 @@ calculate_cells_in_neighborhood3D <- function(data,
     stop(paste(radius, " is not of type 'numeric'"))
   }
   
+  ## Get data for reference cells
+  reference_cells <- df[df[[feature_colname]] == reference_cell_type, ]
+  reference_cell_coords <- reference_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+  rownames(reference_cell_coords) <- reference_cells$Cell.ID
   
+  result <- data.frame(matrix(nrow = nrow(reference_cells), ncol = 0))
   
-  result <- list()
-  
-  for (reference_cell_type in reference_cell_types) {
-    ## Get data for reference cells
-    reference_cells <- data[which(data[, feature_colname] == reference_cell_type), ]
-    reference_cell_coords <- reference_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+  for (target_cell_type in target_cell_types) {
+    ## Get df for target cells
+    target_cells <- df[df[[feature_colname]] == target_cell_type, ]
+    target_cell_coords <- target_cells[, c("Cell.X.Position","Cell.Y.Position", "Cell.Z.Position")]
     
-    ## Set up data frame for current reference cell type
-    reference_cell_df <- reference_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
-    rownames(reference_cell_df) <- reference_cells$Cell.ID
+    ## Determine number of target cells specified distance for each reference cell
+    reference_target_result <- dbscan::frNN(target_cell_coords, 
+                                            eps = radius,
+                                            query = reference_cell_coords, 
+                                            sort = FALSE)
+    n_targets <- rapply(reference_target_result$id, length)
     
-    for (target_cell_type in target_cell_types) {
-      ## Get data for target cells
-      target_cells <- data[which(data[, feature_colname] == target_cell_type), ]
-      target_cell_coords <- target_cells[, c("Cell.X.Position","Cell.Y.Position", "Cell.Z.Position")]
-      
-      ## Determine number of target cells specified distance for each reference cell
-      reference_target_result <- dbscan::frNN(target_cell_coords, 
-                                              eps = radius,
-                                              query = reference_cell_coords, 
-                                              sort = FALSE)
-      n_targets <- rapply(reference_target_result$id, length)
-      
-      ## Add to results data frame
-      reference_cell_df[, target_cell_type] <- n_targets
-      
-    }
-    result[[reference_cell_type]] <- reference_cell_df
+    ## Add to data frame
+    result[[target_cell_type]] <- n_targets
   }
   
-  return (result)
+  result <- data.frame(ref_cell_id = reference_cells$Cell.ID, result)
+  
+  ## Show summarised results
+  print(summarise_cells_in_neighborhood3D(result))
+  
+  ## Plot
+  if (plot_image) {
+    fig <- plot_cells_in_neighborhood_violin3D(result)
+    methods::show(fig)
+  }
+  
+  return(result)
 }

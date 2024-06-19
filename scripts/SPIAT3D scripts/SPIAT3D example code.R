@@ -1,15 +1,15 @@
 data1 <- data.frame(spatialCoords(spe_clusters), Cell.Type = spe_clusters[["Cell.Type"]], Cell.ID = spe_clusters[["Cell.ID"]])
-spe <- spe_clusters
+spe1 <- spe_clusters
 
 
 ### 1. Basic Metrics ----------------------------------------------------------
 
 # Calculate Cell Proportions
-cell_props1 <- calculate_cell_proportions3D(spe,
+cell_props1 <- calculate_cell_proportions3D(spe1,
                                             cell_types_of_interest = NULL,
                                             plot_image = TRUE)
 
-cell_props2 <- calculate_cell_proportions3D(spe,
+cell_props2 <- calculate_cell_proportions3D(spe1,
                                             cell_types_of_interest = c("Tumour", "Immune"),
                                             plot_image = TRUE)
 
@@ -17,13 +17,13 @@ cell_props2 <- calculate_cell_proportions3D(spe,
 ### 2. Colocalization metrics -------------------------------------------------
 
 ### Calculate Pairwise Distances between Cells
-pairwise_distances <- calculate_pairwise_distances_between_cell_types3D(spe,
+pairwise_distances <- calculate_pairwise_distances_between_cell_types3D(spe1,
                                                                         cell_types_of_interest = c("Tumour", "Immune"),
                                                                         plot_image = TRUE)
 
 
 ### Calculate Minimum Distances between cells
-minimum_distances <- calculate_minimum_distances_between_cell_types3D(spe,
+minimum_distances <- calculate_minimum_distances_between_cell_types3D(spe1,
                                                                       cell_types_of_interest = c("Tumour", "Immune"),
                                                                       plot_image = TRUE)
 
@@ -32,27 +32,26 @@ minimum_distances <- calculate_minimum_distances_between_cell_types3D(spe,
 
 
 ### Calculate Mixing Scores
-mixing_scores <- calculate_mixing_scores3D(data1,
+mixing_scores <- calculate_mixing_scores3D(spe1,
                                            reference_cell_types = c("Tumour", "Immune"),
                                            target_cell_types = c("Tumour", "Immune"),
                                            radius = 20)
+print(mixing_scores)
 
-mixing_scores_gradient <- calculate_mixing_scores_gradient3D(data1,
+mixing_scores_gradient <- calculate_mixing_scores_gradient3D(spe1,
                                                              reference_cell_type = "Immune",
                                                              target_cell_type = "Tumour",
                                                              radii = 30)
 
 
 ### Calculate Cells in the Neighborhood
-neighborhood_cells <- calculate_cells_in_neighborhood3D(data,
-                                                        reference_cell_types = c("Tumour", "Immune"),
+neighborhood_cells <- calculate_cells_in_neighborhood3D(spe1,
+                                                        reference_cell_type = "Tumour",
                                                         target_cell_types = c("Tumour", "Immune"),
                                                         radius = 20)
 
-plot_cells_in_neighborhood_violin3D(neighborhood_cells,
-                                    scales = "free_x")
 
-neighborhood_cells_summary <- summarise_cells_in_neighborhood3D(neighborhood_cells)
+
 
 
 ### Calculate cross-K function

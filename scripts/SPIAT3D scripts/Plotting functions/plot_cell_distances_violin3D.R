@@ -8,7 +8,8 @@ plot_cell_distances_violin3D <- function(cell_to_cell_dist, scales = "free_x") {
     geom_violin() +
     facet_wrap(~pair, scales=scales) +
     theme_bw() +
-    theme(axis.text.x=element_blank()) +
+    theme(axis.text.x=element_blank(), plot.title = element_text(hjust = 0.5)) +
+    labs(title="Cell distances", x = "Reference/Target pair", y = "Distance") +
     stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
   
   message("Plots show mean ± sd")

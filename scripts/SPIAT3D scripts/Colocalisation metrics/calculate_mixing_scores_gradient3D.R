@@ -1,37 +1,37 @@
-calculate_mixing_scores_gradient3D <- function(data, 
+calculate_mixing_scores_gradient3D <- function(spe, 
                                                reference_cell_type, 
                                                target_cell_type, 
                                                radii = 20, 
                                                feature_colname = "Cell.Type",
                                                plot_image = TRUE) {
   
-  
-  df <- data.frame(matrix(nrow = radii, ncol = 8))
-  df.cols <- c("Reference", 
-               "Target", 
-               "Number_of_reference_cells",
-               "Number_of_target_cells", 
-               "Reference_target_interaction",
-               "Reference_reference_interaction", 
-               "Mixing_score", 
-               "Normalised_mixing_score")
-  colnames(df) <- df.cols
+  result <- data.frame(matrix(nrow = radii, ncol = 8))
+  colnames(result) <- c("ref_cell_type", 
+                        "tar_cell_type", 
+                        "n_ref_cells",
+                        "n_tar_cells", 
+                        "n_ref_tar_interactions",
+                        "n_ref_ref_interactions", 
+                        "mixing_score", 
+                        "normalised_mixing_score")
   
   for (radius in seq(radii)) {
-    mixing_scores <- calculate_mixing_scores3D(data,
+    mixing_scores <- calculate_mixing_scores3D(spe,
                                                reference_cell_type,
                                                target_cell_type,
                                                radius,
                                                feature_colname)
 
-    df[radius, ] <- mixing_scores
+    result[radius, ] <- mixing_scores
   }
   
+  # Add a radius column to the result
+  result$radius <- seq(radii)
   
   if (plot_image) {
-    plot(seq(radii), df[["Normalised_mixing_score"]], type = "l", xlab = "Radius", ylab = "Normalised Mixing Score")
+    plot(result[["radius"]], result[["normalised_mixing_score"]], type = "l", xlab = "Radius", ylab = "Normalised Mixing Score")
     abline(a = 1, b = 0, col = "red", lwd = 2, lty = 2)
   }
   
-  return (df)
+  return(result)
 }

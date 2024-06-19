@@ -1,5 +1,5 @@
 
-calculate_pairwise_distances_between_cell_types3D <- function(data,
+calculate_pairwise_distances_between_cell_types3D <- function(spe,
                                                               cell_types_of_interest = NULL,
                                                               feature_colname = "Cell.Type",
                                                               plot_image = TRUE) {
