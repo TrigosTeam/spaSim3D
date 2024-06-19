@@ -1,6 +1,7 @@
 calculate_cell_proportions3D <- function(spe,
                                          cell_types_of_interest = NULL, 
                                          feature_colname = "Cell.Type",
+                                         show_summary = TRUE,
                                          plot_image = TRUE) {
   
   ## Convert spe object to data frame
@@ -41,6 +42,11 @@ calculate_cell_proportions3D <- function(spe,
   cell_proportions <- cell_proportions[rev(order(cell_proportions$proportion)), ]
   rownames(cell_proportions) <- seq(nrow(cell_proportions))
   
+  # Print short summary description
+  if (show_summary) {
+    print(cell_proportions[ , c("cell_type", "frequency", "percentage")])
+  }
+  
   # Plot
   if (plot_image) {
     
@@ -56,9 +62,6 @@ calculate_cell_proportions3D <- function(spe,
     
     methods::show(g)
   }
-  
-  # Print short summary description
-  print(cell_proportions[ , c("cell_type", "frequency", "percentage")])
   
   return(cell_proportions)
 }

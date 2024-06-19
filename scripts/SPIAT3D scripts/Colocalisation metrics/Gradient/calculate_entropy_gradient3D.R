@@ -1,63 +1,55 @@
-calculate_entropy_gradient3D <- function(data,
-                                         radii,
+calculate_entropy_gradient3D <- function(spe,
                                          reference_cell_type,
                                          target_cell_types,
+                                         radii,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  # If the columns are not correct, give error
-  required_colnames <- c("Cell.X.Position", 
-                         "Cell.Y.Position", 
-                         "Cell.Z.Position", 
-                         feature_colname,
-                         "Cell.ID")
-  
-  missing_colnames <- setdiff(required_colnames,
-                              colnames(data))
-  
-  if (length(missing_colnames) > 0) {
-    stop(paste(paste(missing_colnames, collapse = ', '),
-               "are missing as column names in your data")) 
-  }
-  
-  # Check if radii is numeric
-  if (!is.numeric(radii)) {
-    stop(paste(radii, " radii is not of type 'numeric'"))
-  }
-  
-  # Check if reference_cell_type is in the data
-  if (!reference_cell_type %in% unique(data[[feature_colname]])) {
-    stop(paste(reference_cell_type, " reference_cell_type does not exist in data"))
-  }
-  
-  # Check if target_cell_types has cells not found in the data
-  incorrect_cell_types <- setdiff(target_cell_types, unique(data[[feature_colname]]))
-  if (length(incorrect_cell_types) > 0) {
-    stop(paste(paste(incorrect_cell_types, collapse = ', '),
-               "in target_cell_types don't exist in data."))
-  }
-  
-  
-  entropy_gradient <- list()
-  entropy_mean <- c()
+  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
+  colnames(result) <- target_cell_types
   
   for (radius in seq(radii)) {
-    entropy_data <- calculate_entropy3D(data,
-                                        radius,
-                                        reference_cell_type,
-                                        target_cell_types,
-                                        length(target_cell_types),
-                                        feature_colname)
+    cells_in_neighborhood_data <- calculate_cells_in_neighborhood3D(spe,
+                                                                    reference_cell_type,
+                                                                    target_cell_types,
+                                                                    radius,
+                                                                    feature_colname,
+                                                                    FALSE,
+                                                                    FALSE)
     
-    entropy_gradient[[paste(radius)]] <- entropy_data
-    entropy_mean <- append(entropy_mean, mean(entropy_data$Entropy))
+    cells_in_neighborhood_data$ref_cell_id <- NULL
+    result[radius, ] <- apply(cells_in_neighborhood_data, 2, sum)
+  }
+  
+  ## Get total number of target cells for each row
+  result$total <- apply(result, 1, sum)
+  
+  ## Set intial entropy to 0
+  result$entropy <- 0
+  
+  for (target_cell_type in target_cell_types) {
+    
+    target_cell_type_proportions <- (result[[target_cell_type]] / result$total)
+    
+    ## If an element in target_cell_type_proportion is 0, just add 0.    
+    target_cell_entropy <- ifelse(target_cell_type_proportions == 0,
+                                  0,
+                                  -1 * target_cell_type_proportions * log(target_cell_type_proportions, length(target_cell_types)))
+    
+    result$entropy <- result$entropy + target_cell_entropy
     
   }
+  
+  # Add a radius column to the result
+  result$radius <- seq(radii)
   
   if (plot_image) {
-    plot(seq(radii), entropy_mean, type = "l", xlab = "Radius", ylab = "Entropy Mean")
+    plot(result$radius, result$entropy, type = "l", col = "red", 
+         xlim = c(0, radius), ylim = c(0, max(result$entropy)),
+         xlab = "Radius", ylab = "Entropy")
+    # lines(result$radius, result$expected_cross_K, type = "l", col = "blue", lty = 2)
+    # legend(0, max(result), legend = c("Observed cross K", "Expected cross K"), col = c("red", "blue"), lty = c(1, 2))
   }
   
-  return (entropy_gradient)
-  
+  return(result)
 }

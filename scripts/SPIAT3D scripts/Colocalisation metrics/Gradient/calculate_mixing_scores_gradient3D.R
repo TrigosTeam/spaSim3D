@@ -1,7 +1,7 @@
 calculate_mixing_scores_gradient3D <- function(spe, 
                                                reference_cell_type, 
                                                target_cell_type, 
-                                               radii = 20, 
+                                               radii, 
                                                feature_colname = "Cell.Type",
                                                plot_image = TRUE) {
   

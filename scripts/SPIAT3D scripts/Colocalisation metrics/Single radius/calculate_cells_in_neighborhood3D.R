@@ -3,6 +3,7 @@ calculate_cells_in_neighborhood3D <- function(spe,
                                               target_cell_types, 
                                               radius, 
                                               feature_colname = "Cell.Type",
+                                              show_summary = TRUE,
                                               plot_image = TRUE) {
   
   ## Convert spe object to data frame
@@ -52,8 +53,11 @@ calculate_cells_in_neighborhood3D <- function(spe,
   
   result <- data.frame(ref_cell_id = reference_cells$Cell.ID, result)
   
-  ## Show summarised results
-  print(summarise_cells_in_neighborhood3D(result))
+  if (show_summary) {
+    ## Show summarised results
+    print(summarise_cells_in_neighborhood3D(result))    
+  }
+
   
   ## Plot
   if (plot_image) {

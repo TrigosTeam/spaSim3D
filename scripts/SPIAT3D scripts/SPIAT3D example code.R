@@ -55,10 +55,17 @@ neighborhood_cells <- calculate_cells_in_neighborhood3D(spe1,
 
 
 ### Calculate cross-K function
-Kcross_results <- calculate_Kcross3D(data,
-                                     reference_cell_type = "Tumour",
-                                     target_cell_type = "Immune",
-                                     distance = 20)
+cross_K <- calculate_cross_K3D(spe1,
+                               reference_cell_type = "Tumour",
+                               target_cell_type = "Immune",
+                               radius = 20)
+
+
+cross_K_gradient <- calculate_cross_K_gradient3D(spe1,
+                                                 reference_cell_type = "Tumour",
+                                                 target_cell_type = "Immune",
+                                                 radii = 20)
+
 
 
 Kcross_intersection <- calculate_Kcross_intersection3D(Kcross_results)
@@ -68,29 +75,26 @@ print(Kcross_AUC)
 
 
 ### Calculate entropy
-entropy_entire_image <- calculate_entropy3D(data,
-                                            radius = NULL,
-                                            reference_cell_type = NULL,
-                                            target_cell_types = c("Tumour", "Immune", "Others"),
-                                            log_base = NULL)
-print(entropy_entire_image)
+entropy_background <- calculate_entropy_background3D(spe1,
+                                                     cell_types_of_interest = NULL)
 
-entropy_result <- calculate_entropy3D(data,
+print(entropy_background)
+
+entropy_result <- calculate_entropy3D(spe1,
                                       radius = 20,
                                       reference_cell_type = "Tumour",
                                       target_cell_types = c("Tumour", "Immune", "Others"),
-                                      log_base = NULL)
+                                      plot_image = TRUE)
 
-entropy_gradient <- calculate_entropy_gradient3D(data,
-                                                 radii = 100,
+
+
+
+
+entropy_gradient <- calculate_entropy_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
-                                                 target_cell_types = c("Tumour", "Immune", "Others"))
+                                                 target_cell_types = c("Tumour", "Immune", "Others"),
+                                                 radii = 50)
 
-
-entropy_gradient_aggregated <- calculate_entropy_gradient_aggregated3D(data,
-                                                                       radii = 100,
-                                                                       reference_cell_type = "Tumour",
-                                                                       target_cell_types = c("Tumour", "Immune"))
 
 
 ### 3. Spatial Heterogeneity metrics ------------------------------------------

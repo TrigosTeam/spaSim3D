@@ -549,6 +549,7 @@ calculate_cells_in_neighborhood3D <- function(spe,
                                               target_cell_types, 
                                               radius, 
                                               feature_colname = "Cell.Type",
+                                              show_summary = TRUE,
                                               plot_image = TRUE) {
   
   ## Convert spe object to data frame
@@ -598,8 +599,11 @@ calculate_cells_in_neighborhood3D <- function(spe,
   
   result <- data.frame(ref_cell_id = reference_cells$Cell.ID, result)
   
-  ## Show summarised results
-  print(summarise_cells_in_neighborhood3D(result))
+  if (show_summary) {
+    ## Show summarised results
+    print(summarise_cells_in_neighborhood3D(result))    
+  }
+  
   
   ## Plot
   if (plot_image) {
@@ -609,6 +613,7 @@ calculate_cells_in_neighborhood3D <- function(spe,
   
   return(result)
 }
+
 
 
 summarise_cells_in_neighborhood3D <- function(cells_in_neighborhood_data) {
@@ -665,4 +670,204 @@ plot_cells_in_neighborhood_violin3D <- function(cells_in_neighborhood_data, scal
 
 
 
+calculate_cross_K3D <- function(spe, 
+                                reference_cell_type, 
+                                target_cell_type, 
+                                radius, 
+                                feature_colname = "Cell.Type") {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe), 
+                   "Cell.Type" = spe[[feature_colname]], 
+                   "Cell.ID" = spe[["Cell.ID"]])
+  
+  ## For reference_cell_type, check it is found in the spe object
+  if (!(reference_cell_type %in% df$Cell.Type)) {
+    stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+  }
+  
+  ## For target_cell_type, check it is found in the spe object
+  if (!(target_cell_type %in% df$Cell.Type)) {
+    stop(paste("The target_cell_type", target_cell_type,"is not found in the spe object"))
+  }
+  
+  
+  cells_in_neighbourhood_data <- calculate_cells_in_neighborhood3D(spe,
+                                                                   reference_cell_type,
+                                                                   target_cell_type,
+                                                                   radius,
+                                                                   feature_colname,
+                                                                   show_summary = FALSE,
+                                                                   plot_image = FALSE)
+  
+  n_ref_tar_interactions <- sum(cells_in_neighbourhood_data[[target_cell_type]])
+  n_ref_cells <- sum(df$Cell.Type == reference_cell_type)
+  n_tar_cells <- sum(df$Cell.Type == target_cell_type)
+  
+  ## Get rough dimensions of the window the points are in
+  length <- round(max(df$Cell.X.Position) - min(df$Cell.X.Position))
+  width  <- round(max(df$Cell.Y.Position) - min(df$Cell.Y.Position))
+  height <- round(max(df$Cell.Z.Position) - min(df$Cell.Z.Position))
+  ## Get volume of the window the cells are in
+  volume <- length * width * height
+  
+  
+  ## Get observed cross K-function
+  observed_cross_K <- (volume * n_ref_tar_interactions) / (n_ref_cells * n_tar_cells)
+  
+  ## Get expected cross K-function
+  expected_cross_K <- (4/3) * (pi * radius^3)
+  
+  result <- data.frame(observed_cross_K = observed_cross_K,
+                       expected_cross_K = expected_cross_K)
+  
+  return(result)
+}
+
+calculate_cross_K_gradient3D <- function(spe, 
+                                         reference_cell_type, 
+                                         target_cell_type, 
+                                         radii, 
+                                         feature_colname = "Cell.Type",
+                                         plot_image = TRUE) {
+  
+  result <- data.frame(matrix(nrow = radii, ncol = 2))
+  colnames(result) <- c("observed_cross_K", 
+                        "expected_cross_K")
+  
+  for (radius in seq(radii)) {
+    cross_K_data <- calculate_cross_K3D(spe,
+                                        reference_cell_type,
+                                        target_cell_type,
+                                        radius,
+                                        feature_colname)
+    
+    result[radius, ] <- cross_K_data
+  }
+  
+  # Add a radius column to the result
+  result$radius <- seq(radii)
+  
+  if (plot_image) {
+    plot(result$radius, result$observed_cross_K, type = "l", col = "red", 
+         xlim = c(0, radius), ylim = c(0, max(result)),
+         xlab = "Radius", ylab = "Cross K-function value")
+    lines(result$radius, result$expected_cross_K, type = "l", col = "blue", lty = 2)
+    legend(0, max(result), legend = c("Observed cross K", "Expected cross K"), col = c("red", "blue"), lty = c(1, 2))
+  }
+  
+  return(result)
+}
+
+
+
+calculate_entropy3D <- function(spe,
+                                reference_cell_type,
+                                target_cell_types,
+                                radius,
+                                feature_colname = "Cell.Type",
+                                plot_image = TRUE) {
+  
+  # Check if radius is numeric
+  if (!is.numeric(radius)) {
+    stop(paste(radius, " is not of type 'numeric'"))
+  }
+  
+  ## Users should ensure include the reference_cell_type as one of the target_cell_types
+  cells_in_neighborhood_data <- calculate_cells_in_neighborhood3D(spe,
+                                                                  reference_cell_type,
+                                                                  target_cell_types,
+                                                                  radius,
+                                                                  feature_colname,
+                                                                  FALSE,
+                                                                  FALSE)
+  
+  ## Get total number of target cells for each row
+  cells_in_neighborhood_data$total <- apply(cells_in_neighborhood_data[ , c(-1)], 1, sum)
+  
+  ## Get entropy for each row
+  cells_in_neighborhood_data$entropy <- 0
+  
+  for (target_cell_type in target_cell_types) {
+    
+    target_cell_type_proportions <- (cells_in_neighborhood_data[[target_cell_type]] / cells_in_neighborhood_data$total)
+    
+    ## If an element in target_cell_type_proportion is 0, just add 0.    
+    target_cell_entropy <- ifelse(target_cell_type_proportions == 0,
+                                  0,
+                                  -1 * target_cell_type_proportions * log(target_cell_type_proportions, length(target_cell_types)))
+    
+    cells_in_neighborhood_data$entropy <- cells_in_neighborhood_data$entropy + target_cell_entropy
+    
+  }
+  
+  ## Case when row has 0 target cells
+  cells_in_neighborhood_data[cells_in_neighborhood_data$Total == 0, "entropy"] <- 0
+  
+  if (plot_image) {
+    fig <- plot_entropy_violin3D(cells_in_neighborhood_data)
+    methods::show(fig)
+  }
+  
+  return(cells_in_neighborhood_data)
+}
+
+
+
+
+calculate_entropy_gradient3D <- function(spe,
+                                         reference_cell_type,
+                                         target_cell_types,
+                                         radii,
+                                         feature_colname = "Cell.Type",
+                                         plot_image = TRUE) {
+  
+  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
+  colnames(result) <- target_cell_types
+  
+  for (radius in seq(radii)) {
+    cells_in_neighborhood_data <- calculate_cells_in_neighborhood3D(spe,
+                                                                    reference_cell_type,
+                                                                    target_cell_types,
+                                                                    radius,
+                                                                    feature_colname,
+                                                                    FALSE,
+                                                                    FALSE)
+    
+    cells_in_neighborhood_data$ref_cell_id <- NULL
+    result[radius, ] <- apply(cells_in_neighborhood_data, 2, sum)
+  }
+  
+  ## Get total number of target cells for each row
+  result$total <- apply(result, 1, sum)
+  
+  ## Set intial entropy to 0
+  result$entropy <- 0
+  
+  for (target_cell_type in target_cell_types) {
+    
+    target_cell_type_proportions <- (result[[target_cell_type]] / result$total)
+    
+    ## If an element in target_cell_type_proportion is 0, just add 0.    
+    target_cell_entropy <- ifelse(target_cell_type_proportions == 0,
+                                  0,
+                                  -1 * target_cell_type_proportions * log(target_cell_type_proportions, length(target_cell_types)))
+    
+    result$entropy <- result$entropy + target_cell_entropy
+    
+  }
+  
+  # Add a radius column to the result
+  result$radius <- seq(radii)
+  
+  if (plot_image) {
+    plot(result$radius, result$entropy, type = "l", col = "red", 
+         xlim = c(0, radius), ylim = c(0, max(result$entropy)),
+         xlab = "Radius", ylab = "Entropy")
+    # lines(result$radius, result$expected_cross_K, type = "l", col = "blue", lty = 2)
+    # legend(0, max(result), legend = c("Observed cross K", "Expected cross K"), col = c("red", "blue"), lty = c(1, 2))
+  }
+  
+  return(result)
+}
 
