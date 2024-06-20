@@ -46,5 +46,10 @@ plot_cells3D <- function(spe,
                                      yaxis = list(title = 'y'),
                                      zaxis = list(title = 'z')))
   
+  fig <- fig %>% layout(scene = list(xaxis = list(title = '', showgrid = T, showaxeslabels = F, showticklabels = F),
+                                     yaxis = list(title = '', showgrid = T, showaxeslabels = F, showticklabels = F),
+                                     zaxis = list(title = '', showgrid = T, showaxeslabels = F, showticklabels = F)))
+  
+  
   return (fig)
 }

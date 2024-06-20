@@ -8,6 +8,7 @@ spe1 <- spe_clusters
 cell_props1 <- calculate_cell_proportions3D(spe1,
                                             cell_types_of_interest = NULL,
                                             plot_image = TRUE)
+print(cell_props1)
 
 cell_props2 <- calculate_cell_proportions3D(spe1,
                                             cell_types_of_interest = c("Tumour", "Immune"),
@@ -59,24 +60,31 @@ cross_K <- calculate_cross_K3D(spe1,
                                reference_cell_type = "Tumour",
                                target_cell_type = "Immune",
                                radius = 20)
+print(cross_K)
 
 
 cross_K_gradient <- calculate_cross_K_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_type = "Immune",
-                                                 radii = 20)
+                                                 radii = 60)
 
+plot(cross_K_gradient$radius, 
+     cross_K_gradient$observed_cross_K / cross_K_gradient$expected_cross_K, 
+     type = "l", 
+     col = "red", 
+     xlim = c(0, max(cross_K_gradient$radius)), ylim = c(0, 3),
+     xlab = "Radius", ylab = "Cross K-function ratio")
+abline(a = 1, b = 0, col = "blue")
 
-
-Kcross_intersection <- calculate_Kcross_intersection3D(Kcross_results)
-
-Kcross_AUC <- calculate_AUC_of_Kcross3D(Kcross_results)
-print(Kcross_AUC)
+# Kcross_intersection <- calculate_Kcross_intersection3D(Kcross_results)
+# 
+# Kcross_AUC <- calculate_AUC_of_Kcross3D(Kcross_results)
+# print(Kcross_AUC)
 
 
 ### Calculate entropy
 entropy_background <- calculate_entropy_background3D(spe1,
-                                                     cell_types_of_interest = NULL)
+                                                     cell_types_of_interest = c("Tumour", "Immune"))
 
 print(entropy_background)
 
@@ -93,53 +101,54 @@ entropy_result <- calculate_entropy3D(spe1,
 entropy_gradient <- calculate_entropy_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_types = c("Tumour", "Immune", "Others"),
-                                                 radii = 50)
+                                                 radii = 50,
+                                                 plot_image = TRUE)
 
 
 
 ### 3. Spatial Heterogeneity metrics ------------------------------------------
 
 ### Determine entropy grid metrics
-entropy_grid_metrics <- determine_entropy_grid_metrics3D(data,
+entropy_grid_metrics <- determine_entropy_grid_metrics3D(spe1,
                                                          n_split = 8,
-                                                         target_cell_types = c("Tumour", "Immune", "Others"),
-                                                         size = 12,
+                                                         cell_types_of_interest = c("Tumour", "Immune"),
                                                          plot_image = TRUE)
+plot_grid_metrics_discrete3D(spe1, entropy_grid_metrics, "entropy")
+
 
 ### Determine entropy prevalence
 entropy_prevalence <- determine_prevalence3D(entropy_grid_metrics,
-                                             metric_colname = "Entropy",
+                                             metric_colname = "entropy",
                                              threshold = 0.5)
 print(entropy_prevalence)
 
 ### Determine spatial autocorrelation
 entropy_spatial_autocorrelation <- determine_spatial_autocorrelation(entropy_grid_metrics,
-                                                                     metric_colname = "Entropy",
+                                                                     metric_colname = "entropy",
                                                                      weight_method = "IDW")
-
 print(entropy_spatial_autocorrelation)
 
 
 ### Determine cell proportion grid metrics
-cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(data,
+cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(spe1,
                                                                          n_split = 8,
-                                                                         reference_cell_types = c("Immune"),
-                                                                         target_cell_types = c("Tumour"),
-                                                                         size = 10,
+                                                                         reference_cell_types = c("Tumour"),
+                                                                         target_cell_types = c("Immune"),
                                                                          plot_image = TRUE)
+plot_grid_metrics_discrete3D(spe1, cell_proportion_grid_metrics, "proportion")
+
 
 ### Determine cell proportion prevalence
 cell_proportion_prevalence <- determine_prevalence3D(cell_proportion_grid_metrics,
-                                                     metric_colname = "Proportion",
+                                                     metric_colname = "proportion",
                                                      threshold = 0.5)
 print(cell_proportion_prevalence)
 
 
 ## Determine spatial autocorrelation for cell proportions
 cell_proportion_spatial_autocorrelation <- determine_spatial_autocorrelation(cell_proportion_grid_metrics,
-                                                                             metric_colname = "Proportion",
-                                                                             weight_method = "Binary")
-
+                                                                             metric_colname = "proportion",
+                                                                             weight_method = "binary")
 print(cell_proportion_spatial_autocorrelation)
 
 
@@ -165,6 +174,6 @@ ggplot(df, aes(x, y)) + geom_point() + geom_errorbar(aes(ymin = low, ymax = up))
 
 
 ### 6. Plot data -------------------------------------------------------------
-plot_cell_categories3D(data,
-                       cell_types_of_interest = c("Tumour", "Immune", "Others"),
-                       colour_vector = c("orange", "skyblue", "lightgray"))
+plot_cells3D(spe1,
+             plot_cell_types = c("Tumour", "Immune", "Others"),
+             plot_colours = c("orange", "skyblue", "lightgray"))
