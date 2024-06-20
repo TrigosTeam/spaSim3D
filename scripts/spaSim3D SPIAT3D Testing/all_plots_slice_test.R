@@ -27,10 +27,14 @@ colnames(plot_result) <- c("dimension", "metric", "value")
 plot_result$metric <- factor(plot_result$metric, levels = metrics_list_names)
 plot_result$dimension <- factor(plot_result$dimension, levels = c("3D", "2D"))
 
-plot <- ggplot(plot_result, aes(dimension, value, fill = dimension)) +
+plot_result1 <- plot_result[plot_result$metric %in% c("APD", "AMD"), ]
+
+plot <- ggplot(plot_result1, aes(dimension, value, fill = dimension)) +
   geom_bar(stat = "identity") +
-  facet_wrap(~metric, scales = "free_y", ncol = 3) + 
-  theme(legend.position = "left")
+  facet_wrap(~metric, scales = "free_y", ncol = 2) + 
+  theme(legend.position = "left") +
+  labs(x = "Dimension", y = "Value") + 
+  guides(fill=guide_legend(title="Dimension"))
 plot
 
 # 
@@ -289,7 +293,7 @@ plot_slice_3D <- function(all_plots_data = all_plots_data,
   }
   plot_cell_categories3D(plots_data, 
                          c("Tumour", "Immune", "Slice", "Others"),
-                         c("orange", "skyblue", "tomato", "lightgray"))
+                         c("orange", "skyblue", "lightgray", "lightgray"))
 }
 
 
