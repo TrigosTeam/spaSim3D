@@ -109,7 +109,7 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
                                      cluster_properties = network_cluster_properties,
                                      plot_image = F)
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]])
+  df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]], "Cell.ID" = network_spe[["Cell.ID"]])
   
   # Update current meta data
   metadata <- bg_spe@metadata
