@@ -1,5 +1,5 @@
 determine_spatial_autocorrelation <- function(grid_data,
-                                              metric_colname = "Entropy",
+                                              metric_colname,
                                               weight_method = "IDW") {
   
   
@@ -23,7 +23,7 @@ determine_spatial_autocorrelation <- function(grid_data,
   }
   ## Use binary method: adjacent points get a weight of 1, otherwise, weight of 0
   ## Adjacent points are within sqrt(3) units apart. e.g. (0, 0, 0) vs (1, 1, 1)
-  else if (weight_method == "Binary") {
+  else if (weight_method == "binary") {
     weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
   }
   else {
@@ -61,6 +61,6 @@ determine_spatial_autocorrelation <- function(grid_data,
   
   I <- (n_grid_prisms * numerator) / (sum(weight_matrix) * denominator)
   
-  return (I)
+  return(I)
   
 }

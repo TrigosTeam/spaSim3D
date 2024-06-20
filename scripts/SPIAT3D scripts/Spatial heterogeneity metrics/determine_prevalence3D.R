@@ -1,5 +1,5 @@
 determine_prevalence3D <- function(grid_data,
-                                   metric_colname = "Entropy",
+                                   metric_colname,
                                    threshold,
                                    above = TRUE) {
   
@@ -13,5 +13,5 @@ determine_prevalence3D <- function(grid_data,
     p <- sum(grid_data[[metric_colname]] < threshold) / nrow(grid_data) * 100    
   }
   
-  return (p)
+  return(p)
 }
