@@ -5,13 +5,18 @@
 spe_bg <- spaSim3D_background_integrator()
 
 spe_cluster <- spaSim3D_cluster_integrator(spe_bg)
+spe_cluster1 <- spaSim3D_cluster_integrator(spe_cluster)
 
 # Plot with chosen colours
 plot_cells3D(spe_bg, 
-             plot_cell_types = c("Others", "Tumour"),
-             plot_colours = c("lightgray", "orange"))
+             plot_cell_types = c("Others", "Tumour", "Immune"),
+             plot_colours = c("lightgray", "orange", "skyblue"))
 
 plot_cells3D(spe_cluster,
+             plot_cell_types = c("Tumour", "Immune1", "Immune2", "Others"),
+             plot_colours = c("orange", "lightgreen", "skyblue", "lightgray"))
+
+plot_cells3D(spe_cluster1,
              plot_cell_types = c("Tumour", "Immune", "Others"),
              plot_colours = c("orange", "skyblue", "lightgray"))
 
@@ -31,7 +36,7 @@ metadata_bg_n <- spe_metadata_background_template("normal")
 # Change background metadata
 metadata_bg_r$background$minimum_distance_between_cells <- 0
 metadata_bg_r$background$n_cells <- 11000
-View(metadata_bg_n)
+# View(metadata_bg_n)
 
 # Get spe from background metadata
 spe_bg1 <- simulate_spe_metadata3D(metadata_bg_r)
@@ -70,3 +75,25 @@ plot_cells3D(spe_clusters1,
              plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Endothelial"),
              plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "tomato"))
 
+
+
+
+
+
+
+
+### Random simuation
+metadata_bg_r <- spe_metadata_background_template("random")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_r, "double ring", "Sphere")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "regular", "Network")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "regular", "Network")
+
+metadata_bg_clusters$cluster_1$centre_loc <- c(50, 50, 50)
+metadata_bg_clusters$cluster_2$centre_loc <- c(25, 25, 25)
+metadata_bg_clusters$cluster_3$centre_loc <- c(75, 75, 75)
+
+
+spe_clusters <- simulate_spe_metadata3D(metadata_bg_clusters)
+plot_cells3D(spe_clusters,
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Immune2"),
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "purple"))
