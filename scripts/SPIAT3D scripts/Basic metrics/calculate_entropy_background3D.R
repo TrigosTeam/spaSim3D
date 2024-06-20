@@ -1,13 +1,13 @@
 calculate_entropy_background3D <- function(spe,
-                                           cell_types_of_interest = NULL, 
+                                           cell_types_of_interest, 
                                            feature_colname = "Cell.Type") {
   
+  if (length(cell_types_of_interest) <= 1) return(0)
   
-  cell_proportions_data <- calculate_cell_proportions3D(spe, cell_types_of_interest, feature_colname, FALSE, FALSE)
+  cell_proportions_data <- calculate_cell_proportions3D(spe, cell_types_of_interest, feature_colname, FALSE)
   
   # Calculate entropy of the entire image
-  cell_proportions <- cell_proportions_data$proportion
-  entropy <- -1 * sum(cell_proportions * log(cell_proportions, length(cell_proportions)))
-
+  entropy <- -1 * sum(cell_proportions_data$proportion * log(cell_proportions_data$proportion, length(cell_proportions_data$proportion)))
+  
   return(entropy) 
 }

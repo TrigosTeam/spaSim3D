@@ -1,5 +1,5 @@
 ## For scales parameter, use "free_x" or "free". "free_y" looks silly
-plot_cells_in_neighborhood_violin3D <- function(cells_in_neighborhood_data, scales = "free_x") {
+plot_cells_in_neighborhood_violin3D <- function(cells_in_neighborhood_data, reference_cell_type, scales = "free_x") {
   
   ## Target cell types will be all the columns except the first column
   target_cell_types <- colnames(cells_in_neighborhood_data)[c(-1)]
@@ -12,10 +12,10 @@ plot_cells_in_neighborhood_violin3D <- function(cells_in_neighborhood_data, scal
   
   fig <- ggplot(df, aes(x = tar_cell_type, y = count)) + 
     geom_violin() +
-    facet_wrap(~tar_cell_type, scales=scales) +
+    facet_wrap(~tar_cell_type, scales=scales, strip.position="bottom") +
     theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5)) +
-    labs(title="Cells in neighbourhood", x = "Target cell type", y = "Number of cells") +
+    theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+    labs(title=paste("Cells in neighbourhood of", reference_cell_type, "cells"), x = "Target cell type", y = "Number of cells") +
     stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
   
   message("Plots show mean ± sd")

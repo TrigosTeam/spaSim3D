@@ -61,7 +61,7 @@ calculate_cells_in_neighborhood3D <- function(spe,
   
   ## Plot
   if (plot_image) {
-    fig <- plot_cells_in_neighborhood_violin3D(result)
+    fig <- plot_cells_in_neighborhood_violin3D(result, reference_cell_type)
     methods::show(fig)
   }
   
