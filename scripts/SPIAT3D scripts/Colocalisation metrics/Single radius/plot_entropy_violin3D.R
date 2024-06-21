@@ -8,6 +8,7 @@ plot_entropy_violin3D <- function(entropy_data, scales = "free_x") {
     geom_violin() +
     theme_bw() +
     labs(x = "", y = "Entropy") +
+    theme(axis.ticks.x = element_blank()) +
     stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
   
   message("Plot shows mean ± sd")
