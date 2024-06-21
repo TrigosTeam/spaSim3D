@@ -2,7 +2,8 @@ calculate_entropy_background3D <- function(spe,
                                            cell_types_of_interest, 
                                            feature_colname = "Cell.Type") {
   
-  if (length(cell_types_of_interest) <= 1) return(0)
+  if (length(cell_types_of_interest) == 0) return(NA)
+  if (length(cell_types_of_interest) == 1) return(0)
   
   cell_proportions_data <- calculate_cell_proportions3D(spe, cell_types_of_interest, feature_colname, FALSE)
   
