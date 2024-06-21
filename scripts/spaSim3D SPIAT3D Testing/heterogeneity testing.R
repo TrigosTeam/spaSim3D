@@ -1,5 +1,4 @@
 ### Generating simulations ---------------------------------------------------
-
 metadata_bg_r <- spe_metadata_background_template("random")
 metadata_bg_r[["background"]][["cell_types"]] <- "Others"
 metadata_bg_r[["background"]][["cell_proportions"]] <- 1
@@ -59,6 +58,21 @@ plot_cells3D(spe_separate_spheres,
              plot_colours = c("lightgray", "orange", "skyblue"))
 
 
+# Ringed sphere
+metadata_ringed_sphere <- spe_metadata_cluster_template(metadata_bg_r, "ring", "Sphere")
+metadata_ringed_sphere[["cluster_1"]][["cluster_cell_types"]] <- c("Tumour")
+metadata_ringed_sphere[["cluster_1"]][["cluster_cell_proportions"]] <- c(1)
+metadata_ringed_sphere[["cluster_1"]][["radius"]] <- 40
+metadata_ringed_sphere[["cluster_1"]][["centre_loc"]] <- c(50, 50, 50)
+metadata_ringed_sphere[["cluster_1"]][["ring_cell_types"]] <- "Immune"
+metadata_ringed_sphere[["cluster_1"]][["ring_cell_proportions"]] <- 1
+
+spe_ringed_sphere <- simulate_spe_metadata3D(metadata_ringed_sphere)
+plot_cells3D(spe_ringed_sphere,
+             plot_cell_types = c("Others", "Tumour", "Immune"),
+             plot_colours = c("lightgray", "orange", "skyblue"))
+
+
 
 ### Analysis - mixed sphere --------------------------------------------------
 entropy_grid_metrics <- determine_entropy_grid_metrics3D(spe_mixed_sphere,
@@ -113,3 +127,20 @@ cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(spe_sep
                                                                          target_cell_types = c("Immune"),
                                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(spe_separate_spheres, cell_proportion_grid_metrics, "proportion")
+
+
+### Analysis - ringed spheres ----------------------------------------------------
+entropy_grid_metrics <- determine_entropy_grid_metrics3D(spe_ringed_sphere,
+                                                         n_split = 8,
+                                                         cell_types_of_interest = c("Tumour", "Immune"),
+                                                         plot_image = TRUE)
+plot_grid_metrics_discrete3D(spe_ringed_sphere, entropy_grid_metrics, "entropy")
+
+
+
+cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(spe_ringed_sphere,
+                                                                         n_split = 8,
+                                                                         reference_cell_types = c("Tumour"),
+                                                                         target_cell_types = c("Immune"),
+                                                                         plot_image = TRUE)
+plot_grid_metrics_discrete3D(spe_ringed_sphere, cell_proportion_grid_metrics, "proportion")
