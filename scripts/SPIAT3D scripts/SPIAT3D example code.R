@@ -1,5 +1,5 @@
 data1 <- data.frame(spatialCoords(spe_clusters), Cell.Type = spe_clusters[["Cell.Type"]], Cell.ID = spe_clusters[["Cell.ID"]])
-spe1 <- spe_sphere_ception
+spe1 <- spe_ringed_sphere
 
 
 ### 1. Basic Metrics ----------------------------------------------------------
