@@ -47,7 +47,7 @@ calculate_cell_proportions3D <- function(spe,
     
     labels <- paste(round(cell_proportions$percentage, 1), "%", sep = "")
     
-    g <- ggplot(cell_proportions, aes(x = factor(cell_type, cell_type), y = percentage, fill = cell_type)) +
+    fig <- ggplot(cell_proportions, aes(x = factor(cell_type, cell_type), y = percentage, fill = cell_type)) +
       geom_bar(stat='identity') + 
       theme_bw() +
       labs(title="Cell proportions", x = "Cell type", y = "Percentage") +
@@ -55,7 +55,7 @@ calculate_cell_proportions3D <- function(spe,
             legend.position = "none") +
       geom_text(aes(label = labels), vjust = 0)
     
-    methods::show(g)
+    methods::show(fig)
   }
   
   return(cell_proportions)
