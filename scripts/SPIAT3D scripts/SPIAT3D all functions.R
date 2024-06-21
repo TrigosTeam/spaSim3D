@@ -47,7 +47,7 @@ calculate_cell_proportions3D <- function(spe,
     
     labels <- paste(round(cell_proportions$percentage, 1), "%", sep = "")
     
-    g <- ggplot(cell_proportions, aes(x = factor(cell_type, cell_type), y = percentage, fill = cell_type)) +
+    fig <- ggplot(cell_proportions, aes(x = factor(cell_type, cell_type), y = percentage, fill = cell_type)) +
       geom_bar(stat='identity') + 
       theme_bw() +
       labs(title="Cell proportions", x = "Cell type", y = "Percentage") +
@@ -55,7 +55,7 @@ calculate_cell_proportions3D <- function(spe,
             legend.position = "none") +
       geom_text(aes(label = labels), vjust = 0)
     
-    methods::show(g)
+    methods::show(fig)
   }
   
   return(cell_proportions)
@@ -66,7 +66,8 @@ calculate_entropy_background3D <- function(spe,
                                            cell_types_of_interest, 
                                            feature_colname = "Cell.Type") {
   
-  if (length(cell_types_of_interest) <= 1) return(0)
+  if (length(cell_types_of_interest) == 0) return(NA)
+  if (length(cell_types_of_interest) == 1) return(0)
   
   cell_proportions_data <- calculate_cell_proportions3D(spe, cell_types_of_interest, feature_colname, FALSE)
   
@@ -312,9 +313,9 @@ plot_cell_distances_violin3D <- function(cell_to_cell_dist, scales = "free_x") {
   
   fig <- ggplot(cell_to_cell_dist, aes(x = pair, y = distance)) + 
     geom_violin() +
-    facet_wrap(~pair, scales=scales) +
+    facet_wrap(~pair, scales=scales, strip.position="bottom") +
     theme_bw() +
-    theme(axis.text.x=element_blank(), plot.title = element_text(hjust = 0.5)) +
+    theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), plot.title = element_text(hjust = 0.5)) +
     labs(title="Cell distances", x = "Reference/Target pair", y = "Distance") +
     stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
   
@@ -322,6 +323,8 @@ plot_cell_distances_violin3D <- function(cell_to_cell_dist, scales = "free_x") {
   
   return(fig)
 }
+
+
 
 
 calculate_mixing_scores3D <- function(spe, 
@@ -472,7 +475,7 @@ calculate_mixing_scores3D <- function(spe,
 }
 
 
-calculate_cells_in_neighborhood3D <- function(spe, 
+calculate_cells_in_neighbourhood3D <- function(spe, 
                                               reference_cell_type, 
                                               target_cell_types, 
                                               radius, 
@@ -529,13 +532,13 @@ calculate_cells_in_neighborhood3D <- function(spe,
   
   if (show_summary) {
     ## Show summarised results
-    print(summarise_cells_in_neighborhood3D(result))    
+    print(summarise_cells_in_neighbourhood3D(result))    
   }
   
   
   ## Plot
   if (plot_image) {
-    fig <- plot_cells_in_neighborhood_violin3D(result, reference_cell_type)
+    fig <- plot_cells_in_neighbourhood_violin3D(result, reference_cell_type)
     methods::show(fig)
   }
   
@@ -544,12 +547,12 @@ calculate_cells_in_neighborhood3D <- function(spe,
 
 
 
-summarise_cells_in_neighborhood3D <- function(cells_in_neighborhood_data) {
+summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_data) {
   
-  df <- cells_in_neighborhood_data
+  df <- cells_in_neighbourhood_data
   
   ## Target cell types will be all the columns except the first column
-  target_cell_types <- colnames(cells_in_neighborhood_data)[c(-1)]
+  target_cell_types <- colnames(cells_in_neighbourhood_data)[c(-1)]
   
   ## Set up data frame for summarised_results list
   df <- data.frame(row.names = c("mean", "min", "max", "median", "st_dev"))
@@ -557,7 +560,7 @@ summarise_cells_in_neighborhood3D <- function(cells_in_neighborhood_data) {
   for (target_cell_type in target_cell_types) {
     
     ## Get statistical measures for each target cell type
-    target_cell_type_values <- cells_in_neighborhood_data[[target_cell_type]]
+    target_cell_type_values <- cells_in_neighbourhood_data[[target_cell_type]]
     df[[target_cell_type]] <- c(mean(target_cell_type_values),
                                 min(target_cell_type_values),
                                 max(target_cell_type_values),
@@ -573,12 +576,12 @@ summarise_cells_in_neighborhood3D <- function(cells_in_neighborhood_data) {
 
 
 ## For scales parameter, use "free_x" or "free". "free_y" looks silly
-plot_cells_in_neighborhood_violin3D <- function(cells_in_neighborhood_data, reference_cell_type, scales = "free_x") {
+plot_cells_in_neighbourhood_violin3D <- function(cells_in_neighbourhood_data, reference_cell_type, scales = "free_x") {
   
   ## Target cell types will be all the columns except the first column
-  target_cell_types <- colnames(cells_in_neighborhood_data)[c(-1)]
+  target_cell_types <- colnames(cells_in_neighbourhood_data)[c(-1)]
   
-  df <- reshape2::melt(cells_in_neighborhood_data, measure.vars = target_cell_types)
+  df <- reshape2::melt(cells_in_neighbourhood_data, measure.vars = target_cell_types)
   colnames(df) <- c("ref_cell_id", "tar_cell_type", "count")
   
   # setting these variables to NULL as otherwise get "no visible binding for global variable" in R check
@@ -613,7 +616,7 @@ calculate_entropy3D <- function(spe,
   }
   
   ## Users should ensure include the reference_cell_type as one of the target_cell_types
-  cells_in_neighborhood_data <- calculate_cells_in_neighborhood3D(spe,
+  cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
                                                                   reference_cell_type,
                                                                   target_cell_types,
                                                                   radius,
@@ -622,33 +625,33 @@ calculate_entropy3D <- function(spe,
                                                                   FALSE)
   
   ## Get total number of target cells for each row
-  cells_in_neighborhood_data$total <- apply(cells_in_neighborhood_data[ , c(-1)], 1, sum)
+  cells_in_neighbourhood_data$total <- apply(cells_in_neighbourhood_data[ , c(-1)], 1, sum)
   
   ## Get entropy for each row
-  cells_in_neighborhood_data$entropy <- 0
+  cells_in_neighbourhood_data$entropy <- 0
   
   for (target_cell_type in target_cell_types) {
     
-    target_cell_type_proportions <- (cells_in_neighborhood_data[[target_cell_type]] / cells_in_neighborhood_data$total)
+    target_cell_type_proportions <- (cells_in_neighbourhood_data[[target_cell_type]] / cells_in_neighbourhood_data$total)
     
     ## If an element in target_cell_type_proportion is 0, just add 0.    
     target_cell_entropy <- ifelse(target_cell_type_proportions == 0,
                                   0,
                                   -1 * target_cell_type_proportions * log(target_cell_type_proportions, length(target_cell_types)))
     
-    cells_in_neighborhood_data$entropy <- cells_in_neighborhood_data$entropy + target_cell_entropy
+    cells_in_neighbourhood_data$entropy <- cells_in_neighbourhood_data$entropy + target_cell_entropy
     
   }
   
   ## Case when row has 0 target cells
-  cells_in_neighborhood_data[cells_in_neighborhood_data$Total == 0, "entropy"] <- 0
+  cells_in_neighbourhood_data[cells_in_neighbourhood_data$Total == 0, "entropy"] <- 0
   
   if (plot_image) {
-    fig <- plot_entropy_violin3D(cells_in_neighborhood_data)
+    fig <- plot_entropy_violin3D(cells_in_neighbourhood_data)
     methods::show(fig)
   }
   
-  return(cells_in_neighborhood_data)
+  return(cells_in_neighbourhood_data)
 }
 
 
@@ -662,12 +665,17 @@ plot_entropy_violin3D <- function(entropy_data, scales = "free_x") {
     geom_violin() +
     theme_bw() +
     labs(x = "", y = "Entropy") +
+    theme(axis.ticks.x = element_blank()) +
     stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
   
   message("Plot shows mean ± sd")
   
   return(fig)
 }
+
+
+
+
 
 
 
@@ -693,7 +701,7 @@ calculate_cross_K3D <- function(spe,
   }
   
   
-  cells_in_neighbourhood_data <- calculate_cells_in_neighborhood3D(spe,
+  cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
                                                                    reference_cell_type,
                                                                    target_cell_type,
                                                                    radius,
@@ -757,12 +765,20 @@ calculate_mixing_scores_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   if (plot_image) {
-    plot(result[["radius"]], result[["normalised_mixing_score"]], type = "l", xlab = "Radius", ylab = "Normalised Mixing Score")
-    abline(a = 1, b = 0, col = "red", lwd = 2, lty = 2)
+    plot(result[["radius"]], result[["normalised_mixing_score"]], 
+         type = "l", 
+         xlab = "Radius", 
+         ylab = "normalised mixing score",
+         ylim = c(0, max(result[["normalised_mixing_score"]], 1)),
+         col = "red")
+    abline(a = 1, b = 0, col = "blue", lty = 2)
+    legend(0, 0.95, legend = c("Observed normalised mixing score", "Expected CSR normalised mixing score"), col = c("red", "blue"), lty = c(1, 2))
   }
   
   return(result)
 }
+
+
 
 
 
@@ -795,7 +811,7 @@ calculate_cross_K_gradient3D <- function(spe,
          xlim = c(0, radius), ylim = c(0, max(result)),
          xlab = "Radius", ylab = "Cross K-function value")
     lines(result$radius, result$expected_cross_K, type = "l", col = "blue", lty = 2)
-    legend(0, max(result), legend = c("Observed cross K", "Expected cross K"), col = c("red", "blue"), lty = c(1, 2))
+    legend(0, max(result), legend = c("Observed cross K", "Expected CSR cross K"), col = c("red", "blue"), lty = c(1, 2))
   }
   
   return(result)
@@ -813,7 +829,7 @@ calculate_entropy_gradient3D <- function(spe,
   colnames(result) <- target_cell_types
   
   for (radius in seq(radii)) {
-    cells_in_neighborhood_data <- calculate_cells_in_neighborhood3D(spe,
+    cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
                                                                     reference_cell_type,
                                                                     target_cell_types,
                                                                     radius,
@@ -821,8 +837,8 @@ calculate_entropy_gradient3D <- function(spe,
                                                                     FALSE,
                                                                     FALSE)
     
-    cells_in_neighborhood_data$ref_cell_id <- NULL
-    result[radius, ] <- apply(cells_in_neighborhood_data, 2, sum)
+    cells_in_neighbourhood_data$ref_cell_id <- NULL
+    result[radius, ] <- apply(cells_in_neighbourhood_data, 2, sum)
   }
   
   ## Get total number of target cells for each row
@@ -848,15 +864,19 @@ calculate_entropy_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   if (plot_image) {
+    expected_entropy <- calculate_entropy_background3D(spe, target_cell_types, feature_colname)
+    
     plot(result$radius, result$entropy, type = "l", col = "red", 
          xlim = c(0, radius), ylim = c(0, max(result$entropy)),
          xlab = "Radius", ylab = "Entropy")
-    # lines(result$radius, result$expected_cross_K, type = "l", col = "blue", lty = 2)
-    # legend(0, max(result), legend = c("Observed cross K", "Expected cross K"), col = c("red", "blue"), lty = c(1, 2))
+    abline(a = expected_entropy, b = 0, col = "blue", lty = 2)
+    legend(0, max(result$entropy, expected_entropy), legend = c("Observed entropy", "Expected CSR entropy"), col = c("red", "blue"), lty = c(1, 2))
   }
   
   return(result)
 }
+
+
 
 
 
@@ -926,45 +946,21 @@ determine_entropy_grid_metrics3D <- function(spe,
   ## Add column for total cell count for each grid prism
   result$total <- apply(result[ , colnames(result) %in% cell_types_of_interest], 1, sum)
   
+  ## Add x, y and z coords of each grid prism to result
+  result$prism_x_coord <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
+  result$prism_y_coord <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
+  result$prism_z_coord <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
+  
   ## Plot
   if (plot_image) {
-    
-    plot_data <- result
-    
-    ## Place a dot at the center of each grid prism to represent entropy
-    ## Use the grid prism number to figure out their location...
-    plot_data$x <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
-    plot_data$y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
-    plot_data$z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
-    
-    ## Color of each dot is related to its entropy
-    pal <- colorRampPalette(hcl.colors(n = 5, palette = "Red-Blue", rev = TRUE))
-    
-    ## Add size column and for 0 cell proportion values, make the size small
-    plot_data$size <- ifelse(plot_data$entropy == 0, 5, 10)
-    
-    fig <- plot_ly(plot_data,
-                   type = "scatter3d",
-                   mode = 'markers',
-                   x = ~x,
-                   y = ~y,
-                   z = ~z,
-                   color = ~entropy,
-                   colors = pal(nrow(plot_data)),
-                   marker = list(size = ~size),
-                   symbol = 1,
-                   symbols = "square")
-    
-    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
-                                       yaxis = list(title = 'y'),
-                                       zaxis = list(title = 'z')))
-    
-    print(fig)
-    
+    fig <- plot_grid_metrics_continuous3D(result, "entropy")
+    methods::show(fig)
   }
   
   return(result)
 }
+
+
 
 
 determine_cell_proportion_grid_metrics3D <- function(spe, 
@@ -1050,42 +1046,15 @@ determine_cell_proportion_grid_metrics3D <- function(spe,
                                   grid_prism_cell_proportion)
   }
   
+  ## Add x, y and z coords of each grid prism to result
+  result$prism_x_coord <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
+  result$prism_y_coord <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
+  result$prism_z_coord <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
+  
   ## Plot
   if (plot_image) {
-    
-    plot_data <- result
-    
-    ## Place a dot at the center of each grid prism to represent cell proportion
-    ## Use the grid prism number to figure out their location...
-    plot_data$x <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
-    plot_data$y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
-    plot_data$z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
-    
-    ## Color of each dot is related to its cell proportion
-    pal <- colorRampPalette(hcl.colors(n = 5, palette = "Red-Blue", rev = TRUE))
-    
-    
-    ## Add size column and for NA cell proportion values, make the size small
-    plot_data$size <- ifelse(is.na(plot_data$proportion), 3, 10)
-    
-    fig <- plot_ly(plot_data,
-                   type = "scatter3d",
-                   mode = 'markers',
-                   x = ~x,
-                   y = ~y,
-                   z = ~z,
-                   color = ~proportion,
-                   colors = pal(nrow(plot_data)),
-                   marker = list(size = ~size),
-                   symbol = 1,
-                   symbols = "square")
-    
-    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
-                                       yaxis = list(title = 'y'),
-                                       zaxis = list(title = 'z')))
-    
-    print(fig)
-    
+    fig <- plot_grid_metrics_continuous3D(result, "proportion")
+    methods::show(fig)
   }
   
   return(result)
@@ -1094,28 +1063,35 @@ determine_cell_proportion_grid_metrics3D <- function(spe,
 
 
 
-plot_grid_metrics_discrete3D <- function(spe, grid_metrics, metric_colname) {
+plot_grid_metrics_continuous3D <- function(grid_metrics, metric_colname) {
   
-  spe_coords <- data.frame(spatialCoords(spe))
+  ## Color of each dot is related to its entropy
+  pal <- colorRampPalette(hcl.colors(n = 5, palette = "Red-Blue", rev = TRUE))
   
-  ## Get dimensions of the window
-  length <- round(max(spe_coords$Cell.X.Position) - min(spe_coords$Cell.X.Position))
-  width  <- round(max(spe_coords$Cell.Y.Position) - min(spe_coords$Cell.Y.Position))
-  height <- round(max(spe_coords$Cell.Z.Position) - min(spe_coords$Cell.Z.Position))
+  ## Add size column and for NA entropy values, make the size small
+  grid_metrics$size <- ifelse(is.na(grid_metrics[[metric_colname]]), 3, 10)
   
+  fig <- plot_ly(grid_metrics,
+                 type = "scatter3d",
+                 mode = 'markers',
+                 x = ~prism_x_coord,
+                 y = ~prism_y_coord,
+                 z = ~prism_z_coord,
+                 color = as.formula(paste0('~', metric_colname)),
+                 colors = pal(nrow(grid_metrics)),
+                 marker = list(size = ~size),
+                 symbol = 1,
+                 symbols = "square")
   
-  ## Get distance of row, col and lay
-  n_grid_prisms <- nrow(grid_metrics)
-  n_split <- n_grid_prisms^(1/3)
-  d_row <- length / n_split
-  d_col <- width / n_split
-  d_lay <- height / n_split
+  fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
+                                     yaxis = list(title = 'y'),
+                                     zaxis = list(title = 'z')))
   
-  ## Add x, y and z coords of each grid prism to data
-  grid_metrics$x <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
-  grid_metrics$y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
-  grid_metrics$z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
-  
+  return(fig)
+}
+
+
+plot_grid_metrics_discrete3D <- function(grid_metrics, metric_colname) {
   
   ## Define low, medium and high categories
   # Low: between 0 and 1/3
@@ -1130,9 +1106,9 @@ plot_grid_metrics_discrete3D <- function(spe, grid_metrics, metric_colname) {
   fig <- plot_ly(grid_metrics,
                  type = "scatter3d",
                  mode = 'markers',
-                 x = ~x,
-                 y = ~y,
-                 z = ~z,
+                 x = ~prism_x_coord,
+                 y = ~prism_y_coord,
+                 z = ~prism_z_coord,
                  color = ~rank,
                  colors = c("#AEB6E5", "#BC6EB9", "#A93154", "gray"),
                  symbol = 1,
@@ -1144,6 +1120,7 @@ plot_grid_metrics_discrete3D <- function(spe, grid_metrics, metric_colname) {
                                      zaxis = list(title = 'z')))
   return(fig)
 }
+
 
 
 determine_prevalence3D <- function(grid_data,
@@ -1164,7 +1141,7 @@ determine_prevalence3D <- function(grid_data,
   return(p)
 }
 
-determine_spatial_autocorrelation <- function(grid_data,
+determine_spatial_autocorrelation3D <- function(grid_data,
                                               metric_colname,
                                               weight_method = "IDW") {
   
