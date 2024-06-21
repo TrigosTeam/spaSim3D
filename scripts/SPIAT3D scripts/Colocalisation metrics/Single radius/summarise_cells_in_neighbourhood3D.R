@@ -1,9 +1,9 @@
-summarise_cells_in_neighborhood3D <- function(cells_in_neighborhood_data) {
+summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_data) {
   
-  df <- cells_in_neighborhood_data
+  df <- cells_in_neighbourhood_data
   
   ## Target cell types will be all the columns except the first column
-  target_cell_types <- colnames(cells_in_neighborhood_data)[c(-1)]
+  target_cell_types <- colnames(cells_in_neighbourhood_data)[c(-1)]
   
   ## Set up data frame for summarised_results list
   df <- data.frame(row.names = c("mean", "min", "max", "median", "st_dev"))
@@ -11,7 +11,7 @@ summarise_cells_in_neighborhood3D <- function(cells_in_neighborhood_data) {
   for (target_cell_type in target_cell_types) {
     
     ## Get statistical measures for each target cell type
-    target_cell_type_values <- cells_in_neighborhood_data[[target_cell_type]]
+    target_cell_type_values <- cells_in_neighbourhood_data[[target_cell_type]]
     df[[target_cell_type]] <- c(mean(target_cell_type_values),
                                 min(target_cell_type_values),
                                 max(target_cell_type_values),

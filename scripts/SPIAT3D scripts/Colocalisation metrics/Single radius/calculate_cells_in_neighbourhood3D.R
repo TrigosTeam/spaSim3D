@@ -1,4 +1,4 @@
-calculate_cells_in_neighborhood3D <- function(spe, 
+calculate_cells_in_neighbourhood3D <- function(spe, 
                                               reference_cell_type, 
                                               target_cell_types, 
                                               radius, 
@@ -55,13 +55,13 @@ calculate_cells_in_neighborhood3D <- function(spe,
   
   if (show_summary) {
     ## Show summarised results
-    print(summarise_cells_in_neighborhood3D(result))    
+    print(summarise_cells_in_neighbourhood3D(result))    
   }
 
   
   ## Plot
   if (plot_image) {
-    fig <- plot_cells_in_neighborhood_violin3D(result, reference_cell_type)
+    fig <- plot_cells_in_neighbourhood_violin3D(result, reference_cell_type)
     methods::show(fig)
   }
   

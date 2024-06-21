@@ -1,10 +1,10 @@
 ## For scales parameter, use "free_x" or "free". "free_y" looks silly
-plot_cells_in_neighborhood_violin3D <- function(cells_in_neighborhood_data, reference_cell_type, scales = "free_x") {
+plot_cells_in_neighbourhood_violin3D <- function(cells_in_neighbourhood_data, reference_cell_type, scales = "free_x") {
   
   ## Target cell types will be all the columns except the first column
-  target_cell_types <- colnames(cells_in_neighborhood_data)[c(-1)]
+  target_cell_types <- colnames(cells_in_neighbourhood_data)[c(-1)]
   
-  df <- reshape2::melt(cells_in_neighborhood_data, measure.vars = target_cell_types)
+  df <- reshape2::melt(cells_in_neighbourhood_data, measure.vars = target_cell_types)
   colnames(df) <- c("ref_cell_id", "tar_cell_type", "count")
   
   # setting these variables to NULL as otherwise get "no visible binding for global variable" in R check
