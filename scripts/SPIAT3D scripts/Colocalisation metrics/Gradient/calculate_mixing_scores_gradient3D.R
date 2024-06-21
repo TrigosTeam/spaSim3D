@@ -29,8 +29,14 @@ calculate_mixing_scores_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   if (plot_image) {
-    plot(result[["radius"]], result[["normalised_mixing_score"]], type = "l", xlab = "Radius", ylab = "Normalised Mixing Score")
-    abline(a = 1, b = 0, col = "red", lwd = 2, lty = 2)
+    plot(result[["radius"]], result[["normalised_mixing_score"]], 
+         type = "l", 
+         xlab = "Radius", 
+         ylab = "Normalised mixing score",
+         ylim = c(0, max(result[["normalised_mixing_score"]], 1)),
+         col = "red")
+    abline(a = 1, b = 0, col = "blue", lty = 2)
+    legend(0, 0.95, legend = c("Observed normalised mixing score", "Expected CSR normalised mixing score"), col = c("red", "blue"), lty = c(1, 2))
   }
   
   return(result)

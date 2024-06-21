@@ -27,7 +27,7 @@ calculate_cross_K_gradient3D <- function(spe,
          xlim = c(0, radius), ylim = c(0, max(result)),
          xlab = "Radius", ylab = "Cross K-function value")
     lines(result$radius, result$expected_cross_K, type = "l", col = "blue", lty = 2)
-    legend(0, max(result), legend = c("Observed cross K", "Expected cross K"), col = c("red", "blue"), lty = c(1, 2))
+    legend(0, max(result), legend = c("Observed cross K", "Expected CSR cross K"), col = c("red", "blue"), lty = c(1, 2))
   }
   
   return(result)

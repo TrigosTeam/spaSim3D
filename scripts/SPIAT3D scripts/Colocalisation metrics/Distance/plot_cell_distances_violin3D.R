@@ -6,9 +6,9 @@ plot_cell_distances_violin3D <- function(cell_to_cell_dist, scales = "free_x") {
   
   fig <- ggplot(cell_to_cell_dist, aes(x = pair, y = distance)) + 
     geom_violin() +
-    facet_wrap(~pair, scales=scales) +
+    facet_wrap(~pair, scales=scales, strip.position="bottom") +
     theme_bw() +
-    theme(axis.text.x=element_blank(), plot.title = element_text(hjust = 0.5)) +
+    theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), plot.title = element_text(hjust = 0.5)) +
     labs(title="Cell distances", x = "Reference/Target pair", y = "Distance") +
     stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
   
