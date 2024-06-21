@@ -1,15 +1,24 @@
 simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
-  
   # Get sphere properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
   cluster_cell_proportions <- cluster_properties$cluster_cell_proportions
   radius <- cluster_properties$radius
   centre_loc <- cluster_properties$centre_loc
+  
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get number of cells
   n_cells <- nrow(df)

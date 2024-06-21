@@ -358,6 +358,15 @@ simulate_mixing3D <- function(bg_spe,
                               plot_cell_types = NULL,
                               plot_colours = NULL) {
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cell_types) != length(cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cell_proportions < 0 | cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(bg_spe), 
                    "Cell.Type" = bg_spe[["Cell.Type"]],
@@ -558,16 +567,25 @@ simulate_double_rings3D <- function(bg_spe,
 ### Sphere --------------------------------------------------------------------
 simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
-  
   # Get sphere properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
   cluster_cell_proportions <- cluster_properties$cluster_cell_proportions
   radius <- cluster_properties$radius
   centre_loc <- cluster_properties$centre_loc
+  
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get number of cells
   n_cells <- nrow(df)
@@ -606,9 +624,6 @@ simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
     }
   }
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
@@ -624,12 +639,8 @@ simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
   return(cluster_spe)
 }
 
+
 simulate_sphere_ring <- function(bg_spe, ring_properties) {
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get sphere ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -637,9 +648,32 @@ simulate_sphere_ring <- function(bg_spe, ring_properties) {
   radius <- ring_properties$radius
   centre_loc <- ring_properties$centre_loc
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
   ring_width <- ring_properties$ring_width
+  
+  ## Check number of ring cell types matches the number of cell proportions
+  if (length(ring_cell_types) != length(ring_cell_proportions)) stop("Number of ring cell types doesn't match number of ring cell proportion.")
+  
+  ## Check ring cell proportions are not negative or greater than 1
+  if (sum(ring_cell_proportions < 0 | ring_cell_proportions > 1) != 0) stop("Ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check ring cell proportions add up to 1
+  if (sum(ring_cell_proportions) != 1) stop("Sum of ring cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get number of cells
   n_cells <- nrow(df)
@@ -702,8 +736,6 @@ simulate_sphere_ring <- function(bg_spe, ring_properties) {
   }
   
   
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
@@ -719,12 +751,8 @@ simulate_sphere_ring <- function(bg_spe, ring_properties) {
   return(cluster_spe)
 }
 
+
 simulate_sphere_dr <- function(bg_spe, dr_properties) {
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get sphere double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -732,13 +760,45 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
   radius <- dr_properties$radius
   centre_loc <- dr_properties$centre_loc
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
   inner_ring_width <- dr_properties$inner_ring_width
   
+  ## Check number of inner ring cell types matches the number of inner ring cell proportions
+  if (length(inner_ring_cell_types) != length(inner_ring_cell_proportions)) stop("Number of inner ring cell types doesn't match number of inner ring cell proportion.")
+  
+  ## Check inner ring cell proportions are not negative or greater than 1
+  if (sum(inner_ring_cell_proportions < 0 | inner_ring_cell_proportions > 1) != 0) stop("Inner ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check inner ring cell proportions add up to 1
+  if (sum(inner_ring_cell_proportions) != 1) stop("Sum of inner ring cell proportions is NOT 1")
+  
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
   outer_ring_width <- dr_properties$outer_ring_width
+  
+  ## Check number of outer ring cell types matches the number of outer ring cell proportions
+  if (length(outer_ring_cell_types) != length(outer_ring_cell_proportions)) stop("Number of outer ring cell types doesn't match number of outer ring cell proportion.")
+  
+  ## Check outer ring cell proportions are not negative or greater than 1
+  if (sum(outer_ring_cell_proportions < 0 | outer_ring_cell_proportions > 1) != 0) stop("Outer ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check outer ring cell proportions add up to 1
+  if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get number of cells
   n_cells <- nrow(df)
@@ -824,8 +884,6 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
   }
   
   
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
@@ -841,13 +899,9 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
   return(cluster_spe)
 }
 
+
 ### Ellipsoid -----------------------------------------------------------------
 simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get ellipsoid properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -856,6 +910,20 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   y_radius <- cluster_properties$y_radius
   z_radius <- cluster_properties$z_radius
   centre_loc <- cluster_properties$centre_loc
+  
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Rotation angles
   theta <- cluster_properties$y_z_rotation * (pi/180) # rotation in x-axis
@@ -915,9 +983,6 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
     }
   }
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
@@ -933,12 +998,8 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   return(cluster_spe)
 }
 
+
 simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get ellipsoid ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -948,9 +1009,32 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   z_radius <- ring_properties$z_radius
   centre_loc <- ring_properties$centre_loc
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
   ring_width <- ring_properties$ring_width
+  
+  ## Check number of ring cell types matches the number of cell proportions
+  if (length(ring_cell_types) != length(ring_cell_proportions)) stop("Number of ring cell types doesn't match number of ring cell proportion.")
+  
+  ## Check ring cell proportions are not negative or greater than 1
+  if (sum(ring_cell_proportions < 0 | ring_cell_proportions > 1) != 0) stop("Ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check ring cell proportions add up to 1
+  if (sum(ring_cell_proportions) != 1) stop("Sum of ring cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Rotation angles
   theta <- ring_properties$y_z_rotation * (pi/180) # rotation in x-axis
@@ -1036,9 +1120,6 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
     }
   }
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
@@ -1054,12 +1135,8 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   return(cluster_spe)
 }
 
+
 simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get ellipsoid double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -1069,13 +1146,45 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   z_radius <- dr_properties$z_radius
   centre_loc <- dr_properties$centre_loc
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
   inner_ring_width <- dr_properties$inner_ring_width
   
+  ## Check number of inner ring cell types matches the number of inner ring cell proportions
+  if (length(inner_ring_cell_types) != length(inner_ring_cell_proportions)) stop("Number of inner ring cell types doesn't match number of inner ring cell proportion.")
+  
+  ## Check inner ring cell proportions are not negative or greater than 1
+  if (sum(inner_ring_cell_proportions < 0 | inner_ring_cell_proportions > 1) != 0) stop("Inner ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check inner ring cell proportions add up to 1
+  if (sum(inner_ring_cell_proportions) != 1) stop("Sum of inner ring cell proportions is NOT 1")
+  
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
   outer_ring_width <- dr_properties$outer_ring_width
+  
+  ## Check number of outer ring cell types matches the number of outer ring cell proportions
+  if (length(outer_ring_cell_types) != length(outer_ring_cell_proportions)) stop("Number of outer ring cell types doesn't match number of outer ring cell proportion.")
+  
+  ## Check outer ring cell proportions are not negative or greater than 1
+  if (sum(outer_ring_cell_proportions < 0 | outer_ring_cell_proportions > 1) != 0) stop("Outer ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check outer ring cell proportions add up to 1
+  if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Rotation angles
   theta <- dr_properties$y_z_rotation * (pi/180) # rotation in x-axis
@@ -1186,9 +1295,6 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
     }
   }
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
@@ -1205,13 +1311,9 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
 }
 
 
+
 ### Cylinder ------------------------------------------------------------------
 simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get cylinder properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -1219,6 +1321,20 @@ simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
   radius <- cluster_properties$radius
   start_loc <- cluster_properties$start_loc
   end_loc <- cluster_properties$end_loc
+  
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get number of cells
   n_cells <- nrow(df)
@@ -1288,9 +1404,6 @@ simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
     }
   }
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
@@ -1306,12 +1419,8 @@ simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
   return(cluster_spe)
 }
 
+
 simulate_cylinder_ring <- function(bg_spe, ring_properties) {
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get cylinder ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -1320,9 +1429,32 @@ simulate_cylinder_ring <- function(bg_spe, ring_properties) {
   start_loc <- ring_properties$start_loc
   end_loc <- ring_properties$end_loc
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
   ring_width <- ring_properties$ring_width
+  
+  ## Check number of ring cell types matches the number of cell proportions
+  if (length(ring_cell_types) != length(ring_cell_proportions)) stop("Number of ring cell types doesn't match number of ring cell proportion.")
+  
+  ## Check ring cell proportions are not negative or greater than 1
+  if (sum(ring_cell_proportions < 0 | ring_cell_proportions > 1) != 0) stop("Ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check ring cell proportions add up to 1
+  if (sum(ring_cell_proportions) != 1) stop("Sum of ring cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get number of cells
   n_cells <- nrow(df)
@@ -1413,9 +1545,6 @@ simulate_cylinder_ring <- function(bg_spe, ring_properties) {
     }
   }
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
@@ -1431,12 +1560,8 @@ simulate_cylinder_ring <- function(bg_spe, ring_properties) {
   return(cluster_spe)
 }
 
+
 simulate_cylinder_dr <- function(bg_spe, dr_properties) {
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get cylinder double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -1445,13 +1570,45 @@ simulate_cylinder_dr <- function(bg_spe, dr_properties) {
   start_loc <- dr_properties$start_loc
   end_loc <- dr_properties$end_loc
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
   inner_ring_width <- dr_properties$inner_ring_width
   
+  ## Check number of inner ring cell types matches the number of inner ring cell proportions
+  if (length(inner_ring_cell_types) != length(inner_ring_cell_proportions)) stop("Number of inner ring cell types doesn't match number of inner ring cell proportion.")
+  
+  ## Check inner ring cell proportions are not negative or greater than 1
+  if (sum(inner_ring_cell_proportions < 0 | inner_ring_cell_proportions > 1) != 0) stop("Inner ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check inner ring cell proportions add up to 1
+  if (sum(inner_ring_cell_proportions) != 1) stop("Sum of inner ring cell proportions is NOT 1")
+  
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
   outer_ring_width <- dr_properties$outer_ring_width
+  
+  ## Check number of outer ring cell types matches the number of outer ring cell proportions
+  if (length(outer_ring_cell_types) != length(outer_ring_cell_proportions)) stop("Number of outer ring cell types doesn't match number of outer ring cell proportion.")
+  
+  ## Check outer ring cell proportions are not negative or greater than 1
+  if (sum(outer_ring_cell_proportions < 0 | outer_ring_cell_proportions > 1) != 0) stop("Outer ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check outer ring cell proportions add up to 1
+  if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get number of cells
   n_cells <- nrow(df)
@@ -1563,9 +1720,6 @@ simulate_cylinder_dr <- function(bg_spe, dr_properties) {
     }
   }
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
@@ -1582,13 +1736,9 @@ simulate_cylinder_dr <- function(bg_spe, dr_properties) {
 }
 
 
+
 ### Network -------------------------------------------------------------------
 simulate_network_cluster <- function(bg_spe, cluster_properties) {  
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get network properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -1597,6 +1747,20 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   width <- cluster_properties$width
   centre_loc <- cluster_properties$centre_loc
   radius <- cluster_properties$radius
+  
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Number of vertices is always one more than the number of edges for the MST will we make
   n_vertices <- n_edges + 1 
@@ -1696,9 +1860,6 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]], "Cell.ID" = network_spe[["Cell.ID"]])
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
@@ -1714,12 +1875,8 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   return(cluster_spe)
 }
 
+
 simulate_network_ring <- function(bg_spe, ring_properties) {  
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get network ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -1729,9 +1886,32 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   centre_loc <- ring_properties$centre_loc
   radius <- ring_properties$radius
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
   ring_width <- ring_properties$ring_width
+  
+  ## Check number of ring cell types matches the number of cell proportions
+  if (length(ring_cell_types) != length(ring_cell_proportions)) stop("Number of ring cell types doesn't match number of ring cell proportion.")
+  
+  ## Check ring cell proportions are not negative or greater than 1
+  if (sum(ring_cell_proportions < 0 | ring_cell_proportions > 1) != 0) stop("Ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check ring cell proportions add up to 1
+  if (sum(ring_cell_proportions) != 1) stop("Sum of ring cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # number of vertices is always one more than the number of edges for the MST will we make
   n_vertices <- n_edges + 1 
@@ -1835,9 +2015,6 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]], "Cell.ID" = network_spe[["Cell.ID"]])
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
@@ -1854,12 +2031,8 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   
 }
 
+
 simulate_network_dr <- function(bg_spe, dr_properties) {  
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Get network double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
@@ -1869,13 +2042,45 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   centre_loc <- dr_properties$centre_loc
   radius <- dr_properties$radius
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
   inner_ring_width <- dr_properties$inner_ring_width
   
+  ## Check number of inner ring cell types matches the number of inner ring cell proportions
+  if (length(inner_ring_cell_types) != length(inner_ring_cell_proportions)) stop("Number of inner ring cell types doesn't match number of inner ring cell proportion.")
+  
+  ## Check inner ring cell proportions are not negative or greater than 1
+  if (sum(inner_ring_cell_proportions < 0 | inner_ring_cell_proportions > 1) != 0) stop("Inner ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check inner ring cell proportions add up to 1
+  if (sum(inner_ring_cell_proportions) != 1) stop("Sum of inner ring cell proportions is NOT 1")
+  
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
   outer_ring_width <- dr_properties$outer_ring_width
+  
+  ## Check number of outer ring cell types matches the number of outer ring cell proportions
+  if (length(outer_ring_cell_types) != length(outer_ring_cell_proportions)) stop("Number of outer ring cell types doesn't match number of outer ring cell proportion.")
+  
+  ## Check outer ring cell proportions are not negative or greater than 1
+  if (sum(outer_ring_cell_proportions < 0 | outer_ring_cell_proportions > 1) != 0) stop("Outer ring cell proportions cannot be negative or greater than 1")
+  
+  ## Check outer ring cell proportions add up to 1
+  if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(bg_spe), 
+                   "Cell.Type" = bg_spe[["Cell.Type"]],
+                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # number of vertices is always one more than the number of edges for the MST will we make
   n_vertices <- n_edges + 1 
@@ -1982,9 +2187,6 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]], "Cell.ID" = network_spe[["Cell.ID"]])
   
-  
-
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
@@ -2000,4 +2202,5 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   return(cluster_spe)
   
 }
+
 

@@ -82,7 +82,7 @@ plot_cells3D(spe_clusters1,
 
 
 
-### Random simuation
+### Random simuation ---------------------------------------------------------
 metadata_bg_r <- spe_metadata_background_template("random")
 metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_r, "double ring", "Sphere")
 metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "regular", "Network")
@@ -97,3 +97,26 @@ spe_clusters <- simulate_spe_metadata3D(metadata_bg_clusters)
 plot_cells3D(spe_clusters,
              plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Immune2"),
              plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "purple"))
+
+
+### Testing every default clustering -----------------------------------------
+metadata_bg_r <- spe_metadata_background_template("random")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_r, "regular", "Sphere")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "regular", "Ellipsoid")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "regular", "Cylinder")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "regular", "Network")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "ring", "Sphere")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "ring", "Ellipsoid")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "ring", "Cylinder")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "ring", "Network")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "double ring", "Sphere")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "double ring", "Ellipsoid")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "double ring", "Cylinder")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "double ring", "Network")
+spe_clusters <- simulate_spe_metadata3D(metadata_bg_clusters)
+
+
+### Error checking
+metadata_bg_r <- spe_metadata_background_template("random")
+metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_r, "double ring", "Sphere")
+spe_clusters <- simulate_spe_metadata3D(metadata_bg_clusters)

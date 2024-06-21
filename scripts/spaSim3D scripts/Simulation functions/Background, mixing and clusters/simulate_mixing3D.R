@@ -5,6 +5,15 @@ simulate_mixing3D <- function(bg_spe,
                               plot_cell_types = NULL,
                               plot_colours = NULL) {
   
+  ## Check number of cell types matches the number of cell proportions
+  if (length(cell_types) != length(cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
+  
+  ## Check cell proportions are not negative or greater than 1
+  if (sum(cell_proportions < 0 | cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
+  
+  ## Check cell proportions add up to 1
+  if (sum(cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(bg_spe), 
                    "Cell.Type" = bg_spe[["Cell.Type"]],
