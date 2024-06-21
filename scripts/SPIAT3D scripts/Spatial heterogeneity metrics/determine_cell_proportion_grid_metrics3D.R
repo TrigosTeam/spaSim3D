@@ -81,42 +81,15 @@ determine_cell_proportion_grid_metrics3D <- function(spe,
                                   grid_prism_cell_proportion)
   }
   
+  ## Add x, y and z coords of each grid prism to result
+  result$prism_x_coord <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
+  result$prism_y_coord <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
+  result$prism_z_coord <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
+  
   ## Plot
   if (plot_image) {
-    
-    plot_data <- result
-    
-    ## Place a dot at the center of each grid prism to represent cell proportion
-    ## Use the grid prism number to figure out their location...
-    plot_data$x <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
-    plot_data$y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
-    plot_data$z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
-    
-    ## Color of each dot is related to its cell proportion
-    pal <- colorRampPalette(hcl.colors(n = 5, palette = "Red-Blue", rev = TRUE))
-    
-    
-    ## Add size column and for NA cell proportion values, make the size small
-    plot_data$size <- ifelse(is.na(plot_data$proportion), 3, 10)
-    
-    fig <- plot_ly(plot_data,
-                   type = "scatter3d",
-                   mode = 'markers',
-                   x = ~x,
-                   y = ~y,
-                   z = ~z,
-                   color = ~proportion,
-                   colors = pal(nrow(plot_data)),
-                   marker = list(size = ~size),
-                   symbol = 1,
-                   symbols = "square")
-    
-    fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
-                                       yaxis = list(title = 'y'),
-                                       zaxis = list(title = 'z')))
-    
-    print(fig)
-    
+    fig <- plot_grid_metrics_continuous3D(result, "proportion")
+    methods::show(fig)
   }
   
   return(result)
