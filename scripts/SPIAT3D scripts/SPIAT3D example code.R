@@ -1,5 +1,5 @@
 data1 <- data.frame(spatialCoords(spe_clusters), Cell.Type = spe_clusters[["Cell.Type"]], Cell.ID = spe_clusters[["Cell.ID"]])
-spe1 <- spe_ringed_sphere
+spe1 <- spe_cluster
 
 
 ### 1. Basic Metrics ----------------------------------------------------------
@@ -149,8 +149,11 @@ print(cell_proportion_spatial_autocorrelation)
 
 
 ### 4. Margin of structure metrics --------------------------------------------
+spe_alpha_hull <- determine_alpha_hull3D(spe1, c("Tumour", "Immune"), alpha = 4, minimum_cells_in_alpha_hull = 10)
 
+plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Others"), c("orange", "skyblue", "lightgray"))
 
+alpha_hull_props <- calculate_alpha_hull_cell_proportions3D(spe_alpha_hull)
 
 
 ### 5. Presence of cluster metrics --------------------------------------------

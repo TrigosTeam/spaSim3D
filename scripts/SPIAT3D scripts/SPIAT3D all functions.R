@@ -1,3 +1,5 @@
+### Basic metrics -------------------------------------------------------------
+
 calculate_cell_proportions3D <- function(spe,
                                          cell_types_of_interest = NULL, 
                                          feature_colname = "Cell.Type",
@@ -78,6 +80,7 @@ calculate_entropy_background3D <- function(spe,
 }
 
 
+### Cell colocalisation metrics -----------------------------------------------
 calculate_pairwise_distances_between_cell_types3D <- function(spe,
                                                               cell_types_of_interest = NULL,
                                                               feature_colname = "Cell.Type",
@@ -880,6 +883,7 @@ calculate_entropy_gradient3D <- function(spe,
 
 
 
+### Spatial heterogeneity metrics ---------------------------------------------
 determine_entropy_grid_metrics3D <- function(spe, 
                                              n_split,
                                              cell_types_of_interest,
@@ -1207,6 +1211,245 @@ determine_spatial_autocorrelation3D <- function(grid_data,
   return(I)
   
 }
+
+
+### Margin of structure metrics -----------------------------------------------
+library(alphashape3d)
+
+library(alphashape3d)
+
+determine_alpha_hull3D <- function(spe, 
+                                   cell_types_of_interest, 
+                                   alpha = NULL, 
+                                   minimum_cells_in_alpha_hull,
+                                   feature_colname = "Cell.Type", 
+                                   plot_image = T) {
+  
+  ## Check cell types of interst are found in the spe object
+  unknown_cell_types <- setdiff(cell_types_of_interest, spe$Cell.Type)
+  if (length(unknown_cell_types) != 0) {
+    stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
+               paste(unknown_cell_types, collapse = ", ")))
+  }
+  
+  ## Subset for the chosen cell_types_of_interest
+  spe_subset <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
+  spe_subset_coords <- spatialCoords(spe_subset)
+  
+  ## Get alpha value if not specified by user
+  if (is.null(alpha)) {
+    spe_coords <- spatialCoords(spe)
+    window_volume <- 
+      (max(spe_coords[, "Cell.X.Position"]) - min(spe_coords[, "Cell.X.Position"])) * 
+      (max(spe_coords[, "Cell.Y.Position"]) - min(spe_coords[, "Cell.Y.Position"])) * 
+      (max(spe_coords[, "Cell.Z.Position"]) - min(spe_coords[, "Cell.Z.Position"]))
+    n_cells <- nrow(spe_coords)
+    
+    ### Estimated alpha is 10% of the ratio between the window volume and the number of cells
+    alpha <- 0.1 * (window_volume / n_cells) 
+    print(paste("No alpha inputted. Choosing alpha to be", round(alpha, 2)))
+  }
+  
+  ## Get the alpha hull
+  alpha_hull <- ashape3d(as.matrix(spe_subset_coords), alpha = alpha)
+  
+  ## Determine which alpha hull each cell_type_of_interest belongs to
+  alpha_hull_numbers <- components_ashape3d(alpha_hull)
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe), 
+                   "Cell.Type" = spe[[feature_colname]],
+                   "Cell.ID" = spe[["Cell.ID"]])
+  
+  df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
+  df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]
+  df_cell_types_of_interest$alpha_hull_number <- alpha_hull_numbers
+  df_other_cell_types$alpha_hull_number <- -1
+  
+  ## Ignore cell_types_of_interest which belong to an alpha hull cluster with less than minimum_cells_in_alpha_hull
+  alpha_hull_numbers_table <- table(alpha_hull_numbers)
+  maximium_alpha_hull_number <- Position(function(x) x < minimum_cells_in_alpha_hull, alpha_hull_numbers_table)
+  maximium_alpha_hull_number <- as.numeric(names(alpha_hull_numbers_table[maximium_alpha_hull_number]))
+  
+  if (!is.na(maximium_alpha_hull_number) && maximium_alpha_hull_number != -1) {
+    spe_subset_coords <- spe_subset_coords[alpha_hull_numbers >= 1 & alpha_hull_numbers < maximium_alpha_hull_number, ]
+    
+    df_cell_types_of_interest$alpha_hull_number <- ifelse(alpha_hull_numbers >= 1 & alpha_hull_numbers < maximium_alpha_hull_number, 
+                                                          alpha_hull_numbers, -1)
+    
+    ## Get the alpha hull again...
+    alpha_hull <- ashape3d(as.matrix(spe_subset_coords), alpha = alpha)
+  }
+  
+  ## Convert data frame to spe object
+  df <- rbind(df_cell_types_of_interest, df_other_cell_types)
+  
+  spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = spe@metadata)
+  
+  ## Get the information of the vertices and faces of the alpha hull (what 3 vertices make up each face triangle?)
+  vertices <- alpha_hull$x
+  faces <- alpha_hull$triang[alpha_hull$triang[, 9] != 0, c("tr1", "tr2", "tr3")]
+  spe@metadata$alpha_hull <- list(vertices = vertices, faces = faces)
+  
+  ## Plot
+  if (plot_image) {
+    fig <- plot_alpha_hull3D(spe, feature_colname = feature_colname)
+    methods::show(fig)
+  }
+  
+  return(spe)
+}
+
+
+plot_alpha_hull3D <- function(spe_with_alpha_hull, 
+                              plot_cell_types = NULL,
+                              plot_colours = NULL,
+                              feature_colname = "Cell.Type") {
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe_with_alpha_hull), "Cell.Type" = spe_with_alpha_hull[[feature_colname]])
+  
+  ## If no cell types chosen, use all cell types found in data frame
+  if (is.null(plot_cell_types)) {
+    plot_cell_types <- unique(df[["Cell.Type"]])
+  }
+  ## If cell types have been chosen, check they are found in the spe object
+  unknown_cell_types <- setdiff(plot_cell_types, spe_with_alpha_hull[[feature_colname]])
+  if (length(unknown_cell_types) != 0) {
+    stop(paste("The following plot_cell_types are not found in the spe object:\n   ",
+               paste(unknown_cell_types, collapse = ", ")))
+  }
+  
+  ## If no colours inputted, use rainbow palette
+  if (is.null(plot_colours)) {
+    plot_colours <- rainbow(length(plot_cell_types))
+  }
+  
+  ## User inputs mismatching cell types and colours
+  if (length(plot_cell_types) != length(plot_colours)) {
+    stop("Length of plot_cell_types is not equal to length of plot_colours")
+  }
+  
+  ## Factor for feature column
+  df[, "Cell.Type"] <- factor(df[, "Cell.Type"],
+                              levels = plot_cell_types)
+  
+  ## Add points to fig
+  fig <- plot_ly() %>%
+    add_trace(
+      data = df,
+      type = "scatter3d",
+      mode = 'markers',
+      x = ~Cell.X.Position,
+      y = ~Cell.Y.Position,
+      z = ~Cell.Z.Position,
+      marker = list(size = 2),
+      color = ~Cell.Type,
+      colors = plot_colours
+    ) %>% 
+    layout(scene = list(xaxis = list(title = 'x'),
+                        yaxis = list(title = 'y'),
+                        zaxis = list(title = 'z')))
+  
+  
+  ## Get alpha hull numbers (ignoring -1)
+  alpha_hull_numbers <- spe_with_alpha_hull$alpha_hull_number[spe_with_alpha_hull$alpha_hull_number != -1]
+  
+  # Get number of alpha hulls
+  n_alpha_hulls <- length(unique(alpha_hull_numbers))
+  
+  vertices <- spe_with_alpha_hull@metadata$alpha_hull$vertices
+  faces <- data.frame(spe_with_alpha_hull@metadata$alpha_hull$faces)
+  alpha_hull_colours <- rainbow(length(unique(alpha_hull_numbers)))
+  
+  ## Add alpha hulls to fig, one by one  
+  for (i in seq(n_alpha_hulls)) {
+    faces_temp <- faces[faces[ , 1] %in% which(alpha_hull_numbers == i) , ]
+    
+    opacity_level <- ifelse(nrow(faces_temp) > 50, 0.05, 0.25)
+    
+    fig <- fig %>%
+      add_trace(
+        type = 'mesh3d',
+        x = vertices[, 1], 
+        y = vertices[, 2], 
+        z = vertices[, 3],
+        i = faces_temp[, 1] - 1, 
+        j = faces_temp[, 2] - 1, 
+        k = faces_temp[, 3] - 1,
+        opacity = opacity_level,
+        facecolor = rep(alpha_hull_colours[i], nrow(faces_temp))
+      )
+  }
+  
+  return(fig)
+}
+
+
+calculate_alpha_hull_cell_proportions3D <- function(spe_with_alpha_hull, feature_colname = "Cell.Type", plot_image = T) {
+  
+  ## Get alpha hull numbers (ignoring -1)
+  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != -1]
+  
+  ## Get number of alpha hulls
+  n_alpha_hulls <- length(unique(alpha_hull_numbers))
+  
+  ## Get different cell types found in the alpha hulls
+  cell_types <- unique(spe_with_alpha_hull[[feature_colname]][spe_alpha_hull$alpha_hull_number != -1])
+  
+  ## For each alpha hull, determine the size and cell proportion of each alpha hull
+  result <- data.frame(matrix(nrow = n_alpha_hulls, ncol = 1 + length(cell_types)))
+  colnames(result) <- c("n_cells", cell_types)
+  
+  for (i in seq(n_alpha_hulls)) {
+    cells_in_alpha_hull <- spe_with_alpha_hull[[feature_colname]][spe_with_alpha_hull$alpha_hull_number == i]
+    result[i, "n_cells"] <- length(cells_in_alpha_hull)
+    
+    for (cell_type in cell_types) {
+      result[i, cell_type] <- sum(cells_in_alpha_hull == cell_type) / result[i, "n_cells"]
+    }
+  }
+  
+  result <- result[order(result$n_cells), ]
+  rownames(result) <- seq(n_alpha_hulls)
+  
+  ## Plot
+  if (plot_image) {
+    plot_result <- reshape2::melt(result, id.vars = c("n_cells"))
+    
+    curr_n_cell <- plot_result[1, "n_cells"]
+    len <- 0
+    for (i in seq(nrow(plot_result) / length(cell_types))) {
+      n_cell <- plot_result[i, "n_cells"]
+      
+      if (curr_n_cell == n_cell) len <- len + 1
+      else {
+        plot_result[plot_result$n_cells == curr_n_cell, "value"] <- plot_result[plot_result$n_cells == curr_n_cell, "value"] / len
+        len <- 1
+        curr_n_cell <- n_cell
+      }
+    }
+    
+    plot_result$n_cells <- factor(as.character(plot_result$n_cells), 
+                                  levels = as.character(unique(plot_result$n_cells)[order(unique(plot_result$n_cells))]))
+    
+    fig <- ggplot(plot_result, aes(n_cells, value, fill = variable)) +
+      geom_bar(stat = "identity") +
+      labs(title = "Cell proportions of each alpha hull", x = "Number of cells in alpha hull", y = "Cell proportion") +
+      guides(fill = guide_legend(title="Cell type")) +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5))
+    
+    methods::show(fig)
+  }
+  
+  return(result)
+}
+
 
 
 
