@@ -26,3 +26,5 @@ spe_alpha_hull <- determine_alpha_hull3D(spe_clusters, c("Tumour"), alpha = 3, m
 plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Others"), c("orange", "skyblue", "lightgray"))
 
 alpha_hull_props <- calculate_alpha_hull_cell_proportions3D(spe_alpha_hull)
+
+alpha_hull_min_distances <- calculate_minimum_distances_to_alpha_hull3D(spe_alpha_hull, cell_types_of_interest = c("Tumour", "Immune"))

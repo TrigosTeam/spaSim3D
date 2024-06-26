@@ -155,6 +155,7 @@ plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Others"), c("orange", "
 
 alpha_hull_props <- calculate_alpha_hull_cell_proportions3D(spe_alpha_hull)
 
+alpha_hull_min_distances <- calculate_minimum_distances_to_alpha_hull3D(spe_alpha_hull, cell_types_of_interest = c("Tumour", "Immune"))
 
 ### 5. Presence of cluster metrics --------------------------------------------
 ANNI_result <- average_nearest_neighbor_index3D(data,
