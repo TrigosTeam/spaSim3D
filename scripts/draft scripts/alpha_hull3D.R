@@ -4,8 +4,8 @@ library(alphashape3d)
 metadata_bg_r <- spe_metadata_background_template("random")
 metadata_bg_r[["background"]][["n_cells"]] <- 20000
 metadata_bg_r[["background"]][["minimum_distance_between_cells"]] <- 0
-metadata_bg_r[["background"]][["cell_types"]] <- "Others"
-metadata_bg_r[["background"]][["cell_proportions"]] <- 1
+metadata_bg_r[["background"]][["cell_types"]] <- c("Others", "Tumour")
+metadata_bg_r[["background"]][["cell_proportions"]] <- c(0.97, 0.03)
 
 metadata_separate_ellipsoids <- spe_metadata_cluster_template(metadata_bg_r, "regular", "Ellipsoid")
 metadata_separate_ellipsoids <- spe_metadata_cluster_template(metadata_separate_ellipsoids, "regular", "Ellipsoid")

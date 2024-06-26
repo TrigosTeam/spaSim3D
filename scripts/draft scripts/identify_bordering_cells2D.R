@@ -6,7 +6,7 @@ spe_temp <- spe_cluster
 ## Get 2D slice from 3D spe object
 z_coords <- spe_temp@int_colData$spatialCoords[ , 3]
 spe_slice <- spe_temp[ , (z_coords > 35 & z_coords < 65)]
-plot_cell_categories(spe_slice, "Tumour", "orange")
+plot_cell_categories(spe_slice, c("Tumour", "Immune"), c("orange", "skyblue"))
 
 ## Get border spe
 border_spe <- identify_bordering_cells(spe_slice, "Tumour")
