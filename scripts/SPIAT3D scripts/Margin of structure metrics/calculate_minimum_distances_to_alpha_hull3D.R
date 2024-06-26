@@ -58,7 +58,3 @@ calculate_minimum_distances_to_alpha_hull3D <- function(spe_with_alpha_hull, cel
   }
   return(result)
 }
-
-
-
-x <- calculate_minimum_distances_to_alpha_hull3D(spe_alpha_hull, c("Immune", "Tumour"))
