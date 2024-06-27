@@ -1,4 +1,3 @@
-data1 <- data.frame(spatialCoords(spe_clusters), Cell.Type = spe_clusters[["Cell.Type"]], Cell.ID = spe_clusters[["Cell.ID"]])
 spe1 <- spe_cluster
 
 
@@ -46,7 +45,7 @@ mixing_scores_gradient <- calculate_mixing_scores_gradient3D(spe1,
                                                              radii = 30)
 
 
-### Calculate Cells in the neighbourhood
+### Calculate cells in the neighbourhood
 neighbourhood_cells <- calculate_cells_in_neighbourhood3D(spe1,
                                                           reference_cell_type = "Tumour",
                                                           target_cell_types = c("Tumour", "Immune"),
@@ -54,6 +53,16 @@ neighbourhood_cells <- calculate_cells_in_neighbourhood3D(spe1,
 
 
 
+## Calculate cell proportions in the neighbourhood
+neighbourhood_cell_proportions <- calculate_cell_proportions_in_neighbourhood3D(spe1,
+                                                                                reference_cell_type = "Tumour",
+                                                                                target_cell_types = c("Immune", "Immune1"),
+                                                                                radius = 20)
+
+neighbourhood_cell_proportions_gradient <- calculate_cell_proportions_in_neighbourhood_gradient3D(spe1,
+                                                                                                  reference_cell_type = "Tumour",
+                                                                                                  target_cell_types = c("Immune", "Immune1"),
+                                                                                                  radii = 20)
 
 
 ### Calculate cross-K function
@@ -149,13 +158,13 @@ print(cell_proportion_spatial_autocorrelation)
 
 
 ### 4. Margin of structure metrics --------------------------------------------
-spe_alpha_hull <- determine_alpha_hull3D(spe1, c("Tumour", "Immune"), alpha = 4, minimum_cells_in_alpha_hull = 10)
+spe_alpha_hull <- determine_alpha_hull3D(spe1, c("Tumour", "Immune"), alpha = 4, minimum_cells_in_alpha_hull = 15)
 
-plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Others"), c("orange", "skyblue", "lightgray"))
+plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
 
 alpha_hull_props <- calculate_alpha_hull_cell_proportions3D(spe_alpha_hull)
 
-alpha_hull_min_distances <- calculate_minimum_distances_to_alpha_hull3D(spe_alpha_hull, cell_types_of_interest = c("Tumour", "Immune"))
+alpha_hull_min_distances <- calculate_minimum_distances_to_alpha_hull3D(spe_alpha_hull, cell_types_of_interest = c("Tumour", "Immune", "Immune1"))
 
 ### 5. Presence of cluster metrics --------------------------------------------
 ANNI_result <- average_nearest_neighbor_index3D(data,

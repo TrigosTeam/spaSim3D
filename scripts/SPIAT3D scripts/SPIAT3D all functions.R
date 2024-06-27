@@ -576,6 +576,89 @@ summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_data) {
 }
 
 
+calculate_cell_proportions_in_neighbourhood3D <- function(spe, 
+                                                          reference_cell_type, 
+                                                          target_cell_types, 
+                                                          radius, 
+                                                          feature_colname = "Cell.Type") {
+  
+  ## Get 'count' neighbourhood data
+  cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
+                                                                    reference_cell_type,
+                                                                    target_cell_types,
+                                                                    radius,
+                                                                    feature_colname,
+                                                                    FALSE,
+                                                                    FALSE)
+  
+  
+  
+  result <- data.frame(matrix(nrow = length(target_cell_types), ncol = 4))
+  colnames(result) <- c("target_cell_type", "frequency", "proportion", "percentage")
+  
+  result$target_cell_type <- target_cell_types
+  
+  ## Get frequency of each target cell type
+  result$frequency <- apply(cells_in_neighbourhood_data[ , target_cell_types], 2, sum)
+  
+  ## Use frequency to get proportion and percentage of each cell type
+  total <- sum(result$frequency)
+  if (total != 0) {
+    result$proportion <- result$frequency / total
+    result$percentage <- result$proportion * 100  
+  }
+  else {
+    result$proportion <- NA
+    result$percentage <- NA
+  }
+  
+  
+  return(result)
+}
+
+
+calculate_cell_proportions_in_neighbourhood_gradient3D <- function(spe, 
+                                                                   reference_cell_type, 
+                                                                   target_cell_types, 
+                                                                   radii, 
+                                                                   feature_colname = "Cell.Type",
+                                                                   plot_image = TRUE) {
+  
+  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
+  colnames(result) <- target_cell_types
+  
+  for (radius in seq(radii)) {
+    cell_proportions_neighbourhood_data <- calculate_cell_proportions_in_neighbourhood3D(spe,
+                                                                                         reference_cell_type,
+                                                                                         target_cell_types,
+                                                                                         radius,
+                                                                                         feature_colname)
+    
+    result[radius, ] <- cell_proportions_neighbourhood_data$proportion
+  }
+  
+  # Add a radius column to the result
+  result$radius <- seq(radii)
+  
+  # Plot
+  if (plot_image) {
+    plot_result <- reshape2::melt(result, id.vars = c("radius"))
+    fig <- ggplot(plot_result, aes(radius, value, color = variable)) +
+      geom_point() +
+      geom_line() +
+      labs(title = "Neighbourhood cell proportion gradients", x = "Radius", y = "Cell proportion", color = "Cell type") +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5)) +
+      ylim(0, 1)
+    
+    methods::show(fig)
+  }
+  
+  return(result)
+}
+
+
+
 
 
 ## For scales parameter, use "free_x" or "free". "free_y" looks silly
@@ -880,6 +963,19 @@ calculate_entropy_gradient3D <- function(spe,
 }
 
 
+plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_results) {
+  
+  plot(cross_K_gradient$radius, 
+       cross_K_gradient$observed_cross_K / cross_K_gradient$expected_cross_K, 
+       type = "l", 
+       col = "red", 
+       xlim = c(0, max(cross_K_gradient$radius)), ylim = c(0, 1.2 * max((cross_K_gradient$observed_cross_K / cross_K_gradient$expected_cross_K), 1)),
+       xlab = "Radius", ylab = "Cross K-function ratio")
+  abline(a = 1, b = 0, col = "blue", lty = 2)
+  legend(0, 1.2 * max((cross_K_gradient$observed_cross_K / cross_K_gradient$expected_cross_K), 1), 
+         legend = c("Observed cross K ratio", "Expected CSR cross K ratio"), col = c("red", "blue"), lty = c(1, 2))
+  
+}
 
 
 
@@ -1402,8 +1498,8 @@ calculate_alpha_hull_cell_proportions3D <- function(spe_with_alpha_hull, feature
   cell_types <- unique(spe_with_alpha_hull[[feature_colname]][spe_alpha_hull$alpha_hull_number != -1])
   
   ## For each alpha hull, determine the size and cell proportion of each alpha hull
-  result <- data.frame(matrix(nrow = n_alpha_hulls, ncol = 1 + length(cell_types)))
-  colnames(result) <- c("n_cells", cell_types)
+  result <- data.frame(matrix(nrow = n_alpha_hulls, ncol = 2 + length(cell_types)))
+  colnames(result) <- c("alpha_hull_number", "n_cells", cell_types)
   
   for (i in seq(n_alpha_hulls)) {
     cells_in_alpha_hull <- spe_with_alpha_hull[[feature_colname]][spe_with_alpha_hull$alpha_hull_number == i]
@@ -1416,30 +1512,15 @@ calculate_alpha_hull_cell_proportions3D <- function(spe_with_alpha_hull, feature
   
   result <- result[order(result$n_cells), ]
   rownames(result) <- seq(n_alpha_hulls)
+  result$alpha_hull_number <- as.character(seq(n_alpha_hulls))
   
   ## Plot
   if (plot_image) {
-    plot_result <- reshape2::melt(result, id.vars = c("n_cells"))
-    
-    curr_n_cell <- plot_result[1, "n_cells"]
-    len <- 0
-    for (i in seq(nrow(plot_result) / length(cell_types))) {
-      n_cell <- plot_result[i, "n_cells"]
-      
-      if (curr_n_cell == n_cell) len <- len + 1
-      else {
-        plot_result[plot_result$n_cells == curr_n_cell, "value"] <- plot_result[plot_result$n_cells == curr_n_cell, "value"] / len
-        len <- 1
-        curr_n_cell <- n_cell
-      }
-    }
-    
-    plot_result$n_cells <- factor(as.character(plot_result$n_cells), 
-                                  levels = as.character(unique(plot_result$n_cells)[order(unique(plot_result$n_cells))]))
-    
-    fig <- ggplot(plot_result, aes(n_cells, value, fill = variable)) +
+    plot_result <- reshape2::melt(result, id.vars = c("alpha_hull_number", "n_cells"))
+    fig <- ggplot(plot_result, aes(alpha_hull_number, value, fill = variable)) +
       geom_bar(stat = "identity") +
-      labs(title = "Cell proportions of each alpha hull", x = "Number of cells in alpha hull", y = "Cell proportion") +
+      labs(title = "Cell proportions of each alpha hull", x = "", y = "Cell proportion") +
+      scale_x_discrete(labels = paste("n =", result$n_cells)) +
       guides(fill = guide_legend(title="Cell type")) +
       theme_bw() +
       theme(plot.title = element_text(hjust = 0.5))
@@ -1451,6 +1532,72 @@ calculate_alpha_hull_cell_proportions3D <- function(spe_with_alpha_hull, feature
 }
 
 
+
+calculate_minimum_distances_to_alpha_hull3D <- function(spe_with_alpha_hull, cell_types_of_interest, feature_colname = "Cell.Type", plot_image = T) {
+  
+  ## Get alpha hull numbers (ignoring -1)
+  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != -1]
+  
+  ## Get number of alpha hulls
+  n_alpha_hulls <- length(unique(alpha_hull_numbers))
+  
+  ## For each alpha hull, determine the minimum distance of each cell_type_of_interest
+  result <- data.frame()
+  
+  
+  spe_coords <- spatialCoords(spe_with_alpha_hull)
+  cell_types_of_interest_coords <- list()
+  for (cell_type in cell_types_of_interest) {
+    cell_types_of_interest_coords[[cell_type]] <- spe_coords[spe_with_alpha_hull[[feature_colname]] == cell_type, ]
+  }
+  
+  
+  
+  result <- vector()
+  
+  for (i in seq(n_alpha_hulls)) {
+    alpha_hull_coords <- spe_coords[spe_with_alpha_hull$alpha_hull_number == i, ]
+    
+    for (cell_type in cell_types_of_interest) {
+      curr_cell_type_coords <- cell_types_of_interest_coords[[cell_type]]
+      
+      all_closest <- RANN::nn2(data = alpha_hull_coords, 
+                               query = curr_cell_type_coords, 
+                               k = 1)  
+      
+      local_dist_mins <- data.frame(
+        alpha_hull_number = i,
+        cell_type_of_interest = cell_type,
+        distance = all_closest$nn.dists
+      )
+      ## Remove any 0 distance rows
+      local_dist_mins <- local_dist_mins[local_dist_mins$distance != 0, ]
+      result <- rbind(result, local_dist_mins)
+    }
+    
+    
+    ## Plot
+    if (plot_image) {
+      
+      alpha_hull_cell_props <- calculate_alpha_hull_cell_proportions3D(spe_with_alpha_hull, feature_colname, FALSE)
+      
+      alpha_hull_number_labs <- paste("n =", rev(alpha_hull_cell_props$n_cells))
+      names(alpha_hull_number_labs) <- seq(nrow(alpha_hull_cell_props))
+      
+      fig <- ggplot(result, aes(x = cell_type_of_interest, y = distance, fill = cell_type_of_interest)) + 
+        geom_violin() +
+        facet_grid(alpha_hull_number~., scales="free_x", labeller = labeller(alpha_hull_number = alpha_hull_number_labs)) +
+        theme_bw() +
+        theme(axis.ticks.x = element_blank(), plot.title = element_text(hjust = 0.5), legend.position = "none") +
+        labs(title="Minimum cell distances to alpha hulls", x = "Cell type", y = "Distance") +
+        stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
+      
+      methods::show(fig)
+    }
+    
+  }
+  return(result)
+}
 
 
 
