@@ -1,10 +1,10 @@
 calculate_cells_in_neighbourhood3D <- function(spe, 
-                                              reference_cell_type, 
-                                              target_cell_types, 
-                                              radius, 
-                                              feature_colname = "Cell.Type",
-                                              show_summary = TRUE,
-                                              plot_image = TRUE) {
+                                               reference_cell_type, 
+                                               target_cell_types, 
+                                               radius, 
+                                               feature_colname = "Cell.Type",
+                                               show_summary = TRUE,
+                                               plot_image = TRUE) {
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 
