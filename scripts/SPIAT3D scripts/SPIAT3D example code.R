@@ -158,7 +158,7 @@ print(cell_proportion_spatial_autocorrelation)
 
 
 ### 4. Margin of structure metrics --------------------------------------------
-spe_alpha_hull <- determine_alpha_hull3D(spe1, c("Tumour", "Immune"), alpha = 4, minimum_cells_in_alpha_hull = 15)
+spe_alpha_hull <- determine_alpha_hull3D(spe1, c("Tumour", "Immune"), alpha = 3.85, minimum_cells_in_alpha_hull = 15)
 
 plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
 
