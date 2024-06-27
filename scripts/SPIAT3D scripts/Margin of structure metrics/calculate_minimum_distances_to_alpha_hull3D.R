@@ -44,9 +44,14 @@ calculate_minimum_distances_to_alpha_hull3D <- function(spe_with_alpha_hull, cel
     ## Plot
     if (plot_image) {
       
+      alpha_hull_cell_props <- calculate_alpha_hull_cell_proportions3D(spe_with_alpha_hull, feature_colname, FALSE)
+      
+      alpha_hull_number_labs <- paste("n =", rev(alpha_hull_cell_props$n_cells))
+      names(alpha_hull_number_labs) <- seq(nrow(alpha_hull_cell_props))
+      
       fig <- ggplot(result, aes(x = cell_type_of_interest, y = distance, fill = cell_type_of_interest)) + 
         geom_violin() +
-        facet_grid(alpha_hull_number~., scales="free_x") +
+        facet_grid(alpha_hull_number~., scales="free_x", labeller = labeller(alpha_hull_number = alpha_hull_number_labs)) +
         theme_bw() +
         theme(axis.ticks.x = element_blank(), plot.title = element_text(hjust = 0.5), legend.position = "none") +
         labs(title="Minimum cell distances to alpha hulls", x = "Cell type", y = "Distance") +
