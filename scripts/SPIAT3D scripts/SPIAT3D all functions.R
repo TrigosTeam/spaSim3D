@@ -1360,18 +1360,18 @@ determine_alpha_hull3D <- function(spe,
   df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
   df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]
   df_cell_types_of_interest$alpha_hull_number <- alpha_hull_numbers
-  df_other_cell_types$alpha_hull_number <- -1
+  df_other_cell_types$alpha_hull_number <- 0
   
   ## Ignore cell_types_of_interest which belong to an alpha hull cluster with less than minimum_cells_in_alpha_hull
   alpha_hull_numbers_table <- table(alpha_hull_numbers)
   maximium_alpha_hull_number <- Position(function(x) x < minimum_cells_in_alpha_hull, alpha_hull_numbers_table)
   maximium_alpha_hull_number <- as.numeric(names(alpha_hull_numbers_table[maximium_alpha_hull_number]))
   
-  if (!is.na(maximium_alpha_hull_number) && maximium_alpha_hull_number != -1) {
+  if (!is.na(maximium_alpha_hull_number) && maximium_alpha_hull_number != 0) {
     spe_subset_coords <- spe_subset_coords[alpha_hull_numbers >= 1 & alpha_hull_numbers < maximium_alpha_hull_number, ]
     
     df_cell_types_of_interest$alpha_hull_number <- ifelse(alpha_hull_numbers >= 1 & alpha_hull_numbers < maximium_alpha_hull_number, 
-                                                          alpha_hull_numbers, -1)
+                                                          alpha_hull_numbers, 0)
     
     ## Get the alpha hull again...
     alpha_hull <- ashape3d(as.matrix(spe_subset_coords), alpha = alpha)
@@ -1452,8 +1452,8 @@ plot_alpha_hull3D <- function(spe_with_alpha_hull,
                         zaxis = list(title = 'z')))
   
   
-  ## Get alpha hull numbers (ignoring -1)
-  alpha_hull_numbers <- spe_with_alpha_hull$alpha_hull_number[spe_with_alpha_hull$alpha_hull_number != -1]
+  ## Get alpha hull numbers (ignoring 0)
+  alpha_hull_numbers <- spe_with_alpha_hull$alpha_hull_number[spe_with_alpha_hull$alpha_hull_number != 0]
   
   # Get number of alpha hulls
   n_alpha_hulls <- length(unique(alpha_hull_numbers))
@@ -1488,14 +1488,14 @@ plot_alpha_hull3D <- function(spe_with_alpha_hull,
 
 calculate_alpha_hull_cell_proportions3D <- function(spe_with_alpha_hull, feature_colname = "Cell.Type", plot_image = T) {
   
-  ## Get alpha hull numbers (ignoring -1)
-  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != -1]
+  ## Get alpha hull numbers (ignoring 0)
+  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != 0]
   
   ## Get number of alpha hulls
   n_alpha_hulls <- length(unique(alpha_hull_numbers))
   
   ## Get different cell types found in the alpha hulls
-  cell_types <- unique(spe_with_alpha_hull[[feature_colname]][spe_alpha_hull$alpha_hull_number != -1])
+  cell_types <- unique(spe_with_alpha_hull[[feature_colname]][spe_alpha_hull$alpha_hull_number != 0])
   
   ## For each alpha hull, determine the size and cell proportion of each alpha hull
   result <- data.frame(matrix(nrow = n_alpha_hulls, ncol = 2 + length(cell_types)))
@@ -1535,8 +1535,8 @@ calculate_alpha_hull_cell_proportions3D <- function(spe_with_alpha_hull, feature
 
 calculate_minimum_distances_to_alpha_hull3D <- function(spe_with_alpha_hull, cell_types_of_interest, feature_colname = "Cell.Type", plot_image = T) {
   
-  ## Get alpha hull numbers (ignoring -1)
-  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != -1]
+  ## Get alpha hull numbers (ignoring 0)
+  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != 0]
   
   ## Get number of alpha hulls
   n_alpha_hulls <- length(unique(alpha_hull_numbers))

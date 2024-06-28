@@ -40,16 +40,16 @@ mixing_scores <- calculate_mixing_scores3D(spe1,
 print(mixing_scores)
 
 mixing_scores_gradient <- calculate_mixing_scores_gradient3D(spe1,
-                                                             reference_cell_type = "Immune",
-                                                             target_cell_type = "Tumour",
-                                                             radii = 30)
+                                                             reference_cell_type = "Tumour",
+                                                             target_cell_type = "Immune1",
+                                                             radii = 50)
 
 
 ### Calculate cells in the neighbourhood
 neighbourhood_cells <- calculate_cells_in_neighbourhood3D(spe1,
                                                           reference_cell_type = "Tumour",
                                                           target_cell_types = c("Tumour", "Immune"),
-                                                          radius = 20)
+                                                          radius = 30)
 
 
 
@@ -58,11 +58,12 @@ neighbourhood_cell_proportions <- calculate_cell_proportions_in_neighbourhood3D(
                                                                                 reference_cell_type = "Tumour",
                                                                                 target_cell_types = c("Immune", "Immune1"),
                                                                                 radius = 20)
+print(neighbourhood_cell_proportions)
 
 neighbourhood_cell_proportions_gradient <- calculate_cell_proportions_in_neighbourhood_gradient3D(spe1,
                                                                                                   reference_cell_type = "Tumour",
-                                                                                                  target_cell_types = c("Immune", "Immune1"),
-                                                                                                  radii = 20)
+                                                                                                  target_cell_types = c("Immune1", "Immune"),
+                                                                                                  radii = 30)
 
 
 ### Calculate cross-K function
@@ -137,7 +138,7 @@ print(entropy_spatial_autocorrelation)
 cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(spe1,
                                                                          n_split = 8,
                                                                          reference_cell_types = c("Tumour"),
-                                                                         target_cell_types = c("Immune"),
+                                                                         target_cell_types = c("Immune", "Immune1"),
                                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(cell_proportion_grid_metrics, "proportion")
 
