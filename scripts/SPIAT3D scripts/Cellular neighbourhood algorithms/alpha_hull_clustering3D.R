@@ -1,11 +1,11 @@
 library(alphashape3d)
 
-determine_alpha_hull3D <- function(spe, 
-                                   cell_types_of_interest, 
-                                   alpha = NULL, 
-                                   minimum_cells_in_alpha_hull,
-                                   feature_colname = "Cell.Type", 
-                                   plot_image = T) {
+alpha_hull_clustering3D <- function(spe, 
+                                    cell_types_of_interest, 
+                                    alpha = NULL, 
+                                    minimum_cells_in_alpha_hull,
+                                    feature_colname = "Cell.Type", 
+                                    plot_image = T) {
   
   ## Check cell types of interst are found in the spe object
   unknown_cell_types <- setdiff(cell_types_of_interest, spe$Cell.Type)
@@ -35,8 +35,8 @@ determine_alpha_hull3D <- function(spe,
   ## Get the alpha hull
   alpha_hull <- ashape3d(as.matrix(spe_subset_coords), alpha = alpha)
   
-  ## Determine which alpha hull each cell_type_of_interest belongs to
-  alpha_hull_numbers <- components_ashape3d(alpha_hull)
+  ## Determine which alpha hull cluster each cell_type_of_interest belongs to
+  alpha_hull_clusters <- components_ashape3d(alpha_hull)
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 
@@ -45,19 +45,19 @@ determine_alpha_hull3D <- function(spe,
   
   df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
   df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]
-  df_cell_types_of_interest$alpha_hull_number <- alpha_hull_numbers
-  df_other_cell_types$alpha_hull_number <- 0
+  df_cell_types_of_interest$alpha_hull_cluster <- alpha_hull_clusters
+  df_other_cell_types$alpha_hull_cluster <- 0
   
   ## Ignore cell_types_of_interest which belong to an alpha hull cluster with less than minimum_cells_in_alpha_hull
-  alpha_hull_numbers_table <- table(alpha_hull_numbers)
-  maximium_alpha_hull_number <- Position(function(x) x < minimum_cells_in_alpha_hull, alpha_hull_numbers_table)
-  maximium_alpha_hull_number <- as.numeric(names(alpha_hull_numbers_table[maximium_alpha_hull_number]))
+  alpha_hull_clusters_table <- table(alpha_hull_clusters)
+  maximium_alpha_hull_cluster <- Position(function(x) x < minimum_cells_in_alpha_hull, alpha_hull_clusters_table)
+  maximium_alpha_hull_cluster <- as.numeric(names(alpha_hull_clusters_table[maximium_alpha_hull_cluster]))
   
-  if (!is.na(maximium_alpha_hull_number) && maximium_alpha_hull_number != 0) {
-    spe_subset_coords <- spe_subset_coords[alpha_hull_numbers >= 1 & alpha_hull_numbers < maximium_alpha_hull_number, ]
+  if (!is.na(maximium_alpha_hull_cluster) && maximium_alpha_hull_cluster != 0) {
+    spe_subset_coords <- spe_subset_coords[alpha_hull_clusters >= 1 & alpha_hull_clusters < maximium_alpha_hull_cluster, ]
     
-    df_cell_types_of_interest$alpha_hull_number <- ifelse(alpha_hull_numbers >= 1 & alpha_hull_numbers < maximium_alpha_hull_number, 
-                                                           alpha_hull_numbers, 0)
+    df_cell_types_of_interest$alpha_hull_cluster <- ifelse(alpha_hull_clusters >= 1 & alpha_hull_clusters < maximium_alpha_hull_cluster, 
+                                                           alpha_hull_clusters, 0)
   
     ## Get the alpha hull again...
     alpha_hull <- ashape3d(as.matrix(spe_subset_coords), alpha = alpha)

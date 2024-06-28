@@ -1309,17 +1309,15 @@ determine_spatial_autocorrelation3D <- function(grid_data,
 }
 
 
-### Margin of structure metrics -----------------------------------------------
+### Clustering algorithms ----------------------------------------------------
 library(alphashape3d)
 
-library(alphashape3d)
-
-determine_alpha_hull3D <- function(spe, 
-                                   cell_types_of_interest, 
-                                   alpha = NULL, 
-                                   minimum_cells_in_alpha_hull,
-                                   feature_colname = "Cell.Type", 
-                                   plot_image = T) {
+alpha_hull_clustering3D <- function(spe, 
+                                    cell_types_of_interest, 
+                                    alpha = NULL, 
+                                    minimum_cells_in_alpha_hull,
+                                    feature_colname = "Cell.Type", 
+                                    plot_image = T) {
   
   ## Check cell types of interst are found in the spe object
   unknown_cell_types <- setdiff(cell_types_of_interest, spe$Cell.Type)
@@ -1349,8 +1347,8 @@ determine_alpha_hull3D <- function(spe,
   ## Get the alpha hull
   alpha_hull <- ashape3d(as.matrix(spe_subset_coords), alpha = alpha)
   
-  ## Determine which alpha hull each cell_type_of_interest belongs to
-  alpha_hull_numbers <- components_ashape3d(alpha_hull)
+  ## Determine which alpha hull cluster each cell_type_of_interest belongs to
+  alpha_hull_clusters <- components_ashape3d(alpha_hull)
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 
@@ -1359,19 +1357,19 @@ determine_alpha_hull3D <- function(spe,
   
   df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
   df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]
-  df_cell_types_of_interest$alpha_hull_number <- alpha_hull_numbers
-  df_other_cell_types$alpha_hull_number <- 0
+  df_cell_types_of_interest$alpha_hull_cluster <- alpha_hull_clusters
+  df_other_cell_types$alpha_hull_cluster <- 0
   
   ## Ignore cell_types_of_interest which belong to an alpha hull cluster with less than minimum_cells_in_alpha_hull
-  alpha_hull_numbers_table <- table(alpha_hull_numbers)
-  maximium_alpha_hull_number <- Position(function(x) x < minimum_cells_in_alpha_hull, alpha_hull_numbers_table)
-  maximium_alpha_hull_number <- as.numeric(names(alpha_hull_numbers_table[maximium_alpha_hull_number]))
+  alpha_hull_clusters_table <- table(alpha_hull_clusters)
+  maximium_alpha_hull_cluster <- Position(function(x) x < minimum_cells_in_alpha_hull, alpha_hull_clusters_table)
+  maximium_alpha_hull_cluster <- as.numeric(names(alpha_hull_clusters_table[maximium_alpha_hull_cluster]))
   
-  if (!is.na(maximium_alpha_hull_number) && maximium_alpha_hull_number != 0) {
-    spe_subset_coords <- spe_subset_coords[alpha_hull_numbers >= 1 & alpha_hull_numbers < maximium_alpha_hull_number, ]
+  if (!is.na(maximium_alpha_hull_cluster) && maximium_alpha_hull_cluster != 0) {
+    spe_subset_coords <- spe_subset_coords[alpha_hull_clusters >= 1 & alpha_hull_clusters < maximium_alpha_hull_cluster, ]
     
-    df_cell_types_of_interest$alpha_hull_number <- ifelse(alpha_hull_numbers >= 1 & alpha_hull_numbers < maximium_alpha_hull_number, 
-                                                          alpha_hull_numbers, 0)
+    df_cell_types_of_interest$alpha_hull_cluster <- ifelse(alpha_hull_clusters >= 1 & alpha_hull_clusters < maximium_alpha_hull_cluster, 
+                                                           alpha_hull_clusters, 0)
     
     ## Get the alpha hull again...
     alpha_hull <- ashape3d(as.matrix(spe_subset_coords), alpha = alpha)
@@ -1453,19 +1451,20 @@ plot_alpha_hull3D <- function(spe_with_alpha_hull,
   
   
   ## Get alpha hull numbers (ignoring 0)
-  alpha_hull_numbers <- spe_with_alpha_hull$alpha_hull_number[spe_with_alpha_hull$alpha_hull_number != 0]
+  alpha_hull_clusters <- spe_with_alpha_hull$alpha_hull_cluster[spe_with_alpha_hull$alpha_hull_cluster != 0]
   
   # Get number of alpha hulls
-  n_alpha_hulls <- length(unique(alpha_hull_numbers))
+  n_alpha_hulls <- length(unique(alpha_hull_clusters))
   
   vertices <- spe_with_alpha_hull@metadata$alpha_hull$vertices
   faces <- data.frame(spe_with_alpha_hull@metadata$alpha_hull$faces)
-  alpha_hull_colours <- rainbow(length(unique(alpha_hull_numbers)))
+  alpha_hull_colours <- rainbow(length(unique(alpha_hull_clusters)))
   
   ## Add alpha hulls to fig, one by one  
   for (i in seq(n_alpha_hulls)) {
-    faces_temp <- faces[faces[ , 1] %in% which(alpha_hull_numbers == i) , ]
+    faces_temp <- faces[faces[ , 1] %in% which(alpha_hull_clusters == i) , ]
     
+    # Large alpha hulls should have a lower opacity so they are more visible
     opacity_level <- ifelse(nrow(faces_temp) > 50, 0.05, 0.25)
     
     fig <- fig %>%
@@ -1486,41 +1485,102 @@ plot_alpha_hull3D <- function(spe_with_alpha_hull,
 }
 
 
-calculate_alpha_hull_cell_proportions3D <- function(spe_with_alpha_hull, feature_colname = "Cell.Type", plot_image = T) {
+library(dbscan)
+
+dbscan_clustering3D <- function(spe,
+                                cell_types_of_interest,
+                                radius,
+                                minimum_cells_in_radius,
+                                feature_colname = "Cell.Type",
+                                plot_image = T) {
   
-  ## Get alpha hull numbers (ignoring 0)
-  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != 0]
+  spe_subset <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
+  spe_subset_coords <- spatialCoords(spe_subset)
   
-  ## Get number of alpha hulls
-  n_alpha_hulls <- length(unique(alpha_hull_numbers))
+  db <- dbscan::dbscan(spe_subset_coords, eps = radius, minPts = minimum_cells_in_radius, borderPoints = F)
   
-  ## Get different cell types found in the alpha hulls
-  cell_types <- unique(spe_with_alpha_hull[[feature_colname]][spe_alpha_hull$alpha_hull_number != 0])
   
-  ## For each alpha hull, determine the size and cell proportion of each alpha hull
-  result <- data.frame(matrix(nrow = n_alpha_hulls, ncol = 2 + length(cell_types)))
-  colnames(result) <- c("alpha_hull_number", "n_cells", cell_types)
   
-  for (i in seq(n_alpha_hulls)) {
-    cells_in_alpha_hull <- spe_with_alpha_hull[[feature_colname]][spe_with_alpha_hull$alpha_hull_number == i]
-    result[i, "n_cells"] <- length(cells_in_alpha_hull)
+  # Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe),
+                   "Cell.Type" = spe[[feature_colname]],
+                   "Cell.ID" = spe[["Cell.ID"]])
+  
+  df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
+  df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]
+  df_cell_types_of_interest$dbscan_cluster <- db$cluster
+  df_other_cell_types$dbscan_cluster <- 0
+  
+  ## Convert data frame to spe object
+  df <- rbind(df_cell_types_of_interest, df_other_cell_types)
+  
+  spe <- SpatialExperiment(
+    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    colData = df,
+    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+    metadata = spe@metadata)
+  
+  ## Plot
+  if (plot_image) {
+    df$dbscan_cluster <- ifelse(df$dbscan_cluster == 0, "non_cluster", paste("cluster_", df$dbscan_cluster, sep = ""))
+    
+    fig <- plot_ly(df,
+                   type = "scatter3d",
+                   mode = 'markers',
+                   x = ~Cell.X.Position,
+                   y = ~Cell.Y.Position,
+                   z = ~Cell.Z.Position,
+                   color = ~dbscan_cluster,
+                   colors = rainbow(length(unique(df$dbscan_cluster))),
+                   marker = list(size = 2)) %>% 
+      layout(scene = list(xaxis = list(title = 'x'),
+                          yaxis = list(title = 'y'),
+                          zaxis = list(title = 'z')))
+    
+    methods::show(fig)
+  }
+  
+  return(spe)
+}
+
+
+
+calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
+  
+  ## Get cluster numbers (ignoring 0)
+  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
+  
+  ## Get number of clusters
+  n_clusters <- length(unique(cluster_numbers))
+  
+  ## Get different cell types found in the clusters (alphabetical for consistency)
+  cell_types <- unique(spe[[feature_colname]][spe[[cluster_colname]] != 0])
+  cell_types <- cell_types[order(cell_types)]
+  
+  ## For each cluster, determine the size and cell proportion of each cluster
+  result <- data.frame(matrix(nrow = n_clusters, ncol = 2 + length(cell_types)))
+  colnames(result) <- c("cluster_number", "n_cells", cell_types)
+  
+  for (i in seq(n_clusters)) {
+    cells_in_clusters <- spe[[feature_colname]][spe[[cluster_colname]] == i]
+    result[i, "n_cells"] <- length(cells_in_clusters)
     
     for (cell_type in cell_types) {
-      result[i, cell_type] <- sum(cells_in_alpha_hull == cell_type) / result[i, "n_cells"]
+      result[i, cell_type] <- sum(cells_in_clusters == cell_type) / result[i, "n_cells"]
     }
   }
   
   result <- result[order(result$n_cells), ]
-  rownames(result) <- seq(n_alpha_hulls)
-  result$alpha_hull_number <- as.character(seq(n_alpha_hulls))
+  rownames(result) <- seq(n_clusters)
+  result$cluster_number <- as.character(seq(n_clusters))
   
   ## Plot
   if (plot_image) {
-    plot_result <- reshape2::melt(result, id.vars = c("alpha_hull_number", "n_cells"))
-    fig <- ggplot(plot_result, aes(alpha_hull_number, value, fill = variable)) +
+    plot_result <- reshape2::melt(result, id.vars = c("cluster_number", "n_cells"))
+    fig <- ggplot(plot_result, aes(cluster_number, value, fill = variable)) +
       geom_bar(stat = "identity") +
-      labs(title = "Cell proportions of each alpha hull", x = "", y = "Cell proportion") +
-      scale_x_discrete(labels = paste("n =", result$n_cells)) +
+      labs(title = "Cell proportions of each cluster", x = "", y = "Cell proportion") +
+      scale_x_discrete(labels = paste("cluster_", result$cluster_number, ", n = ", result$n_cells, sep = "")) +
       guides(fill = guide_legend(title="Cell type")) +
       theme_bw() +
       theme(plot.title = element_text(hjust = 0.5))
@@ -1531,42 +1591,40 @@ calculate_alpha_hull_cell_proportions3D <- function(spe_with_alpha_hull, feature
   return(result)
 }
 
-
-
-calculate_minimum_distances_to_alpha_hull3D <- function(spe_with_alpha_hull, cell_types_of_interest, feature_colname = "Cell.Type", plot_image = T) {
+calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_of_interest, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
   
-  ## Get alpha hull numbers (ignoring 0)
-  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != 0]
+  ## Get cluster numbers (ignoring 0)
+  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
   
-  ## Get number of alpha hulls
-  n_alpha_hulls <- length(unique(alpha_hull_numbers))
+  ## Get number of clusters
+  n_clusters <- length(unique(cluster_numbers))
   
-  ## For each alpha hull, determine the minimum distance of each cell_type_of_interest
+  ## For each cluster, determine the minimum distance of each cell_type_of_interest
   result <- data.frame()
   
   
-  spe_coords <- spatialCoords(spe_with_alpha_hull)
+  spe_coords <- spatialCoords(spe)
   cell_types_of_interest_coords <- list()
   for (cell_type in cell_types_of_interest) {
-    cell_types_of_interest_coords[[cell_type]] <- spe_coords[spe_with_alpha_hull[[feature_colname]] == cell_type, ]
+    cell_types_of_interest_coords[[cell_type]] <- spe_coords[spe[[feature_colname]] == cell_type, ]
   }
   
   
   
   result <- vector()
   
-  for (i in seq(n_alpha_hulls)) {
-    alpha_hull_coords <- spe_coords[spe_with_alpha_hull$alpha_hull_number == i, ]
+  for (i in seq(n_clusters)) {
+    cluster_coords <- spe_coords[spe[[cluster_colname]] == i, ]
     
     for (cell_type in cell_types_of_interest) {
       curr_cell_type_coords <- cell_types_of_interest_coords[[cell_type]]
       
-      all_closest <- RANN::nn2(data = alpha_hull_coords, 
+      all_closest <- RANN::nn2(data = cluster_coords, 
                                query = curr_cell_type_coords, 
                                k = 1)  
       
       local_dist_mins <- data.frame(
-        alpha_hull_number = i,
+        cluster_number = i,
         cell_type_of_interest = cell_type,
         distance = all_closest$nn.dists
       )
@@ -1579,17 +1637,18 @@ calculate_minimum_distances_to_alpha_hull3D <- function(spe_with_alpha_hull, cel
     ## Plot
     if (plot_image) {
       
-      alpha_hull_cell_props <- calculate_alpha_hull_cell_proportions3D(spe_with_alpha_hull, feature_colname, FALSE)
+      plot_result <- result
+      cluster_cell_props <- calculate_cell_proportions_of_clusters3D(spe, cluster_colname, feature_colname, FALSE)
+      plot_result$cluster_number <- factor(plot_result$cluster_number, levels = rev(cluster_cell_props$cluster_number))
+      cluster_number_labs <- paste("cluster_", rev(cluster_cell_props$cluster_number),", n = ", rev(cluster_cell_props$n_cells), sep = "")
+      names(cluster_number_labs) <- seq(nrow(cluster_cell_props))
       
-      alpha_hull_number_labs <- paste("n =", rev(alpha_hull_cell_props$n_cells))
-      names(alpha_hull_number_labs) <- seq(nrow(alpha_hull_cell_props))
-      
-      fig <- ggplot(result, aes(x = cell_type_of_interest, y = distance, fill = cell_type_of_interest)) + 
+      fig <- ggplot(plot_result, aes(x = cell_type_of_interest, y = distance, fill = cell_type_of_interest)) + 
         geom_violin() +
-        facet_grid(alpha_hull_number~., scales="free_x", labeller = labeller(alpha_hull_number = alpha_hull_number_labs)) +
+        facet_grid(cluster_number~., scales="free_x", labeller = labeller(cluster_number = cluster_number_labs)) +
         theme_bw() +
         theme(axis.ticks.x = element_blank(), plot.title = element_text(hjust = 0.5), legend.position = "none") +
-        labs(title="Minimum cell distances to alpha hulls", x = "Cell type", y = "Distance") +
+        labs(title="Minimum cell distances to clusters", x = "Cell type", y = "Distance") +
         stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
       
       methods::show(fig)

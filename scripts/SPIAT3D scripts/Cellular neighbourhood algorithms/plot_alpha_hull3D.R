@@ -50,18 +50,18 @@ plot_alpha_hull3D <- function(spe_with_alpha_hull,
   
   
   ## Get alpha hull numbers (ignoring 0)
-  alpha_hull_numbers <- spe_with_alpha_hull$alpha_hull_number[spe_with_alpha_hull$alpha_hull_number != 0]
+  alpha_hull_clusters <- spe_with_alpha_hull$alpha_hull_cluster[spe_with_alpha_hull$alpha_hull_cluster != 0]
   
   # Get number of alpha hulls
-  n_alpha_hulls <- length(unique(alpha_hull_numbers))
+  n_alpha_hulls <- length(unique(alpha_hull_clusters))
 
   vertices <- spe_with_alpha_hull@metadata$alpha_hull$vertices
   faces <- data.frame(spe_with_alpha_hull@metadata$alpha_hull$faces)
-  alpha_hull_colours <- rainbow(length(unique(alpha_hull_numbers)))
+  alpha_hull_colours <- rainbow(length(unique(alpha_hull_clusters)))
   
   ## Add alpha hulls to fig, one by one  
   for (i in seq(n_alpha_hulls)) {
-    faces_temp <- faces[faces[ , 1] %in% which(alpha_hull_numbers == i) , ]
+    faces_temp <- faces[faces[ , 1] %in% which(alpha_hull_clusters == i) , ]
     
     # Large alpha hulls should have a lower opacity so they are more visible
     opacity_level <- ifelse(nrow(faces_temp) > 50, 0.05, 0.25)

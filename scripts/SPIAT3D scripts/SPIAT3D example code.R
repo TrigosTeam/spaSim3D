@@ -158,14 +158,24 @@ print(cell_proportion_spatial_autocorrelation)
 
 
 
-### 4. Margin of structure metrics --------------------------------------------
-spe_alpha_hull <- determine_alpha_hull3D(spe1, c("Tumour", "Immune"), alpha = 3.85, minimum_cells_in_alpha_hull = 15)
+### 4. Clustering algorithms --------------------------------------------------
+spe_alpha_hull <- alpha_hull_clustering3D(spe1, c("Tumour", "Immune"), alpha = 3.85, minimum_cells_in_alpha_hull = 15)
 
 plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
 
-alpha_hull_props <- calculate_alpha_hull_cell_proportions3D(spe_alpha_hull)
+alpha_hull_props <- calculate_cell_proportions_of_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster")
 
-alpha_hull_min_distances <- calculate_minimum_distances_to_alpha_hull3D(spe_alpha_hull, cell_types_of_interest = c("Tumour", "Immune", "Immune1"))
+alpha_hull_min_distances <- calculate_minimum_distances_to_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster", cell_types_of_interest = c("Tumour", "Immune", "Immune1"))
+
+
+spe_dbscan <- dbscan_clustering3D(spe1, c("Tumour", "Immune"), radius = 13, minimum_cells_in_radius = 25)
+
+dbscan_props <- calculate_cell_proportions_of_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster")
+
+dbscan_min_distances <- calculate_minimum_distances_to_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster", cell_types_of_interest = c("Tumour", "Immune", "Immune1"))
+
+
+
 
 ### 5. Presence of cluster metrics --------------------------------------------
 ANNI_result <- average_nearest_neighbor_index3D(data,
