@@ -1,9 +1,9 @@
-calculate_cell_proportions_in_neighbourhood_gradient3D <- function(spe, 
-                                                                   reference_cell_type, 
-                                                                   target_cell_types, 
-                                                                   radii, 
-                                                                   feature_colname = "Cell.Type",
-                                                                   plot_image = TRUE) {
+calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe, 
+                                                                    reference_cell_type, 
+                                                                    target_cell_types, 
+                                                                    radii, 
+                                                                    feature_colname = "Cell.Type",
+                                                                    plot_image = TRUE) {
   
   result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
   colnames(result) <- target_cell_types

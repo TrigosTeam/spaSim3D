@@ -1,8 +1,8 @@
-calculate_cell_proportions_in_neighbourhood3D <- function(spe, 
-                                                          reference_cell_type, 
-                                                          target_cell_types, 
-                                                          radius, 
-                                                          feature_colname = "Cell.Type") {
+calculate_cells_in_neighbourhood_proportions3D <- function(spe, 
+                                                           reference_cell_type, 
+                                                           target_cell_types, 
+                                                           radius, 
+                                                           feature_colname = "Cell.Type") {
   
   ## Get 'count' neighbourhood data
   cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
@@ -12,8 +12,8 @@ calculate_cell_proportions_in_neighbourhood3D <- function(spe,
                                                                     feature_colname,
                                                                     FALSE,
                                                                     FALSE)
-
-    
+  
+  
   
   result <- data.frame(matrix(nrow = length(target_cell_types), ncol = 4))
   colnames(result) <- c("target_cell_type", "frequency", "proportion", "percentage")

@@ -54,16 +54,16 @@ neighbourhood_cells <- calculate_cells_in_neighbourhood3D(spe1,
 
 
 ## Calculate cell proportions in the neighbourhood
-neighbourhood_cell_proportions <- calculate_cell_proportions_in_neighbourhood3D(spe1,
-                                                                                reference_cell_type = "Tumour",
-                                                                                target_cell_types = c("Immune", "Immune1"),
-                                                                                radius = 20)
+neighbourhood_cell_proportions <- calculate_cells_in_neighbourhood_proportions3D(spe1,
+                                                                                 reference_cell_type = "Tumour",
+                                                                                 target_cell_types = c("Immune", "Immune1"),
+                                                                                 radius = 20)
 print(neighbourhood_cell_proportions)
 
-neighbourhood_cell_proportions_gradient <- calculate_cell_proportions_in_neighbourhood_gradient3D(spe1,
-                                                                                                  reference_cell_type = "Tumour",
-                                                                                                  target_cell_types = c("Immune1", "Immune"),
-                                                                                                  radii = 30)
+neighbourhood_cell_proportions_gradient <- calculate_cells_in_neighbourhood_proportions_gradient3D(spe1,
+                                                                                                   reference_cell_type = "Tumour",
+                                                                                                   target_cell_types = c("Immune1", "Immune"),
+                                                                                                   radii = 30)
 
 
 ### Calculate cross-K function
