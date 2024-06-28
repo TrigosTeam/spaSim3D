@@ -1464,6 +1464,9 @@ plot_alpha_hull3D <- function(spe_with_alpha_hull,
   for (i in seq(n_alpha_hulls)) {
     faces_temp <- faces[faces[ , 1] %in% which(alpha_hull_clusters == i) , ]
     
+    ## Ignore the weird cases where some cells represent clusters, but no faces are associated with them??
+    if (nrow(faces_temp) == 0) next
+    
     # Large alpha hulls should have a lower opacity so they are more visible
     opacity_level <- ifelse(nrow(faces_temp) > 50, 0.05, 0.25)
     
@@ -1483,6 +1486,7 @@ plot_alpha_hull3D <- function(spe_with_alpha_hull,
   
   return(fig)
 }
+
 
 
 library(dbscan)

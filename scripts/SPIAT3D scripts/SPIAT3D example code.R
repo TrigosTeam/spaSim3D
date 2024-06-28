@@ -159,7 +159,7 @@ print(cell_proportion_spatial_autocorrelation)
 
 
 ### 4. Clustering algorithms --------------------------------------------------
-spe_alpha_hull <- alpha_hull_clustering3D(spe1, c("Tumour", "Immune"), alpha = 3.85, minimum_cells_in_alpha_hull = 15)
+spe_alpha_hull <- alpha_hull_clustering3D(spe1, c("Tumour", "Immune"), alpha = 3.85, minimum_cells_in_alpha_hull = 10)
 
 plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
 
@@ -194,5 +194,5 @@ ggplot(df, aes(x, y)) + geom_point() + geom_errorbar(aes(ymin = low, ymax = up))
 
 ### 6. Plot data -------------------------------------------------------------
 plot_cells3D(spe1,
-             plot_cell_types = c("Tumour", "Immune", "Others"),
-             plot_colours = c("orange", "skyblue", "lightgray"))
+             plot_cell_types = c("Tumour", "Immune", "Immune1", "Others"),
+             plot_colours = c("orange", "skyblue", "lightgreen", "lightgray"))
