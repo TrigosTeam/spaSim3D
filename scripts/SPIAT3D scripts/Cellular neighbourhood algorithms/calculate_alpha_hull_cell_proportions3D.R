@@ -1,13 +1,13 @@
 calculate_alpha_hull_cell_proportions3D <- function(spe_with_alpha_hull, feature_colname = "Cell.Type", plot_image = T) {
   
-  ## Get alpha hull numbers (ignoring -1)
-  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != -1]
+  ## Get alpha hull numbers (ignoring 0)
+  alpha_hull_numbers <- spe_alpha_hull$alpha_hull_number[spe_alpha_hull$alpha_hull_number != 0]
   
   ## Get number of alpha hulls
   n_alpha_hulls <- length(unique(alpha_hull_numbers))
   
   ## Get different cell types found in the alpha hulls
-  cell_types <- unique(spe_with_alpha_hull[[feature_colname]][spe_alpha_hull$alpha_hull_number != -1])
+  cell_types <- unique(spe_with_alpha_hull[[feature_colname]][spe_alpha_hull$alpha_hull_number != 0])
   
   ## For each alpha hull, determine the size and cell proportion of each alpha hull
   result <- data.frame(matrix(nrow = n_alpha_hulls, ncol = 2 + length(cell_types)))

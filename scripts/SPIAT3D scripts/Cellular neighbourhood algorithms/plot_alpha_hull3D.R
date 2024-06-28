@@ -49,8 +49,8 @@ plot_alpha_hull3D <- function(spe_with_alpha_hull,
                         zaxis = list(title = 'z')))
   
   
-  ## Get alpha hull numbers (ignoring -1)
-  alpha_hull_numbers <- spe_with_alpha_hull$alpha_hull_number[spe_with_alpha_hull$alpha_hull_number != -1]
+  ## Get alpha hull numbers (ignoring 0)
+  alpha_hull_numbers <- spe_with_alpha_hull$alpha_hull_number[spe_with_alpha_hull$alpha_hull_number != 0]
   
   # Get number of alpha hulls
   n_alpha_hulls <- length(unique(alpha_hull_numbers))
