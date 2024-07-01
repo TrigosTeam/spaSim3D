@@ -1,13 +1,13 @@
 determine_entropy_grid_metrics3D <- function(spe, 
-                                             n_split,
+                                             n_splits,
                                              cell_types_of_interest,
                                              feature_colname = "Cell.Type",
                                              plot_image = TRUE) {
   
   
-  # Check if n_split is numeric
-  if (!is.numeric(n_split)) {
-    stop(paste(n_split, " n_split is not of type 'numeric'"))
+  # Check if n_splits is numeric
+  if (!is.numeric(n_splits)) {
+    stop(paste(n_splits, " n_splits is not of type 'numeric'"))
   }
   
   ## If cell types have been chosen, check they are found in the spe object
@@ -26,17 +26,17 @@ determine_entropy_grid_metrics3D <- function(spe,
   height <- round(max(spe_coords$Cell.Z.Position) - min(spe_coords$Cell.Z.Position))
   
   ## Get distance of row, col and lay
-  d_row <- length / n_split
-  d_col <- width / n_split
-  d_lay <- height / n_split
+  d_row <- length / n_splits
+  d_col <- width / n_splits
+  d_lay <- height / n_splits
   
   ## Figure out which 'grid prism number' each cell is inside
   spe$Prism.Num <- floor(spe_coords$Cell.X.Position / d_row) +
-    floor(spe_coords$Cell.Y.Position / d_col) * n_split + 
-    floor(spe_coords$Cell.Z.Position / d_lay) * n_split^2 + 1
+    floor(spe_coords$Cell.Y.Position / d_col) * n_splits + 
+    floor(spe_coords$Cell.Z.Position / d_lay) * n_splits^2 + 1
   
   ## Get number of grid prisms
-  n_grid_prisms <- n_split^3
+  n_grid_prisms <- n_splits^3
   
   ## Define data frame which contains all results
   result <- data.frame(matrix(nrow = n_grid_prisms, ncol = (length(cell_types_of_interest) + 2)))
@@ -65,9 +65,9 @@ determine_entropy_grid_metrics3D <- function(spe,
   result$total <- apply(result[ , colnames(result) %in% cell_types_of_interest], 1, sum)
   
   ## Add x, y and z coords of each grid prism to result
-  result$prism_x_coord <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
-  result$prism_y_coord <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
-  result$prism_z_coord <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
+  result$prism_x_coord <- ((seq(n_grid_prisms) - 1) %% n_splits + 0.5) * d_row
+  result$prism_y_coord <- (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits) + 0.5) * d_col
+  result$prism_z_coord <- (floor((seq(n_grid_prisms) - 1) / (n_splits^2)) + 0.5) * d_lay
   
   ## Plot
   if (plot_image) {

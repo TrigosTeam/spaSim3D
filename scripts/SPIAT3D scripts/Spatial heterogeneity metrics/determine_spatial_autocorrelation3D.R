@@ -7,12 +7,12 @@ determine_spatial_autocorrelation3D <- function(grid_data,
   n_grid_prisms <- nrow(grid_data)
   
   ## Get splitting number (should be the cube root of n_grid_prisms)
-  n_split <- (n_grid_prisms)^(1/3)
+  n_splits <- (n_grid_prisms)^(1/3)
   
   ## Find the coordinates of each grid prism
-  x <- ((seq(n_grid_prisms) - 1) %% n_split)
-  y <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split))
-  z <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)))
+  x <- ((seq(n_grid_prisms) - 1) %% n_splits)
+  y <- (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits))
+  z <- (floor((seq(n_grid_prisms) - 1) / (n_splits^2)))
   grid_prism_coords <- data.frame(x = x, y = y, z = z)
   
   

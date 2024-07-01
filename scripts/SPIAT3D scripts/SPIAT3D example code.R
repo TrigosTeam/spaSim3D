@@ -115,7 +115,7 @@ entropy_gradient <- calculate_entropy_gradient3D(spe1,
 
 ### Determine entropy grid metrics
 entropy_grid_metrics <- determine_entropy_grid_metrics3D(spe1,
-                                                         n_split = 8,
+                                                         n_splits = 8,
                                                          cell_types_of_interest = c("Tumour", "Immune"),
                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(entropy_grid_metrics, "entropy")
@@ -136,7 +136,7 @@ print(entropy_spatial_autocorrelation)
 
 ### Determine cell proportion grid metrics
 cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(spe1,
-                                                                         n_split = 8,
+                                                                         n_splits = 8,
                                                                          reference_cell_types = c("Tumour"),
                                                                          target_cell_types = c("Immune", "Immune1"),
                                                                          plot_image = TRUE)
@@ -159,7 +159,7 @@ print(cell_proportion_spatial_autocorrelation)
 
 
 ### 4. Clustering algorithms --------------------------------------------------
-spe_alpha_hull <- alpha_hull_clustering3D(spe1, c("Tumour", "Immune"), alpha = 3.85, minimum_cells_in_alpha_hull = 10)
+spe_alpha_hull <- alpha_hull_clustering3D(spe1, c("Tumour", "Immune"), alpha = 3.85, minimum_cells_in_alpha_hull = 15)
 
 plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
 

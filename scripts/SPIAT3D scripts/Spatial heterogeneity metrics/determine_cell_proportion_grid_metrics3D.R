@@ -1,5 +1,5 @@
 determine_cell_proportion_grid_metrics3D <- function(spe, 
-                                                     n_split,
+                                                     n_splits,
                                                      reference_cell_types,
                                                      target_cell_types,
                                                      feature_colname = "Cell.Type",
@@ -7,9 +7,9 @@ determine_cell_proportion_grid_metrics3D <- function(spe,
   
 
   
-  # Check if n_split is numeric
-  if (!is.numeric(n_split)) {
-    stop(paste(n_split, " n_split is not of type 'numeric'"))
+  # Check if n_splits is numeric
+  if (!is.numeric(n_splits)) {
+    stop(paste(n_splits, " n_splits is not of type 'numeric'"))
   }
   
   ## Check reference_cell_types are found in the spe object
@@ -39,17 +39,17 @@ determine_cell_proportion_grid_metrics3D <- function(spe,
   
   
   ## Get distance of row, col and lay
-  d_row <- length / n_split
-  d_col <- width / n_split
-  d_lay <- height / n_split
+  d_row <- length / n_splits
+  d_col <- width / n_splits
+  d_lay <- height / n_splits
   
   ## Figure out which 'grid prism number' each cell is inside
   spe$Prism.Num <- floor(spe_coords$Cell.X.Position / d_row) +
-    floor(spe_coords$Cell.Y.Position / d_col) * n_split + 
-    floor(spe_coords$Cell.Z.Position / d_lay) * n_split^2 + 1
+    floor(spe_coords$Cell.Y.Position / d_col) * n_splits + 
+    floor(spe_coords$Cell.Z.Position / d_lay) * n_splits^2 + 1
   
   ## Calculate cell_proportions for each grid prism
-  n_grid_prisms <- n_split^3
+  n_grid_prisms <- n_splits^3
   n_reference_cells_vec <- c()
   n_target_cells_vec <- c()
   grid_prism_cell_proportions <- c()
@@ -82,9 +82,9 @@ determine_cell_proportion_grid_metrics3D <- function(spe,
   }
   
   ## Add x, y and z coords of each grid prism to result
-  result$prism_x_coord <- ((seq(n_grid_prisms) - 1) %% n_split + 0.5) * d_row
-  result$prism_y_coord <- (floor(((seq(n_grid_prisms) - 1) %% (n_split)^2) / n_split) + 0.5) * d_col
-  result$prism_z_coord <- (floor((seq(n_grid_prisms) - 1) / (n_split^2)) + 0.5) * d_lay
+  result$prism_x_coord <- ((seq(n_grid_prisms) - 1) %% n_splits + 0.5) * d_row
+  result$prism_y_coord <- (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits) + 0.5) * d_col
+  result$prism_z_coord <- (floor((seq(n_grid_prisms) - 1) / (n_splits^2)) + 0.5) * d_lay
   
   ## Plot
   if (plot_image) {
