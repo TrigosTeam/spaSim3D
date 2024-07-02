@@ -172,16 +172,21 @@ spe_dbscan <- dbscan_clustering3D(spe1, c("Tumour", "Immune"), radius = 13, mini
 
 dbscan_props <- calculate_cell_proportions_of_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster")
 
-dbscan_min_distances <- calculate_minimum_distances_to_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster", cell_types_of_interest = c("Tumour", "Immune", "Immune1"))
+dbscan_min_distances <- calculate_minimum_distances_to_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster", 
+                                                                  cell_types_inside_cluster = c("Tumour", "Immune"),
+                                                                  cell_types_outside_cluster = c("Tumour", "Immune", "Immune1"))
 
 
-spe_grid <- grid_based_clustering3D(spe1, cell_types_of_interest = c("Tumour", "Immune"), n_splits = 9)
+
+spe_grid <- grid_based_clustering3D(spe1, cell_types_of_interest = c("Tumour", "Immune"), n_splits = 8)
 
 plot_grid_based_clusters3D(spe_grid, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
 
 grid_props <- calculate_cell_proportions_of_clusters3D(spe_grid, cluster_colname = "grid_based_cluster")
 
-grid_min_distances <- calculate_minimum_distances_to_clusters3D(spe_grid, cluster_colname = "grid_based_cluster", cell_types_of_interest = c("Tumour", "Immune", "Immune1"))
+grid_min_distances <- calculate_minimum_distances_to_clusters3D(spe_grid, cluster_colname = "grid_based_cluster", 
+                                                                cell_types_inside_cluster = c("Tumour", "Immune"),
+                                                                cell_types_outside_cluster = c("Tumour", "Immune", "Immune1"))
 
 
 ### 5. Presence of cluster metrics --------------------------------------------

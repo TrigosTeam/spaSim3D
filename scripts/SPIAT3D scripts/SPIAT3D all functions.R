@@ -2042,7 +2042,7 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
   return(result)
 }
 
-calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_of_interest, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
+calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_cluster, cell_types_outside_cluster, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
   
   ## Get cluster numbers (ignoring 0)
   cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
@@ -2050,25 +2050,27 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_of_interes
   ## Get number of clusters
   n_clusters <- length(unique(cluster_numbers))
   
-  ## For each cluster, determine the minimum distance of each cell_type_of_interest
-  result <- data.frame()
-  
-  
+  ## For each cell type outside clusters, get their set of coords. These exclude cell types in clusters
   spe_coords <- spatialCoords(spe)
-  cell_types_of_interest_coords <- list()
-  for (cell_type in cell_types_of_interest) {
-    cell_types_of_interest_coords[[cell_type]] <- spe_coords[spe[[feature_colname]] == cell_type, ]
+  cluster_rows <- rep(FALSE, nrow(spe_coords))
+  for (i in seq(n_clusters)) {
+    cluster_rows <- cluster_rows | (spe[[cluster_colname]] == i)
   }
   
+  spe_outside_cluster <- spe[ , !cluster_rows]
+  cell_types_outside_cluster_coords <- list()
+  for (cell_type in cell_types_outside_cluster) {
+    cell_types_outside_cluster_coords[[cell_type]] <- spatialCoords(spe_outside_cluster)[spe_outside_cluster[[feature_colname]] == cell_type, ]
+  }
   
-  
+  ## For each cluster, determine the minimum distance of each cell_type_of_interest  
   result <- vector()
   
   for (i in seq(n_clusters)) {
-    cluster_coords <- spe_coords[spe[[cluster_colname]] == i, ]
+    cluster_coords <- spe_coords[spe[[cluster_colname]] == i & spe[[feature_colname]] %in% cell_types_inside_cluster, ]
     
-    for (cell_type in cell_types_of_interest) {
-      curr_cell_type_coords <- cell_types_of_interest_coords[[cell_type]]
+    for (cell_type in cell_types_outside_cluster) {
+      curr_cell_type_coords <- cell_types_outside_cluster_coords[[cell_type]]
       
       all_closest <- RANN::nn2(data = cluster_coords, 
                                query = curr_cell_type_coords, 
@@ -2108,6 +2110,3 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_of_interes
   }
   return(result)
 }
-
-
-
