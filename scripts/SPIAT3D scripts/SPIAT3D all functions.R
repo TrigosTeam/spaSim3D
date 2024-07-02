@@ -1387,7 +1387,7 @@ alpha_hull_clustering3D <- function(spe,
   ## Get the information of the vertices and faces of the alpha hull (what 3 vertices make up each face triangle?)
   vertices <- alpha_hull$x
   faces <- alpha_hull$triang[alpha_hull$triang[, 9] != 0, c("tr1", "tr2", "tr3")]
-  spe@metadata$alpha_hull <- list(vertices = vertices, faces = faces)
+  spe@metadata$alpha_hull <- list(vertices = vertices, faces = faces, ashape3d_object = alpha_hull)
   
   ## Plot
   if (plot_image) {
@@ -1397,6 +1397,7 @@ alpha_hull_clustering3D <- function(spe,
   
   return(spe)
 }
+
 
 
 plot_alpha_hull_clusters3D <- function(spe_with_alpha_hull, 
@@ -2013,11 +2014,11 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
   colnames(result) <- c("cluster_number", "n_cells", cell_types)
   
   for (i in seq(n_clusters)) {
-    cells_in_clusters <- spe[[feature_colname]][spe[[cluster_colname]] == i]
-    result[i, "n_cells"] <- length(cells_in_clusters)
+    cells_in_cluster <- spe[[feature_colname]][spe[[cluster_colname]] == i]
+    result[i, "n_cells"] <- length(cells_in_cluster)
     
     for (cell_type in cell_types) {
-      result[i, cell_type] <- sum(cells_in_clusters == cell_type) / result[i, "n_cells"]
+      result[i, cell_type] <- sum(cells_in_cluster == cell_type) / result[i, "n_cells"]
     }
   }
   
@@ -2041,6 +2042,7 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
   
   return(result)
 }
+
 
 calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_cluster, cell_types_outside_cluster, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
   

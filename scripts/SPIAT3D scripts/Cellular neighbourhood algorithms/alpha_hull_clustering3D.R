@@ -75,7 +75,7 @@ alpha_hull_clustering3D <- function(spe,
   ## Get the information of the vertices and faces of the alpha hull (what 3 vertices make up each face triangle?)
   vertices <- alpha_hull$x
   faces <- alpha_hull$triang[alpha_hull$triang[, 9] != 0, c("tr1", "tr2", "tr3")]
-  spe@metadata$alpha_hull <- list(vertices = vertices, faces = faces)
+  spe@metadata$alpha_hull <- list(vertices = vertices, faces = faces, ashape3d_object = alpha_hull)
   
   ## Plot
   if (plot_image) {
