@@ -15,11 +15,11 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
   colnames(result) <- c("cluster_number", "n_cells", cell_types)
   
   for (i in seq(n_clusters)) {
-    cells_in_clusters <- spe[[feature_colname]][spe[[cluster_colname]] == i]
-    result[i, "n_cells"] <- length(cells_in_clusters)
+    cells_in_cluster <- spe[[feature_colname]][spe[[cluster_colname]] == i]
+    result[i, "n_cells"] <- length(cells_in_cluster)
     
     for (cell_type in cell_types) {
-      result[i, cell_type] <- sum(cells_in_clusters == cell_type) / result[i, "n_cells"]
+      result[i, cell_type] <- sum(cells_in_cluster == cell_type) / result[i, "n_cells"]
     }
   }
   
