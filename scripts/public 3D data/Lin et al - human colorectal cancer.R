@@ -470,3 +470,4 @@ plot_cell_categories3D(sample_n(spatial_data_3D, 4000),
                        my_colours)
 
 ### 6. Use cell type dictionary to determine cell identities (all cell types, all slices)
+
