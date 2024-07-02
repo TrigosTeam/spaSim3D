@@ -79,7 +79,7 @@ alpha_hull_clustering3D <- function(spe,
   
   ## Plot
   if (plot_image) {
-    fig <- plot_alpha_hull3D(spe, feature_colname = feature_colname)
+    fig <- plot_alpha_hull_clusters3D(spe, feature_colname = feature_colname)
     methods::show(fig)
   }
   

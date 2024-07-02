@@ -1,7 +1,7 @@
-plot_alpha_hull3D <- function(spe_with_alpha_hull, 
-                              plot_cell_types = NULL,
-                              plot_colours = NULL,
-                              feature_colname = "Cell.Type") {
+plot_alpha_hull_clusters3D <- function(spe_with_alpha_hull, 
+                                       plot_cell_types = NULL,
+                                       plot_colours = NULL,
+                                       feature_colname = "Cell.Type") {
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe_with_alpha_hull), "Cell.Type" = spe_with_alpha_hull[[feature_colname]])
@@ -57,7 +57,7 @@ plot_alpha_hull3D <- function(spe_with_alpha_hull,
 
   vertices <- spe_with_alpha_hull@metadata$alpha_hull$vertices
   faces <- data.frame(spe_with_alpha_hull@metadata$alpha_hull$faces)
-  alpha_hull_colours <- rainbow(length(unique(alpha_hull_clusters)))
+  alpha_hull_colours <- rainbow(n_alpha_hulls)
   
   ## Add alpha hulls to fig, one by one  
   for (i in seq(n_alpha_hulls)) {
