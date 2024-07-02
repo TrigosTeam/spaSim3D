@@ -2012,6 +2012,7 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
   ## For each cluster, determine the size and cell proportion of each cluster
   result <- data.frame(matrix(nrow = n_clusters, ncol = 2 + length(cell_types)))
   colnames(result) <- c("cluster_number", "n_cells", cell_types)
+  result$cluster_number <- as.character(seq(n_clusters))
   
   for (i in seq(n_clusters)) {
     cells_in_cluster <- spe[[feature_colname]][spe[[cluster_colname]] == i]
@@ -2021,10 +2022,6 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
       result[i, cell_type] <- sum(cells_in_cluster == cell_type) / result[i, "n_cells"]
     }
   }
-  
-  result <- result[order(result$n_cells), ]
-  rownames(result) <- seq(n_clusters)
-  result$cluster_number <- as.character(seq(n_clusters))
   
   ## Plot
   if (plot_image) {
@@ -2042,6 +2039,7 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
   
   return(result)
 }
+
 
 
 calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_cluster, cell_types_outside_cluster, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
@@ -2092,13 +2090,10 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_clu
     ## Plot
     if (plot_image) {
       
-      plot_result <- result
-      cluster_cell_props <- calculate_cell_proportions_of_clusters3D(spe, cluster_colname, feature_colname, FALSE)
-      plot_result$cluster_number <- factor(plot_result$cluster_number, levels = rev(cluster_cell_props$cluster_number))
-      cluster_number_labs <- paste("cluster_", rev(cluster_cell_props$cluster_number),", n = ", rev(cluster_cell_props$n_cells), sep = "")
-      names(cluster_number_labs) <- seq(nrow(cluster_cell_props))
+      cluster_number_labs <- paste("cluster_", seq(n_clusters), sep = "")
+      names(cluster_number_labs) <- seq(n_clusters)
       
-      fig <- ggplot(plot_result, aes(x = cell_type_of_interest, y = distance, fill = cell_type_of_interest)) + 
+      fig <- ggplot(result, aes(x = cell_type_of_interest, y = distance, fill = cell_type_of_interest)) + 
         geom_violin() +
         facet_grid(cluster_number~., scales="free_x", labeller = labeller(cluster_number = cluster_number_labs)) +
         theme_bw() +
@@ -2112,3 +2107,62 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_clu
   }
   return(result)
 }
+
+calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname = "Cell.Type") {
+  
+  ## Get cluster numbers (ignoring 0)
+  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
+  
+  ## Get number of clusters
+  n_clusters <- length(unique(cluster_numbers))
+  
+  
+  ### 1. Estimate volume of each cluster by density of the window. ------------
+  
+  ## For each cluster, determine the number of cells in each cluster of each cluster
+  result <- data.frame(matrix(nrow = n_clusters, ncol = 2))
+  colnames(result) <- c("cluster_number", "n_cells")
+  
+  for (i in seq(n_clusters)) {
+    cells_in_cluster <- spe[[feature_colname]][spe[[cluster_colname]] == i]
+    result[i, "n_cells"] <- length(cells_in_cluster)
+    
+  }
+  # result <- result[order(result$n_cells), ]
+  # rownames(result) <- seq(n_clusters)
+  result$cluster_number <- as.character(seq(n_clusters))
+  
+  
+  ## Assume window is a rectangular prism
+  spe_coords <- data.frame(spatialCoords(spe))
+  
+  length <- round(max(spe_coords$Cell.X.Position) - min(spe_coords$Cell.X.Position))
+  width  <- round(max(spe_coords$Cell.Y.Position) - min(spe_coords$Cell.Y.Position))
+  height <- round(max(spe_coords$Cell.Z.Position) - min(spe_coords$Cell.Z.Position))
+  
+  window_volume <- length * width * height
+  
+  result$volume_by_density <- (result$n_cells / ncol(spe)) * window_volume
+  
+  
+  ### 2. If cluster_colname == "alpha_hull_cluster", use the volume method found in the alphashape3d package
+  if (cluster_colname == "alpha_hull_cluster") {
+    print(volume_ashape3d(spe@metadata$alpha_hull$ashape3d_object, byComponents = T))
+    result$volume_by_alpha_hull <- volume_ashape3d(spe@metadata$alpha_hull$ashape3d_object, byComponents = T)
+  }
+  
+  
+  ### 3. If cluster_colname == "grid_based_cluster", sum the volume of each grid prism to get volume of each cluster
+  if (cluster_colname == "grid_based_cluster") {
+    result$volume_by_grid <- 0
+    i <- 1
+    for (grid_cluster in spe@metadata$grid_prisms) {
+      result[i, "volume_by_grid"] <- sum(grid_cluster$l * grid_cluster$w * grid_cluster$h)
+      i <- i + 1
+    }
+  }
+  
+  return(result)
+}
+
+

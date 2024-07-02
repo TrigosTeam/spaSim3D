@@ -13,6 +13,7 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
   ## For each cluster, determine the size and cell proportion of each cluster
   result <- data.frame(matrix(nrow = n_clusters, ncol = 2 + length(cell_types)))
   colnames(result) <- c("cluster_number", "n_cells", cell_types)
+  result$cluster_number <- as.character(seq(n_clusters))
   
   for (i in seq(n_clusters)) {
     cells_in_cluster <- spe[[feature_colname]][spe[[cluster_colname]] == i]
@@ -22,10 +23,6 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
       result[i, cell_type] <- sum(cells_in_cluster == cell_type) / result[i, "n_cells"]
     }
   }
-  
-  result <- result[order(result$n_cells), ]
-  rownames(result) <- seq(n_clusters)
-  result$cluster_number <- as.character(seq(n_clusters))
   
   ## Plot
   if (plot_image) {

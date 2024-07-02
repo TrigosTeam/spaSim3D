@@ -45,14 +45,11 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_clu
 
     ## Plot
     if (plot_image) {
+
+      cluster_number_labs <- paste("cluster_", seq(n_clusters), sep = "")
+      names(cluster_number_labs) <- seq(n_clusters)
       
-      plot_result <- result
-      cluster_cell_props <- calculate_cell_proportions_of_clusters3D(spe, cluster_colname, feature_colname, FALSE)
-      plot_result$cluster_number <- factor(plot_result$cluster_number, levels = rev(cluster_cell_props$cluster_number))
-      cluster_number_labs <- paste("cluster_", rev(cluster_cell_props$cluster_number),", n = ", rev(cluster_cell_props$n_cells), sep = "")
-      names(cluster_number_labs) <- seq(nrow(cluster_cell_props))
-      
-      fig <- ggplot(plot_result, aes(x = cell_type_of_interest, y = distance, fill = cell_type_of_interest)) + 
+      fig <- ggplot(result, aes(x = cell_type_of_interest, y = distance, fill = cell_type_of_interest)) + 
         geom_violin() +
         facet_grid(cluster_number~., scales="free_x", labeller = labeller(cluster_number = cluster_number_labs)) +
         theme_bw() +
