@@ -165,9 +165,11 @@ plot_alpha_hull_clusters3D(spe_alpha_hull, c("Tumour", "Immune", "Immune1", "Oth
 
 alpha_hull_props <- calculate_cell_proportions_of_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster")
 
-dbscan_min_distances <- calculate_minimum_distances_to_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster", 
+alpha_hull_min_distances <- calculate_minimum_distances_to_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster", 
                                                                   cell_types_inside_cluster = c("Tumour", "Immune"),
                                                                   cell_types_outside_cluster = c("Tumour", "Immune", "Immune1"))
+
+alpha_hull_volumes <- calculate_volume_of_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster")
 
 spe_dbscan <- dbscan_clustering3D(spe1, c("Tumour", "Immune"), radius = 13, minimum_cells_in_radius = 25)
 
@@ -188,6 +190,10 @@ grid_props <- calculate_cell_proportions_of_clusters3D(spe_grid, cluster_colname
 grid_min_distances <- calculate_minimum_distances_to_clusters3D(spe_grid, cluster_colname = "grid_based_cluster", 
                                                                 cell_types_inside_cluster = c("Tumour", "Immune"),
                                                                 cell_types_outside_cluster = c("Tumour", "Immune", "Immune1"))
+
+grid_volumes <- calculate_volume_of_clusters3D(spe_grid, cluster_colname = "grid_based_cluster")
+
+
 
 
 ### 5. Presence of cluster metrics --------------------------------------------
