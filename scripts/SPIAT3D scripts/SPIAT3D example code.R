@@ -161,7 +161,7 @@ print(cell_proportion_spatial_autocorrelation)
 ### 4. Clustering algorithms --------------------------------------------------
 spe_alpha_hull <- alpha_hull_clustering3D(spe1, c("Tumour", "Immune"), alpha = 3.85, minimum_cells_in_alpha_hull = 15)
 
-plot_alpha_hull3D(spe_alpha_hull, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
+plot_alpha_hull_clusters3D(spe_alpha_hull, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
 
 alpha_hull_props <- calculate_cell_proportions_of_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster")
 
@@ -175,6 +175,13 @@ dbscan_props <- calculate_cell_proportions_of_clusters3D(spe_dbscan, cluster_col
 dbscan_min_distances <- calculate_minimum_distances_to_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster", cell_types_of_interest = c("Tumour", "Immune", "Immune1"))
 
 
+spe_grid <- grid_based_clustering3D(spe1, cell_types_of_interest = c("Tumour", "Immune"), n_splits = 9)
+
+plot_grid_based_clusters3D(spe_grid, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
+
+grid_props <- calculate_cell_proportions_of_clusters3D(spe_grid, cluster_colname = "grid_based_cluster")
+
+grid_min_distances <- calculate_minimum_distances_to_clusters3D(spe_grid, cluster_colname = "grid_based_cluster", cell_types_of_interest = c("Tumour", "Immune", "Immune1"))
 
 
 ### 5. Presence of cluster metrics --------------------------------------------
