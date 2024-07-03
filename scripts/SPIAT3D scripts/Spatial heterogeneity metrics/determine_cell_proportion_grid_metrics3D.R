@@ -61,7 +61,7 @@ determine_cell_proportion_grid_metrics3D <- function(spe,
   for (grid_prism_num in seq(n_grid_prisms)) {
     
     ## Get spe object for current grid_prism
-    spe_temp <- spe[ , spe$Prism.Num == grid_prism_num, ]
+    spe_temp <- spe[ , spe$Prism.Num == grid_prism_num]
     
     ## Get cell_proportion: n_target_cells / (n_target_cells + n_reference_cells)
     n_target_cells <- sum(spe_temp[[feature_colname]] %in% target_cell_types)

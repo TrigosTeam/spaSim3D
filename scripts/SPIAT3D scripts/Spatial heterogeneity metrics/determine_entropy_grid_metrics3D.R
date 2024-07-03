@@ -46,7 +46,7 @@ determine_entropy_grid_metrics3D <- function(spe,
   for (grid_prism_num in seq(n_grid_prisms)) {
     
     ## Get spe object for current grid_prism
-    spe_temp <- spe[ , spe$Prism.Num == grid_prism_num, ]
+    spe_temp <- spe[ , spe$Prism.Num == grid_prism_num]
     
     ## Get cell_types_of_interest found in the sub-spe object
     temp_cell_types_of_interest <- intersect(cell_types_of_interest, unique(spe_temp[[feature_colname]]))
