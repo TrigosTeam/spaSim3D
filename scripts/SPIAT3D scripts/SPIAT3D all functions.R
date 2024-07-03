@@ -1333,6 +1333,8 @@ alpha_hull_clustering3D <- function(spe,
   ## Get the alpha hull
   alpha_hull <- ashape3d(as.matrix(spe_subset_coords), alpha = alpha)
   
+  if (sum(alpha_hull$triang[, 9]) == 0) stop("alpha value is too small? No alpha hulls identified")
+  
   ## Determine which alpha hull cluster each cell_type_of_interest belongs to
   alpha_hull_clusters <- components_ashape3d(alpha_hull)
   
