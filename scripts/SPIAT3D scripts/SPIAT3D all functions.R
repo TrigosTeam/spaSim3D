@@ -1314,7 +1314,7 @@ library(alphashape3d)
 
 alpha_hull_clustering3D <- function(spe, 
                                     cell_types_of_interest, 
-                                    alpha = NULL, 
+                                    alpha, 
                                     minimum_cells_in_alpha_hull,
                                     feature_colname = "Cell.Type", 
                                     plot_image = T) {
@@ -1329,20 +1329,6 @@ alpha_hull_clustering3D <- function(spe,
   ## Subset for the chosen cell_types_of_interest
   spe_subset <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
   spe_subset_coords <- spatialCoords(spe_subset)
-  
-  ## Get alpha value if not specified by user
-  if (is.null(alpha)) {
-    spe_coords <- spatialCoords(spe)
-    window_volume <- 
-      (max(spe_coords[, "Cell.X.Position"]) - min(spe_coords[, "Cell.X.Position"])) * 
-      (max(spe_coords[, "Cell.Y.Position"]) - min(spe_coords[, "Cell.Y.Position"])) * 
-      (max(spe_coords[, "Cell.Z.Position"]) - min(spe_coords[, "Cell.Z.Position"]))
-    n_cells <- nrow(spe_coords)
-    
-    ### Estimated alpha is 10% of the ratio between the window volume and the number of cells
-    alpha <- 0.1 * (window_volume / n_cells) 
-    print(paste("No alpha inputted. Choosing alpha to be", round(alpha, 2)))
-  }
   
   ## Get the alpha hull
   alpha_hull <- ashape3d(as.matrix(spe_subset_coords), alpha = alpha)
