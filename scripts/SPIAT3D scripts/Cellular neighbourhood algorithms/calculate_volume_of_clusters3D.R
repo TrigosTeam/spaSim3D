@@ -37,7 +37,6 @@ calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname
   
   ### 2. If cluster_colname == "alpha_hull_cluster", use the volume method found in the alphashape3d package
   if (cluster_colname == "alpha_hull_cluster") {
-    print(volume_ashape3d(spe@metadata$alpha_hull$ashape3d_object, byComponents = T))
     result$volume_by_alpha_hull <- volume_ashape3d(spe@metadata$alpha_hull$ashape3d_object, byComponents = T)
   }
   

@@ -129,12 +129,12 @@ grid_based_clustering3D <- function(spe,
       w <- cluster_info$w[i]
       h <- cluster_info$h[i]
       
-      spe$grid_based_cluster <- ifelse(spe2_coords$Cell.X.Position >= x &
-                                         spe2_coords$Cell.X.Position < (x + l) &
-                                         spe2_coords$Cell.Y.Position >= y &
-                                         spe2_coords$Cell.Y.Position < (y + w) &
-                                         spe2_coords$Cell.Z.Position >= z &
-                                         spe2_coords$Cell.Z.Position < (z + h), 
+      spe$grid_based_cluster <- ifelse(spe_coords$Cell.X.Position >= x &
+                                         spe_coords$Cell.X.Position < (x + l) &
+                                         spe_coords$Cell.Y.Position >= y &
+                                         spe_coords$Cell.Y.Position < (y + w) &
+                                         spe_coords$Cell.Z.Position >= z &
+                                         spe_coords$Cell.Z.Position < (z + h), 
                                        cluster_number, 
                                        spe$grid_based_cluster)
     }

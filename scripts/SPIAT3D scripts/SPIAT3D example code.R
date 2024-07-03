@@ -171,6 +171,7 @@ alpha_hull_min_distances <- calculate_minimum_distances_to_clusters3D(spe_alpha_
 
 alpha_hull_volumes <- calculate_volume_of_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster")
 
+
 spe_dbscan <- dbscan_clustering3D(spe1, c("Tumour", "Immune"), radius = 13, minimum_cells_in_radius = 25)
 
 dbscan_props <- calculate_cell_proportions_of_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster")
@@ -179,6 +180,7 @@ dbscan_min_distances <- calculate_minimum_distances_to_clusters3D(spe_dbscan, cl
                                                                   cell_types_inside_cluster = c("Tumour", "Immune"),
                                                                   cell_types_outside_cluster = c("Tumour", "Immune", "Immune1"))
 
+dbscan_volumes <- calculate_volume_of_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster")
 
 
 spe_grid <- grid_based_clustering3D(spe1, cell_types_of_interest = c("Tumour", "Immune"), n_splits = 8)

@@ -1681,12 +1681,12 @@ grid_based_clustering3D <- function(spe,
       w <- cluster_info$w[i]
       h <- cluster_info$h[i]
       
-      spe$grid_based_cluster <- ifelse(spe2_coords$Cell.X.Position >= x &
-                                         spe2_coords$Cell.X.Position < (x + l) &
-                                         spe2_coords$Cell.Y.Position >= y &
-                                         spe2_coords$Cell.Y.Position < (y + w) &
-                                         spe2_coords$Cell.Z.Position >= z &
-                                         spe2_coords$Cell.Z.Position < (z + h), 
+      spe$grid_based_cluster <- ifelse(spe_coords$Cell.X.Position >= x &
+                                         spe_coords$Cell.X.Position < (x + l) &
+                                         spe_coords$Cell.Y.Position >= y &
+                                         spe_coords$Cell.Y.Position < (y + w) &
+                                         spe_coords$Cell.Z.Position >= z &
+                                         spe_coords$Cell.Z.Position < (z + h), 
                                        cluster_number, 
                                        spe$grid_based_cluster)
     }
@@ -2147,7 +2147,6 @@ calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname
   
   ### 2. If cluster_colname == "alpha_hull_cluster", use the volume method found in the alphashape3d package
   if (cluster_colname == "alpha_hull_cluster") {
-    print(volume_ashape3d(spe@metadata$alpha_hull$ashape3d_object, byComponents = T))
     result$volume_by_alpha_hull <- volume_ashape3d(spe@metadata$alpha_hull$ashape3d_object, byComponents = T)
   }
   
