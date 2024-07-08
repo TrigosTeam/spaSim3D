@@ -90,8 +90,6 @@ ggplot(sample_n(plot_data, 5000), aes(Cell.X.Position, Cell.Y.Position, colour =
   scale_colour_manual(values = my_colours)
 
 
-
-
 ### 2. Cell type annotations with only tumour, immune and stroma cells ------
 
 # Tumour: Keratin+
@@ -389,7 +387,7 @@ for (i in seq(length(dataset))) {
 }
 
 
-### 5.1. Plotting multiple slices (tumour, immune, stroma) --------------------
+### 5.1. Plotting all slices (tumour, immune, stroma) --------------------
 
 setwd("C:/Users/Me/OneDrive - The University of Melbourne/PeterMac/Honours 2024/3D public spatial data/Lin et al - human colorectal cancer")
 spatial_data_3D <- readRDS("spatial_data_3D.rds")
@@ -460,14 +458,9 @@ plot_cells_df3D(sample_n(spatial_data_3D, 4000),
 
 ### 6. Use cell type dictionary to determine cell identities (all cell types, all slices) -----------------------------------
 
-library(ggplot2)
-df <- data.frame(x = runif(100), y = runif(100))
-ggplot(df, aes(x, y)) + geom_point()
-
-
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-BiocManager::install("SPIAT")
+# if (!require("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# BiocManager::install("SPIAT")
 
 library(SPIAT)
 
@@ -530,7 +523,7 @@ predicted_image <- predict_phenotypes(spe_object = general_format_image,
 
 # Get cell type from phenotypes
 phenotypes <- unique(predicted_image$Phenotype)
-cell_types <- ifelse(phenotypes %in% cell_type_dict$phenotype, cell_type_dict$Type_Name, "Others")
+cell_types <- ifelse(phenotypes %in% cell_type_dict$phenotype, cell_type_dict$Type_Name, "Other")
 
 all_phenotypes <- predicted_image$Phenotype
 all_cell_types <- cell_types[match(all_phenotypes, phenotypes)]
@@ -540,6 +533,60 @@ df <- data.frame(Cell.X.Position = coord_x,
                  Cell.Y.Position = coord_y,
                  Cell.Z.Position = coord_z,
                  Cell.Type = all_cell_types)
+
+
+### 6.1. Plotting all slices (all cell types, all slices) --------------------
+
+setwd("~/Lin et al - human colorectal cancer/Other data")
+df <- readRDS("lin_et_al_3D_spatial_data.rds")
+
+## Get all unique cell types
+cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.", 
+                
+                "Endothelial", "Muscle/Fibroblast",      
+                
+                "Macrophage(I)", "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage", 
+                "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",    
+                "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg", 
+                "B cells",
+                
+                "Other")
+cell_types
+
+## Assign colour to each cell type
+cell_colours <- c("orange", "orange2", "orange3",       # Tumour
+                
+                "brown1", "brown",             # Endothelial & fibroblast
+                
+                "green", "green1", "green2", "green3", "green4", # Macrophages
+                "purple1",  "purple2", "purple3", "purple4",    # Lymphocytes
+                "skyblue", "skyblue1", "skyblue2", "skyblue3", "skyblue4", # T cells
+                "orchid",                 # B cells
+                
+                "lightgray")
+
+names(cell_colours) <- cell_types
+df$Cell.Colour <- cell_colours[df$Cell.Type]
+
+
+## Plot
+library(dplyr)
+library(rgl)
+options(rgl.printRglwidget = T)
+
+df_plot <- sample_n(df, 100000)
+plot3d(df_plot$Cell.X.Position,
+       df_plot$Cell.Y.Position,
+       df_plot$Cell.Z.Position,
+       col = df_plot$Cell.Colour,
+       size = 8,
+       xlab = 'x',
+       ylab = 'y',
+       zlab = 'z')
+
+# legend3d("topright", legend = cell_types, pch = 16, col = cell_colours, cex=0.5, inset=0.02)
+
+
 
 
 
