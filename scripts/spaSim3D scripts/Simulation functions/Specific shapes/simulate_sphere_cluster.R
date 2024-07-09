@@ -33,7 +33,7 @@ simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
     z <- df[i, "Cell.Z.Position"]
     
     # Add noise to the radius of the sphere
-    R <- (radius * runif(1, min = 0.7, max = 1.3))^2
+    R <- radius^2
     
     # Get distance of current cell from the centre of the sphere
     D <- (x - centre_loc[1])^2 + (y - centre_loc[2])^2 + (z - centre_loc[3])^2
