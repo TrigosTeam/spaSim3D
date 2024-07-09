@@ -41,7 +41,7 @@ print(mixing_scores)
 
 mixing_scores_gradient <- calculate_mixing_scores_gradient3D(spe1,
                                                              reference_cell_type = "Tumour",
-                                                             target_cell_type = "Immune1",
+                                                             target_cell_type = "Immune",
                                                              radii = 50)
 
 
@@ -56,14 +56,14 @@ neighbourhood_cells <- calculate_cells_in_neighbourhood3D(spe1,
 ## Calculate cell proportions in the neighbourhood
 neighbourhood_cell_proportions <- calculate_cells_in_neighbourhood_proportions3D(spe1,
                                                                                  reference_cell_type = "Tumour",
-                                                                                 target_cell_types = c("Immune", "Immune1"),
+                                                                                 target_cell_types = c("Tumour", "Immune"),
                                                                                  radius = 20)
 print(neighbourhood_cell_proportions)
 
 neighbourhood_cell_proportions_gradient <- calculate_cells_in_neighbourhood_proportions_gradient3D(spe1,
                                                                                                    reference_cell_type = "Tumour",
-                                                                                                   target_cell_types = c("Immune1", "Immune"),
-                                                                                                   radii = 30)
+                                                                                                   target_cell_types = c("Tumour", "Immune"),
+                                                                                                   radii = 50)
 
 
 ### Calculate cross-K function
@@ -77,7 +77,7 @@ print(cross_K)
 cross_K_gradient <- calculate_cross_K_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_type = "Immune",
-                                                 radii = 50)
+                                                 radii = 100)
 
 plot_cross_K_gradient_ratio3D(cross_K_gradient_results = cross_K_gradient)
 
@@ -106,7 +106,7 @@ entropy_result <- calculate_entropy3D(spe1,
 entropy_gradient <- calculate_entropy_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_types = c("Tumour", "Immune"),
-                                                 radii = 65,
+                                                 radii = 100,
                                                  plot_image = TRUE)
 
 
@@ -138,7 +138,7 @@ print(entropy_spatial_autocorrelation)
 cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(spe1,
                                                                          n_splits = 8,
                                                                          reference_cell_types = c("Tumour"),
-                                                                         target_cell_types = c("Immune", "Immune1"),
+                                                                         target_cell_types = c("Immune"),
                                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(cell_proportion_grid_metrics, "proportion")
 
@@ -159,17 +159,17 @@ print(cell_proportion_spatial_autocorrelation)
 
 
 ### 4. Clustering algorithms --------------------------------------------------
-spe_alpha_hull <- alpha_hull_clustering3D(spe1, c("Tumour", "Immune"), alpha = 3.85, minimum_cells_in_alpha_hull = 15)
+spe_alpha_hull <- alpha_hull_clustering3D(spe1, c("Tumour", "Immune"), alpha = 4, minimum_cells_in_alpha_hull = 15)
 
-plot_alpha_hull_clusters3D(spe_alpha_hull, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
+plot_alpha_hull_clusters3D(spe_alpha_hull, c("Tumour", "Immune", "Others"), c("orange", "skyblue", "lightgray"))
 
 alpha_hull_props <- calculate_cell_proportions_of_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster")
 
 alpha_hull_min_distances <- calculate_minimum_distances_to_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster", 
-                                                                  cell_types_inside_cluster = c("Tumour", "Immune"),
-                                                                  cell_types_outside_cluster = c("Tumour", "Immune", "Immune1"))
+                                                                      cell_types_inside_cluster = c("Tumour", "Immune"),
+                                                                      cell_types_outside_cluster = c("Tumour"))
 
-alpha_hull_volumes <- calculate_volume_of_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster")
+calculate_volume_of_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_cluster")
 
 calculate_center_of_clusters3D(spe_alpha_hull, "alpha_hull_cluster")
 
@@ -181,24 +181,26 @@ dbscan_props <- calculate_cell_proportions_of_clusters3D(spe_dbscan, cluster_col
 
 dbscan_min_distances <- calculate_minimum_distances_to_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster", 
                                                                   cell_types_inside_cluster = c("Tumour", "Immune"),
-                                                                  cell_types_outside_cluster = c("Tumour", "Immune", "Immune1"))
+                                                                  cell_types_outside_cluster = c("Tumour"))
 
-dbscan_volumes <- calculate_volume_of_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster")
+calculate_volume_of_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster")
 
+calculate_center_of_clusters3D(spe_dbscan, "dbscan_cluster")
 
 
 spe_grid <- grid_based_clustering3D(spe1, cell_types_of_interest = c("Tumour", "Immune"), n_splits = 10)
 
-plot_grid_based_clusters3D(spe_grid, c("Tumour", "Immune", "Immune1", "Others"), c("orange", "skyblue", "lightgreen", "lightgray"))
+plot_grid_based_clusters3D(spe_grid, c("Tumour", "Immune", "Others"), c("orange", "skyblue", "lightgray"))
 
 grid_props <- calculate_cell_proportions_of_clusters3D(spe_grid, cluster_colname = "grid_based_cluster")
 
 grid_min_distances <- calculate_minimum_distances_to_clusters3D(spe_grid, cluster_colname = "grid_based_cluster", 
                                                                 cell_types_inside_cluster = c("Tumour", "Immune"),
-                                                                cell_types_outside_cluster = c("Tumour", "Immune", "Immune1"))
+                                                                cell_types_outside_cluster = c("Tumour"))
 
-grid_volumes <- calculate_volume_of_clusters3D(spe_grid, cluster_colname = "grid_based_cluster")
+calculate_volume_of_clusters3D(spe_grid, cluster_colname = "grid_based_cluster")
 
+calculate_center_of_clusters3D(spe_grid, "grid_based_cluster")
 
 
 
@@ -219,5 +221,5 @@ ggplot(df, aes(x, y)) + geom_point() + geom_errorbar(aes(ymin = low, ymax = up))
 
 ### 6. Plot data -------------------------------------------------------------
 plot_cells3D(spe1,
-             plot_cell_types = c("Tumour", "Immune", "Immune1", "Others"),
-             plot_colours = c("orange", "skyblue", "lightgreen", "lightgray"))
+             plot_cell_types = c("Tumour", "Immune", "Others"),
+             plot_colours = c("orange", "skyblue", "lightgray"))
