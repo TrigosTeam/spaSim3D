@@ -9,11 +9,11 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
   colnames(result) <- target_cell_types
   
   for (radius in seq(radii)) {
-    cell_proportions_neighbourhood_data <- calculate_cell_proportions_in_neighbourhood3D(spe,
-                                                                                         reference_cell_type,
-                                                                                         target_cell_types,
-                                                                                         radius,
-                                                                                         feature_colname)
+    cell_proportions_neighbourhood_data <- calculate_cells_in_neighbourhood_proportions3D(spe,
+                                                                                          reference_cell_type,
+                                                                                          target_cell_types,
+                                                                                          radius,
+                                                                                          feature_colname)
     
     result[radius, ] <- cell_proportions_neighbourhood_data$proportion
   }
