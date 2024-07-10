@@ -3,6 +3,7 @@
 calculate_minimum_distances_between_cell_types3D <- function(spe,
                                                              cell_types_of_interest = NULL,
                                                              feature_colname = "Cell.Type",
+                                                             show_summary = TRUE,
                                                              plot_image = TRUE) {
   
   ## Convert spe object to data frame
@@ -90,7 +91,9 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
   }
   
   # Print summary
-  print(summarise_distances_between_cell_types3D(result))
+  if (show_summary) {
+    print(summarise_distances_between_cell_types3D(result))  
+  }
   
   return(result)
 }

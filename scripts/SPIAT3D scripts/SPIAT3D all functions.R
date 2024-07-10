@@ -84,6 +84,7 @@ calculate_entropy_background3D <- function(spe,
 calculate_pairwise_distances_between_cell_types3D <- function(spe,
                                                               cell_types_of_interest = NULL,
                                                               feature_colname = "Cell.Type",
+                                                              show_summary = TRUE,
                                                               plot_image = TRUE) {
   
   ## Convert spe object to data frame
@@ -170,7 +171,9 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
   }
   
   # Print summary
-  print(summarise_distances_between_cell_types3D(cell_to_cell_dist_all))
+  if (show_summary) {
+    print(summarise_distances_between_cell_types3D(cell_to_cell_dist_all))  
+  }
   
   return(cell_to_cell_dist_all)
 }
@@ -181,6 +184,7 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
 calculate_minimum_distances_between_cell_types3D <- function(spe,
                                                              cell_types_of_interest = NULL,
                                                              feature_colname = "Cell.Type",
+                                                             show_summary = TRUE,
                                                              plot_image = TRUE) {
   
   ## Convert spe object to data frame
@@ -268,7 +272,9 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
   }
   
   # Print summary
-  print(summarise_distances_between_cell_types3D(result))
+  if (show_summary) {
+    print(summarise_distances_between_cell_types3D(result))  
+  }
   
   return(result)
 }
