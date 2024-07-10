@@ -115,8 +115,8 @@ entropy_gradient <- calculate_entropy_gradient3D(spe1,
 
 ### Determine entropy grid metrics
 entropy_grid_metrics <- determine_entropy_grid_metrics3D(spe1,
-                                                         n_splits = 8,
-                                                         cell_types_of_interest = c("Tumour", "Immune"),
+                                                         n_splits = 10,
+                                                         cell_types_of_interest = c("A", "B"),
                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(entropy_grid_metrics, "entropy")
 
@@ -126,6 +126,9 @@ entropy_prevalence <- determine_prevalence3D(entropy_grid_metrics,
                                              metric_colname = "entropy",
                                              threshold = 0.5)
 print(entropy_prevalence)
+
+entropy_prevalence_gradient <- determine_prevalence_gradient3D(entropy_grid_metrics,
+                                                               "entropy")
 
 ### Determine spatial autocorrelation
 entropy_spatial_autocorrelation <- determine_spatial_autocorrelation3D(entropy_grid_metrics,
