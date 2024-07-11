@@ -1,9 +1,6 @@
 ### 1.1. Mixed spes - cc distance metrics ----------------------------------------
 
-# Get mixed_spes_metadata and mixed_spes_table
-setwd("~/Objects/spes_metadata")
-mixed_spes_metadata <- readRDS("mixed_spes_metadata.rds")
-
+# Get mixed_spes_table
 setwd("~/Objects/spes_table")
 mixed_spes_table <- readRDS("mixed_spes_table.rds")
 
