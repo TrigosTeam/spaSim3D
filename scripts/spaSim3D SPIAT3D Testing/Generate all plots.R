@@ -82,7 +82,8 @@ for (bg_type in bg_types) {
   }
 }
 
-# saveRDS(df, "mixed_spes_table.rds")
+setwd("~/Objects/spes_table")
+# write.table(mixed_spes_table, "mixed_spes_table.csv")
 
 
 # Define shape parameters based on the size (Small, Medium, Large)
@@ -117,7 +118,7 @@ bg_spes_metadata <- readRDS("bg_spes_metadata_100_100_100.rds")
 
 # Get table for mixed simulations
 setwd("~/Objects/spes_table")
-mixed_spes_table <- readRDS("mixed_spes_table.rds")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
 
 mixed_spes_metadata <- list()
 
@@ -202,7 +203,8 @@ for (bg_type in bg_types) {
   }
 }
 
-# saveRDS(df, "ringed_spes_table.rds")
+setwd("~/Objects/spes_table")
+# write.table(ringed_spes_table, "ringed_spes_table.csv")
 
 
 
@@ -241,7 +243,7 @@ bg_spes_metadata <- readRDS("bg_spes_metadata_100_100_100.rds")
 
 # Get table for ringed simulations
 setwd("~/Objects/spes_table")
-ringed_spes_table <- readRDS("ringed_spes_table.rds")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
 
 ringed_spes_metadata <- list()
 
@@ -335,8 +337,8 @@ for (bg_type in bg_types) {
   }
 }
 
-# saveRDS(df, "separated_spes_table.rds")
-
+setwd("~Objects/spes_table")
+# write.table(separated_spes_table, "separated_spes_table.csv")
 
 
 # Define shape parameters based on the size (Small, Medium, Large)
@@ -375,7 +377,7 @@ bg_spes_metadata <- readRDS("bg_spes_metadata_200_100_100.rds")
 
 # Get table for ringed simulations
 setwd("~/Objects/spes_table")
-separated_spes_table <- readRDS("separated_spes_table.rds")
+separated_spes_table <- read.table("separated_spes_table.csv")
 
 separated_spes_metadata <- list()
 
