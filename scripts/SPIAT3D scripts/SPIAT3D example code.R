@@ -49,8 +49,14 @@ mixing_scores_gradient <- calculate_mixing_scores_gradient3D(spe1,
 neighbourhood_cells <- calculate_cells_in_neighbourhood3D(spe1,
                                                           reference_cell_type = "Tumour",
                                                           target_cell_types = c("Tumour", "Immune"),
-                                                          radius = 30)
+                                                          radius = 30,
+                                                          plot_image = F)
 
+neighbourhood_cells_gradient <- calculate_cells_in_neighbourhood_gradient3D(spe1,
+                                                                            reference_cell_type = "A",
+                                                                            target_cell_types = c("A", "B"),
+                                                                            radii = 30,
+                                                                            plot_image = T)
 
 
 ## Calculate cell proportions in the neighbourhood
