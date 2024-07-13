@@ -464,6 +464,7 @@ mixed_spes_metadata <- readRDS("mixed_spes_metadata.rds")
 setwd("~/Objects/mixed_spes")
 i <- 1
 for (mixed_spe_metadata in mixed_spes_metadata) {
+  
   curr_spe <- simulate_spe_metadata3D(mixed_spe_metadata)
   file_name <- paste("mixed_spe_", i, ".rds", sep = "")
   
@@ -480,7 +481,7 @@ ringed_spes_metadata <- readRDS("ringed_spes_metadata.rds")
 setwd("~/Objects/ringed_spes")
 i <- 1
 for (ringed_spe_metadata in ringed_spes_metadata) {
-  # if (i > 5) break
+  
   curr_spe <- simulate_spe_metadata3D(ringed_spe_metadata)
   file_name <- paste("ringed_spe_", i, ".rds", sep = "")
   
@@ -492,10 +493,23 @@ for (ringed_spe_metadata in ringed_spes_metadata) {
 setwd("~/Objects/spes_metadata")
 separated_spes_metadata <- readRDS("separated_spes_metadata.rds")
 
+setwd("~/Objects/spes_table")
+separated_spes_table <- read.table("separated_spes_table.csv")
+
 setwd("~/Objects/separated_spes")
 i <- 1
 for (separated_spe_metadata in separated_spes_metadata) {
-  # if (i > 5) break
+
+  if (i <= 75 || 
+      separated_spes_table[i, "shapeA"] != separated_spes_table[i, "shapeB"] ||
+      separated_spes_table[i, "sizeA"] != separated_spes_table[i, "sizeB"] ||
+      separated_spes_table[i, "arrangement"] != "S2") {
+    i <- i + 1
+    next
+  }
+  
+  print(i)
+  
   curr_spe <- simulate_spe_metadata3D(separated_spe_metadata)
   file_name <- paste("separated_spe_", i, ".rds", sep = "")
   
