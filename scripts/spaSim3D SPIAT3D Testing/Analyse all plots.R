@@ -22,23 +22,23 @@ colnames(mixed_AMD_df) <- c("spe", "reference", "target", "AMD")
 # Loop through each mixed spes and get APD and AMD
 setwd("~/Objects/mixed_spes")
 for (i in seq(n_mixed_spes)) {
-  
-  # Read in current mixed spe
-  mixed_spe_name <- paste("mixed_spe_", i, sep = "")
-  mixed_spe_file_name <- paste(mixed_spe_name, ".rds", sep = "")
-  mixed_spe <- readRDS(mixed_spe_file_name)
-  
-  pairwise_distance_data <- calculate_pairwise_distances_between_cell_types3D(mixed_spe,
-                                                                              cell_types,
-                                                                              show_summary = F,
-                                                                              plot_image = F)
-  pairwise_distance_data_summary <- summarise_distances_between_cell_types3D(pairwise_distance_data)
-  
-  ## Fill in 3 rows at a time for APD df (as we have A/A, A/B, B/B)
-  index <- 3 * (i - 1) + 1 # index is 1, 4, 7, 10 ...
-  mixed_APD_df[index:(index + 2), "spe"] <- mixed_spe_name
-  mixed_APD_df[index:(index + 2), "pair"] <- pairwise_distance_data_summary$pair
-  mixed_APD_df[index:(index + 2), "APD"] <- pairwise_distance_data_summary$mean
+
+  # # Read in current mixed spe
+  # mixed_spe_name <- paste("mixed_spe_", i, sep = "")
+  # mixed_spe_file_name <- paste(mixed_spe_name, ".rds", sep = "")
+  # mixed_spe <- readRDS(mixed_spe_file_name)
+  # 
+  # pairwise_distance_data <- calculate_pairwise_distances_between_cell_types3D(mixed_spe,
+  #                                                                             cell_types,
+  #                                                                             show_summary = F,
+  #                                                                             plot_image = F)
+  # pairwise_distance_data_summary <- summarise_distances_between_cell_types3D(pairwise_distance_data)
+  # 
+  # ## Fill in 3 rows at a time for APD df (as we have A/A, A/B, B/B)
+  # index <- 3 * (i - 1) + 1 # index is 1, 4, 7, 10 ...
+  # mixed_APD_df[index:(index + 2), "spe"] <- mixed_spe_name
+  # mixed_APD_df[index:(index + 2), "pair"] <- pairwise_distance_data_summary$pair
+  # mixed_APD_df[index:(index + 2), "APD"] <- pairwise_distance_data_summary$mean
   
   minimum_distance_data <- calculate_minimum_distances_between_cell_types3D(mixed_spe,
                                                                             cell_types,
@@ -298,17 +298,17 @@ for (i in seq(n_ringed_spes)) {
   ringed_spe_file_name <- paste(ringed_spe_name, ".rds", sep = "")
   ringed_spe <- readRDS(ringed_spe_file_name)
   
-  pairwise_distance_data <- calculate_pairwise_distances_between_cell_types3D(ringed_spe,
-                                                                              cell_types,
-                                                                              show_summary = F,
-                                                                              plot_image = F)
-  pairwise_distance_data_summary <- summarise_distances_between_cell_types3D(pairwise_distance_data)
-  
-  ## Fill in 3 rows at a time for APD df (as we have A/A, A/B, B/B)
-  index <- 3 * (i - 1) + 1 # index is 1, 4, 7, 10 ...
-  ringed_APD_df[index:(index + 2), "spe"] <- ringed_spe_name
-  ringed_APD_df[index:(index + 2), "pair"] <- pairwise_distance_data_summary$pair
-  ringed_APD_df[index:(index + 2), "APD"] <- pairwise_distance_data_summary$mean
+  # pairwise_distance_data <- calculate_pairwise_distances_between_cell_types3D(ringed_spe,
+  #                                                                             cell_types,
+  #                                                                             show_summary = F,
+  #                                                                             plot_image = F)
+  # pairwise_distance_data_summary <- summarise_distances_between_cell_types3D(pairwise_distance_data)
+  # 
+  # ## Fill in 3 rows at a time for APD df (as we have A/A, A/B, B/B)
+  # index <- 3 * (i - 1) + 1 # index is 1, 4, 7, 10 ...
+  # ringed_APD_df[index:(index + 2), "spe"] <- ringed_spe_name
+  # ringed_APD_df[index:(index + 2), "pair"] <- pairwise_distance_data_summary$pair
+  # ringed_APD_df[index:(index + 2), "APD"] <- pairwise_distance_data_summary$mean
   
   minimum_distance_data <- calculate_minimum_distances_between_cell_types3D(ringed_spe,
                                                                             cell_types,
