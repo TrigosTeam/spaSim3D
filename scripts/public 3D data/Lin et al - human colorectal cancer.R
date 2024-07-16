@@ -771,7 +771,72 @@ get_thresholds <- function(spe_object, thresholds = NULL, tumour_marker,
   return(selected_valley_xcord)
 }
 
-### 4a. SPIAT analysis -------------------------------------------------------
+### 4a. Plot gene expression values for each slice ---------------------------
+setwd("~/Lin et al - human colorectal cancer/CRC1 data")
+protein_expression_data <- read.table("protein_expression_data.csv")
+
+
+## Melt
+plot_df <- reshape2::melt(protein_expression_data,  c("Z", "slice"))
+
+plot_sample_df <- sample_n(plot_df, 10000)
+
+
+## Plot
+library(ggplot2)
+library(dplyr)
+library(cowplot)
+
+# fig <- ggplot(plot_sample_df, aes(Z, value, color = variable, group = Z)) + 
+#   geom_boxplot(outlier.shape = NA) +
+#   facet_wrap(~variable, nrow = 4, ncol = 4, scales = "free") +
+#   theme_bw()
+# methods::show(fig)
+
+
+all_cell_markers <- c("Keratin", "Ki67", "CD3", "CD20", 
+                      "CD45RO", "CD4", "CD8a", "CD68", 
+                      "CD163", "FOXP3", "PD1", "PDL1", 
+                      "CD31", "aSMA", "Desmin", "CD45")
+
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+colors <- gg_color_hue(length(all_cell_markers))
+names(colors) <- all_cell_markers
+
+plot_sample_df <- sample_n(plot_df, 10000000)
+fig_list <- list()
+
+for (cell_marker in all_cell_markers) {
+
+  plot_sample_marker_df <- plot_sample_df[plot_sample_df$variable == cell_marker, ]
+  
+  boxplot_stats <- boxplot.stats(plot_sample_marker_df$value)
+  
+  fig <- ggplot(plot_sample_marker_df, aes(Z, value, group = Z)) +
+    geom_boxplot(outlier.shape = NA, color = colors[cell_marker]) +
+    scale_y_continuous(limits = c(0, boxplot_stats$stats[4])) +
+    theme_bw() +
+    labs(x = "z-coord", y = "", title = cell_marker) +
+    theme(plot.title = element_text(hjust = 0.5))
+
+  fig_list[[cell_marker]] <- fig    
+  
+}
+
+plot_grid(fig_list$Keratin, fig_list$Ki67, fig_list$CD3, fig_list$CD20,
+          fig_list$CD45RO, fig_list$CD4, fig_list$CD8a, fig_list$CD68,
+          fig_list$CD163, fig_list$FOXP3,fig_list$PD1, fig_list$PDL1,
+          fig_list$CD31, fig_list$aSMA, fig_list$Desmin, fig_list$CD45,
+          nrow = 4, ncol = 4)
+
+
+
+
+### 5a. SPIAT analysis -------------------------------------------------------
 setwd("~/Lin et al - human colorectal cancer/Other data")
 df <- readRDS("lin_et_al_3D_spatial_data_separate_slices.rds")
 
@@ -790,7 +855,7 @@ minimum_distance <- calculate_minimum_distances_between_cell_types_df3D(df,
                                                                         plot_image = FALSE)
 
 
-### 4b. Calculate minimum distance function using a data frame (rather than a spe object) ----------------
+### 5b. Calculate minimum distance function using a data frame (rather than a spe object) ----------------
 calculate_minimum_distances_between_cell_types_df3D <- function(df,
                                                                 cell_types_of_interest = NULL,
                                                                 feature_colname = "Cell.Type",
