@@ -562,6 +562,14 @@ colnames(separated_AMD_df) <- c("spe", "reference", "target", "AMD")
 setwd("~/Objects/separated_spes")
 for (i in seq(n_separated_spes)) {
   
+  if (separated_spes_table[i, "shapeA"] != separated_spes_table[i, "shapeB"] ||
+      separated_spes_table[i, "sizeA"] != separated_spes_table[i, "sizeB"] ||
+      separated_spes_table[i, "arrangement"] != "S2") {
+    i <- i + 1
+    next
+  }
+  
+  
   # Read in current separated spe
   separated_spe_name <- paste("separated_spe_", i, sep = "")
   separated_spe_file_name <- paste(separated_spe_name, ".rds", sep = "")
@@ -572,13 +580,13 @@ for (i in seq(n_separated_spes)) {
                                                                               show_summary = F,
                                                                               plot_image = F)
   pairwise_distance_data_summary <- summarise_distances_between_cell_types3D(pairwise_distance_data)
-  
+
   ## Fill in 3 rows at a time for APD df (as we have A/A, A/B, B/B)
   index <- 3 * (i - 1) + 1 # index is 1, 4, 7, 10 ...
   separated_APD_df[index:(index + 2), "spe"] <- separated_spe_name
   separated_APD_df[index:(index + 2), "pair"] <- pairwise_distance_data_summary$pair
   separated_APD_df[index:(index + 2), "APD"] <- pairwise_distance_data_summary$mean
-  
+
   minimum_distance_data <- calculate_minimum_distances_between_cell_types3D(separated_spe,
                                                                             cell_types,
                                                                             show_summary = F,
