@@ -28,8 +28,7 @@ alpha_hull_clustering3D <- function(spe,
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 
-                   "Cell.Type" = spe[[feature_colname]],
-                   "Cell.ID" = spe[["Cell.ID"]])
+                   "Cell.Type" = spe[[feature_colname]])
   
   df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
   df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]

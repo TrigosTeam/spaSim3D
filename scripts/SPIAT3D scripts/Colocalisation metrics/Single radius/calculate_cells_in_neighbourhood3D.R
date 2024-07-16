@@ -6,6 +6,8 @@ calculate_cells_in_neighbourhood3D <- function(spe,
                                                show_summary = TRUE,
                                                plot_image = TRUE) {
   
+  if (is.null(spe[["Cell.ID"]])) stop("No Cell.ID column. Add a Cell.ID columnt to your spe.")
+  
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 
                    "Cell.Type" = spe[[feature_colname]], 

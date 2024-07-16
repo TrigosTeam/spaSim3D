@@ -6,8 +6,7 @@ calculate_cross_K3D <- function(spe,
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 
-                   "Cell.Type" = spe[[feature_colname]], 
-                   "Cell.ID" = spe[["Cell.ID"]])
+                   "Cell.Type" = spe[[feature_colname]])
   
   ## For reference_cell_type, check it is found in the spe object
   if (!(reference_cell_type %in% df$Cell.Type)) {
