@@ -1,4 +1,10 @@
 calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_cluster, cell_types_outside_cluster, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
+
+  ## Add Cell.ID column
+  if (is.null(spe[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.Id column to your spe")
+    spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
+  }
   
   ## Get cluster numbers (ignoring 0)
   cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
@@ -19,22 +25,27 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_clu
     cell_types_outside_cluster_coords[[cell_type]] <- spatialCoords(spe_outside_cluster)[spe_outside_cluster[[feature_colname]] == cell_type, ]
   }
   
-  ## For each cluster, determine the minimum distance of each cell_type_of_interest  
+  ## For each cluster, determine the minimum distance of each outside_cell_type  
   result <- vector()
   
   for (i in seq(n_clusters)) {
     cluster_coords <- spe_coords[spe[[cluster_colname]] == i & spe[[feature_colname]] %in% cell_types_inside_cluster, ]
+    cluster_cell_types <- spe[["Cell.Type"]][spe[[cluster_colname]] == i & spe[[feature_colname]] %in% cell_types_inside_cluster]
+    cluster_cell_ids <- spe[["Cell.ID"]][spe[[cluster_colname]] == i & spe[[feature_colname]] %in% cell_types_inside_cluster]
     
-    for (cell_type in cell_types_outside_cluster) {
-      curr_cell_type_coords <- cell_types_outside_cluster_coords[[cell_type]]
+    for (outside_cell_type in cell_types_outside_cluster) {
+      curr_cell_type_coords <- cell_types_outside_cluster_coords[[outside_cell_type]]
       
       all_closest <- RANN::nn2(data = cluster_coords, 
                                query = curr_cell_type_coords, 
-                               k = 1)  
+                               k = 1) 
       
       local_dist_mins <- data.frame(
         cluster_number = i,
-        cell_type_of_interest = cell_type,
+        outside_cell_id = as.character(spe_outside_cluster$Cell.ID[spe_outside_cluster[["Cell.Type"]] == outside_cell_type]),
+        outside_cell_type = outside_cell_type,
+        inside_cell_id = cluster_cell_ids[c(all_closest$nn.idx)],
+        inside_cell_type = cluster_cell_types[c(all_closest$nn.idx)],
         distance = all_closest$nn.dists
       )
       ## Remove any 0 distance rows
@@ -49,7 +60,7 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_clu
       cluster_number_labs <- paste("cluster_", seq(n_clusters), sep = "")
       names(cluster_number_labs) <- seq(n_clusters)
       
-      fig <- ggplot(result, aes(x = cell_type_of_interest, y = distance, fill = cell_type_of_interest)) + 
+      fig <- ggplot(result, aes(x = outside_cell_type, y = distance, fill = outside_cell_type)) + 
         geom_violin() +
         facet_grid(cluster_number~., scales="free_x", labeller = labeller(cluster_number = cluster_number_labs)) +
         theme_bw() +
