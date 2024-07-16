@@ -510,7 +510,7 @@ for (separated_spe_metadata in separated_spes_metadata) {
   
   print(i)
   
-  curr_spe <- simulate_spe_metadata3D(separated_spe_metadata)
+  curr_spe <- simulate_spe_metadata3D(separated_spe_metadata, plot_image = FALSE)
   file_name <- paste("separated_spe_", i, ".rds", sep = "")
   
   saveRDS(curr_spe, file = file_name)
