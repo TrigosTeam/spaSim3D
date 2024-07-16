@@ -3069,7 +3069,7 @@ get_cell_types_and_proportions_for_mixing <- function(simulated_spe) {
     ## For the last cell type, we can figure out what the cell proportion must be
     if (i == length(cell_types)) {
       cell_proportions <- c(cell_proportions, max_proportion)
-      message("Cell proportion for ", cell_types[i], " must be ", max_proportion)
+      message("Cell proportion for ", cell_types[i], " must be ", round(max_proportion, 5))
     }
     ## Add inputted cell proportion to cell_proportions vector
     else {
@@ -3165,7 +3165,7 @@ get_cell_types_and_proportions_for_clusters <- function(simulated_spe, simulate_
     ## For the last cell type, we can figure out what the cell proportion must be
     if (i == length(cell_types)) {
       cell_proportions <- c(cell_proportions, max_proportion)
-      message("Cell proportion for ", cell_types[i], " must be ", max_proportion)
+      message("Cell proportion for ", cell_types[i], " must be ", round(max_proportion, 5))
     }
     ## Add inputted cell proportion to cell_proportions vector
     else {
