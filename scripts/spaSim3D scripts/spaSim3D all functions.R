@@ -3347,7 +3347,7 @@ spe_metadata_cluster_template <- function(background_metadata, cluster_type, sha
 }
 
 
-simulate_spe_metadata3D <- function(spe_metadata) {
+simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
   
   # First element should contain background metadata
   bg_metadata <- spe_metadata[[1]]
@@ -3356,14 +3356,16 @@ simulate_spe_metadata3D <- function(spe_metadata) {
                                               bg_metadata$length,
                                               bg_metadata$width,
                                               bg_metadata$height,
-                                              bg_metadata$minimum_distance_between_cells)    
+                                              bg_metadata$minimum_distance_between_cells,
+                                              plot_image = plot_image)    
   }
   else if (bg_metadata$background_type == "normal") {
     spe <- simulate_normal_background_cells3D(bg_metadata$n_cells,
                                               bg_metadata$length,
                                               bg_metadata$width,
                                               bg_metadata$height,
-                                              bg_metadata$jitter_proportion) 
+                                              bg_metadata$jitter_proportion,
+                                              plot_image = plot_image) 
   }
   else {
     stop("background_type parameter found in the first list must be 'random' or 'normal'.")
@@ -3371,7 +3373,8 @@ simulate_spe_metadata3D <- function(spe_metadata) {
   # Apply background mixing
   spe <- simulate_mixing3D(spe,
                            bg_metadata$cell_types,
-                           bg_metadata$cell_proportions)
+                           bg_metadata$cell_proportions,
+                           plot_image = plot_image)
   
   ### If there is only background metadata, we are done
   if (length(spe_metadata) == 1) return(spe)
@@ -3381,13 +3384,13 @@ simulate_spe_metadata3D <- function(spe_metadata) {
   for (i in 2:length(spe_metadata)) {
     cluster_metadata <- spe_metadata[[i]]
     if (cluster_metadata$cluster_type == "regular") {
-      spe <- simulate_clusters3D(spe, list(cluster_metadata))
+      spe <- simulate_clusters3D(spe, list(cluster_metadata), plot_image = plot_image)
     }
     else if (cluster_metadata$cluster_type == "ring") {
-      spe <- simulate_rings3D(spe, list(cluster_metadata))      
+      spe <- simulate_rings3D(spe, list(cluster_metadata), plot_image = plot_image)      
     }
     else if (cluster_metadata$cluster_type == "double ring") {
-      spe <- simulate_double_rings3D(spe, list(cluster_metadata))
+      spe <- simulate_double_rings3D(spe, list(cluster_metadata), plot_image = plot_image)
     }
   }
   
@@ -3396,7 +3399,7 @@ simulate_spe_metadata3D <- function(spe_metadata) {
 
 
 
-add_spe_metadata3D <- function(spe, metadata) {
+add_spe_metadata3D <- function(spe, metadata, plot_image = TRUE) {
   
   # Ignore the 'background' element in metadata
   metadata[['background']] <- NULL
@@ -3405,13 +3408,13 @@ add_spe_metadata3D <- function(spe, metadata) {
     metadata_cluster <- metadata[[i]]
     
     if (metadata_cluster$cluster_type == "regular") {
-      spe <- simulate_clusters3D(spe, list(metadata_cluster))
+      spe <- simulate_clusters3D(spe, list(metadata_cluster), plot_image = plot_image)
     }
     else if (metadata_cluster$cluster_type == "ring") {
-      spe <- simulate_rings3D(spe, list(metadata_cluster))
+      spe <- simulate_rings3D(spe, list(metadata_cluster), plot_image = plot_image)
     }
     else if (metadata_cluster$cluster_type == "double ring") {
-      spe <- simulate_double_rings3D(spe, list(metadata_cluster))
+      spe <- simulate_double_rings3D(spe, list(metadata_cluster), plot_image = plot_image)
     }
   }
   
