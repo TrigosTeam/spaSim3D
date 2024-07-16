@@ -70,7 +70,6 @@ grid_based_clustering3D <- function(spe,
   
   while (length(grid_prism_cell_proportions) != 0) {
     # Get the maximum cell proportion and its corresponding grid prism number
-    print(grid_prism_cell_proportions)
     maximum_cell_proportion <- max(grid_prism_cell_proportions)
     maximum_cell_proportion_prism_number <- as.numeric(names(which.max(grid_prism_cell_proportions)))
     
@@ -85,7 +84,7 @@ grid_based_clustering3D <- function(spe,
                                                                         maximum_cell_proportion,
                                                                         n_splits,
                                                                         c())
-
+  
     # Perform the recursive algorithm on each grid prism potentially apart of the cluster to get a more precise shape of each cluster
     result[[n_clusters]] <- data.frame()
     for (grid_prism in as.numeric(grid_prisms_in_cluster)) {
