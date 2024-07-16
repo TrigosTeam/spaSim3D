@@ -500,10 +500,10 @@ setwd("~/Objects/separated_spes")
 i <- 1
 for (separated_spe_metadata in separated_spes_metadata) {
 
-  if (i <= 75 || 
-      separated_spes_table[i, "shapeA"] != separated_spes_table[i, "shapeB"] ||
-      separated_spes_table[i, "sizeA"] != separated_spes_table[i, "sizeB"] ||
-      separated_spes_table[i, "arrangement"] != "S2") {
+  if (i <= 384 || (
+      separated_spes_table[i, "shapeA"] == separated_spes_table[i, "shapeB"] &&
+      separated_spes_table[i, "sizeA"] == separated_spes_table[i, "sizeB"] &&
+      separated_spes_table[i, "arrangement"] == "S2")) {
     i <- i + 1
     next
   }
