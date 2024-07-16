@@ -87,6 +87,12 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
                                                               show_summary = TRUE,
                                                               plot_image = TRUE) {
   
+  if (is.null(spe[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.Id column to your spe")
+    spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
+  }
+  
+  
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 
                    "Cell.Type" = spe[[feature_colname]], 
@@ -186,6 +192,12 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
                                                              feature_colname = "Cell.Type",
                                                              show_summary = TRUE,
                                                              plot_image = TRUE) {
+  
+  if (is.null(spe[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.Id column to your spe")
+    spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
+  }
+  
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 
@@ -492,7 +504,11 @@ calculate_cells_in_neighbourhood3D <- function(spe,
                                               show_summary = TRUE,
                                               plot_image = TRUE) {
   
-  if (is.null(spe[["Cell.ID"]])) stop("No Cell.ID column. Add a Cell.ID columnt to your spe.")
+  if (is.null(spe[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.Id column to your spe")
+    spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
+  }
+  
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 
@@ -963,12 +979,12 @@ calculate_entropy_gradient3D <- function(spe,
   
   for (radius in seq(radii)) {
     cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
-                                                                    reference_cell_type,
-                                                                    target_cell_types,
-                                                                    radius,
-                                                                    feature_colname,
-                                                                    FALSE,
-                                                                    FALSE)
+                                                                      reference_cell_type,
+                                                                      target_cell_types,
+                                                                      radius,
+                                                                      feature_colname,
+                                                                      FALSE,
+                                                                      FALSE)
     
     cells_in_neighbourhood_data$ref_cell_id <- NULL
     result[radius, ] <- apply(cells_in_neighbourhood_data, 2, sum)

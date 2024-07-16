@@ -5,7 +5,11 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
                                                               show_summary = TRUE,
                                                               plot_image = TRUE) {
   
-  if (is.null(spe[["Cell.ID"]])) stop("No Cell.ID column. Add a Cell.ID columnt to your spe.")
+  if (is.null(spe[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.Id column to your spe")
+    spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
+  }
+  
  
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), 

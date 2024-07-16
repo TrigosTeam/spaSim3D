@@ -70,6 +70,7 @@ grid_based_clustering3D <- function(spe,
   
   while (length(grid_prism_cell_proportions) != 0) {
     # Get the maximum cell proportion and its corresponding grid prism number
+    print(grid_prism_cell_proportions)
     maximum_cell_proportion <- max(grid_prism_cell_proportions)
     maximum_cell_proportion_prism_number <- as.numeric(names(which.max(grid_prism_cell_proportions)))
     
