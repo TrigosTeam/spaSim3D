@@ -119,8 +119,8 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
   # Create a list of the number of cell types with their
   # corresponding cell ID's
   cell_types <- list()
-  for (eachType in unique(df[ , feature_colname])) {
-    cell_types[[eachType]] <- as.character(df$Cell.ID[df[, feature_colname] == eachType])
+  for (eachType in unique(df[["Cell.Type"]])) {
+    cell_types[[eachType]] <- as.character(df$Cell.ID[df[["Cell.Type"]] == eachType])
   }
   
   # Calculate cell to cell distances
