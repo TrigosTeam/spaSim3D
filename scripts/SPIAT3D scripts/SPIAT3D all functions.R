@@ -1331,7 +1331,8 @@ determine_prevalence_gradient3D <- function(grid_data,
       labs(x = "Threshold",
            y = "Prevalence",
            title = paste("Prevalence vs Threshold (", metric_colname, ")", sep = "")) +
-      theme(plot.title = element_text(hjust = 0.5))
+      theme(plot.title = element_text(hjust = 0.5)) +
+      ylim(0, 100)
     methods::show(fig)
   }
   
@@ -1340,8 +1341,8 @@ determine_prevalence_gradient3D <- function(grid_data,
 
 
 determine_spatial_autocorrelation3D <- function(grid_data,
-                                              metric_colname,
-                                              weight_method = "IDW") {
+                                                metric_colname,
+                                                weight_method = "IDW") {
   
   
   ## Get number of grid prisms
@@ -1373,6 +1374,10 @@ determine_spatial_autocorrelation3D <- function(grid_data,
   
   ## Points along the diagonal are comparing the same point so its weight is zero
   diag(weight_matrix) <- 0
+  
+  ## NA grid cubes are zero too
+  weight_matrix[is.na(grid_data[[metric_colname]]), ] <- 0
+  weight_matrix[ , is.na(grid_data[[metric_colname]])] <- 0
   
   data_mean <- mean(grid_data[!is.na(grid_data[[metric_colname]]), metric_colname])
   

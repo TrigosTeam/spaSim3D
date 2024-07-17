@@ -1,6 +1,6 @@
 determine_spatial_autocorrelation3D <- function(grid_data,
-                                              metric_colname,
-                                              weight_method = "IDW") {
+                                                metric_colname,
+                                                weight_method = "IDW") {
   
   
   ## Get number of grid prisms
@@ -15,6 +15,9 @@ determine_spatial_autocorrelation3D <- function(grid_data,
   z <- (floor((seq(n_grid_prisms) - 1) / (n_splits^2)))
   grid_prism_coords <- data.frame(x = x, y = y, z = z)
   
+  ## Subset for non NA rows
+  grid_prism_coords <- grid_prism_coords[!is.na(grid_data[[metric_colname]]), ]
+  grid_data <- grid_data[!is.na(grid_data[[metric_colname]]), ]
   
   weight_matrix <- -1 * apcluster::negDistMat(grid_prism_coords)
   ## Use the inverse distance between two points as the weight (IDW is 'inverse distance weighting')
@@ -33,26 +36,18 @@ determine_spatial_autocorrelation3D <- function(grid_data,
   ## Points along the diagonal are comparing the same point so its weight is zero
   diag(weight_matrix) <- 0
   
-  data_mean <- mean(grid_data[!is.na(grid_data[[metric_colname]]), metric_colname])
+  data_mean <- mean(grid_data[, metric_colname])
   
   numerator <- 0
   denominator <- 0
   
-  for (i in seq(n_grid_prisms)) {
+  for (i in seq(nrow(grid_data))) {
     
-    if (is.na(grid_data[i, metric_colname])) {
-      next
-    }
-    
-    for (j in seq(n_grid_prisms)) {
-      
-      if (is.na(grid_data[j, metric_colname])) {
-        next
-      }
+    for (j in seq(nrow(grid_data))) {
       
       numerator <- numerator + weight_matrix[i, j] * 
-                              (grid_data[i, metric_colname] - data_mean) * 
-                              (grid_data[j, metric_colname] - data_mean)
+        (grid_data[i, metric_colname] - data_mean) * 
+        (grid_data[j, metric_colname] - data_mean)
       
     }
     denominator <- denominator + (grid_data[i, metric_colname] - data_mean)^2
