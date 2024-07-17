@@ -772,28 +772,30 @@ get_thresholds <- function(spe_object, thresholds = NULL, tumour_marker,
 }
 
 ### 4a. Plot gene expression values for each slice ---------------------------
-setwd("~/Lin et al - human colorectal cancer/CRC1 data")
-protein_expression_data <- read.table("protein_expression_data.csv")
-
-
-## Melt
-plot_df <- reshape2::melt(protein_expression_data,  c("Z", "slice"))
-
-plot_sample_df <- sample_n(plot_df, 10000)
-
-
-## Plot
 library(ggplot2)
 library(dplyr)
 library(cowplot)
 
-# fig <- ggplot(plot_sample_df, aes(Z, value, color = variable, group = Z)) + 
-#   geom_boxplot(outlier.shape = NA) +
-#   facet_wrap(~variable, nrow = 4, ncol = 4, scales = "free") +
-#   theme_bw()
-# methods::show(fig)
+setwd("~/Lin et al - human colorectal cancer/CRC1 data")
+protein_expression_data <- read.table("protein_expression_data.csv")
+
+## Melt
+plot_df <- reshape2::melt(protein_expression_data,  c("Z", "slice"))
+
+plot_sample_df <- sample_n(plot_df, 1000000)
+
+# Plot with no outliers
+fig <- ggplot(plot_sample_df, aes(Z, value, color = variable, group = Z)) +
+  geom_boxplot(outlier.size = 0.01) +
+  stat_summary(fun = median, geom = "line", aes(group = 1), color = "grey") +
+  stat_summary(fun = mean, geom = "line", aes(group = 1), color = "black") +
+  facet_wrap(~variable, nrow = 4, ncol = 4, scales = "free") +
+  theme_bw()
+methods::show(fig)
 
 
+
+# Plot without outliers
 all_cell_markers <- c("Keratin", "Ki67", "CD3", "CD20", 
                       "CD45RO", "CD4", "CD8a", "CD68", 
                       "CD163", "FOXP3", "PD1", "PDL1", 
@@ -811,14 +813,28 @@ plot_sample_df <- sample_n(plot_df, 10000000)
 fig_list <- list()
 
 for (cell_marker in all_cell_markers) {
-
+  
   plot_sample_marker_df <- plot_sample_df[plot_sample_df$variable == cell_marker, ]
   
-  boxplot_stats <- boxplot.stats(plot_sample_marker_df$value)
+  y_max <- boxplot.stats(plot_sample_marker_df$value)[["stats"]][5]
+  
+  # y_max <- 0
+  # for (slice in seq(25)) {
+  #   plot_sample_marker_slice_df <- plot_sample_marker_df[plot_sample_marker_df$slice == slice, ]
+  #   curr_y_max <- boxplot.stats(plot_sample_marker_slice_df$value)[["stats"]][5]
+  #   if (curr_y_max > y_max) y_max <- curr_y_max
+  #   
+  # 
+  #   View(plot_sample_marker_slice_df)
+  #   break
+  # }
+  # 
   
   fig <- ggplot(plot_sample_marker_df, aes(Z, value, group = Z)) +
     geom_boxplot(outlier.shape = NA, color = colors[cell_marker]) +
-    scale_y_continuous(limits = c(0, boxplot_stats$stats[4])) +
+    stat_summary(fun = median, geom = "line", aes(group = 1), color = "grey") +
+    stat_summary(fun = mean, geom = "line", aes(group = 1), color = "black") +
+    scale_y_continuous(limits = c(0, y_max)) +
     theme_bw() +
     labs(x = "z-coord", y = "", title = cell_marker) +
     theme(plot.title = element_text(hjust = 0.5))
@@ -840,19 +856,21 @@ plot_grid(fig_list$Keratin, fig_list$Ki67, fig_list$CD3, fig_list$CD20,
 setwd("~/Lin et al - human colorectal cancer/Other data")
 df <- readRDS("lin_et_al_3D_spatial_data_separate_slices.rds")
 
-## Convert data frame to spe object
-# spe <- SpatialExperiment(
-#   assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
-#   colData = df,
-#   spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"))
-
 df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
 
-minimum_distance <- calculate_minimum_distances_between_cell_types_df3D(df,
-                                                                        cell_types_of_interest = NULL,
-                                                                        feature_colname = "Cell.Type1",
-                                                                        show_summary = FALSE,
-                                                                        plot_image = FALSE)
+# minimum_distance_df <- calculate_minimum_distances_between_cell_types_df3D(df,
+#                                                                            cell_types_of_interest = NULL,
+#                                                                            feature_colname = "Cell.Type1",
+#                                                                            show_summary = FALSE,
+#                                                                            plot_image = FALSE)
+
+
+setwd("~/Lin et al - human colorectal cancer/Other data")
+minimum_distances_df <- readRDS("minimum_distance_df.rds")
+
+distances <- minimum_distances_df$distance
+sorted_distances <- distances[order(distances)]
+unique(sorted_distances)[1:200]
 
 
 ### 5b. Calculate minimum distance function using a data frame (rather than a spe object) ----------------
