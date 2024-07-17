@@ -54,7 +54,7 @@ determine_spatial_autocorrelation3D <- function(grid_data,
   }
   
   
-  I <- (n_grid_prisms * numerator) / (sum(weight_matrix) * denominator)
+  I <- (nrow(grid_data) * numerator) / (sum(weight_matrix) * denominator)
   
   return(I)
   
