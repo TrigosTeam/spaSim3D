@@ -2,7 +2,7 @@ library(cowplot)
 
 ### 1.1. Function to get plot for APD ----------------------------------------
 ### 1.2. Function to get plot for AMD -------------------------------------
-plot_AMD_metrics <- function(spes_table, AMD_df, arrangements) {
+plot_AMD_metric <- function(spes_table, AMD_df, arrangements) {
   
   # AMD pairs are A/A, A/B, B/A, B/B
   AMD_pairs <- data.frame(cell1 = c("A", "A", "B", "B"),
@@ -278,7 +278,81 @@ plot_gradient_metrics_type2 <- function(spes_table, gradient_metric_df, metric, 
 }
 
 
-### 1.5. Function to get plot for prevalence ----------------------------------
+### 1.5. Function to get plot for SAC ----------------------------------------
+plot_SAC_metric <- function(spes_table, SAC_df, arrangements) {
+  
+  # SAC applies to proportion and entropy
+  metrics <- c("proportion", "entropy")
+  
+  # Combine spes_table and SAC_df
+  plot_df <- cbind(spes_table, SAC_df)
+  
+  # Put all plots into an organised list
+  all_plots_list <- list()
+  
+  for (i in seq(length(metrics))) {
+    
+    # Create a 'key' column which groups simulations if they have the same bg_type, shape and size (but not arrangement)
+    plot_df$key <- paste(plot_df$bg_type, plot_df$shape, plot_df$size, sep = "_")
+    
+    # Factor
+    plot_df$bg_type <- factor(plot_df$bg_type, c("O", "A", "B", "AB"))
+    plot_df$shape <- factor(plot_df$shape, c("Sphere", "Ellipsoid", "Network"))
+    plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
+    plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
+    
+    fig_bg_type <- ggplot(plot_df, aes(arrangement, !!sym(metrics[i]), group = key, col = bg_type)) +
+      geom_line() +
+      theme_bw() +
+      theme(legend.position="bottom") +
+      ylab("SAC")
+    
+    fig_shape <- ggplot(plot_df, aes(arrangement, !!sym(metrics[i]), group = key, col = shape)) +
+      geom_line() +
+      theme_bw() +
+      theme(legend.position="bottom") +
+      ylab("SAC")
+    
+    fig_size <- ggplot(plot_df, aes(arrangement, !!sym(metrics[i]), group = key, col = size)) +
+      geom_line() +
+      theme_bw() +
+      theme(legend.position="bottom") +
+      ylab("SAC")
+    
+    all_plots_list[[metrics[i]]] <- list(bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
+  }
+  
+  
+  # Combine the plots together by pairs
+  library(cowplot)
+  plots_metric_list <- list()
+  
+  for (i in seq(length(metrics))) {
+    metric <- metrics[i]
+    
+    plots <- plot_grid(all_plots_list[[metric]]$bg_type, all_plots_list[[metric]]$shape, all_plots_list[[metric]]$size, nrow = 1, ncol = 3)
+    
+    title <- ggdraw() + 
+      draw_label(paste("Metric:", metric), 
+                 fontface='bold')
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    
+    plots_metric_list[[metric]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  SAC_plot <- plot_grid(plots_metric_list$proportion, 
+                        plots_metric_list$entropy,
+                        nrow = 2, ncol = 1, scale = 0.9)
+  
+  methods::show(SAC_plot)
+  
+  return(SAC_plot)
+}
+
+
+### 1.6. Function to get plot for prevalence ----------------------------------
 plot_prevalence <- function(spes_table, prevalence_df, arrangements) {
   
   # Constants
@@ -382,7 +456,7 @@ mixed_spes_table <- read.table("mixed_spes_table.csv")
 setwd("~/Objects/mixed_spes/analysis_3D")
 mixed_AMD_df <- read.table("mixed_AMD_df.csv")
 
-mixed_AMD_plot <- plot_AMD_metrics(mixed_spes_table, mixed_AMD_df, c("M1", "M2", "M3"))
+mixed_AMD_plot <- plot_AMD_metric(mixed_spes_table, mixed_AMD_df, c("M1", "M2", "M3"))
 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 saveRDS(mixed_AMD_plot, "mixed_AMD_plot.rds")
@@ -428,7 +502,22 @@ mixed_ACIN_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_ACIN_df, 
 mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, "CKR", c("M1", "M2", "M3"), 15, 50)
 
 
-### 2.5. Mixed spes prevalence ------------------------------------------------
+### 2.5. Mixed spes SAC ------------------------------------------------------
+
+# Read mixed_spes_table
+setwd("~/Objects/spes_table")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
+
+# Read mixed_SAC_df
+setwd("~/Objects/mixed_spes/analysis_3D")
+mixed_SAC_df <- read.table("mixed_SAC_df.csv")
+
+mixed_SAC_plot <- plot_SAC_metric(mixed_spes_table, mixed_SAC_df, c("M1", "M2", "M3"))
+
+setwd("~/Objects/mixed_spes/analysis_3D/plots")
+saveRDS(mixed_SAC_plot, "mixed_SAC_plot.rds")
+
+### 2.6. Mixed spes prevalence ------------------------------------------------
 # Read mixed_spes_table
 setwd("~/Objects/spes_table")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
@@ -452,7 +541,7 @@ ringed_spes_table <- read.table("ringed_spes_table.csv")
 setwd("~/Objects/ringed_spes/analysis_3D")
 ringed_AMD_df <- read.table("ringed_AMD_df.csv")
 
-ringed_AMD_plot <- plot_AMD_metrics(ringed_spes_table, ringed_AMD_df, c("R1", "R2", "R3"))
+ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, c("R1", "R2", "R3"))
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 saveRDS(ringed_AMD_plot, "ringed_AMD_plot.rds")
