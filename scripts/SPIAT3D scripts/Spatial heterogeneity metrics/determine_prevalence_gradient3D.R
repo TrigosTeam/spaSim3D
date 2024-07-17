@@ -25,7 +25,8 @@ determine_prevalence_gradient3D <- function(grid_data,
       labs(x = "Threshold",
            y = "Prevalence",
            title = paste("Prevalence vs Threshold (", metric_colname, ")", sep = "")) +
-      theme(plot.title = element_text(hjust = 0.5))
+      theme(plot.title = element_text(hjust = 0.5)) +
+      ylim(0, 100)
     methods::show(fig)
   }
 

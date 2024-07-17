@@ -158,6 +158,8 @@ cell_proportion_prevalence <- determine_prevalence3D(cell_proportion_grid_metric
                                                      threshold = 0.5)
 print(cell_proportion_prevalence)
 
+cell_proportion_prevalence_gradient <- determine_prevalence_gradient3D(cell_proportion_grid_metrics,
+                                                                       metric_colname = "proportion")
 
 ## Determine spatial autocorrelation for cell proportions
 cell_proportion_spatial_autocorrelation <- determine_spatial_autocorrelation3D(cell_proportion_grid_metrics,
