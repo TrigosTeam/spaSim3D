@@ -358,7 +358,7 @@ plot_prevalence <- function(spes_table, prevalence_df, arrangements) {
   
   # Constants
   metrics <- c("proportion", "entropy")
-  thresholds <- seq(0, 1, 0.01)
+  thresholds <- seq(0.01, 1, 0.01)
   threshold_colnames <- paste("t", thresholds, sep = "")
   
   
@@ -375,7 +375,7 @@ plot_prevalence <- function(spes_table, prevalence_df, arrangements) {
     # Melt
     plot_df <- reshape2::melt(plot_df, , threshold_colnames)
     
-    # Extract threshold value from threshold strings (t0 -> 0, t0.01 -> 0.01...)
+    # Extract threshold value from threshold strings (t0.01 -> 0.01...)
     plot_df$variable <- unfactor(plot_df$variable)
     plot_df$variable <- as.numeric(substr(plot_df$variable, 2, nchar(plot_df$variable)))
     
@@ -530,6 +530,7 @@ mixed_prevalence_df <- read.table("mixed_prevalence_df.csv")
 mixed_prevalence_plot <- plot_prevalence(mixed_spes_table, mixed_prevalence_df, c("M1", "M2", "M3"))
 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
+# saveRDS(mixed_prevalence_plot, "mixed_prevalence_plot.rds")
 
 
 ### 3.1. Ringed spes APD ------------------------------------------------------
@@ -606,3 +607,17 @@ ringed_SAC_plot <- plot_SAC_metric(ringed_spes_table, ringed_SAC_df, c("R1", "R2
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
+
+### 2.6. Ringed spes prevalence ------------------------------------------------
+# Read ringed_spes_table
+setwd("~/Objects/spes_table")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
+
+# Read ringed_AMD_df
+setwd("~/Objects/ringed_spes/analysis_3D")
+ringed_prevalence_df <- read.table("ringed_prevalence_df.csv")
+
+ringed_prevalence_plot <- plot_prevalence(ringed_spes_table, ringed_prevalence_df, c("R1", "R2", "R3"))
+
+setwd("~/Objects/ringed_spes/analysis_3D/plots")
+saveRDS(ringed_prevalence_plot, "ringed_prevalence_plot.rds")
