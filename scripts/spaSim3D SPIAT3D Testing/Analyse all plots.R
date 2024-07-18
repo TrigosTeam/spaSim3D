@@ -202,7 +202,7 @@ n_splits <- 10
 mixed_SAC_df <- data.frame(matrix(nrow = n_mixed_spes, ncol = 3))
 colnames(mixed_SAC_df) <- c("spe", "proportion", "entropy")
 
-thresholds <- seq(0, 1, 0.01)
+thresholds <- seq(0.01, 1, 0.01)
 thresholds_colnames <- paste("t", thresholds, sep = "")
 mixed_prevalence_df <- data.frame(matrix(nrow = n_mixed_spes, ncol = 2 + length(thresholds)))
 colnames(mixed_prevalence_df) <- c("spe", "metric", thresholds_colnames)
@@ -471,7 +471,7 @@ n_splits <- 10
 ringed_SAC_df <- data.frame(matrix(nrow = n_ringed_spes, ncol = 3))
 colnames(ringed_SAC_df) <- c("spe", "proportion", "entropy")
 
-thresholds <- seq(0, 1, 0.01)
+thresholds <- seq(0.01, 1, 0.01)
 thresholds_colnames <- paste("t", thresholds, sep = "")
 ringed_prevalence_df <- data.frame(matrix(nrow = n_ringed_spes, ncol = 2 + length(thresholds)))
 colnames(ringed_prevalence_df) <- c("spe", "metric", thresholds_colnames)
@@ -748,7 +748,7 @@ n_splits <- 10
 separated_SAC_df <- data.frame(matrix(nrow = n_separated_spes, ncol = 3))
 colnames(separated_SAC_df) <- c("spe", "proportion", "entropy")
 
-thresholds <- seq(0, 1, 0.01)
+thresholds <- seq(0.01, 1, 0.01)
 thresholds_colnames <- paste("t", thresholds, sep = "")
 separated_prevalence_df <- data.frame(matrix(nrow = n_separated_spes, ncol = 2 + length(thresholds)))
 colnames(separated_prevalence_df) <- c("spe", "metric", thresholds_colnames)
@@ -815,4 +815,7 @@ write.table(separated_prevalence_df, file = "separated_prevalence_df.csv")
 
 
 ### Spacer --------------------------------
+
+
+
 
