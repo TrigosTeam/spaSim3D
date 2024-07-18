@@ -1,4 +1,5 @@
 library(cowplot)
+library(ggplot2)
 
 ### 1.1. Function to get plot for APD ----------------------------------------
 ### 1.2. Function to get plot for AMD -------------------------------------
@@ -531,7 +532,8 @@ mixed_prevalence_plot <- plot_prevalence(mixed_spes_table, mixed_prevalence_df, 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 
 
-### 3.1. Ringed spes AMD -------------------------------------------------
+### 3.1. Ringed spes APD ------------------------------------------------------
+### 3.2. Ringed spes AMD -------------------------------------------------
 
 # Read ringed_spes_table
 setwd("~/Objects/spes_table")
@@ -547,7 +549,7 @@ setwd("~/Objects/ringed_spes/analysis_3D/plots")
 saveRDS(ringed_AMD_plot, "ringed_AMD_plot.rds")
 
 
-### 3.2. Ringed spes MS, NMS, ACINP, AE ---------------------------------------
+### 3.3. Ringed spes MS, NMS, ACINP, AE ---------------------------------------
 # Read ringed_spes_table
 setwd("~/Objects/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
@@ -567,3 +569,40 @@ ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, "
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS()
 
+
+### 3.4. Ringed spes ACIN, CKR ------------------------------------------------
+
+# Read ringed_spes_table
+setwd("~/Objects/spes_table")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
+
+# Read ringed ACIN, CKR
+setwd("~/Objects/ringed_spes/analysis_3D")
+ringed_ACIN_df <- read.table("ringed_ACIN_df.csv")
+ringed_CKR_df <- read.table("ringed_CKR_df.csv")
+
+# Get plots
+ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, "ACIN", c("R1", "R2", "R3"), 0, 50)
+
+ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, "CKR", c("R1", "R2", "R3"), 10, 50)
+
+
+# setwd("~/Objects/ringed_spes/analysis_3D/plots")
+# saveRDS(ringed_ACIN_plot, "ringed_ACIN_plot.rds")
+# saveRDS(ringed_CKR_plot, "ringed_CKR_plot.rds")
+
+
+### 3.5. Ringed spes SAC ------------------------------------------------------
+
+# Read ringed_spes_table
+setwd("~/Objects/spes_table")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
+
+# Read ringed_SAC_df
+setwd("~/Objects/ringed_spes/analysis_3D")
+ringed_SAC_df <- read.table("ringed_SAC_df.csv")
+
+ringed_SAC_plot <- plot_SAC_metric(ringed_spes_table, ringed_SAC_df, c("R1", "R2", "R3"))
+
+setwd("~/Objects/ringed_spes/analysis_3D/plots")
+saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
