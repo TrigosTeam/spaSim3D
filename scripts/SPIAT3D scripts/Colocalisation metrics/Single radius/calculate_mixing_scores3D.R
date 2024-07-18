@@ -30,12 +30,12 @@ calculate_mixing_scores3D <- function(spe,
   for (reference_cell_type in reference_cell_types) {
     
     # Get all info for cells of reference cell_type
-    reference_cells <- df[df[[feature_colname]] == reference_cell_type, ]
+    reference_cells <- df[df[["Cell.Type"]] == reference_cell_type, ]
     
     for (target_cell_type in target_cell_types) {
       
       # Get all info for cells of target cell_type      
-      target_cells <- df[df[[feature_colname]] == target_cell_type, ]
+      target_cells <- df[df[["Cell.Type"]] == target_cell_type, ]
       
       # No point getting mixing scores if comparing the same cell type
       if (reference_cell_type == target_cell_type) {

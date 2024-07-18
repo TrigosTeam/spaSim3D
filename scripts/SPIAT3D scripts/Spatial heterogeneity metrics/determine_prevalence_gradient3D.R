@@ -3,7 +3,7 @@ determine_prevalence_gradient3D <- function(grid_data,
                                             plot_image = T) {
   
   # Thresholds range from 0 to 1
-  thresholds <- seq(0, 1, 0.01)
+  thresholds <- seq(0.01, 1, 0.01)
   
   # Define result
   result <- data.frame(threshold = thresholds)
