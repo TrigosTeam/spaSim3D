@@ -23,11 +23,11 @@ colnames(mixed_AMD_df) <- c("spe", "reference", "target", "AMD")
 setwd("~/Objects/mixed_spes")
 for (i in seq(n_mixed_spes)) {
 
-  # # Read in current mixed spe
-  # mixed_spe_name <- paste("mixed_spe_", i, sep = "")
-  # mixed_spe_file_name <- paste(mixed_spe_name, ".rds", sep = "")
-  # mixed_spe <- readRDS(mixed_spe_file_name)
-  # 
+  # Read in current mixed spe
+  mixed_spe_name <- paste("mixed_spe_", i, sep = "")
+  mixed_spe_file_name <- paste(mixed_spe_name, ".rds", sep = "")
+  mixed_spe <- readRDS(mixed_spe_file_name)
+
   # pairwise_distance_data <- calculate_pairwise_distances_between_cell_types3D(mixed_spe,
   #                                                                             cell_types,
   #                                                                             show_summary = F,
@@ -265,7 +265,7 @@ for (i in seq(n_mixed_spes)) {
 
 setwd("~/Objects/mixed_spes/analysis_3D")
 write.table(mixed_SAC_df, file = "mixed_SAC_df.csv")
-write.table(mixed_prevalence_df, file = "mixed_prevalence_df.csv")
+# write.table(mixed_prevalence_df, file = "mixed_prevalence_df.csv")
 
 
 ### 2.1. Ringed spes - cc distance metrics ----------------------------------------
