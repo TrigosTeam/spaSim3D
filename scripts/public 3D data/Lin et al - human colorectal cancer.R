@@ -972,3 +972,116 @@ min(minimum_distance[minimum_distance$distance != 0, "distance"]) # Result: 0.00
 
 setwd("~/Lin et al - human colorectal cancer/Other data")
 # write.table(minimum_distance, "minimum_distance_df.csv")
+
+### 6a. FIXING THE DATA -----------------------------------------------------
+setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated")
+df <- readRDS("CRC1_df.rds")
+
+# Fix df generated from first combining slices
+setwd("~/Lin et al - human colorectal cancer/Other_data")
+combine_slices_df <- readRDS("lin_et_al_3D_spatial_data_combine_slices.rds")
+
+combine_slices_df <- combine_slices_df[seq(nrow(df)), ]
+combine_slices_df[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")] <- df[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+
+
+# Fix df generated from examining separate slices
+setwd("~/Lin et al - human colorectal cancer/Other_data")
+separate_slices_df <- readRDS("lin_et_al_3D_spatial_data_separate_slices.rds")
+
+separate_slices_df <- separate_slices_df[seq(nrow(df)), ]
+separate_slices_df[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")] <- df[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+
+# Save
+# setwd("~/Lin et al - human colorectal cancer/CRC1_data")
+# saveRDS(combine_slices_df, "combine_slices_df.rds")
+# saveRDS(separate_slices_df, "separate_slices_df.rds")
+
+### 6b. Plot fixed data -------------------------------------------------------
+setwd("~/Lin et al - human colorectal cancer/CRC1_data")
+
+combine_slices_df <- readRDS("combine_slices_df.rds")
+separate_slices_df <- readRDS("separate_slices_df.rds")
+
+library(dplyr)
+library(rgl)
+plot_cells_rgl_3D <- function(df, n_cells, plot_cell_types = NULL, feature_colname) {
+  
+  ## Get all unique cell types
+  cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.", 
+                  
+                  "Endothelial", "Muscle/Fibroblast",      
+                  
+                  "Macrophage(I)", "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage", 
+                  "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",    
+                  "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg", 
+                  "B cells",
+                  
+                  "Other")
+  
+  ## Assign colour to each cell type
+  cell_colours <- c("orange", "orange2", "orange3",       # Tumour
+                    
+                    "brown1", "brown",             # Endothelial & fibroblast
+                    
+                    "green1", "green", "green3", "green4", "darkgreen", # Macrophages
+                    "purple1",  "purple2", "purple3", "purple4",    # Lymphocytes
+                    "turquoise1", "turquoise2", "steelblue1", "steelblue2", "steelblue3", # T cells
+                    "orchid",                 # B cells
+                    
+                    "lightgray")
+  
+  names(cell_colours) <- cell_types
+  
+  if (!is.null(plot_cell_types)) df <- df[df[[feature_colname]] %in% plot_cell_types, ]
+  
+  df_plot <- sample_n(df, n_cells)  
+  df_plot$Cell.Colour <- cell_colours[df_plot[[feature_colname]]]
+  
+  options(rgl.printRglwidget = T)
+  
+  open3d()
+  plot3d(df_plot$Cell.X.Position,
+         df_plot$Cell.Y.Position,
+         df_plot$Cell.Z.Position,
+         col = df_plot$Cell.Colour,
+         size = 4,
+         xlab = 'x',
+         ylab = 'y',
+         zlab = 'z',
+         xlim = NULL,
+         ylim = NULL,
+         zlim = c(0, 500),
+         forceClipregion = TRUE)
+  aspect3d(5, 5, 1)
+  highlevel()
+  
+}
+
+# All cells
+plot_cells_rgl_3D(df, 10000, NULL, "Cell.Type.Specific")
+
+
+# Tumour cells
+tumour_cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.")
+
+# Stromal cells
+stromal_cell_types <- c("Endothelial", "Muscle/Fibroblast")
+
+# Immune cells
+immune_cell_types <- c("Macrophage(I)", "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage",
+                       "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",
+                       "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg",
+                       "B cells")
+
+
+plot_cells_rgl_3D(combine_slices_df, 50000, NULL, "Cell.Type2")
+plot_cells_rgl_3D(combine_slices_df, 50000, tumour_cell_types, "Cell.Type2")
+plot_cells_rgl_3D(combine_slices_df, 50000, stromal_cell_types, "Cell.Type2")
+plot_cells_rgl_3D(combine_slices_df, 50000, immune_cell_types, "Cell.Type2")
+
+plot_cells_rgl_3D(separate_slices_df, 50000, NULL, "Cell.Type2")
+plot_cells_rgl_3D(separate_slices_df, 50000, tumour_cell_types, "Cell.Type2")
+plot_cells_rgl_3D(separate_slices_df, 50000, stromal_cell_types, "Cell.Type2")
+plot_cells_rgl_3D(separate_slices_df, 50000, immune_cell_types, "Cell.Type2")
+
