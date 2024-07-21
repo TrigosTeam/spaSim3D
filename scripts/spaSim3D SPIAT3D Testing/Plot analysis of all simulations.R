@@ -376,7 +376,7 @@ plot_prevalence <- function(spes_table, prevalence_df, arrangements) {
     plot_df <- reshape2::melt(plot_df, , threshold_colnames)
     
     # Extract threshold value from threshold strings (t0.01 -> 0.01...)
-    plot_df$variable <- unfactor(plot_df$variable)
+    plot_df$variable <- as.character(plot_df$variable)
     plot_df$variable <- as.numeric(substr(plot_df$variable, 2, nchar(plot_df$variable)))
     
     # Factor
@@ -515,8 +515,8 @@ mixed_SAC_df <- read.table("mixed_SAC_df.csv")
 
 mixed_SAC_plot <- plot_SAC_metric(mixed_spes_table, mixed_SAC_df, c("M1", "M2", "M3"))
 
-setwd("~/Objects/mixed_spes/analysis_3D/plots")
-saveRDS(mixed_SAC_plot, "mixed_SAC_plot.rds")
+# setwd("~/Objects/mixed_spes/analysis_3D/plots")
+# saveRDS(mixed_SAC_plot, "mixed_SAC_plot.rds")
 
 ### 2.6. Mixed spes prevalence ------------------------------------------------
 # Read mixed_spes_table
@@ -604,9 +604,9 @@ setwd("~/Objects/ringed_spes/analysis_3D")
 ringed_SAC_df <- read.table("ringed_SAC_df.csv")
 
 ringed_SAC_plot <- plot_SAC_metric(ringed_spes_table, ringed_SAC_df, c("R1", "R2", "R3"))
-
-setwd("~/Objects/ringed_spes/analysis_3D/plots")
-saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
+# 
+# setwd("~/Objects/ringed_spes/analysis_3D/plots")
+# saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
 
 ### 2.6. Ringed spes prevalence ------------------------------------------------
 # Read ringed_spes_table

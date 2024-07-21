@@ -196,16 +196,30 @@ mixed_spes_table <- read.table("mixed_spes_table.csv")
 n_mixed_spes <- nrow(mixed_spes_table)
 
 # Define SAC and prevalence data frames as well as constants
-cell_types <- c("A", "B")
 n_splits <- 10
-
-mixed_SAC_df <- data.frame(matrix(nrow = n_mixed_spes, ncol = 3))
-colnames(mixed_SAC_df) <- c("spe", "proportion", "entropy")
-
 thresholds <- seq(0.01, 1, 0.01)
 thresholds_colnames <- paste("t", thresholds, sep = "")
-mixed_prevalence_df <- data.frame(matrix(nrow = n_mixed_spes, ncol = 2 + length(thresholds)))
-colnames(mixed_prevalence_df) <- c("spe", "metric", thresholds_colnames)
+
+prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+
+mixed_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion")
+mixed_prop_SAC_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(prop_cell_types), ncol = length(mixed_prop_SAC_df_colnames)))
+colnames(mixed_SAC_df) <- mixed_prop_SAC_df_colnames
+
+mixed_prop_prevalence_df_colnames <- c("spe", "reference", "target", thresholds_colnames)
+mixed_prop_prevalence_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(prop_cell_types), ncol = length(mixed_prop_prevalence_df_colnames)))
+colnames(mixed_prevalence_df) <- mixed_prop_prevalence_df_colnames
+
+
+entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+
+mixed_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy")
+mixed_entropy_SAC_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(entropy_cell_types), ncol = length(mixed_entropy_SAC_df_colnames)))
+colnames(mixed_entropy_SAC_df) <- mixed_entropy_SAC_df_colnames
+
+mixed_entropy_prevalence_df_colnames <- c("spe", "cell_types", thresholds_colnames)
+mixed_entropy_prevalence_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(entropy_cell_types), ncol = length(mixed_entropy_prevalence_df_colnames)))
+colnames(mixed_entropy_prevalence_df) <- mixed_entropy_prevalence_df_colnames
 
 
 # Loop through each mixed spes and get SAC and prevalence
