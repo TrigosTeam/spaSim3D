@@ -31,26 +31,24 @@ spe_cluster_dup <- simulate_spe_metadata3D(prev_metadata)
 # Get default background metadata
 metadata_bg_r <- spe_metadata_background_template("random")
 
-metadata_bg_n <- spe_metadata_background_template("normal")
 
 # Change background metadata
 metadata_bg_r$background$minimum_distance_between_cells <- 0
 metadata_bg_r$background$n_cells <- 11000
-# View(metadata_bg_n)
 
 # Get spe from background metadata
-spe_bg1 <- simulate_spe_metadata3D(metadata_bg_r)
+# spe_bg1 <- simulate_spe_metadata3D(metadata_bg_r)
 
 
 
 # Add to background metadata to get cluster metadata
 metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_r, "regular", "Sphere")
 metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "ring", "Ellipsoid")
-metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "double ring", "Cylinder")
+# metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "double ring", "Cylinder")
 # metadata_bg_clusters <- spe_metadata_cluster_template(metadata_bg_clusters, "regular", "Network")
 
 # Change cluster metadata
-metadata_bg_clusters$cluster_3$outer_ring_cell_types <- c("Immune", "Others")
+# metadata_bg_clusters$cluster_3$outer_ring_cell_types <- c("Immune", "Others")
 # metadata_bg_clusters$cluster_4$width <- 10
 # metadata_bg_clusters$cluster_4$cluster_cell_types <- "Immune"
 # metadata_bg_clusters$cluster_4$cluster_cell_proportions <- 1
