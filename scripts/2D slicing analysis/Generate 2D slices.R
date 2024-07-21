@@ -113,8 +113,12 @@ for (i in seq(n_ringed_spes)) {
 setwd("~/Objects/spes_table")
 separated_spes_table <- read.table("separated_spes_table.csv")
 
-# Get number of separated spes
-n_separated_spes <- nrow(separated_spes_table)
+# Only focus on separated simulations which use the same shapes and sizes for simplicity
+separated_spes_table <- separated_spes_table[separated_spes_table$shapeA == separated_spes_table$shapeB &
+                                               separated_spes_table$sizeA == separated_spes_table$sizeB, ]
+
+# Get separated spes simulation numbers
+separated_spes_numbers <- as.integer(rownames(separated_spes_table))
 
 # Define slice parameters
 n_slices <- 5
@@ -127,7 +131,7 @@ slice_z_coords$top <- slice_z_coords$bottom + slice_width
 
 
 # Get slice data for each separated_spe
-for (i in seq(n_separated_spes)) {
+for (i in separated_spes_table) {
   setwd("~/Objects/separated_spes")
   
   # Read in current separated spe
