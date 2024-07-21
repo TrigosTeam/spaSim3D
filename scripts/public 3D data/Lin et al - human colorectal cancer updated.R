@@ -142,3 +142,6 @@ plot_cells_rgl_3D(df, 50000, stromal_cell_types, "Cell.Type.Specific")
 plot_cells_rgl_3D(df, 50000, immune_cell_types, "Cell.Type.Specific")
 
 
+plot_cells_rgl_3D(df, 50000, "Tumor/Epi.", "Cell.Type.Specific")
+
+

@@ -776,13 +776,13 @@ library(ggplot2)
 library(dplyr)
 library(cowplot)
 
-setwd("~/Lin et al - human colorectal cancer/CRC1 data")
+setwd("~/Lin et al - human colorectal cancer/CRC1_data")
 protein_expression_data <- read.table("protein_expression_data.csv")
 
 ## Melt
 plot_df <- reshape2::melt(protein_expression_data,  c("Z", "slice"))
 
-plot_sample_df <- sample_n(plot_df, 1000000)
+plot_sample_df <- sample_n(plot_df, 10000000)
 
 # Plot with no outliers
 fig <- ggplot(plot_sample_df, aes(Z, value, color = variable, group = Z)) +
