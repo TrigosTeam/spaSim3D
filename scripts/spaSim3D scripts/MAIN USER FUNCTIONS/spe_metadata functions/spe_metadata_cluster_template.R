@@ -31,7 +31,7 @@ spe_metadata_cluster_template <- function(background_metadata, cluster_type, sha
   }
   else if (shape == "Network") {
     cluster_metadata <- list(shape = "Network",
-                             cluster_cell_types = c("Immune", "Others"),
+                             cluster_cell_types = c("Tumour", "Others"),
                              cluster_cell_proportions = c(0.95, 0.05),
                              n_edges = 15,
                              width = 8,
