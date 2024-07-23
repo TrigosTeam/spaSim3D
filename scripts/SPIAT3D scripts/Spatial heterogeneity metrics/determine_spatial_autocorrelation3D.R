@@ -1,6 +1,6 @@
 determine_spatial_autocorrelation3D <- function(grid_data,
                                                 metric_colname,
-                                                weight_method = "IDW") {
+                                                weight_method = "binary") {
   
   
   ## Get number of grid prisms
