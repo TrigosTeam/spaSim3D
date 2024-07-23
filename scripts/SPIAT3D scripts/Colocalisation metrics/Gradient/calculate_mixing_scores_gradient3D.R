@@ -29,14 +29,17 @@ calculate_mixing_scores_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   if (plot_image) {
-    plot(result[["radius"]], result[["normalised_mixing_score"]], 
-         type = "l", 
-         xlab = "Radius", 
-         ylab = "Normalised mixing score",
-         ylim = c(0, max(result[["normalised_mixing_score"]], 1)),
-         col = "red")
-    abline(a = 1, b = 0, col = "blue", lty = 2)
-    legend(0, 0.95, legend = c("Observed normalised mixing score", "Expected CSR normalised mixing score"), col = c("red", "blue"), lty = c(1, 2))
+    plot_result <- result
+    plot_result$expected_normalised_mixing_score <- 1
+    plot_result <- reshape2::melt(plot_result, "radius", c("normalised_mixing_score", "expected_normalised_mixing_score"))
+    
+    fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
+      geom_line() +
+      labs(x = "Radius", y = "Normalised mixing score (NMS)") +
+      scale_colour_discrete(name = "", labels = c("Observed NMS", "Expected CSR NMS")) +
+      theme_bw()
+    
+      methods::show(fig)
   }
   
   return(result)

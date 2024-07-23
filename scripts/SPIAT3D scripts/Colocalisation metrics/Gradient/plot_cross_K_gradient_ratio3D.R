@@ -1,13 +1,17 @@
 plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_results) {
   
-  plot(cross_K_gradient$radius, 
-              cross_K_gradient$observed_cross_K / cross_K_gradient$expected_cross_K, 
-              type = "l", 
-              col = "red", 
-              xlim = c(0, max(cross_K_gradient$radius)), ylim = c(0, 1.2 * max((cross_K_gradient$observed_cross_K / cross_K_gradient$expected_cross_K), 1)),
-              xlab = "Radius", ylab = "Cross K-function ratio")
-  abline(a = 1, b = 0, col = "blue", lty = 2)
-  legend(0, 1.2 * max((cross_K_gradient$observed_cross_K / cross_K_gradient$expected_cross_K), 1), 
-         legend = c("Observed cross K ratio", "Expected CSR cross K ratio"), col = c("red", "blue"), lty = c(1, 2))
+  plot_result <- data.frame(radius = cross_K_gradient_results$radius,
+                            observed_cross_K_gradient_ratio = cross_K_gradient_results$observed_cross_K / cross_K_gradient_results$expected_cross_K,
+                            expected_cross_K_gradient_ratio = 1)
+  
+  plot_result <- reshape2::melt(plot_result, "radius", c("observed_cross_K_gradient_ratio", "expected_cross_K_gradient_ratio"))
+  
+  fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
+    geom_line() +
+    labs(x = "Radius", y = "Cross K-function ratio") +
+    scale_colour_discrete(name = "", labels = c("Observed cross K ratio", "Expected CSR cross K ratio")) +
+    theme_bw()
+  
+  methods::show(fig)
   
 }

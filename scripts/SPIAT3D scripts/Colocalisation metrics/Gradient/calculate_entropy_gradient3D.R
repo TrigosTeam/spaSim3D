@@ -44,13 +44,18 @@ calculate_entropy_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   if (plot_image) {
-    expected_entropy <- calculate_entropy_background3D(spe, target_cell_types, feature_colname)
+
+    plot_result <- result
+    plot_result$expected_entropy <- calculate_entropy_background3D(spe, target_cell_types, feature_colname)
+    plot_result <- reshape2::melt(plot_result, "radius", c("entropy", "expected_entropy"))
     
-    plot(result$radius, result$entropy, type = "l", col = "red", 
-         xlim = c(0, radius), ylim = c(0, max(result$entropy)),
-         xlab = "Radius", ylab = "Entropy")
-    abline(a = expected_entropy, b = 0, col = "blue", lty = 2)
-    legend(0, max(result$entropy, expected_entropy), legend = c("Observed entropy", "Expected CSR entropy"), col = c("red", "blue"), lty = c(1, 2))
+    fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
+      geom_line() +
+      labs(x = "Radius", y = "Entropy") +
+      scale_colour_discrete(name = "", labels = c("Observed entropy", "Expected CSR entropy")) +
+      theme_bw()
+    
+    methods::show(fig)
   }
   
   return(result)

@@ -23,11 +23,16 @@ calculate_cross_K_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   if (plot_image) {
-    plot(result$radius, result$observed_cross_K, type = "l", col = "red", 
-         xlim = c(0, radius), ylim = c(0, max(result)),
-         xlab = "Radius", ylab = "Cross K-function value")
-    lines(result$radius, result$expected_cross_K, type = "l", col = "blue", lty = 2)
-    legend(0, max(result), legend = c("Observed cross K", "Expected CSR cross K"), col = c("red", "blue"), lty = c(1, 2))
+    plot_result <- reshape2::melt(result, "radius", c("observed_cross_K", "expected_cross_K"))
+    
+    fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
+      geom_line() +
+      labs(x = "Radius", y = "Cross K-function value") +
+      scale_colour_discrete(name = "", labels = c("Observed cross K", "Expected CSR cross K")) +
+      theme_bw()
+    
+    methods::show(fig)
+
   }
   
   return(result)
