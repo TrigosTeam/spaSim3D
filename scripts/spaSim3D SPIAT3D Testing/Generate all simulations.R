@@ -499,13 +499,6 @@ separated_spes_table <- read.table("separated_spes_table.csv")
 setwd("~/Objects/separated_spes")
 i <- 1
 for (separated_spe_metadata in separated_spes_metadata) {
-
-  if (i <= 752 || (
-      separated_spes_table[i, "shapeA"] == separated_spes_table[i, "shapeB"] &&
-      separated_spes_table[i, "sizeA"] == separated_spes_table[i, "sizeB"])) {
-    i <- i + 1
-    next
-  }
   
   print(i)
   

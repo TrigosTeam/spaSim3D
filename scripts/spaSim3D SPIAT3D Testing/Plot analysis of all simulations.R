@@ -31,6 +31,8 @@ plot_AMD_metric <- function(spes_table, AMD_df, arrangements) {
     plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
     plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
     
+    if(i == 4) return(plot_df)
+    
     fig_bg_type <- ggplot(plot_df, aes(arrangement, AMD, group = key, col = bg_type)) +
       geom_line() +
       theme_bw() +
@@ -608,7 +610,7 @@ ringed_SAC_plot <- plot_SAC_metric(ringed_spes_table, ringed_SAC_df, c("R1", "R2
 # setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
 
-### 2.6. Ringed spes prevalence ------------------------------------------------
+### 3.6. Ringed spes prevalence ------------------------------------------------
 # Read ringed_spes_table
 setwd("~/Objects/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
@@ -621,3 +623,32 @@ ringed_prevalence_plot <- plot_prevalence(ringed_spes_table, ringed_prevalence_d
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 saveRDS(ringed_prevalence_plot, "ringed_prevalence_plot.rds")
+
+### 4.1. Separated spes APD ------------------------------------------------------
+### 4.2. Separated spes AMD -------------------------------------------------
+
+# Read separated_spes_table
+setwd("~/Objects/spes_table")
+separated_spes_table <- read.table("separated_spes_table.csv")
+
+# Read separated_AMD_df
+setwd("~/Objects/separated_spes/analysis_3D")
+separated_AMD_df <- read.table("separated_AMD_df.csv")
+
+
+# Plot when shapes and sizes are the same
+separated_spes_table_subset <- separated_spes_table[separated_spes_table$shapeA == separated_spes_table$shapeB &
+                                                      separated_spes_table$sizeA == separated_spes_table$sizeB, c("bg_type", "shapeA", "sizeA", "arrangement")]
+
+colnames(separated_spes_table_subset) <- c("bg_type", "shape", "size", "arrangement")
+
+separated_AMD_df_subset <- separated_AMD_df[separated_AMD_df$spe %in% paste("separated_spe_", rownames(separated_spes_table_subset), sep = ""), ]
+
+
+separated_AMD_plot <- plot_AMD_metric(separated_spes_table_subset, separated_AMD_df_subset, c("S1", "S2", "S3"))
+
+setwd("~/Objects/separated_spes/analysis_3D/plots")
+saveRDS(separated_AMD_plot, "separated_AMD_plot.rds")
+
+
+
