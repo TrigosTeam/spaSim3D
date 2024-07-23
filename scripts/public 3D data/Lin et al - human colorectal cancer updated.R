@@ -1,6 +1,6 @@
 ### Read updated data --------------------------------------------------------
 
-setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated")
+setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated/raw_slice_data")
 
 slice_nums <- c("002", "007", "014", "020", "025", "029",
                 "034", "039", "044", "049", "050", "051",
@@ -145,3 +145,315 @@ plot_cells_rgl_3D(df, 50000, immune_cell_types, "Cell.Type.Specific")
 plot_cells_rgl_3D(df, 50000, "Tumor/Epi.", "Cell.Type.Specific")
 
 
+### calculate_minimum distance_df functions ------------------------------
+
+calculate_minimum_distances_between_cell_types3D <- function(df,
+                                                             cell_types_of_interest = NULL,
+                                                             feature_colname = "Cell.Type",
+                                                             show_summary = TRUE,
+                                                             plot_image = TRUE) {
+  
+  if (is.null(df[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.Id column to your df")
+    df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  }
+  
+  # Select all rows in data frame which only contains the cells of interest
+  if (!is.null(cell_types_of_interest)) {
+    
+    ## If cell types have been chosen, check they are found in the spe object
+    unknown_cell_types <- setdiff(cell_types_of_interest, df[[feature_colname]])
+    if (length(unknown_cell_types) != 0) {
+      warning(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
+                    paste(unknown_cell_types, collapse = ", ")))
+      return(data.frame())
+    }
+    
+    df <- df[df[[feature_colname]] %in% cell_types_of_interest, ]
+  }
+  
+  # If there are no cells, give error
+  if (nrow(df) <= 1) {
+    warning("There must be at least 2 cells of type 'cell_types_of_interest' in spe")
+    return(data.frame())
+  }
+  
+  # Create a list of the number of cell types with their corresponding cell ID's
+  cell_types <- list()
+  for (eachType in unique(df[[feature_colname]])) {
+    cell_types[[eachType]] <- as.character(df$Cell.ID[df[[feature_colname]] == eachType])
+  }
+  
+  # Get different possible cell type combinations
+  # Each row represents a combination
+  # If a row is [1 , 2], then we are comparing cell type 1 and cell type 2
+  unique_cells <- unique(df[[feature_colname]]) # unique cell types
+  permu <- gtools::permutations(length(unique_cells), 2, repeats.allowed = TRUE)
+  
+  result <- vector()
+  
+  for (i in seq(nrow(permu))) {
+    name1 <- unique_cells[permu[i, 1]]
+    name2 <- unique_cells[permu[i, 2]]
+    
+    # Get x,y,z coords for all cells of cell_type1 and cell_type2
+    all_cell_type1_coord <- df[df[, feature_colname] == name1, 
+                               c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+    
+    all_cell_type2_coord <- df[df[, feature_colname] == name2, 
+                               c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+    
+    # Find all of closest points
+    # For each cell of cell_type1, find the closest cell of cell_type2
+    if (name1 != name2) {
+      all_closest <- RANN::nn2(data = all_cell_type2_coord, 
+                               query = all_cell_type1_coord, 
+                               k = 1)  
+    }
+    else if (nrow(all_cell_type1_coord) == 1) {
+      warning("There is only 1 '", name1, "' cell in your data. It has no nearest neighbour of the same cell type.", sep = "")
+      next
+    }
+    else {
+      # If we are comparing the same cell_type, use the second closest neighbour
+      all_closest <- RANN::nn2(data = all_cell_type2_coord, 
+                               query = all_cell_type1_coord, 
+                               k = 2)
+      all_closest[['nn.idx']] <- all_closest[['nn.idx']][, 2]
+      all_closest[['nn.dists']] <- all_closest[['nn.dists']][, 2]
+    }
+    
+    # Create the data frame containing the chosen cells and their ids, as well as
+    # the nearest cell to them and their ids, and the distance between
+    cell_type2_cell_IDs <- df[df[ , feature_colname] == name2, "Cell.ID"]
+    
+    local_dist_mins <- data.frame(
+      ref_cell_id = cell_types[[name1]],
+      ref_cell_type = name1,
+      nearest_cell_id = cell_type2_cell_IDs[as.vector(all_closest$nn.idx)],
+      nearest_cell_type = name2,
+      distance = all_closest$nn.dists
+    )
+    result <- rbind(result, local_dist_mins)
+  }
+  
+  result$pair <- paste(result$ref_cell_type, result$nearest_cell_type,sep = "/")
+  
+  # Plot
+  if (plot_image) {
+    fig <- plot_cell_distances_violin3D(result)
+    methods::show(fig)
+  }
+  
+  # Print summary
+  if (show_summary) {
+    print(summarise_distances_between_cell_types3D(result))  
+  }
+  
+  return(result)
+}
+
+summarise_distances_between_cell_types3D <- function(df) {
+  
+  pair <- distance <- NULL
+  
+  # summarise the results
+  summarised_dists <- df %>% 
+    dplyr::group_by(pair) %>%
+    dplyr::summarise(mean(distance, na.rm = TRUE), 
+                     min(distance, na.rm = TRUE), 
+                     max(distance, na.rm = TRUE),
+                     stats::median(distance, na.rm = TRUE), 
+                     stats::sd(distance, na.rm = TRUE))
+  
+  summarised_dists <- data.frame(summarised_dists)
+  
+  colnames(summarised_dists) <- c("pair", 
+                                  "mean", 
+                                  "min", 
+                                  "max", 
+                                  "median", 
+                                  "std_dev")
+  
+  for (i in seq(nrow(summarised_dists))) {
+    # Get cell_types for each pair
+    cell_types <- strsplit(summarised_dists[i,"pair"], "/")[[1]]
+    
+    summarised_dists[i, "reference"] <- cell_types[1]
+    summarised_dists[i, "target"] <- cell_types[2]
+  }
+  
+  return(summarised_dists)
+}
+
+
+## For scales parameter, use "free_x" or "free". "free_y" looks silly
+plot_cell_distances_violin3D <- function(cell_to_cell_dist, scales = "free_x") {
+  
+  # setting these variables to NULL as otherwise get "no visible binding for global variable" in R check
+  pair <- distance <- NULL
+  
+  fig <- ggplot(cell_to_cell_dist, aes(x = pair, y = distance)) + 
+    geom_violin() +
+    facet_wrap(~pair, scales=scales, strip.position="bottom") +
+    theme_bw() +
+    theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), plot.title = element_text(hjust = 0.5)) +
+    labs(title="Cell distances", x = "Reference/Target pair", y = "Distance") +
+    stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
+  
+  message("Plots show mean ± sd")
+  
+  return(fig)
+}
+
+### Get the minimum distance dfs between cell types within each slice -------------
+
+# Read data
+setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated")
+df <- readRDS("CRC1_df.rds")
+
+# Get z-coords for each slice
+slice_z_coords <- unique(df$Cell.Z.Position)
+
+# Get minimum distances between each cell type for each slice
+cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.", 
+                "Endothelial", "Muscle/Fibroblast", "Macrophage(I)", 
+                "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage",
+                "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",
+                "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg",
+                "B cells") # Excludes "Other cell type
+
+minimum_distances_slice_df <- data.frame()
+for (slice_z_coord in slice_z_coords) {
+ 
+  # Get cells which have the current slice_z_coord
+  slice_df <- df[df$Cell.Z.Position == slice_z_coord, ]
+  
+  for (cell_type in cell_types) {
+    # Get minimum_distances_df for current slice and cell
+    curr_minimum_distances_slice_df <- calculate_minimum_distances_between_cell_types3D(slice_df,
+                                                                                        cell_types_of_interest = cell_type,
+                                                                                        feature_colname = "Cell.Type.Specific",
+                                                                                        show_summary = FALSE,
+                                                                                        plot_image = FALSE) 
+    
+    if (nrow(curr_minimum_distances_slice_df) != 0) curr_minimum_distances_slice_df$slice_z_coord <- slice_z_coord
+    minimum_distances_slice_df <- rbind(minimum_distances_slice_df, curr_minimum_distances_slice_df)
+  }
+}
+
+# setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated/minimum_distances_data")
+# saveRDS(minimum_distances_slice_df, "minimum_distances_within_slices_df.rds")
+
+
+### Get 'average_minimum_distance', 'lower_quantile_minimum_distance', 'average_shortest_5_percent_minimum_distance' from minimum distance dfs ----------------
+
+# Read data
+setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated/minimum_distances_data")
+df <- readRDS("minimum_distances_within_slices_df.rds")
+
+# Get z-coords for each slice
+slice_z_coords <- unique(df$slice_z_coord)
+
+# Get minimum distances between each cell type for each slice
+cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.", 
+                "Endothelial", "Muscle/Fibroblast", "Macrophage(I)", 
+                "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage",
+                "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",
+                "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg",
+                "B cells") # Excludes "Other cell type
+
+### Define output data frames
+average_minimum_distance_within_slices_df <- data.frame(matrix(nrow = length(slice_z_coords), ncol = length(cell_types)))
+rownames(average_minimum_distance_within_slices_df) <- slice_z_coords
+colnames(average_minimum_distance_within_slices_df) <- cell_types
+
+lower_quantile_minimum_distance_within_slices_df <- data.frame(matrix(nrow = length(slice_z_coords), ncol = length(cell_types)))
+rownames(lower_quantile_minimum_distance_within_slices_df) <- slice_z_coords
+colnames(lower_quantile_minimum_distance_within_slices_df) <- cell_types
+
+average_shortest_5_percent_minimum_distance_within_slices_df <- data.frame(matrix(nrow = length(slice_z_coords), ncol = length(cell_types)))
+rownames(average_shortest_5_percent_minimum_distance_within_slices_df) <- slice_z_coords
+colnames(average_shortest_5_percent_minimum_distance_within_slices_df) <- cell_types
+
+for (slice_z_coord in slice_z_coords) {
+  
+  curr_slice_df <- df[df$slice_z_coord == slice_z_coord, ]
+  for (cell_type in cell_types) {
+    curr_slice_cell_type_df <- curr_slice_df[curr_slice_df$ref_cell_type == cell_type, ]
+    
+    # Fill in each output data frame
+    average_minimum_distance_within_slices_df[as.character(slice_z_coord), cell_type] <- mean(curr_slice_cell_type_df$distance)
+    lower_quantile_minimum_distance_within_slices_df[as.character(slice_z_coord), cell_type] <- quantile(curr_slice_cell_type_df$distance, 0.25)
+    average_shortest_5_percent_minimum_distance_within_slices_df[as.character(slice_z_coord), cell_type] <- mean(curr_slice_cell_type_df$distance[curr_slice_cell_type_df$distance <= quantile(curr_slice_cell_type_df$distance, 0.05)])
+  }  
+}
+
+setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated/minimum_distances_data")
+saveRDS(average_minimum_distance_within_slices_df, "average_minimum_distance_within_slices_df.rds")
+saveRDS(lower_quantile_minimum_distance_within_slices_df, "lower_quantile_minimum_distance_within_slices_df.rds")
+saveRDS(average_shortest_5_percent_minimum_distance_within_slices_df, "average_shortest_5_percent_minimum_distance_within_slices_df.rds")
+
+
+
+
+### Plot 'average_minimum_distance', 'lower_quantile_minimum_distance', 'average_5_percent_shortest_distance' dfs ----------------------
+
+# Read data
+setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated/minimum_distances_data")
+average_minimum_distance_within_slices_df <- readRDS("average_minimum_distance_within_slices_df.rds")
+lower_quantile_minimum_distance_within_slices_df <- readRDS("lower_quantile_minimum_distance_within_slices_df.rds")
+average_shortest_5_percent_minimum_distance_within_slices_df <- readRDS("average_shortest_5_percent_minimum_distance_within_slices_df.rds")
+
+library(ggplot2)
+# function for number of observations 
+median.n <- function(x) {
+  return(c(y = 5, label = round(median(x))))
+  # experiment with the multiplier to find the perfect position
+}
+
+# function for mean labels
+mean.n <- function(x) {
+  return(c(y = 4.5, label = round(mean(x)))) 
+  # experiment with the multiplier to find the perfect position
+}
+
+plot_minimum_distances_within_slices <- function(minimum_distances_within_slices_df, minimum_distance_metric) {
+  
+  df <- reshape2::melt(minimum_distances_within_slices_df)
+  fig <- ggplot(df, aes(variable, value, color = variable)) +
+    geom_boxplot(outliers = FALSE) +
+    # facet_wrap(~variable, scale = "free_x") +
+    stat_summary(fun.data = median.n, geom = "text", fun.y = median, colour = "black") +
+    stat_summary(fun.data = mean.n, geom = "text", fun.y = mean, colour = "red") +
+    labs(x = "cell type", y = minimum_distance_metric) +
+    scale_color_discrete(name = "cell type") +
+    theme_bw()
+  methods::show(fig)
+}
+
+plot_minimum_distances_within_slices(average_minimum_distance_within_slices_df, "average minimum distance")
+plot_minimum_distances_within_slices(lower_quantile_minimum_distance_within_slices_df, "lower quantile minimum distance")
+plot_minimum_distances_within_slices(average_shortest_5_percent_minimum_distance_within_slices_df, "average shortest 5 percent minimum distance")
+
+
+## Plotting just the averages
+minimum_distance_metrics_slice_averages <- data.frame(AMD = apply(average_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE),
+                                                      LQMD = apply(lower_quantile_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE),
+                                                      AS_5_PMD = apply(average_shortest_5_percent_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE))
+minimum_distance_metrics_slice_averages$Cell.Type <- rownames(minimum_distance_metrics_slice_averages)
+
+plot_df <- reshape2::melt(minimum_distance_metrics_slice_averages, "Cell.Type")
+cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.", 
+                "Endothelial", "Muscle/Fibroblast", "Macrophage(I)", 
+                "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage",
+                "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",
+                "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg",
+                "B cells") # Excludes "Other cell type
+plot_df$Cell.Type <- factor(plot_df$Cell.Type, cell_types)
+ggplot(plot_df, aes(Cell.Type, value, color = Cell.Type)) + 
+  geom_point(size = 5) +
+  facet_wrap(~variable, nrow = 3, scales = "free_y") +
+  labs(x = "cell type", y = "minimum distance value") +
+  scale_color_discrete(name = "cell type") +
+  theme_bw()
