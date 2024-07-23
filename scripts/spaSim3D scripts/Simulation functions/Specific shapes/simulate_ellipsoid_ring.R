@@ -30,11 +30,6 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   ## Check ring cell proportions add up to 1
   if (sum(ring_cell_proportions) != 1) stop("Sum of ring cell proportions is NOT 1")
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
-  
   # Rotation angles
   theta <- ring_properties$y_z_rotation * (pi/180) # rotation in x-axis
   alpha <- ring_properties$x_z_rotation * (pi/180) # rotation in y-axis
@@ -54,82 +49,40 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
                 ncol = 3, 
                 byrow = TRUE)
   
-  # Get number of cells
-  n_cells <- nrow(df)
   
-  # Get number of unique cluster cell types
-  n_cluster_cell_types <- length(cluster_cell_types)
   
-  # Get number of unique ring cell types
-  n_ring_cell_types <- length(ring_cell_types)
+  ## Change cell types in the ellipsoid cluster
+  spe_coords <- data.frame(spatialCoords(bg_spe))
   
-  for (i in seq_len(n_cells)) {
-    # Get x, y, z coordinate of current cell
-    x <- df[i, "Cell.X.Position"] - centre_loc[1]
-    y <- df[i, "Cell.Y.Position"] - centre_loc[2]
-    z <- df[i, "Cell.Z.Position"] - centre_loc[3]
-    
-    x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
-    y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
-    z_new <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
-    
-    # Using radii of ellipsoid
-    D1 <- (x_new / x_radius)^2 + 
-          (y_new / y_radius)^2 + 
-          (z_new / z_radius)^2
-    
-    # Using radii of ellipsoid with ring
-    D2 <- (x_new / (x_radius + ring_width))^2 + 
-          (y_new / (y_radius + ring_width))^2 + 
-          (z_new / (z_radius + ring_width))^2
-    
-    if (D1 <= 1) { 
-      # Random number will determine the cluster_cell_type of the cell
-      random <- stats::runif(1)
-      
-      # Start with the first cell
-      n <- 1
-      current_proportion <- 0
-      
-      while (n <= n_cluster_cell_types){
-        current_proportion <- current_proportion + cluster_cell_proportions[n]
-        if (random <= current_proportion) {
-          df[i, "Cell.Type"] <- cluster_cell_types[n]
-          break
-        }
-        n <- n + 1
-      }
-    }
-    else if (D2 <= 1) {
-      # Random number will determine the ring_cell_type of the cell
-      random <- stats::runif(1)
-      
-      # Start with the first cell
-      n <- 1
-      current_proportion <- 0
-      
-      while (n <= n_ring_cell_types){
-        current_proportion <- current_proportion + ring_cell_proportions[n]
-        if (random <= current_proportion) {
-          df[i, "Cell.Type"] <- ring_cell_types[n]
-          break
-        }
-        n <- n + 1
-      }
-    }
-  }
+  # Adjust x, y and z coordinates relative to the ellipsoid centre
+  x <- spe_coords$Cell.X.Position - centre_loc[1]
+  y <- spe_coords$Cell.Y.Position - centre_loc[2]
+  z <- spe_coords$Cell.Z.Position - centre_loc[3]
+  
+  # Transform  x, y and z coordinates using rotation transformation matrix
+  x <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
+  y <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
+  z <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
+  
+  # Start with cells in ring  
+  bg_spe[["Cell.Type"]] <- ifelse((x / (x_radius + ring_width))^2 +
+                                    (y / (y_radius + ring_width))^2 +
+                                    (z / (z_radius + ring_width))^2 <= 1,
+                                  sample(ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = ring_cell_proportions),
+                                  bg_spe[["Cell.Type"]])
+  
+  
+  # Then do cells in the cluster  
+  bg_spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
+                                    (y / y_radius)^2 +
+                                    (z / z_radius)^2 <= 1,
+                                  sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
+                                  bg_spe[["Cell.Type"]])
+  
   
   # Update current meta data
-  metadata <- bg_spe@metadata
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
-  metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
   
-  # Convert data frame to spe object
-  cluster_spe <- SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
-    colData = df,
-    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = metadata)
-  
-  return(cluster_spe)
+  return(bg_spe)
 }

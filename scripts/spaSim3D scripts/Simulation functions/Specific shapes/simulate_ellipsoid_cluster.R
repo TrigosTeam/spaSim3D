@@ -17,10 +17,6 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   ## Check cell proportions add up to 1
   if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
   
   # Rotation angles
   theta <- cluster_properties$y_z_rotation * (pi/180) # rotation in x-axis
@@ -41,56 +37,29 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
                 ncol = 3, 
                 byrow = TRUE)
   
-  # Get number of cells
-  n_cells <- nrow(df)
+  ## Change cell types in the ellipsoid cluster
+  spe_coords <- data.frame(spatialCoords(bg_spe))
   
-  # Get number of unique cell types
-  n_cluster_cell_types <- length(cluster_cell_types)
+  # Adjust x, y and z coordinates relative to the ellipsoid centre
+  x <- spe_coords$Cell.X.Position - centre_loc[1]
+  y <- spe_coords$Cell.Y.Position - centre_loc[2]
+  z <- spe_coords$Cell.Z.Position - centre_loc[3]
   
-  for (i in seq_len(n_cells)) {
-    # Get x, y, z coordinate of current cell
-    x <- df[i, "Cell.X.Position"] - centre_loc[1]
-    y <- df[i, "Cell.Y.Position"] - centre_loc[2]
-    z <- df[i, "Cell.Z.Position"] - centre_loc[3]
-    
-    x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
-    y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
-    z_new <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
-    
-    D <- (x_new / x_radius)^2 + 
-         (y_new / y_radius)^2 + 
-         (z_new / z_radius)^2
-    
-    if (D <= 1) { 
-      # Random number will determine the cluster_cell_type of the cell
-      random <- stats::runif(1)
-      
-      # Start with the first cell
-      n <- 1
-      current_proportion <- 0
-      
-      while (n <= n_cluster_cell_types) {
-        current_proportion <- current_proportion + cluster_cell_proportions[n]
-        if (random <= current_proportion) {
-          df[i, "Cell.Type"] <- cluster_cell_types[n]
-          break
-        }
-        n <- n + 1
-      }
-    }
-  }
+  # Transform  x, y and z coordinates using rotation transformation matrix
+  x <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
+  y <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
+  z <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
+  
+  bg_spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
+                                    (y / y_radius)^2 +
+                                    (z / z_radius)^2 <= 1,
+                                  sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
+                                  bg_spe[["Cell.Type"]])
+  
   
   # Update current meta data
-  metadata <- bg_spe@metadata
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
-  metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
   
-  # Convert data frame to spe object
-  cluster_spe <- SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
-    colData = df,
-    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = metadata)
-  
-  return(cluster_spe)
+  return(bg_spe)
 }

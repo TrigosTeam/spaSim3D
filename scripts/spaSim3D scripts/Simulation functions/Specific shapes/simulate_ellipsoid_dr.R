@@ -43,11 +43,6 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   ## Check outer ring cell proportions add up to 1
   if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
-  
   # Rotation angles
   theta <- dr_properties$y_z_rotation * (pi/180) # rotation in x-axis
   alpha <- dr_properties$x_z_rotation * (pi/180) # rotation in y-axis
@@ -67,107 +62,45 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
                 ncol = 3, 
                 byrow = TRUE)
   
-  # Get number of cells
-  n_cells <- nrow(df)
+  ## Change cell types in the ellipsoid cluster
+  spe_coords <- data.frame(spatialCoords(bg_spe))
   
-  # Get number of unique cluster cell types
-  n_cluster_cell_types <- length(cluster_cell_types)
+  # Adjust x, y and z coordinates relative to the ellipsoid centre
+  x <- spe_coords$Cell.X.Position - centre_loc[1]
+  y <- spe_coords$Cell.Y.Position - centre_loc[2]
+  z <- spe_coords$Cell.Z.Position - centre_loc[3]
   
-  # Get number of unique inner ring cell types
-  n_inner_ring_cell_types <- length(inner_ring_cell_types)
+  # Transform  x, y and z coordinates using rotation transformation matrix
+  x <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
+  y <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
+  z <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
   
-  # Get number of unique outer ring cell types
-  n_outer_ring_cell_types <- length(outer_ring_cell_types)
   
-  for (i in seq_len(n_cells)) {
-    # Get x, y, z coordinate of current cell
-    x <- df[i, "Cell.X.Position"] - centre_loc[1]
-    y <- df[i, "Cell.Y.Position"] - centre_loc[2]
-    z <- df[i, "Cell.Z.Position"] - centre_loc[3]
+  # Start with cells in outer ring  
+  bg_spe[["Cell.Type"]] <- ifelse((x / (x_radius + inner_ring_width + outer_ring_width))^2 +
+                                    (y / (y_radius + inner_ring_width + outer_ring_width))^2 +
+                                    (z / (z_radius + inner_ring_width + outer_ring_width))^2 <= 1,
+                                  sample(outer_ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = outer_ring_cell_proportions),
+                                  bg_spe[["Cell.Type"]])
     
-    x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
-    y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
-    z_new <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
-    
-    # Using radius of ellipsoid
-    D1 <- (x_new/x_radius)^2 + 
-          (y_new/y_radius)^2 + 
-          (z_new/z_radius)^2
-    
-    # Using radius of ellipsoid with inner ring
-    D2 <- (x_new/(x_radius + inner_ring_width))^2 + 
-          (y_new/(y_radius + inner_ring_width))^2 + 
-          (z_new/(z_radius + inner_ring_width))^2
-    
-    # Using radius of ellipsoid with inner and outer ring
-    D3 <- (x_new/(x_radius + inner_ring_width + outer_ring_width))^2 + 
-          (y_new/(y_radius + inner_ring_width + outer_ring_width))^2 + 
-          (z_new/(z_radius + inner_ring_width + outer_ring_width))^2
-    
-    if (D1 <= 1) { 
-      # Random number will determine the cluster_cell_type of the cell
-      random <- stats::runif(1)
-      
-      # Start with the first cell
-      n <- 1
-      current_proportion <- 0
-      
-      while (n <= n_cluster_cell_types){
-        current_proportion <- current_proportion + cluster_cell_proportions[n]
-        if (random <= current_proportion) {
-          df[i, "Cell.Type"] <- cluster_cell_types[n]
-          break
-        }
-        n <- n + 1
-      }
-    }
-    else if (D2 <= 1) {
-      # Random number will determine the inner_ring_cell_type of the cell
-      random <- stats::runif(1)
-      
-      # Start with the first cell
-      n <- 1
-      current_proportion <- 0
-      
-      while (n <= n_inner_ring_cell_types){
-        current_proportion <- current_proportion + inner_ring_cell_proportions[n]
-        if (random <= current_proportion) {
-          df[i, "Cell.Type"] <- inner_ring_cell_types[n]
-          break
-        }
-        n <- n + 1
-      }
-    }
-    else if (D3 <= 1) {
-      # Random number will determine the outer_ring_cell_type of the cell
-      random <- stats::runif(1)
-      
-      # Start with the first cell
-      n <- 1
-      current_proportion <- 0
-      
-      while (n <= n_outer_ring_cell_types){
-        current_proportion <- current_proportion + outer_ring_cell_proportions[n]
-        if (random <= current_proportion) {
-          df[i, "Cell.Type"] <- outer_ring_cell_types[n]
-          break
-        }
-        n <- n + 1
-      }
-    }
-  }
+  # Then do cells in inner ring  
+  bg_spe[["Cell.Type"]] <- ifelse((x / (x_radius + inner_ring_width))^2 +
+                                    (y / (y_radius + inner_ring_width))^2 +
+                                    (z / (z_radius + inner_ring_width))^2 <= 1,
+                                  sample(inner_ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = inner_ring_cell_proportions),
+                                  bg_spe[["Cell.Type"]])
+  
+  
+  # Then do cells in the cluster  
+  bg_spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
+                                    (y / y_radius)^2 +
+                                    (z / z_radius)^2 <= 1,
+                                  sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
+                                  bg_spe[["Cell.Type"]])
   
   # Update current meta data
-  metadata <- bg_spe@metadata
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
-  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
   
-  # Convert data frame to spe object
-  cluster_spe <- SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
-    colData = df,
-    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = metadata)
-  
-  return(cluster_spe)
+  return(bg_spe)
 }
