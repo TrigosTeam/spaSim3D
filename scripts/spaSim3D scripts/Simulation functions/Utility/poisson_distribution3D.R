@@ -34,7 +34,9 @@ poisson_distribution3D <- function(n_cells, length, width, height)  {
   y <- y * width / nCols
   z <- z * height / nLays
   
-  df <- data.frame(x = x, y = y, z = z)
+  df <- data.frame("Cell.X.Position" = x, 
+                   "Cell.Y.Position" = y, 
+                   "Cell.Z.Position" = z)
   
   return(df)
 }
