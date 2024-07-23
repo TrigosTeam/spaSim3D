@@ -83,7 +83,7 @@ print(cross_K)
 cross_K_gradient <- calculate_cross_K_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_type = "Immune",
-                                                 radii = 100)
+                                                 radii = 50)
 
 plot_cross_K_gradient_ratio3D(cross_K_gradient_results = cross_K_gradient)
 
@@ -121,8 +121,8 @@ entropy_gradient <- calculate_entropy_gradient3D(spe1,
 
 ### Determine entropy grid metrics
 entropy_grid_metrics <- determine_entropy_grid_metrics3D(spe1,
-                                                         n_splits = 10,
-                                                         cell_types_of_interest = c("A", "B"),
+                                                         n_splits = 8,
+                                                         cell_types_of_interest = c("Tumour", "Immune"),
                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(entropy_grid_metrics, "entropy")
 
