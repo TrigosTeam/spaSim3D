@@ -34,7 +34,7 @@ metadata_bg_r <- spe_metadata_background_template("random")
 
 # Change background metadata
 metadata_bg_r$background$minimum_distance_between_cells <- 0
-metadata_bg_r$background$n_cells <- 11000
+metadata_bg_r$background$n_cells <- 15000
 
 # Get spe from background metadata
 # spe_bg1 <- simulate_spe_metadata3D(metadata_bg_r)
@@ -74,9 +74,8 @@ plot_cells3D(spe_clusters1,
              plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "tomato"))
 
 
-
-
-
+metadata_new <- spe_metadata_cluster_template(metadata_bg_r, "double ring", "Cylinder")
+spe_clusters1 <- add_spe_metadata3D(spe_bg1, metadata_new)
 
 
 
