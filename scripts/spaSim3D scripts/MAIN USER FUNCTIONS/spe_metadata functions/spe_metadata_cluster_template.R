@@ -33,8 +33,8 @@ spe_metadata_cluster_template <- function(background_metadata, cluster_type, sha
     cluster_metadata <- list(shape = "Network",
                              cluster_cell_types = c("Tumour", "Others"),
                              cluster_cell_proportions = c(0.95, 0.05),
-                             n_edges = 15,
-                             width = 8,
+                             n_edges = 18,
+                             width = 9,
                              centre_loc = c(50, 50, 50),
                              radius = 50)
   }
