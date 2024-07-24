@@ -204,11 +204,11 @@ prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
 
 mixed_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion")
 mixed_prop_SAC_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(prop_cell_types), ncol = length(mixed_prop_SAC_df_colnames)))
-colnames(mixed_SAC_df) <- mixed_prop_SAC_df_colnames
+colnames(mixed_prop_SAC_df) <- mixed_prop_SAC_df_colnames
 
 mixed_prop_prevalence_df_colnames <- c("spe", "reference", "target", thresholds_colnames)
 mixed_prop_prevalence_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(prop_cell_types), ncol = length(mixed_prop_prevalence_df_colnames)))
-colnames(mixed_prevalence_df) <- mixed_prop_prevalence_df_colnames
+colnames(mixed_prop_prevalence_df) <- mixed_prop_prevalence_df_colnames
 
 
 entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
@@ -231,55 +231,61 @@ for (i in seq(n_mixed_spes)) {
   mixed_spe_file_name <- paste(mixed_spe_name, ".rds", sep = "")
   mixed_spe <- readRDS(mixed_spe_file_name)
   
-  # Get grid metrics
-  proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(mixed_spe, 
-                                                                      n_splits,
-                                                                      cell_types[2], 
-                                                                      cell_types[1], # Assume A is target, but doesn't matter
-                                                                      plot_image = F)
-  entropy_grid_metrics <- determine_entropy_grid_metrics3D(mixed_spe,
-                                                           n_splits,
-                                                           cell_types,
-                                                           plot_image = F)
-  
-  # Calculate SACs
-  proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
-                                                        "proportion",
-                                                        "binary")
-  entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics,
-                                                     "entropy",
-                                                     "binary")
-  
-  
-  # Calculate prevalence gradients
-  proportion_prevalence_data <- determine_prevalence_gradient3D(proportion_grid_metrics,
+  # Get proportion grid metrics
+  for (j in seq_len(nrow(prop_cell_types))) {
+    proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(mixed_spe, 
+                                                                        n_splits,
+                                                                        strsplit(prop_cell_types$ref[j], ",")[[1]], 
+                                                                        strsplit(prop_cell_types$tar[j], ",")[[1]],
+                                                                        plot_image = F)
+    
+    proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
+                                                          "proportion",
+                                                          "binary")
+    
+    proportion_prevalence_df <- determine_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
+                                                                show_AUC = T,
                                                                 plot_image = F)
-  entropy_prevalence_data <- determine_prevalence_gradient3D(entropy_grid_metrics,
-                                                             "entropy",
+    
+    index <- nrow(prop_cell_types) * (i - 1) + j
+    mixed_prop_SAC_df[index, c("spe", "reference", "target")] <- c(mixed_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
+    mixed_prop_SAC_df[index, "proportion"] <- proportion_SAC
+    
+    mixed_prop_prevalence_df[index, c("spe", "reference", "target")] <- c(mixed_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
+    mixed_prop_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_df$prevalence
+  }
+  
+  # Get entropy grid metrics
+  for (j in seq_len(nrow(entropy_cell_types))) {
+    entropy_grid_metrics <- determine_entropy_grid_metrics3D(mixed_spe, 
+                                                             n_splits,
+                                                             strsplit(entropy_cell_types$cell_types[j], ",")[[1]], 
                                                              plot_image = F)
-  
-
-  # Add SACs to mixed_SAC_df
-  mixed_SAC_df[i, "spe"] <- mixed_spe_name
-  mixed_SAC_df[i, "proportion"] <- proportion_SAC
-  mixed_SAC_df[i, "entropy"] <- entropy_SAC
-  
-  
-  ## Add prevalences to mixed_prevalence_df
-  
-  # Fill in 2 rows at a time (proportion and entropy)
-  index <- 2 * (i - 1) + 1 # index is 1, 3, 5, 7 ...
-  mixed_prevalence_df[index:(index + 1), "spe"] <- mixed_spe_name
-  mixed_prevalence_df[index:(index + 1), "metric"] <- c("proportion", "entropy")
-  
-  mixed_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_data$prevalence
-  mixed_prevalence_df[index + 1, thresholds_colnames] <- entropy_prevalence_data$prevalence
+    
+    entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics, 
+                                                       "entropy",
+                                                       "binary")
+    
+    entropy_prevalence_df <- determine_prevalence_gradient3D(entropy_grid_metrics,
+                                                             "entropy",
+                                                             show_AUC = T,
+                                                             plot_image = F)
+    
+    index <- nrow(entropy_cell_types) * (i - 1) + j
+    mixed_entropy_SAC_df[index, c("spe", "cell_types")] <- c(mixed_spe_name, entropy_cell_types$cell_types[j])
+    mixed_entropy_SAC_df[index, "entropy"] <- entropy_SAC
+    
+    mixed_entropy_prevalence_df[index, c("spe", "cell_types")] <- c(mixed_spe_name, entropy_cell_types$cell_types[j])
+    mixed_entropy_prevalence_df[index, thresholds_colnames] <- entropy_prevalence_df$prevalence
+  }
 }
 
 setwd("~/Objects/mixed_spes/analysis_3D")
-write.table(mixed_SAC_df, file = "mixed_SAC_df.csv")
-# write.table(mixed_prevalence_df, file = "mixed_prevalence_df.csv")
+write.table(mixed_prop_SAC_df, file = "mixed_prop_SAC_df.csv")
+write.table(mixed_prop_prevalence_df, file = "mixed_prop_prevalence_df.csv")
+write.table(mixed_entropy_SAC_df, file = "mixed_entropy_SAC_df.csv")
+write.table(mixed_entropy_prevalence_df, file = "mixed_entropy_prevalence_df.csv")
 
 
 ### 2.1. Ringed spes - cc distance metrics ----------------------------------------
@@ -479,16 +485,30 @@ ringed_spes_table <- read.table("ringed_spes_table.csv")
 n_ringed_spes <- nrow(ringed_spes_table)
 
 # Define SAC and prevalence data frames as well as constants
-cell_types <- c("A", "B")
 n_splits <- 10
-
-ringed_SAC_df <- data.frame(matrix(nrow = n_ringed_spes, ncol = 3))
-colnames(ringed_SAC_df) <- c("spe", "proportion", "entropy")
-
 thresholds <- seq(0.01, 1, 0.01)
 thresholds_colnames <- paste("t", thresholds, sep = "")
-ringed_prevalence_df <- data.frame(matrix(nrow = n_ringed_spes, ncol = 2 + length(thresholds)))
-colnames(ringed_prevalence_df) <- c("spe", "metric", thresholds_colnames)
+
+prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+
+ringed_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion")
+ringed_prop_SAC_df <- data.frame(matrix(nrow = n_ringed_spes * nrow(prop_cell_types), ncol = length(ringed_prop_SAC_df_colnames)))
+colnames(ringed_prop_SAC_df) <- ringed_prop_SAC_df_colnames
+
+ringed_prop_prevalence_df_colnames <- c("spe", "reference", "target", thresholds_colnames)
+ringed_prop_prevalence_df <- data.frame(matrix(nrow = n_ringed_spes * nrow(prop_cell_types), ncol = length(ringed_prop_prevalence_df_colnames)))
+colnames(ringed_prop_prevalence_df) <- ringed_prop_prevalence_df_colnames
+
+
+entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+
+ringed_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy")
+ringed_entropy_SAC_df <- data.frame(matrix(nrow = n_ringed_spes * nrow(entropy_cell_types), ncol = length(ringed_entropy_SAC_df_colnames)))
+colnames(ringed_entropy_SAC_df) <- ringed_entropy_SAC_df_colnames
+
+ringed_entropy_prevalence_df_colnames <- c("spe", "cell_types", thresholds_colnames)
+ringed_entropy_prevalence_df <- data.frame(matrix(nrow = n_ringed_spes * nrow(entropy_cell_types), ncol = length(ringed_entropy_prevalence_df_colnames)))
+colnames(ringed_entropy_prevalence_df) <- ringed_entropy_prevalence_df_colnames
 
 
 # Loop through each ringed spes and get SAC and prevalence
@@ -500,55 +520,61 @@ for (i in seq(n_ringed_spes)) {
   ringed_spe_file_name <- paste(ringed_spe_name, ".rds", sep = "")
   ringed_spe <- readRDS(ringed_spe_file_name)
   
-  # Get grid metrics
-  proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(ringed_spe, 
-                                                                      n_splits,
-                                                                      cell_types[2], 
-                                                                      cell_types[1], # Assume A is target, but doesn't matter
-                                                                      plot_image = F)
-  entropy_grid_metrics <- determine_entropy_grid_metrics3D(ringed_spe,
-                                                           n_splits,
-                                                           cell_types,
-                                                           plot_image = F)
-  
-  # Calculate SACs
-  proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
-                                                        "proportion",
-                                                        "binary")
-  entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics,
-                                                     "entropy",
-                                                     "binary")
-  
-  
-  # Calculate prevalence gradients
-  proportion_prevalence_data <- determine_prevalence_gradient3D(proportion_grid_metrics,
+  # Get proportion grid metrics
+  for (j in seq_len(nrow(prop_cell_types))) {
+    proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(ringed_spe, 
+                                                                        n_splits,
+                                                                        strsplit(prop_cell_types$ref[j], ",")[[1]], 
+                                                                        strsplit(prop_cell_types$tar[j], ",")[[1]],
+                                                                        plot_image = F)
+    
+    proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
+                                                          "proportion",
+                                                          "binary")
+    
+    proportion_prevalence_df <- determine_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
+                                                                show_AUC = T,
                                                                 plot_image = F)
-  entropy_prevalence_data <- determine_prevalence_gradient3D(entropy_grid_metrics,
-                                                             "entropy",
+    
+    index <- nrow(prop_cell_types) * (i - 1) + j
+    ringed_prop_SAC_df[index, c("spe", "reference", "target")] <- c(ringed_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
+    ringed_prop_SAC_df[index, "proportion"] <- proportion_SAC
+    
+    ringed_prop_prevalence_df[index, c("spe", "reference", "target")] <- c(ringed_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
+    ringed_prop_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_df$prevalence
+  }
+  
+  # Get entropy grid metrics
+  for (j in seq_len(nrow(entropy_cell_types))) {
+    entropy_grid_metrics <- determine_entropy_grid_metrics3D(ringed_spe, 
+                                                             n_splits,
+                                                             strsplit(entropy_cell_types$cell_types[j], ",")[[1]], 
                                                              plot_image = F)
-  
-  
-  # Add SACs to ringed_SAC_df
-  ringed_SAC_df[i, "spe"] <- ringed_spe_name
-  ringed_SAC_df[i, "proportion"] <- proportion_SAC
-  ringed_SAC_df[i, "entropy"] <- entropy_SAC
-  
-  
-  ## Add prevalences to ringed_prevalence_df
-  
-  # Fill in 2 rows at a time (proportion and entropy)
-  index <- 2 * (i - 1) + 1 # index is 1, 3, 5, 7 ...
-  ringed_prevalence_df[index:(index + 1), "spe"] <- ringed_spe_name
-  ringed_prevalence_df[index:(index + 1), "metric"] <- c("proportion", "entropy")
-  
-  ringed_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_data$prevalence
-  ringed_prevalence_df[index + 1, thresholds_colnames] <- entropy_prevalence_data$prevalence
+    
+    entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics, 
+                                                       "entropy",
+                                                       "binary")
+    
+    entropy_prevalence_df <- determine_prevalence_gradient3D(entropy_grid_metrics,
+                                                             "entropy",
+                                                             show_AUC = T,
+                                                             plot_image = F)
+    
+    index <- nrow(entropy_cell_types) * (i - 1) + j
+    ringed_entropy_SAC_df[index, c("spe", "cell_types")] <- c(ringed_spe_name, entropy_cell_types$cell_types[j])
+    ringed_entropy_SAC_df[index, "entropy"] <- entropy_SAC
+    
+    ringed_entropy_prevalence_df[index, c("spe", "cell_types")] <- c(ringed_spe_name, entropy_cell_types$cell_types[j])
+    ringed_entropy_prevalence_df[index, thresholds_colnames] <- entropy_prevalence_df$prevalence
+  }
 }
 
 setwd("~/Objects/ringed_spes/analysis_3D")
-write.table(ringed_SAC_df, file = "ringed_SAC_df.csv")
-write.table(ringed_prevalence_df, file = "ringed_prevalence_df.csv")
+write.table(ringed_prop_SAC_df, file = "ringed_prop_SAC_df.csv")
+write.table(ringed_prop_prevalence_df, file = "ringed_prop_prevalence_df.csv")
+write.table(ringed_entropy_SAC_df, file = "ringed_entropy_SAC_df.csv")
+write.table(ringed_entropy_prevalence_df, file = "ringed_entropy_prevalence_df.csv")
 
 
 ### 3.1. Separated spes - cc distance metrics ----------------------------------------
@@ -756,16 +782,30 @@ separated_spes_table <- read.table("separated_spes_table.csv")
 n_separated_spes <- nrow(separated_spes_table)
 
 # Define SAC and prevalence data frames as well as constants
-cell_types <- c("A", "B")
 n_splits <- 10
-
-separated_SAC_df <- data.frame(matrix(nrow = n_separated_spes, ncol = 3))
-colnames(separated_SAC_df) <- c("spe", "proportion", "entropy")
-
 thresholds <- seq(0.01, 1, 0.01)
 thresholds_colnames <- paste("t", thresholds, sep = "")
-separated_prevalence_df <- data.frame(matrix(nrow = n_separated_spes, ncol = 2 + length(thresholds)))
-colnames(separated_prevalence_df) <- c("spe", "metric", thresholds_colnames)
+
+prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+
+separated_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion")
+separated_prop_SAC_df <- data.frame(matrix(nrow = n_separated_spes * nrow(prop_cell_types), ncol = length(separated_prop_SAC_df_colnames)))
+colnames(separated_prop_SAC_df) <- separated_prop_SAC_df_colnames
+
+separated_prop_prevalence_df_colnames <- c("spe", "reference", "target", thresholds_colnames)
+separated_prop_prevalence_df <- data.frame(matrix(nrow = n_separated_spes * nrow(prop_cell_types), ncol = length(separated_prop_prevalence_df_colnames)))
+colnames(separated_prop_prevalence_df) <- separated_prop_prevalence_df_colnames
+
+
+entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+
+separated_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy")
+separated_entropy_SAC_df <- data.frame(matrix(nrow = n_separated_spes * nrow(entropy_cell_types), ncol = length(separated_entropy_SAC_df_colnames)))
+colnames(separated_entropy_SAC_df) <- separated_entropy_SAC_df_colnames
+
+separated_entropy_prevalence_df_colnames <- c("spe", "cell_types", thresholds_colnames)
+separated_entropy_prevalence_df <- data.frame(matrix(nrow = n_separated_spes * nrow(entropy_cell_types), ncol = length(separated_entropy_prevalence_df_colnames)))
+colnames(separated_entropy_prevalence_df) <- separated_entropy_prevalence_df_colnames
 
 
 # Loop through each separated spes and get SAC and prevalence
@@ -777,55 +817,61 @@ for (i in seq(n_separated_spes)) {
   separated_spe_file_name <- paste(separated_spe_name, ".rds", sep = "")
   separated_spe <- readRDS(separated_spe_file_name)
   
-  # Get grid metrics
-  proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(separated_spe, 
-                                                                      n_splits,
-                                                                      cell_types[2], 
-                                                                      cell_types[1], # Assume A is target, but doesn't matter
-                                                                      plot_image = F)
-  entropy_grid_metrics <- determine_entropy_grid_metrics3D(separated_spe,
-                                                           n_splits,
-                                                           cell_types,
-                                                           plot_image = F)
-  
-  # Calculate SACs
-  proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
-                                                        "proportion",
-                                                        "binary")
-  entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics,
-                                                     "entropy",
-                                                     "binary")
-  
-  
-  # Calculate prevalence gradients
-  proportion_prevalence_data <- determine_prevalence_gradient3D(proportion_grid_metrics,
+  # Get proportion grid metrics
+  for (j in seq_len(nrow(prop_cell_types))) {
+    proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(separated_spe, 
+                                                                        n_splits,
+                                                                        strsplit(prop_cell_types$ref[j], ",")[[1]], 
+                                                                        strsplit(prop_cell_types$tar[j], ",")[[1]],
+                                                                        plot_image = F)
+    
+    proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
+                                                          "proportion",
+                                                          "binary")
+    
+    proportion_prevalence_df <- determine_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
+                                                                show_AUC = T,
                                                                 plot_image = F)
-  entropy_prevalence_data <- determine_prevalence_gradient3D(entropy_grid_metrics,
-                                                             "entropy",
+    
+    index <- nrow(prop_cell_types) * (i - 1) + j
+    separated_prop_SAC_df[index, c("spe", "reference", "target")] <- c(separated_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
+    separated_prop_SAC_df[index, "proportion"] <- proportion_SAC
+    
+    separated_prop_prevalence_df[index, c("spe", "reference", "target")] <- c(separated_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
+    separated_prop_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_df$prevalence
+  }
+  
+  # Get entropy grid metrics
+  for (j in seq_len(nrow(entropy_cell_types))) {
+    entropy_grid_metrics <- determine_entropy_grid_metrics3D(separated_spe, 
+                                                             n_splits,
+                                                             strsplit(entropy_cell_types$cell_types[j], ",")[[1]], 
                                                              plot_image = F)
-  
-  
-  # Add SACs to separated_SAC_df
-  separated_SAC_df[i, "spe"] <- separated_spe_name
-  separated_SAC_df[i, "proportion"] <- proportion_SAC
-  separated_SAC_df[i, "entropy"] <- entropy_SAC
-  
-  
-  ## Add prevalences to separated_prevalence_df
-  
-  # Fill in 2 rows at a time (proportion and entropy)
-  index <- 2 * (i - 1) + 1 # index is 1, 3, 5, 7 ...
-  separated_prevalence_df[index:(index + 1), "spe"] <- separated_spe_name
-  separated_prevalence_df[index:(index + 1), "metric"] <- c("proportion", "entropy")
-  
-  separated_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_data$prevalence
-  separated_prevalence_df[index + 1, thresholds_colnames] <- entropy_prevalence_data$prevalence
+    
+    entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics, 
+                                                       "entropy",
+                                                       "binary")
+    
+    entropy_prevalence_df <- determine_prevalence_gradient3D(entropy_grid_metrics,
+                                                             "entropy",
+                                                             show_AUC = T,
+                                                             plot_image = F)
+    
+    index <- nrow(entropy_cell_types) * (i - 1) + j
+    separated_entropy_SAC_df[index, c("spe", "cell_types")] <- c(separated_spe_name, entropy_cell_types$cell_types[j])
+    separated_entropy_SAC_df[index, "entropy"] <- entropy_SAC
+    
+    separated_entropy_prevalence_df[index, c("spe", "cell_types")] <- c(separated_spe_name, entropy_cell_types$cell_types[j])
+    separated_entropy_prevalence_df[index, thresholds_colnames] <- entropy_prevalence_df$prevalence
+  }
 }
 
 setwd("~/Objects/separated_spes/analysis_3D")
-write.table(separated_SAC_df, file = "separated_SAC_df.csv")
-write.table(separated_prevalence_df, file = "separated_prevalence_df.csv")
+write.table(separated_prop_SAC_df, file = "separated_prop_SAC_df.csv")
+write.table(separated_prop_prevalence_df, file = "separated_prop_prevalence_df.csv")
+write.table(separated_entropy_SAC_df, file = "separated_entropy_SAC_df.csv")
+write.table(separated_entropy_prevalence_df, file = "separated_entropy_prevalence_df.csv")
 
 
 ### Spacer --------------------------------
