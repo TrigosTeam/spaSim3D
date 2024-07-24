@@ -1,5 +1,6 @@
 determine_prevalence_gradient3D <- function(grid_data,
                                             metric_colname,
+                                            show_AUC = T,
                                             plot_image = T) {
   
   # Thresholds range from 0 to 1
@@ -16,6 +17,11 @@ determine_prevalence_gradient3D <- function(grid_data,
                                                          threshold))
   }
   result$prevalence <- prevalences
+  
+  # Show AUC of prevalence gradient graph
+  if (show_AUC) {
+    print(paste("AUC:", round(calculate_prevalence_gradient_AUC3D(result), 2)))
+  }
   
   # Plot
   if (plot_image) {

@@ -1293,6 +1293,7 @@ determine_prevalence3D <- function(grid_data,
 
 determine_prevalence_gradient3D <- function(grid_data,
                                             metric_colname,
+                                            show_AUC = T,
                                             plot_image = T) {
   
   # Thresholds range from 0 to 1
@@ -1310,6 +1311,11 @@ determine_prevalence_gradient3D <- function(grid_data,
   }
   result$prevalence <- prevalences
   
+  # Show AUC of prevalence gradient graph
+  if (show_AUC) {
+    print(paste("AUC:", round(calculate_prevalence_gradient_AUC3D(result), 2)))
+  }
+  
   # Plot
   if (plot_image) {
     fig <- ggplot(result, aes(threshold, prevalence)) +
@@ -1324,6 +1330,12 @@ determine_prevalence_gradient3D <- function(grid_data,
   }
   
   return(result)
+}
+
+
+calculate_prevalence_gradient_AUC3D <- function(prevalence_gradient_df) {
+  
+  return(sum(prevalence_gradient_df$prevalence) * 0.01)
 }
 
 
