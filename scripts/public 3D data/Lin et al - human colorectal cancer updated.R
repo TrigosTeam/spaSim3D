@@ -438,22 +438,26 @@ plot_minimum_distances_within_slices(average_shortest_5_percent_minimum_distance
 
 
 ## Plotting just the averages
-minimum_distance_metrics_slice_averages <- data.frame(AMD = apply(average_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE),
-                                                      LQMD = apply(lower_quantile_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE),
-                                                      AS_5_PMD = apply(average_shortest_5_percent_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE))
-minimum_distance_metrics_slice_averages$Cell.Type <- rownames(minimum_distance_metrics_slice_averages)
-
-plot_df <- reshape2::melt(minimum_distance_metrics_slice_averages, "Cell.Type")
 cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.", 
                 "Endothelial", "Muscle/Fibroblast", "Macrophage(I)", 
                 "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage",
                 "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",
                 "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg",
                 "B cells") # Excludes "Other cell type
+
+minimum_distance_metrics_slice_averages <- data.frame(AMD = apply(average_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE),
+                                                      LQMD = apply(lower_quantile_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE),
+                                                      AS_5_PMD = apply(average_shortest_5_percent_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE))
+minimum_distance_metrics_slice_averages$log_n_cells <- log(as.numeric(table(df$Cell.Type.Specific)[cell_types]), 2)
+minimum_distance_metrics_slice_averages$Cell.Type <- rownames(minimum_distance_metrics_slice_averages)
+
+plot_df <- reshape2::melt(minimum_distance_metrics_slice_averages, "Cell.Type")
+
 plot_df$Cell.Type <- factor(plot_df$Cell.Type, cell_types)
 ggplot(plot_df, aes(Cell.Type, value, color = Cell.Type)) + 
   geom_point(size = 5) +
-  facet_wrap(~variable, nrow = 3, scales = "free_y") +
+  facet_wrap(~variable, nrow = 4, scales = "free_y") +
   labs(x = "cell type", y = "minimum distance value") +
   scale_color_discrete(name = "cell type") +
   theme_bw()
+
