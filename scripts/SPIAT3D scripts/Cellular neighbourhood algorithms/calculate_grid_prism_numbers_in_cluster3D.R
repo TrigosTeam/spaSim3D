@@ -3,7 +3,7 @@
 ## If it does, add it to the answer
 ## Keep doing this until adjacent grid prisms don't have above 25%, or if you hit a boundary, or it has already been removed
 ## Return a vector containing all the grid prism numbers which COULD be part of the cluster
-determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number, 
+calculate_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number, 
                                                       grid_prism_cell_proportions, 
                                                       maximum_cell_proportion,
                                                       n_splits,
@@ -27,7 +27,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Right
     if (curr_grid_prism_number%%n_splits != 0) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + 1,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + 1,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -36,7 +36,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Left
     if (curr_grid_prism_number%%n_splits != 1) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - 1,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - 1,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -45,7 +45,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Forward
     if ((curr_grid_prism_number - 1)%%(n_splits^2) < n_splits^2 - n_splits) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + n_splits,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + n_splits,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -54,7 +54,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Backward
     if (curr_grid_prism_number%%(n_splits^2) > n_splits) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - n_splits,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - n_splits,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -63,7 +63,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Up
     if (curr_grid_prism_number <= n_splits^3 - n_splits^2) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + n_splits^2,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + n_splits^2,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -72,7 +72,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Down
     if (curr_grid_prism_number > n_splits^2) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - n_splits^2,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - n_splits^2,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,

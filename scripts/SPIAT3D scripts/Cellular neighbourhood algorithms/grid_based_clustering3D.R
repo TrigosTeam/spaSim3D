@@ -79,7 +79,7 @@ grid_based_clustering3D <- function(spe,
     # Else, find all the grid prisms adjacent to the maximum cell proportion grid prism. 
     # These are potentially apart of the cluster
     # Adjacent grid prisms must have cell proportion > 0.25 * max cell proportion
-    grid_prisms_in_cluster <- determine_grid_prism_numbers_in_cluster3D(maximum_cell_proportion_prism_number,
+    grid_prisms_in_cluster <- calculate_grid_prism_numbers_in_cluster3D(maximum_cell_proportion_prism_number,
                                                                         grid_prism_cell_proportions,
                                                                         maximum_cell_proportion,
                                                                         n_splits,

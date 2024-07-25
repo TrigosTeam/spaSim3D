@@ -1,4 +1,4 @@
-determine_prevalence3D <- function(grid_data,
+calculate_prevalence3D <- function(grid_data,
                                    metric_colname,
                                    threshold,
                                    above = TRUE) {

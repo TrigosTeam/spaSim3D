@@ -1,4 +1,4 @@
-determine_cell_proportion_grid_metrics3D <- function(spe, 
+calculate_cell_proportion_grid_metrics3D <- function(spe, 
                                                      n_splits,
                                                      reference_cell_types,
                                                      target_cell_types,

@@ -1,4 +1,4 @@
-determine_entropy_grid_metrics3D <- function(spe, 
+calculate_entropy_grid_metrics3D <- function(spe, 
                                              n_splits,
                                              cell_types_of_interest,
                                              feature_colname = "Cell.Type",

@@ -1105,7 +1105,7 @@ get_spe_grid_metrics3D <- function(spe,
 }
 
 
-determine_cell_proportion_grid_metrics3D <- function(spe, 
+calculate_cell_proportion_grid_metrics3D <- function(spe, 
                                                      n_splits,
                                                      reference_cell_types,
                                                      target_cell_types,
@@ -1169,7 +1169,7 @@ determine_cell_proportion_grid_metrics3D <- function(spe,
 
 
 
-determine_entropy_grid_metrics3D <- function(spe, 
+calculate_entropy_grid_metrics3D <- function(spe, 
                                              n_splits,
                                              cell_types_of_interest,
                                              feature_colname = "Cell.Type",
@@ -1273,7 +1273,7 @@ plot_grid_metrics_discrete3D <- function(grid_metrics, metric_colname) {
 }
 
 
-determine_prevalence3D <- function(grid_data,
+calculate_prevalence3D <- function(grid_data,
                                    metric_colname,
                                    threshold,
                                    above = TRUE) {
@@ -1291,7 +1291,7 @@ determine_prevalence3D <- function(grid_data,
   return(p)
 }
 
-determine_prevalence_gradient3D <- function(grid_data,
+calculate_prevalence_gradient3D <- function(grid_data,
                                             metric_colname,
                                             show_AUC = T,
                                             plot_image = T) {
@@ -1302,14 +1302,10 @@ determine_prevalence_gradient3D <- function(grid_data,
   # Define result
   result <- data.frame(threshold = thresholds)
   
-  prevalences <- c()
-  
-  for (threshold in thresholds) {
-    prevalences <- c(prevalences, determine_prevalence3D(grid_data,
-                                                         metric_colname,
-                                                         threshold))
-  }
-  result$prevalence <- prevalences
+  # Get prevalences for each threshold
+  result$prevalence <- sapply(thresholds, function(threshold) { 
+    calculate_prevalence3D(grid_data, metric_colname, threshold) 
+  })
   
   # Show AUC of prevalence gradient graph
   if (show_AUC) {
@@ -1333,13 +1329,14 @@ determine_prevalence_gradient3D <- function(grid_data,
 }
 
 
+
 calculate_prevalence_gradient_AUC3D <- function(prevalence_gradient_df) {
   
   return(sum(prevalence_gradient_df$prevalence) * 0.01)
 }
 
 
-determine_spatial_autocorrelation3D <- function(grid_data,
+calculate_spatial_autocorrelation3D <- function(grid_data,
                                                 metric_colname,
                                                 weight_method = "binary") {
   
@@ -1707,7 +1704,7 @@ grid_based_clustering3D <- function(spe,
     # Else, find all the grid prisms adjacent to the maximum cell proportion grid prism. 
     # These are potentially apart of the cluster
     # Adjacent grid prisms must have cell proportion > 0.25 * max cell proportion
-    grid_prisms_in_cluster <- determine_grid_prism_numbers_in_cluster3D(maximum_cell_proportion_prism_number,
+    grid_prisms_in_cluster <- calculate_grid_prism_numbers_in_cluster3D(maximum_cell_proportion_prism_number,
                                                                         grid_prism_cell_proportions,
                                                                         maximum_cell_proportion,
                                                                         n_splits,
@@ -1785,7 +1782,7 @@ grid_based_clustering3D <- function(spe,
 ## If it does, add it to the answer
 ## Keep doing this until adjacent grid prisms don't have above 25%, or if you hit a boundary, or it has already been removed
 ## Return a vector containing all the grid prism numbers which COULD be part of the cluster
-determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number, 
+calculate_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number, 
                                                       grid_prism_cell_proportions, 
                                                       maximum_cell_proportion,
                                                       n_splits,
@@ -1809,7 +1806,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Right
     if (curr_grid_prism_number%%n_splits != 0) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + 1,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + 1,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -1818,7 +1815,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Left
     if (curr_grid_prism_number%%n_splits != 1) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - 1,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - 1,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -1827,7 +1824,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Forward
     if ((curr_grid_prism_number - 1)%%(n_splits^2) < n_splits^2 - n_splits) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + n_splits,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + n_splits,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -1836,7 +1833,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Backward
     if (curr_grid_prism_number%%(n_splits^2) > n_splits) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - n_splits,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - n_splits,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -1845,7 +1842,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Up
     if (curr_grid_prism_number <= n_splits^3 - n_splits^2) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + n_splits^2,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number + n_splits^2,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
@@ -1854,7 +1851,7 @@ determine_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
     
     # Down
     if (curr_grid_prism_number > n_splits^2) {
-      answer <- determine_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - n_splits^2,
+      answer <- calculate_grid_prism_numbers_in_cluster3D(curr_grid_prism_number - n_splits^2,
                                                           grid_prism_cell_proportions,
                                                           maximum_cell_proportion,
                                                           n_splits,
