@@ -1,25 +1,22 @@
-calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_cluster, cell_types_outside_cluster, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
+calculate_minimum_distances_to_clusters3D <- function(spe, 
+                                                      cell_types_inside_cluster, 
+                                                      cell_types_outside_cluster, 
+                                                      cluster_colname, 
+                                                      feature_colname = "Cell.Type", 
+                                                      plot_image = T) {
 
   ## Add Cell.ID column
   if (is.null(spe[["Cell.ID"]])) {
     warning("Temporarily adding Cell.Id column to your spe")
     spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
   }
-  
-  ## Get cluster numbers (ignoring 0)
-  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
-  
-  ## Get number of clusters
-  n_clusters <- length(unique(cluster_numbers))
 
   ## For each cell type outside clusters, get their set of coords. These exclude cell types in clusters
   spe_coords <- spatialCoords(spe)
-  cluster_rows <- rep(FALSE, nrow(spe_coords))
-  for (i in seq(n_clusters)) {
-    cluster_rows <- cluster_rows | (spe[[cluster_colname]] == i)
-  }
 
-  spe_outside_cluster <- spe[ , !cluster_rows]
+  # Cells outside cluster have a cluster number of 0 (i.e. they are not in a cluster)
+  spe_outside_cluster <- spe[ , spe[[cluster_colname]] == 0]
+  
   cell_types_outside_cluster_coords <- list()
   for (cell_type in cell_types_outside_cluster) {
     cell_types_outside_cluster_coords[[cell_type]] <- spatialCoords(spe_outside_cluster)[spe_outside_cluster[[feature_colname]] == cell_type, ]
@@ -27,6 +24,9 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_clu
   
   ## For each cluster, determine the minimum distance of each outside_cell_type  
   result <- vector()
+  
+  # Get number of clusters
+  n_clusters <- max(spe[[cluster_colname]])
   
   for (i in seq(n_clusters)) {
     cluster_coords <- spe_coords[spe[[cluster_colname]] == i & spe[[feature_colname]] %in% cell_types_inside_cluster, ]

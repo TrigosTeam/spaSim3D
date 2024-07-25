@@ -1,10 +1,7 @@
 calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
   
-  ## Get cluster numbers (ignoring 0)
-  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
-  
-  ## Get number of clusters
-  n_clusters <- length(unique(cluster_numbers))
+  # Get number of clusters
+  n_clusters <- max(spe[[cluster_colname]])
   
   ## Get different cell types found in the clusters (alphabetical for consistency)
   cell_types <- unique(spe[[feature_colname]][spe[[cluster_colname]] != 0])

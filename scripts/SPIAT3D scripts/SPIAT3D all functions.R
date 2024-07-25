@@ -2072,11 +2072,8 @@ plot_grid_based_clusters3D <- function(spe_with_grid,
 
 calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
   
-  ## Get cluster numbers (ignoring 0)
-  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
-  
-  ## Get number of clusters
-  n_clusters <- length(unique(cluster_numbers))
+  # Get number of clusters
+  n_clusters <- max(spe[[cluster_colname]])
   
   ## Get different cell types found in the clusters (alphabetical for consistency)
   cell_types <- unique(spe[[feature_colname]][spe[[cluster_colname]] != 0])
@@ -2117,7 +2114,14 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
 
 
 
-calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_cluster, cell_types_outside_cluster, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
+
+
+calculate_minimum_distances_to_clusters3D <- function(spe, 
+                                                      cell_types_inside_cluster, 
+                                                      cell_types_outside_cluster, 
+                                                      cluster_colname, 
+                                                      feature_colname = "Cell.Type", 
+                                                      plot_image = T) {
   
   ## Add Cell.ID column
   if (is.null(spe[["Cell.ID"]])) {
@@ -2125,20 +2129,12 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_clu
     spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
   }
   
-  ## Get cluster numbers (ignoring 0)
-  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
-  
-  ## Get number of clusters
-  n_clusters <- length(unique(cluster_numbers))
-  
   ## For each cell type outside clusters, get their set of coords. These exclude cell types in clusters
   spe_coords <- spatialCoords(spe)
-  cluster_rows <- rep(FALSE, nrow(spe_coords))
-  for (i in seq(n_clusters)) {
-    cluster_rows <- cluster_rows | (spe[[cluster_colname]] == i)
-  }
   
-  spe_outside_cluster <- spe[ , !cluster_rows]
+  # Cells outside cluster have a cluster number of 0 (i.e. they are not in a cluster)
+  spe_outside_cluster <- spe[ , spe[[cluster_colname]] == 0]
+  
   cell_types_outside_cluster_coords <- list()
   for (cell_type in cell_types_outside_cluster) {
     cell_types_outside_cluster_coords[[cell_type]] <- spatialCoords(spe_outside_cluster)[spe_outside_cluster[[feature_colname]] == cell_type, ]
@@ -2146,6 +2142,9 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_clu
   
   ## For each cluster, determine the minimum distance of each outside_cell_type  
   result <- vector()
+  
+  # Get number of clusters
+  n_clusters <- max(spe[[cluster_colname]])
   
   for (i in seq(n_clusters)) {
     cluster_coords <- spe_coords[spe[[cluster_colname]] == i & spe[[feature_colname]] %in% cell_types_inside_cluster, ]
@@ -2195,14 +2194,11 @@ calculate_minimum_distances_to_clusters3D <- function(spe, cell_types_inside_clu
 }
 
 
+
 calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname = "Cell.Type") {
   
-  ## Get cluster numbers (ignoring 0)
-  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
-  
-  ## Get number of clusters
-  n_clusters <- length(unique(cluster_numbers))
-  
+  # Get number of clusters
+  n_clusters <- max(spe[[cluster_colname]])
   
   ### 1. Estimate volume of each cluster by density of the window. ------------
   
@@ -2215,10 +2211,7 @@ calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname
     result[i, "n_cells"] <- length(cells_in_cluster)
     
   }
-  # result <- result[order(result$n_cells), ]
-  # rownames(result) <- seq(n_clusters)
   result$cluster_number <- as.character(seq(n_clusters))
-  
   
   ## Assume window is a rectangular prism
   spe_coords <- data.frame(spatialCoords(spe))
@@ -2253,16 +2246,19 @@ calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname
 
 
 
+
+
+
+### Assume that clusters have uniform density and that the centre of each cluster is defined by its centre of mass
+### Centre of mass can be estimated by taking the average of the x, y, and z coordinates of cells in the cluster
+
 ### Assume that clusters have uniform density and that the centre of each cluster is defined by its centre of mass
 ### Centre of mass can be estimated by taking the average of the x, y, and z coordinates of cells in the cluster
 
 calculate_center_of_clusters3D <- function(spe, cluster_colname) {
   
-  ## Get cluster numbers (ignoring 0)
-  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
-  
-  ## Get number of clusters
-  n_clusters <- length(unique(cluster_numbers))
+  # Get number of clusters
+  n_clusters <- max(spe[[cluster_colname]])
   
   ## For each cluster, determine the number of cells in each cluster of each cluster
   result <- data.frame(matrix(nrow = n_clusters, ncol = 4))
@@ -2277,6 +2273,8 @@ calculate_center_of_clusters3D <- function(spe, cluster_colname) {
   
   return(result)
 }
+
+
 
 
 

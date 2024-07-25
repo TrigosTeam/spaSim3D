@@ -1,11 +1,7 @@
 calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname = "Cell.Type") {
   
-  ## Get cluster numbers (ignoring 0)
-  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
-  
-  ## Get number of clusters
-  n_clusters <- length(unique(cluster_numbers))
-  
+  # Get number of clusters
+  n_clusters <- max(spe[[cluster_colname]])
   
   ### 1. Estimate volume of each cluster by density of the window. ------------
   
@@ -18,11 +14,8 @@ calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname
     result[i, "n_cells"] <- length(cells_in_cluster)
     
   }
-  # result <- result[order(result$n_cells), ]
-  # rownames(result) <- seq(n_clusters)
   result$cluster_number <- as.character(seq(n_clusters))
   
-
   ## Assume window is a rectangular prism
   spe_coords <- data.frame(spatialCoords(spe))
   

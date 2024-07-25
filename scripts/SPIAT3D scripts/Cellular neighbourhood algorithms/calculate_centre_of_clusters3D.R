@@ -3,11 +3,8 @@
 
 calculate_center_of_clusters3D <- function(spe, cluster_colname) {
   
-  ## Get cluster numbers (ignoring 0)
-  cluster_numbers <- spe[[cluster_colname]][spe[[cluster_colname]] != 0]
-  
-  ## Get number of clusters
-  n_clusters <- length(unique(cluster_numbers))
+  # Get number of clusters
+  n_clusters <- max(spe[[cluster_colname]])
   
   ## For each cluster, determine the number of cells in each cluster of each cluster
   result <- data.frame(matrix(nrow = n_clusters, ncol = 4))
