@@ -282,10 +282,10 @@ for (i in seq(n_mixed_spes)) {
 }
 
 setwd("~/Objects/mixed_spes/analysis_3D")
-write.table(mixed_prop_SAC_df, file = "mixed_prop_SAC_df.csv")
-write.table(mixed_prop_prevalence_df, file = "mixed_prop_prevalence_df.csv")
-write.table(mixed_entropy_SAC_df, file = "mixed_entropy_SAC_df.csv")
-write.table(mixed_entropy_prevalence_df, file = "mixed_entropy_prevalence_df.csv")
+# write.table(mixed_prop_SAC_df, file = "mixed_prop_SAC_df.csv")
+# write.table(mixed_prop_prevalence_df, file = "mixed_prop_prevalence_df.csv")
+# write.table(mixed_entropy_SAC_df, file = "mixed_entropy_SAC_df.csv")
+# write.table(mixed_entropy_prevalence_df, file = "mixed_entropy_prevalence_df.csv")
 
 
 ### 2.1. Ringed spes - cc distance metrics ----------------------------------------
@@ -874,8 +874,253 @@ write.table(separated_entropy_SAC_df, file = "separated_entropy_SAC_df.csv")
 write.table(separated_entropy_prevalence_df, file = "separated_entropy_prevalence_df.csv")
 
 
-### Spacer --------------------------------
+### 4.0. Noisy background - Generating simulation -----------------------------
+
+# I will also generate this simulation in this script since it is a special, and easy case
+setwd("~/Objects/spes_metadata")
+bg_spes_metadata <- readRDS("bg_spes_metadata_100_100_100.rds")
+bg_spe_metadata_A_B <- bg_spes_metadata$AB
+bg_spe_A_B <- simulate_spe_metadata3D(bg_spe_metadata_A_B)
+
+### 4.1. Noisy background - cc distance metrics -----------------------------
+
+setwd("~/Objects/background_spe")
+bg_spe_A_B <- readRDS("bg_spe_A_B.rds")
+
+n_bg_spes <- 1
+bg_spe_name <- "bg_spe_A_B"
+
+# APD and AMD
+cell_types <- c("A", "B")
+APD_pairs <- c("A/A", "A/B", "B/B")
+AMD_pairs <- c("A/A", "A/B", "B/A", "B/B")
+
+bg_APD_df <- data.frame(matrix(nrow = n_bg_spes * length(APD_pairs), ncol = 3))
+colnames(bg_APD_df) <- c("spe", "pair", "APD")
+
+bg_AMD_df <- data.frame(matrix(nrow = n_bg_spes * length(AMD_pairs), ncol = 4))
+colnames(bg_AMD_df) <- c("spe", "reference", "target", "AMD")
+
+
+pairwise_distance_data <- calculate_pairwise_distances_between_cell_types3D(bg_spe_A_B,
+                                                                            cell_types,
+                                                                            show_summary = F,
+                                                                            plot_image = F)
+pairwise_distance_data_summary <- summarise_distances_between_cell_types3D(pairwise_distance_data)
+
+bg_APD_df[1:3, "spe"] <- bg_spe_name
+bg_APD_df[1:3, "pair"] <- pairwise_distance_data_summary$pair
+bg_APD_df[1:3, "APD"] <- pairwise_distance_data_summary$mean
+
+
+minimum_distance_data <- calculate_minimum_distances_between_cell_types3D(bg_spe_A_B,
+                                                                          cell_types,
+                                                                          show_summary = F,
+                                                                          plot_image = F)
+
+minimum_distance_data_summary <- summarise_distances_between_cell_types3D(minimum_distance_data)
+
+bg_AMD_df[1:4, "spe"] <- bg_spe_name
+bg_AMD_df[1:4, "reference"] <- minimum_distance_data_summary$reference
+bg_AMD_df[1:4, "target"] <- minimum_distance_data_summary$target
+bg_AMD_df[1:4, "AMD"] <- minimum_distance_data_summary$mean
+
+setwd("~/Objects/background_spe")
+# write.table(bg_APD_df, "bg_APD_df.csv")
+# write.table(bg_AMD_df, "bg_AMD_df.csv")
+
+### 4.2. Noisy background - cc gradient based metrics -----------------------------
+
+setwd("~/Objects/background_spe")
+bg_spe_A_B <- readRDS("bg_spe_A_B.rds")
+
+n_bg_spes <- 1
+bg_spe_name <- "bg_spe_A_B"
+
+
+# MS, NMS, ACIN, ACINP, CKR and AE
+radii <- 50
+radii_colnames <- paste("r", seq(radii), sep = "")
+
+bg_MS_df <- data.frame(matrix(nrow = n_bg_spes * length(cell_types), ncol = 3 + radii))
+colnames(bg_MS_df) <- c("spe", "reference", "target", radii_colnames)
+
+bg_NMS_df <- data.frame(matrix(nrow = n_bg_spes * length(cell_types), ncol = 3 + radii))
+colnames(bg_NMS_df) <- c("spe", "reference", "target", radii_colnames)
+
+bg_ACINP_df <- data.frame(matrix(nrow = n_bg_spes * length(cell_types), ncol = 2 + radii))
+colnames(bg_ACINP_df) <- c("spe", "reference", radii_colnames)
+
+bg_AE_df <- data.frame(matrix(nrow = n_bg_spes * length(cell_types), ncol = 2 + radii))
+colnames(bg_AE_df) <- c("spe", "reference", radii_colnames)
+
+bg_ACIN_df <- data.frame(matrix(nrow = n_bg_spes * length(cell_types)^2, ncol = 3 + radii))
+colnames(bg_ACIN_df) <- c("spe", "reference", "target", radii_colnames)
+
+bg_CKR_df <- data.frame(matrix(nrow = n_bg_spes * length(cell_types)^2, ncol = 3 + radii))
+colnames(bg_CKR_df) <- c("spe", "reference", "target", radii_colnames)
+
+
+index1 <- 1
+index2 <- 1
+for (reference_cell_type in cell_types) {
+  ## Calculate MS, NMS, ACINP and AE first
+  target_cell_type <- setdiff(cell_types, reference_cell_type)
+  
+  # MS and NMS
+  MS_NMS_data <- calculate_mixing_scores_gradient3D(bg_spe_A_B,
+                                                    reference_cell_type,
+                                                    target_cell_type,
+                                                    radii,
+                                                    plot_image = F)
+  bg_MS_df[index1, c("spe", "reference", "target")] <- c(bg_spe_name, reference_cell_type, target_cell_type)
+  bg_MS_df[index1, radii_colnames] <- MS_NMS_data$mixing_score
+  
+  bg_NMS_df[index1, c("spe", "reference", "target")] <- c(bg_spe_name, reference_cell_type, target_cell_type)
+  bg_NMS_df[index1, radii_colnames] <- MS_NMS_data$normalised_mixing_score
+  
+  
+  # ACINP
+  ACINP_data <- calculate_cells_in_neighbourhood_proportions_gradient3D(bg_spe_A_B,
+                                                                        reference_cell_type,
+                                                                        cell_types, # Use both cell types, but keep prop for A
+                                                                        radii,
+                                                                        plot_image = F)
+  bg_ACINP_df[index1, c("spe", "reference")] <- c(bg_spe_name, reference_cell_type)
+  bg_ACINP_df[index1, radii_colnames] <- ACINP_data[["A"]]
+  
+  
+  # AE
+  AE_data <- calculate_entropy_gradient3D(bg_spe_A_B,
+                                          reference_cell_type,
+                                          cell_types, # Use both A and B
+                                          radii,
+                                          plot_image = F)
+  bg_AE_df[index1, c("spe", "reference")] <- c(bg_spe_name, reference_cell_type)
+  bg_AE_df[index1, radii_colnames] <- AE_data$entropy
+  
+  index1 <- index1 + 1
+  
+  
+  for (target_cell_type in cell_types) {
+    ## Calculate ACIN and CKR as target cell type can also be the reference cell type
+    
+    # ACIN
+    ACIN_data <- calculate_cells_in_neighbourhood_gradient3D(bg_spe_A_B,
+                                                             reference_cell_type,
+                                                             target_cell_type,
+                                                             radii,
+                                                             plot_image = F)
+    bg_ACIN_df[index2, c("spe", "reference", "target")] <- c(bg_spe_name, reference_cell_type, target_cell_type)
+    bg_ACIN_df[index2, radii_colnames] <- ACIN_data[[target_cell_type]]
+    
+    
+    # CKR
+    CK_data <- calculate_cross_K_gradient3D(bg_spe_A_B,
+                                            reference_cell_type,
+                                            target_cell_type,
+                                            radii,
+                                            plot_image = F)
+    bg_CKR_df[index2, c("spe", "reference", "target")] <- c(bg_spe_name, reference_cell_type, target_cell_type)
+    bg_CKR_df[index2, radii_colnames] <- CK_data$observed_cross_K / CK_data$expected_cross_K
+    
+    index2 <- index2 + 1
+  }
+}
+
+setwd("~/Objects/background_spe")
+# write.table(bg_MS_df, "bg_MS_df.csv")
+# write.table(bg_NMS_df, "bg_NMS_df.csv")
+# write.table(bg_ACIN_df, "bg_ACIN_df.csv")
+# write.table(bg_ACINP_df, "bg_ACINP_df.csv")
+# write.table(bg_CKR_df, "bg_CKR_df.csv")
+# write.table(bg_AE_df, "bg_AE_df.csv")
 
 
 
+### 4.3. Noisy background - heterogeneity metrics -----------------------------
 
+setwd("~/Objects/background_spe")
+bg_spe_A_B <- readRDS("bg_spe_A_B.rds")
+
+n_bg_spes <- 1
+bg_spe_name <- "bg_spe_A_B"
+
+# SAC and prevalence
+n_splits <- 10
+thresholds <- seq(0.01, 1, 0.01)
+thresholds_colnames <- paste("t", thresholds, sep = "")
+
+prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+
+bg_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion")
+bg_prop_SAC_df <- data.frame(matrix(nrow = n_bg_spes * nrow(prop_cell_types), ncol = length(bg_prop_SAC_df_colnames)))
+colnames(bg_prop_SAC_df) <- bg_prop_SAC_df_colnames
+
+bg_prop_prevalence_df_colnames <- c("spe", "reference", "target", thresholds_colnames)
+bg_prop_prevalence_df <- data.frame(matrix(nrow = n_bg_spes * nrow(prop_cell_types), ncol = length(bg_prop_prevalence_df_colnames)))
+colnames(bg_prop_prevalence_df) <- bg_prop_prevalence_df_colnames
+
+entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+
+bg_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy")
+bg_entropy_SAC_df <- data.frame(matrix(nrow = n_bg_spes * nrow(entropy_cell_types), ncol = length(bg_entropy_SAC_df_colnames)))
+colnames(bg_entropy_SAC_df) <- bg_entropy_SAC_df_colnames
+
+bg_entropy_prevalence_df_colnames <- c("spe", "cell_types", thresholds_colnames)
+bg_entropy_prevalence_df <- data.frame(matrix(nrow = n_bg_spes * nrow(entropy_cell_types), ncol = length(bg_entropy_prevalence_df_colnames)))
+colnames(bg_entropy_prevalence_df) <- bg_entropy_prevalence_df_colnames
+
+
+# Get proportion grid metrics
+for (i in seq_len(nrow(prop_cell_types))) {
+  proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(bg_spe_A_B, 
+                                                                      n_splits,
+                                                                      strsplit(prop_cell_types$ref[i], ",")[[1]], 
+                                                                      strsplit(prop_cell_types$tar[i], ",")[[1]],
+                                                                      plot_image = F)
+  
+  proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
+                                                        "proportion",
+                                                        "binary")
+  
+  proportion_prevalence_df <- determine_prevalence_gradient3D(proportion_grid_metrics,
+                                                              "proportion",
+                                                              show_AUC = T,
+                                                              plot_image = F)
+  
+  bg_prop_SAC_df[i, c("spe", "reference", "target")] <- c(bg_spe_name, prop_cell_types$ref[i], prop_cell_types$tar[i])
+  bg_prop_SAC_df[i, "proportion"] <- proportion_SAC
+  
+  bg_prop_prevalence_df[i, c("spe", "reference", "target")] <- c(bg_spe_name, prop_cell_types$ref[i], prop_cell_types$tar[i])
+  bg_prop_prevalence_df[i, thresholds_colnames] <- proportion_prevalence_df$prevalence
+}
+
+# Get entropy grid metrics
+for (i in seq_len(nrow(entropy_cell_types))) {
+  entropy_grid_metrics <- determine_entropy_grid_metrics3D(bg_spe_A_B, 
+                                                           n_splits,
+                                                           strsplit(entropy_cell_types$cell_types[i], ",")[[1]], 
+                                                           plot_image = F)
+  
+  entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics, 
+                                                     "entropy",
+                                                     "binary")
+  
+  entropy_prevalence_df <- determine_prevalence_gradient3D(entropy_grid_metrics,
+                                                           "entropy",
+                                                           show_AUC = T,
+                                                           plot_image = F)
+  
+  bg_entropy_SAC_df[i, c("spe", "cell_types")] <- c(bg_spe_name, entropy_cell_types$cell_types[i])
+  bg_entropy_SAC_df[i, "entropy"] <- entropy_SAC
+  
+  bg_entropy_prevalence_df[i, c("spe", "cell_types")] <- c(bg_spe_name, entropy_cell_types$cell_types[i])
+  bg_entropy_prevalence_df[i, thresholds_colnames] <- entropy_prevalence_df$prevalence
+}
+
+setwd("~/Objects/background_spe")
+# write.table(bg_prop_SAC_df, "bg_prop_SAC_df.csv")
+# write.table(bg_prop_prevalence_df, "bg_prop_prevalence_df.csv")
+# write.table(bg_entropy_SAC_df, "bg_entropy_SAC_df.csv")
+# write.table(bg_entropy_prevalence_df, "bg_entropy_prevalence_df.csv")
