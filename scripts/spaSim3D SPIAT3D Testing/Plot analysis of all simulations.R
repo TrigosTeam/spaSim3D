@@ -2,7 +2,7 @@ library(cowplot)
 library(ggplot2)
 
 ### 1.1.1. Function to get plot for APD ----------------------------------------
-### 1.1.1. Function to get plot for AMD -------------------------------------
+### 1.1.2. Function to get plot for AMD -------------------------------------
 plot_AMD_metric <- function(spes_table, AMD_df, arrangements) {
   
   # AMD pairs are A/A, A/B, B/A, B/B
@@ -288,20 +288,20 @@ plot_proportion_SAC <- function(spes_table, SAC_df, arrangements) {
   prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
   prop_cell_types$pair <- paste(prop_cell_types$ref, prop_cell_types$tar, sep = "/")
   
-  # Combine spes_table and SAC_df
-  df <- cbind(spes_table, SAC_df)
-  
   # Put all plots into an organised list
   all_plots_list <- list()
   
   for (i in seq_len(nrow(prop_cell_types))) {
     
     # Subset for current reference (and target) cell
-    plot_df <- df[df$reference == prop_cell_types$ref[i], ]
+    plot_df <- SAC_df[SAC_df$reference == prop_cell_types$ref[i], ]
+    
+    # Combine spes_table and SAC_df
+    plot_df <- cbind(spes_table, plot_df)
     
     # Create a 'key' column which groups simulations if they have the same bg_type, shape and size (but not arrangement)
     plot_df$key <- paste(plot_df$bg_type, plot_df$shape, plot_df$size, sep = "_")
-    
+
     # Factor
     plot_df$bg_type <- factor(plot_df$bg_type, c("O", "A", "B", "AB"))
     plot_df$shape <- factor(plot_df$shape, c("Sphere", "Ellipsoid", "Network"))
@@ -365,16 +365,16 @@ plot_entropy_SAC <- function(spes_table, SAC_df, arrangements) {
   # Get possible cell type of interest combinations
   entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
   
-  # Combine spes_table and SAC_df
-  df <- cbind(spes_table, SAC_df)
-  
   # Put all plots into an organised list
   all_plots_list <- list()
   
   for (i in seq_len(nrow(entropy_cell_types))) {
     
     # Subset for current cell type of interest combintation
-    plot_df <- df[df$cell_types == entropy_cell_types$cell_types[i], ]
+    plot_df <- SAC_df[SAC_df$cell_types == entropy_cell_types$cell_types[i], ]
+    
+    # Combine spes_table and SAC_df
+    plot_df <- cbind(spes_table, plot_df)
     
     # Create a 'key' column which groups simulations if they have the same bg_type, shape and size (but not arrangement)
     plot_df$key <- paste(plot_df$bg_type, plot_df$shape, plot_df$size, sep = "_")
@@ -447,7 +447,7 @@ plot_proportion_prevalence <- function(spes_table, prevalence_df, arrangements) 
   # Put all plots into an organised list
   all_plots_list <- list()
   
-  for (i in seq(seq_len(prop_cell_types))) {
+  for (i in seq_len(nrow(prop_cell_types))) {
     # Subset prevalence_df for current metric
     plot_df <- prevalence_df[prevalence_df$reference == prop_cell_types$ref[i], ]
     
@@ -540,7 +540,7 @@ plot_entropy_prevalence <- function(spes_table, prevalence_df, arrangements) {
   # Put all plots into an organised list
   all_plots_list <- list()
   
-  for (i in seq(seq_len(prop_cell_types))) {
+  for (i in seq_len(nrow(entropy_cell_types))) {
     # Subset prevalence_df for current cell type of interest
     plot_df <- prevalence_df[prevalence_df$cell_types == entropy_cell_types$cell_types[i], ]
     
@@ -629,13 +629,10 @@ plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, arrangemen
   
   prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
   prop_cell_types$pair <- paste(prop_cell_types$ref, prop_cell_types$tar, sep = "/")
-  
+
   # Get AUC for each prevalence gradient
-  prevalence_df$AUC <- apply(prevalence_df[ , threshold_colnames], 2, sum) * 0.01
+  prevalence_df$AUC <- apply(prevalence_df[ , threshold_colnames], 1, sum) * 0.01
   prevalence_df <- prevalence_df[ , c("spe", "reference", "target", "AUC")]
-  
-  # Combine spes_table and updated prevalence_df
-  df <- cbind(spes_table, SAC_df)
   
   # Put all plots into an organised list
   all_plots_list <- list()
@@ -643,7 +640,10 @@ plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, arrangemen
   for (i in seq_len(nrow(prop_cell_types))) {
     
     # Subset for current reference (and target) cell
-    plot_df <- df[df$reference == prop_cell_types$ref[i], ]
+    plot_df <- prevalence_df[prevalence_df$reference == prop_cell_types$ref[i], ]
+    
+    # Combine spes_table and updated prevalence_df
+    plot_df <- cbind(spes_table, plot_df)
     
     # Create a 'key' column which groups simulations if they have the same bg_type, shape and size (but not arrangement)
     plot_df$key <- paste(plot_df$bg_type, plot_df$shape, plot_df$size, sep = "_")
@@ -714,11 +714,8 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, arrangements)
   entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
 
   # Get AUC for each prevalence gradient
-  prevalence_df$AUC <- apply(prevalence_df[ , threshold_colnames], 2, sum) * 0.01
-  prevalence_df <- prevalence_df[ , c("spe", "reference", "target", "AUC")]
-    
-  # Combine spes_table and SAC_df
-  df <- cbind(spes_table, SAC_df)
+  prevalence_df$AUC <- apply(prevalence_df[ , threshold_colnames], 1, sum) * 0.01
+  prevalence_df <- prevalence_df[ , c("spe", "cell_types", "AUC")]
   
   # Put all plots into an organised list
   all_plots_list <- list()
@@ -726,7 +723,10 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, arrangements)
   for (i in seq_len(nrow(entropy_cell_types))) {
     
     # Subset for current cell type of interest combintation
-    plot_df <- df[df$cell_types == entropy_cell_types$cell_types[i], ]
+    plot_df <- prevalence_df[prevalence_df$cell_types == entropy_cell_types$cell_types[i], ]
+    
+    # Combine spes_table and SAC_df
+    plot_df <- cbind(spes_table, plot_df)
     
     # Create a 'key' column which groups simulations if they have the same bg_type, shape and size (but not arrangement)
     plot_df$key <- paste(plot_df$bg_type, plot_df$shape, plot_df$size, sep = "_")
@@ -737,23 +737,23 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, arrangements)
     plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
     plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
     
-    fig_bg_type <- ggplot(plot_df, aes(arrangement, entropy, group = key, col = bg_type)) +
+    fig_bg_type <- ggplot(plot_df, aes(arrangement, AUC, group = key, col = bg_type)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("SAC")
+      ylab("AUC")
     
-    fig_shape <- ggplot(plot_df, aes(arrangement, entropy, group = key, col = shape)) +
+    fig_shape <- ggplot(plot_df, aes(arrangement, AUC, group = key, col = shape)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("SAC")
+      ylab("AUC")
     
-    fig_size <- ggplot(plot_df, aes(arrangement, entropy, group = key, col = size)) +
+    fig_size <- ggplot(plot_df, aes(arrangement, AUC, group = key, col = size)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("SAC")
+      ylab("AUC")
     
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
   }
@@ -777,13 +777,13 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, arrangements)
   }
   
   # Combine the combined plots into one big plot
-  SAC_plot <- plot_grid(plots_cell_types_list[[entropy_cell_types$cell_types[1]]], 
+  AUC_plot <- plot_grid(plots_cell_types_list[[entropy_cell_types$cell_types[1]]], 
                         plots_cell_types_list[[entropy_cell_types$cell_types[2]]],
                         nrow = 2, ncol = 1, scale = 0.9)
   
-  methods::show(SAC_plot)
+  methods::show(AUC_plot)
   
-  return(SAC_plot)
+  return(AUC_plot)
 }
 
 
@@ -875,6 +875,9 @@ mixed_entropy_prevalence_df <- read.table("mixed_entropy_prevalence_df.csv")
 mixed_prop_prevalence_plot <- plot_proportion_prevalence(mixed_spes_table, mixed_prop_prevalence_df, c("M1", "M2", "M3"))
 mixed_entropy_prevalence_plot <- plot_entropy_prevalence(mixed_spes_table, mixed_entropy_prevalence_df, c("M1", "M2", "M3"))
 
+mixed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(mixed_spes_table, mixed_prop_prevalence_df, c("M1", "M2", "M3"))
+mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_table, mixed_entropy_prevalence_df, c("M1", "M2", "M3"))
+
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS(mixed_prevalence_plot, "mixed_prevalence_plot.rds")
 
@@ -950,8 +953,8 @@ setwd("~/Objects/ringed_spes/analysis_3D")
 ringed_prop_SAC_df <- read.table("ringed_prop_SAC_df.csv")
 ringed_entropy_SAC_df <- read.table("ringed_entropy_SAC_df.csv")
 
-ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, c("M1", "M2", "M3"))
-ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, c("M1", "M2", "M3"))
+ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, c("R1", "R2", "R3"))
+ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, c("R1", "R2", "R3"))
 
 # setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
@@ -967,8 +970,11 @@ setwd("~/Objects/ringed_spes/analysis_3D")
 ringed_prop_prevalence_df <- read.table("ringed_prop_prevalence_df.csv")
 ringed_entropy_prevalence_df <- read.table("ringed_entropy_prevalence_df.csv")
 
-ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, c("M1", "M2", "M3"))
-ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, c("M1", "M2", "M3"))
+ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, c("R1", "R2", "R3"))
+ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, c("R1", "R2", "R3"))
+
+ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, c("R1", "R2", "R3"))
+ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, c("R1", "R2", "R3"))
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_prevalence_plot, "ringed_prevalence_plot.rds")
