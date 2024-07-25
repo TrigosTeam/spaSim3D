@@ -16,10 +16,8 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
                    "Cell.Type" = spe[[feature_colname]], 
                    "Cell.ID" = spe[["Cell.ID"]])
   
-  # If there are no cells, give error
-  if (nrow(df) == 0) {
-    stop("There are no cells in data")
-  }
+  # If there are less than two cells, give error
+  if (nrow(df) <= 1) stop("There must be at least two cells in spe")
   
   # Select all rows in data frame which only contains the cells of interest
   if (!is.null(cell_types_of_interest)) {
@@ -62,17 +60,31 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
       cell_ids1 <- cell_types[[cell_name1]]
       cell_ids2 <- cell_types[[cell_name2]]
       
-      ## Need to investigate this
-      if (length(cell_ids1) < 2 & length(cell_ids2) < 2) {
-        next
-      }
+      ## Same cell type, only one cell
+      if (cell_name1 == cell_name2 && length(cell_ids1) == 1) next
         
       cell_to_cell <- dist_all[cell_id_vector %in% cell_ids1, 
                                cell_id_vector %in% cell_ids2]
       
-      if (cell_name1 == cell_name2) {
-        cell_to_cell[upper.tri(cell_to_cell, diag = TRUE)] <- NA
+      ## Different cell types, each only has one cell
+      if (length(cell_ids1) == 1 && length(cell_ids2) == 1) {
+        cell_to_cell <- as.matrix(cell_to_cell)
+        rownames(cell_to_cell) <- cell_ids1
+        colnames(cell_to_cell) <- cell_ids2
+      }    
+      ## Different cell types, only one cell of cell_type1
+      else if (length(cell_ids1) == 1) {
+        cell_to_cell <- as.matrix(cell_to_cell)
+        colnames(cell_to_cell) <- cell_ids1
       }
+      ## Different cell types, only one cell of cell_type2
+      else if (length(cell_ids2) == 1) {
+        cell_to_cell <- as.matrix(cell_to_cell)
+        colnames(cell_to_cell) <- cell_ids2
+      }
+      
+      ## Same cell type, only need part of the matrix
+      if (cell_name1 == cell_name2) cell_to_cell[upper.tri(cell_to_cell, diag = TRUE)] <- NA
       
       # Melts dist_all to produce dataframe of target and nearest 
       # cell ID's columns and distance column
@@ -80,7 +92,7 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
       cell_to_cell_dist$cell_type1 <- cell_name1
       cell_to_cell_dist$cell_type2 <- cell_name2
       cell_to_cell_dist$pair <- paste(cell_name1, cell_name2, sep="/")
-      
+
       cell_to_cell_dist_all <- rbind(cell_to_cell_dist_all, 
                                      cell_to_cell_dist)
     }

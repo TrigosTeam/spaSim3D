@@ -17,8 +17,8 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
                    "Cell.Type" = spe[[feature_colname]], 
                    "Cell.ID" = spe[["Cell.ID"]])
   
-  # If there are no cells, give error
-  if (nrow(df) == 0) stop("There are no cells in spe")
+  # If there are less than two cells, give error
+  if (nrow(df) <= 1) stop("There must be at least two cells in spe")
   
   # Select all rows in data frame which only contains the cells of interest
   if (!is.null(cell_types_of_interest)) {
@@ -65,8 +65,13 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
                                query = all_cell_type1_coord, 
                                k = 1)  
     }
+    # If we are comparing the same cell_type, and there is only one of this cell type, move on
+    else if (nrow(all_cell_type1_coord) == 1) {
+      warning("There is only 1 '", name1, "' cell in your data. It has no nearest neighbour of the same cell type.", sep = "")
+      next
+    }
+    # If we are comparing the same cell_type, use the second closest neighbour
     else {
-      # If we are comparing the same cell_type, use the second closest neighbour
       all_closest <- RANN::nn2(data = all_cell_type2_coord, 
                                query = all_cell_type1_coord, 
                                k = 2)

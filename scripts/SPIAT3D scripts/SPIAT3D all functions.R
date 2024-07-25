@@ -81,6 +81,9 @@ calculate_entropy_background3D <- function(spe,
 
 
 ### Cell colocalisation metrics -----------------------------------------------
+
+
+
 calculate_pairwise_distances_between_cell_types3D <- function(spe,
                                                               cell_types_of_interest = NULL,
                                                               feature_colname = "Cell.Type",
@@ -98,10 +101,8 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
                    "Cell.Type" = spe[[feature_colname]], 
                    "Cell.ID" = spe[["Cell.ID"]])
   
-  # If there are no cells, give error
-  if (nrow(df) == 0) {
-    stop("There are no cells in data")
-  }
+  # If there are less than two cells, give error
+  if (nrow(df) <= 1) stop("There must be at least two cells in spe")
   
   # Select all rows in data frame which only contains the cells of interest
   if (!is.null(cell_types_of_interest)) {
@@ -144,17 +145,31 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
       cell_ids1 <- cell_types[[cell_name1]]
       cell_ids2 <- cell_types[[cell_name2]]
       
-      ## Need to investigate this
-      if (length(cell_ids1) < 2 & length(cell_ids2) < 2) {
-        next
-      }
+      ## Same cell type, only one cell
+      if (cell_name1 == cell_name2 && length(cell_ids1) == 1) next
       
       cell_to_cell <- dist_all[cell_id_vector %in% cell_ids1, 
                                cell_id_vector %in% cell_ids2]
       
-      if (cell_name1 == cell_name2) {
-        cell_to_cell[upper.tri(cell_to_cell, diag = TRUE)] <- NA
+      ## Different cell types, each only has one cell
+      if (length(cell_ids1) == 1 && length(cell_ids2) == 1) {
+        cell_to_cell <- as.matrix(cell_to_cell)
+        rownames(cell_to_cell) <- cell_ids1
+        colnames(cell_to_cell) <- cell_ids2
+      }    
+      ## Different cell types, only one cell of cell_type1
+      else if (length(cell_ids1) == 1) {
+        cell_to_cell <- as.matrix(cell_to_cell)
+        colnames(cell_to_cell) <- cell_ids1
       }
+      ## Different cell types, only one cell of cell_type2
+      else if (length(cell_ids2) == 1) {
+        cell_to_cell <- as.matrix(cell_to_cell)
+        colnames(cell_to_cell) <- cell_ids2
+      }
+      
+      ## Same cell type, only need part of the matrix
+      if (cell_name1 == cell_name2) cell_to_cell[upper.tri(cell_to_cell, diag = TRUE)] <- NA
       
       # Melts dist_all to produce dataframe of target and nearest 
       # cell ID's columns and distance column
@@ -185,7 +200,6 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
 }
 
 
-## Please ensure there is no factoring in any of the columns!!!
 
 calculate_minimum_distances_between_cell_types3D <- function(spe,
                                                              cell_types_of_interest = NULL,
@@ -204,8 +218,8 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
                    "Cell.Type" = spe[[feature_colname]], 
                    "Cell.ID" = spe[["Cell.ID"]])
   
-  # If there are no cells, give error
-  if (nrow(df) == 0) stop("There are no cells in spe")
+  # If there are less than two cells, give error
+  if (nrow(df) <= 1) stop("There must be at least two cells in spe")
   
   # Select all rows in data frame which only contains the cells of interest
   if (!is.null(cell_types_of_interest)) {
@@ -252,8 +266,13 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
                                query = all_cell_type1_coord, 
                                k = 1)  
     }
+    # If we are comparing the same cell_type, and there is only one of this cell type, move on
+    else if (nrow(all_cell_type1_coord) == 1) {
+      warning("There is only 1 '", name1, "' cell in your data. It has no nearest neighbour of the same cell type.", sep = "")
+      next
+    }
+    # If we are comparing the same cell_type, use the second closest neighbour
     else {
-      # If we are comparing the same cell_type, use the second closest neighbour
       all_closest <- RANN::nn2(data = all_cell_type2_coord, 
                                query = all_cell_type1_coord, 
                                k = 2)
@@ -290,6 +309,7 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
   
   return(result)
 }
+
 
 
 summarise_distances_between_cell_types3D <- function(df) {
