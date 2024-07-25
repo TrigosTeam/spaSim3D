@@ -36,25 +36,19 @@ determine_spatial_autocorrelation3D <- function(grid_data,
   ## Points along the diagonal are comparing the same point so its weight is zero
   diag(weight_matrix) <- 0
   
-  data_mean <- mean(grid_data[, metric_colname])
+  n <- nrow(grid_data)
   
-  numerator <- 0
-  denominator <- 0
+  # Center the data
+  data_centered <- grid_data[, metric_colname] - mean(grid_data[, metric_colname])
   
-  for (i in seq(nrow(grid_data))) {
-    
-    for (j in seq(nrow(grid_data))) {
-      
-      numerator <- numerator + weight_matrix[i, j] * 
-        (grid_data[i, metric_colname] - data_mean) * 
-        (grid_data[j, metric_colname] - data_mean)
-      
-    }
-    denominator <- denominator + (grid_data[i, metric_colname] - data_mean)^2
-  }
+  # Calculate numerator using matrix multiplication
+  numerator <- sum(data_centered * (weight_matrix %*% data_centered))
   
+  # Calculate denominator
+  denominator <- sum(data_centered^2) * sum(weight_matrix)
   
-  I <- (nrow(grid_data) * numerator) / (sum(weight_matrix) * denominator)
+  # Moran's I
+  I <- (n * numerator) / denominator
   
   return(I)
   
