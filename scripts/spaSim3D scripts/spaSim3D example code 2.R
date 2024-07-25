@@ -77,6 +77,7 @@ plot_cells3D(spe_clusters,
 
 ### Testing every default clustering -----------------------------------------
 spe_metadata <- spe_metadata_background_template("random")
+spe_metadata <- spe_metadata_cluster_template(spe_metadata, "regular", "Sphere")
 spe_metadata <- spe_metadata_cluster_template(spe_metadata, "regular", "Ellipsoid")
 spe_metadata <- spe_metadata_cluster_template(spe_metadata, "regular", "Cylinder")
 spe_metadata <- spe_metadata_cluster_template(spe_metadata, "regular", "Network")
