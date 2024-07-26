@@ -1,7 +1,7 @@
-plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_results) {
+plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_df) {
   
-  plot_result <- data.frame(radius = cross_K_gradient_results$radius,
-                            observed_cross_K_gradient_ratio = cross_K_gradient_results$observed_cross_K / cross_K_gradient_results$expected_cross_K,
+  plot_result <- data.frame(radius = cross_K_gradient_df$radius,
+                            observed_cross_K_gradient_ratio = cross_K_gradient_df$observed_cross_K / cross_K_gradient_df$expected_cross_K,
                             expected_cross_K_gradient_ratio = 1)
   
   plot_result <- reshape2::melt(plot_result, "radius", c("observed_cross_K_gradient_ratio", "expected_cross_K_gradient_ratio"))

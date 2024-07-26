@@ -4,18 +4,18 @@ calculate_mixing_scores3D <- function(spe,
                                       radius, 
                                       feature_colname = "Cell.Type") {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), "Cell.Type" = spe[[feature_colname]])
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   
   ## For reference_cell_types, check they are found in the spe object
-  unknown_cell_types <- setdiff(reference_cell_types, df$Cell.Type)
+  unknown_cell_types <- setdiff(reference_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     stop(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
   }
   
   ## For target_cell_types, check they are found in the spe object
-  unknown_cell_types <- setdiff(target_cell_types, df$Cell.Type)
+  unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
@@ -24,18 +24,21 @@ calculate_mixing_scores3D <- function(spe,
   # Check if radius is numeric
   if (!is.numeric(radius)) stop(paste(radius, " is not of type 'numeric'"))
   
+  # Get spe coords
+  spe_coords <- spatialCoords(spe)
   
-  result <- data.frame(matrix(ncol=8, nrow=0))
+  # Define result
+  result <- data.frame()
   
   for (reference_cell_type in reference_cell_types) {
     
-    # Get all info for cells of reference cell_type
-    reference_cells <- df[df[["Cell.Type"]] == reference_cell_type, ]
+    # Get coords for reference_cell_type
+    reference_cell_type_coords <- spe_coords[spe[[feature_colname]] == reference_cell_type, ]
     
     for (target_cell_type in target_cell_types) {
       
-      # Get all info for cells of target cell_type      
-      target_cells <- df[df[["Cell.Type"]] == target_cell_type, ]
+      # Get coords for target_cell_type
+      target_cell_type_coords <- spe_coords[spe[[feature_colname]] == target_cell_type, ]
       
       # No point getting mixing scores if comparing the same cell type
       if (reference_cell_type == target_cell_type) {
@@ -43,7 +46,7 @@ calculate_mixing_scores3D <- function(spe,
       }
       
       # Can't get mixing scores if there are no reference cells
-      if (nrow(reference_cells) == 0) {
+      if (nrow(reference_cell_type_coords) == 0) {
         methods::show(paste("There are no unique reference cells of specified cell type ", reference_cell_type, "for target cell", target_cell_type))
         result <-  rbind(result, 
                          c(reference_cell_type, 
@@ -57,17 +60,16 @@ calculate_mixing_scores3D <- function(spe,
       }
       
       # Can't get mixing scores if there are no target cells
-      else if (nrow(target_cells) == 0) {
+      else if (nrow(target_cell_type_coords) == 0) {
         methods::show(paste("There are no unique target cells of specified cell type", target_cell_type, "for reference cell", reference_cell_type))
         
-        reference_cell_coords <- reference_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
-        reference_reference_result <- dbscan::frNN(reference_cell_coords, 
-                                                   eps = radius, 
-                                                   query = NULL,
-                                                   sort = FALSE)
+        ref_ref_result <- dbscan::frNN(reference_cell_type_coords, 
+                                       eps = radius, 
+                                       query = NULL,
+                                       sort = FALSE)
         
         # halve it to avoid counting each ref-ref interaction twice
-        reference_reference_interactions <- 0.5 * sum(rapply(reference_reference_result$id, length)) 
+        n_ref_ref_interactions <- 0.5 * sum(rapply(ref_ref_result$id, length)) 
         
         result <-  rbind(result, 
                          c(reference_cell_type, 
@@ -75,40 +77,37 @@ calculate_mixing_scores3D <- function(spe,
                            nrow(reference_cells), 
                            0, 
                            0, 
-                           reference_reference_interactions, 
+                           n_ref_ref_interactions, 
                            NA, 
                            NA))
       }
       
       # Generic case: We have reference cells and target cells
       else {
-        # Get x,y,z coords for reference cells and target cells
-        reference_cell_coords <- reference_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
-        target_cell_coords <- target_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
         
         # For each reference cell, find all target cells within the chosen radius
-        reference_target_result <- dbscan::frNN(target_cell_coords, 
-                                                eps = radius, 
-                                                query = reference_cell_coords, 
-                                                sort = FALSE)
+        ref_tar_result <- dbscan::frNN(target_cell_type_coords, 
+                                       eps = radius, 
+                                       query = reference_cell_type_coords, 
+                                       sort = FALSE)
         
         # Find the total sum of how many target cells were close enough to reference cells
-        reference_target_interactions <- sum(rapply(reference_target_result$id, length))
+        n_ref_tar_interactions <- sum(rapply(ref_tar_result$id, length))
         
         # For each reference cell, find all other reference cells within the chosen radius
-        reference_reference_result <- dbscan::frNN(reference_cell_coords, 
-                                                   eps = radius,
-                                                   query = NULL,
-                                                   sort = FALSE)
+        ref_ref_result <- dbscan::frNN(reference_cell_type_coords, 
+                                       eps = radius,
+                                       query = NULL,
+                                       sort = FALSE)
         
         # Find the the total sum of how many other reference cells were close enough to reference cells
         # Halve it to avoid counting each ref-ref interaction twice
-        reference_reference_interactions <- 0.5 * sum(rapply(reference_reference_result$id, length)) 
+        n_ref_ref_interactions <- 0.5 * sum(rapply(ref_ref_result$id, length)) 
         
         
-        if (reference_reference_interactions != 0) {
-          mixing_score <- reference_target_interactions / reference_reference_interactions
-          normalised_mixing_score <- 0.5 * mixing_score * (nrow(reference_cells) - 1) / nrow(target_cells)
+        if (n_ref_ref_interactions != 0) {
+          mixing_score <- n_ref_tar_interactions / n_ref_ref_interactions
+          normalised_mixing_score <- 0.5 * mixing_score * (nrow(reference_cell_type_coords) - 1) / nrow(target_cell_type_coords)
         }
         else {
           mixing_score <- 0
@@ -119,10 +118,10 @@ calculate_mixing_scores3D <- function(spe,
         result <-  rbind(result, 
                          c(reference_cell_type, 
                            target_cell_type, 
-                           nrow(reference_cells), 
-                           nrow(target_cells), 
-                           reference_target_interactions, 
-                           reference_reference_interactions, 
+                           nrow(reference_cell_type_coords), 
+                           nrow(target_cell_type_coords), 
+                           n_ref_tar_interactions, 
+                           n_ref_ref_interactions, 
                            mixing_score, 
                            normalised_mixing_score))
       }

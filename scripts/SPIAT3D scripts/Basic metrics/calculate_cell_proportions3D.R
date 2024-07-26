@@ -3,14 +3,13 @@ calculate_cell_proportions3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), "Cell.Type" = spe[[feature_colname]])
-  
   # Check
-  if (nrow(df) == 0) stop("No cells found for calculating cell proportions")
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
+  if (ncol(spe) == 0) stop("No cells found for calculating cell proportions")
   
   # Creates frequency/bar plot of all cell types in the entire image
-  cell_proportions <- data.frame(table(df[, feature_colname]))
+  cell_proportions <- data.frame(table(spe[[feature_colname]]))
   names(cell_proportions) <- c("cell_type", 'frequency')
   
   # Only include cell types the user has chosen
@@ -26,8 +25,6 @@ calculate_cell_proportions3D <- function(spe,
     # Subset for cell types chosen by user
     cell_proportions <- cell_proportions[(cell_proportions$cell_type %in% cell_types_of_interest), ]
     
-    # Check if the user has excluded all cell types
-    if (nrow(cell_proportions) == 0) stop("All cells have been excluded")
   }
   
   # Get frequency total for all cells

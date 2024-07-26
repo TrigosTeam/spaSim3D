@@ -1,4 +1,4 @@
-calculate_prevalence_gradient3D <- function(grid_data,
+calculate_prevalence_gradient3D <- function(grid_metrics,
                                             metric_colname,
                                             show_AUC = T,
                                             plot_image = T) {
@@ -11,7 +11,7 @@ calculate_prevalence_gradient3D <- function(grid_data,
   
   # Get prevalences for each threshold
   result$prevalence <- sapply(thresholds, function(threshold) { 
-    calculate_prevalence3D(grid_data, metric_colname, threshold) 
+    calculate_prevalence3D(grid_metrics, metric_colname, threshold) 
     })
   
   # Show AUC of prevalence gradient graph

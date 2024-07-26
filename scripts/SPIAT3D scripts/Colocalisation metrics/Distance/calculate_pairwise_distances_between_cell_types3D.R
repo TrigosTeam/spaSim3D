@@ -1,115 +1,110 @@
-
 calculate_pairwise_distances_between_cell_types3D <- function(spe,
                                                               cell_types_of_interest = NULL,
                                                               feature_colname = "Cell.Type",
                                                               show_summary = TRUE,
                                                               plot_image = TRUE) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   if (is.null(spe[["Cell.ID"]])) {
-    warning("Temporarily adding Cell.Id column to your spe")
+    warning("Temporarily adding Cell.ID column to your spe")
     spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
   }
   
- 
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), 
-                   "Cell.Type" = spe[[feature_colname]], 
-                   "Cell.ID" = spe[["Cell.ID"]])
-  
   # If there are less than two cells, give error
-  if (nrow(df) <= 1) stop("There must be at least two cells in spe")
+  if (ncol(spe) < 2) stop("There must be at least two cells in spe")
   
-  # Select all rows in data frame which only contains the cells of interest
+  # Subset spe to only contain the cells of interest
   if (!is.null(cell_types_of_interest)) {
     
     ## If cell types have been chosen, check they are found in the spe object
-    unknown_cell_types <- setdiff(cell_types_of_interest, df$Cell.Type)
+    unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
     if (length(unknown_cell_types) != 0) {
       stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                  paste(unknown_cell_types, collapse = ", ")))
     }
     
-    df <- df[df[["Cell.Type"]] %in% cell_types_of_interest, ]
+    spe <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
+  }
+  # If cell_types_of_interest is NULL, use all cells in spe
+  else {
+    cell_types_of_interest <- unique(spe[[feature_colname]])
   }
   
-  # Create a list of the number of cell types with their
-  # corresponding cell ID's
-  cell_types <- list()
-  for (cell_type in unique(df[["Cell.Type"]])) {
-    cell_types[[cell_type]] <- as.character(df$Cell.ID[df[["Cell.Type"]] == cell_type])
+  # Create a list containing the cell IDs of each cell type
+  cell_type_ids <- list()
+  for (cell_type in cell_types_of_interest) {
+    cell_type_ids[[cell_type]] <- as.character(spe$Cell.ID[spe[[feature_colname]] == cell_type])
   }
   
   # Calculate cell to cell distances
-  dist_all <- -1 * apcluster::negDistMat(df[, c("Cell.X.Position",
-                                                "Cell.Y.Position",
-                                                "Cell.Z.Position")])
+  distance_matrix <- -1 * apcluster::negDistMat(spatialCoords(spe))
+  rownames(distance_matrix) <- spe$Cell.ID
+  colnames(distance_matrix) <- spe$Cell.ID
   
-  cell_id_vector <- df$Cell.ID
-  colnames(dist_all) <- cell_id_vector
-  rownames(dist_all) <- cell_id_vector
+  result <- data.frame()
   
-  cell_to_cell_dist_all <- vector()
-
-  for (i in seq(length(cell_types))) {
+  for (i in seq(length(cell_types_of_interest))) {
     
-    for (j in i:length(cell_types)) {
-  
-      cell_name1 <- names(cell_types)[i]
-      cell_name2 <- names(cell_types)[j]
-
-      cell_ids1 <- cell_types[[cell_name1]]
-      cell_ids2 <- cell_types[[cell_name2]]
+    for (j in i:length(cell_types_of_interest)) {
+      
+      # Get current cell types and cell ids
+      cell_type1 <- names(cell_type_ids)[i]
+      cell_type2 <- names(cell_type_ids)[j]
+      
+      cell_type1_ids <- cell_type_ids[[cell_type1]]
+      cell_type2_ids <- cell_type_ids[[cell_type2]]
       
       ## Same cell type, only one cell
-      if (cell_name1 == cell_name2 && length(cell_ids1) == 1) next
-        
-      cell_to_cell <- dist_all[cell_id_vector %in% cell_ids1, 
-                               cell_id_vector %in% cell_ids2]
+      if (cell_type1 == cell_type2 && length(cell_type1_ids) == 1) next
+      
+      # Subset distance_matrix for current cell types
+      distance_matrix_subset <- distance_matrix[rownames(distance_matrix) %in% cell_type1_ids, 
+                                                colnames(distance_matrix) %in% cell_type2_ids]
       
       ## Different cell types, each only has one cell
-      if (length(cell_ids1) == 1 && length(cell_ids2) == 1) {
-        cell_to_cell <- as.matrix(cell_to_cell)
-        rownames(cell_to_cell) <- cell_ids1
-        colnames(cell_to_cell) <- cell_ids2
+      if (length(cell_type1_ids) == 1 && length(cell_type2_ids) == 1) {
+        distance_matrix_subset <- as.matrix(distance_matrix_subset)
+        rownames(distance_matrix_subset) <- cell_type1_ids
+        colnames(distance_matrix_subset) <- cell_type2_ids
       }    
       ## Different cell types, only one cell of cell_type1
-      else if (length(cell_ids1) == 1) {
-        cell_to_cell <- as.matrix(cell_to_cell)
-        colnames(cell_to_cell) <- cell_ids1
+      else if (length(cell_type1_ids) == 1) {
+        distance_matrix_subset <- as.matrix(distance_matrix_subset)
+        colnames(distance_matrix_subset) <- cell_type1_ids
       }
       ## Different cell types, only one cell of cell_type2
-      else if (length(cell_ids2) == 1) {
-        cell_to_cell <- as.matrix(cell_to_cell)
-        colnames(cell_to_cell) <- cell_ids2
+      else if (length(cell_type2_ids) == 1) {
+        distance_matrix_subset <- as.matrix(distance_matrix_subset)
+        colnames(distance_matrix_subset) <- cell_type2_ids
       }
+      ## Same cell type, only need part of the matrix (make irrelevant part of matrix equal to NA)
+      if (cell_type1 == cell_type2) distance_matrix_subset[upper.tri(distance_matrix_subset, diag = TRUE)] <- NA
       
-      ## Same cell type, only need part of the matrix
-      if (cell_name1 == cell_name2) cell_to_cell[upper.tri(cell_to_cell, diag = TRUE)] <- NA
+      # Convert distance_matrix_subset to a data frame
+      df <- reshape2::melt(distance_matrix_subset, na.rm = TRUE)
+      df$cell_type1 <- cell_type1
+      df$cell_type2 <- cell_type2
+      df$pair <- paste(cell_type1, cell_type2, sep="/")
       
-      # Melts dist_all to produce dataframe of target and nearest 
-      # cell ID's columns and distance column
-      cell_to_cell_dist <- reshape2::melt(cell_to_cell, na.rm = TRUE)
-      cell_to_cell_dist$cell_type1 <- cell_name1
-      cell_to_cell_dist$cell_type2 <- cell_name2
-      cell_to_cell_dist$pair <- paste(cell_name1, cell_name2, sep="/")
-
-      cell_to_cell_dist_all <- rbind(cell_to_cell_dist_all, 
-                                     cell_to_cell_dist)
+      result <- rbind(result, df)
     }
   }
   
-  colnames(cell_to_cell_dist_all)[c(1,2,3)] <- c("cell_id1", "cell_id2", "distance")
- 
+  # Rearrange columns 
+  colnames(result)[c(1, 2, 3)] <- c("cell_type1_id", "cell_type2_id", "distance")
+  result <- result[ , c("cell_type1_id", "cell_type1", "cell_type2_id", "cell_type2", "distance", "pair")]
+  
   # Plot
   if (plot_image) {
-    fig <- plot_cell_distances_violin3D(cell_to_cell_dist_all)
+    fig <- plot_cell_distances_violin3D(result)
     methods::show(fig)
   }
   
   # Print summary
   if (show_summary) {
-    print(summarise_distances_between_cell_types3D(cell_to_cell_dist_all))  
+    print(summarise_distances_between_cell_types3D(result))  
   }
   
-  return(cell_to_cell_dist_all)
+  return(result)
 }

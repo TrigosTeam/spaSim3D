@@ -7,19 +7,19 @@ dbscan_clustering3D <- function(spe,
                                 feature_colname = "Cell.Type",
                                 plot_image = T) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   spe_subset <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
   spe_subset_coords <- spatialCoords(spe_subset)
   
   db <- dbscan::dbscan(spe_subset_coords, eps = radius, minPts = minimum_cells_in_radius, borderPoints = F)
   
-  
-  
-  # Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe),
-                   "Cell.Type" = spe[[feature_colname]])
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe), colData(spe))
 
-  df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
-  df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]
+  df_cell_types_of_interest <- df[df[[feature_colname]] %in% cell_types_of_interest, ]
+  df_other_cell_types <- df[!(df[[feature_colname]] %in% cell_types_of_interest), ]
+  
   df_cell_types_of_interest$dbscan_cluster <- db$cluster
   df_other_cell_types$dbscan_cluster <- 0
   

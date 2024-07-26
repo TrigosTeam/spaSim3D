@@ -1,9 +1,9 @@
-summarise_distances_between_cell_types3D <- function(df) {
+summarise_distances_between_cell_types3D <- function(distances_df) {
   
   pair <- distance <- NULL
   
   # summarise the results
-  summarised_dists <- df %>% 
+  distances_df_summarised <- distances_df %>% 
     dplyr::group_by(pair) %>%
     dplyr::summarise(mean(distance, na.rm = TRUE), 
                      min(distance, na.rm = TRUE), 
@@ -11,22 +11,22 @@ summarise_distances_between_cell_types3D <- function(df) {
                      stats::median(distance, na.rm = TRUE), 
                      stats::sd(distance, na.rm = TRUE))
   
-  summarised_dists <- data.frame(summarised_dists)
+  distances_df_summarised <- data.frame(distances_df_summarised)
   
-  colnames(summarised_dists) <- c("pair", 
-                                  "mean", 
-                                  "min", 
-                                  "max", 
-                                  "median", 
-                                  "std_dev")
+  colnames(distances_df_summarised) <- c("pair", 
+                                         "mean", 
+                                         "min", 
+                                         "max", 
+                                         "median", 
+                                         "std_dev")
   
-  for (i in seq(nrow(summarised_dists))) {
+  for (i in seq(nrow(distances_df_summarised))) {
     # Get cell_types for each pair
-    cell_types <- strsplit(summarised_dists[i,"pair"], "/")[[1]]
+    cell_types <- strsplit(distances_df_summarised[i,"pair"], "/")[[1]]
     
-    summarised_dists[i, "reference"] <- cell_types[1]
-    summarised_dists[i, "target"] <- cell_types[2]
+    distances_df_summarised[i, "reference"] <- cell_types[1]
+    distances_df_summarised[i, "target"] <- cell_types[2]
   }
   
-  return(summarised_dists)
+  return(distances_df_summarised)
 }

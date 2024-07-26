@@ -4,6 +4,8 @@ calculate_entropy_grid_metrics3D <- function(spe,
                                              feature_colname = "Cell.Type",
                                              plot_image = TRUE) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   ## If cell types have been chosen, check they are found in the spe object
   unknown_cell_types <- setdiff(cell_types_of_interest, unique(spe[[feature_colname]]))
   if (length(unknown_cell_types) != 0) {

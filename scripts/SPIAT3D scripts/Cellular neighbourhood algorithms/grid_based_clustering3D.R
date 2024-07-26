@@ -4,6 +4,8 @@ grid_based_clustering3D <- function(spe,
                                     feature_colname = "Cell.Type",
                                     plot_image = TRUE) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   # Check if n_splits is numeric
   if (!is.numeric(n_splits)) {
     stop(paste(n_splits, " n_splits is not of type 'numeric'"))
@@ -101,7 +103,7 @@ grid_based_clustering3D <- function(spe,
                                                                    0.75 * maximum_cell_proportion,
                                                                    grid_prism_x, grid_prism_y, grid_prism_z,
                                                                    d_row, d_col, d_lay,
-                                                                   "Cell.Type",
+                                                                   feature_colname,
                                                                    data.frame()))
     }
     

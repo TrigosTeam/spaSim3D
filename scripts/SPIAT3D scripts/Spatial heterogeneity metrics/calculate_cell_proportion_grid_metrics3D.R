@@ -5,6 +5,8 @@ calculate_cell_proportion_grid_metrics3D <- function(spe,
                                                      feature_colname = "Cell.Type",
                                                      plot_image = TRUE) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   ## Check reference_cell_types are found in the spe object
   unknown_cell_types <- setdiff(reference_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {

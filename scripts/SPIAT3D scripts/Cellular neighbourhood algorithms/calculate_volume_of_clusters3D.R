@@ -1,4 +1,4 @@
-calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname = "Cell.Type") {
+calculate_volume_of_clusters3D <- function(spe, cluster_colname) {
   
   # Get number of clusters
   n_clusters <- max(spe[[cluster_colname]])
@@ -10,9 +10,7 @@ calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname
   colnames(result) <- c("cluster_number", "n_cells")
   
   for (i in seq(n_clusters)) {
-    cells_in_cluster <- spe[[feature_colname]][spe[[cluster_colname]] == i]
-    result[i, "n_cells"] <- length(cells_in_cluster)
-    
+    result[i, "n_cells"] <- sum(spe[[cluster_colname]] == i)
   }
   result$cluster_number <- as.character(seq(n_clusters))
   

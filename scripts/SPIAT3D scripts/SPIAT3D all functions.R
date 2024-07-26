@@ -5,14 +5,13 @@ calculate_cell_proportions3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), "Cell.Type" = spe[[feature_colname]])
-  
   # Check
-  if (nrow(df) == 0) stop("No cells found for calculating cell proportions")
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
+  if (ncol(spe) == 0) stop("No cells found for calculating cell proportions")
   
   # Creates frequency/bar plot of all cell types in the entire image
-  cell_proportions <- data.frame(table(df[, feature_colname]))
+  cell_proportions <- data.frame(table(spe[[feature_colname]]))
   names(cell_proportions) <- c("cell_type", 'frequency')
   
   # Only include cell types the user has chosen
@@ -28,8 +27,6 @@ calculate_cell_proportions3D <- function(spe,
     # Subset for cell types chosen by user
     cell_proportions <- cell_proportions[(cell_proportions$cell_type %in% cell_types_of_interest), ]
     
-    # Check if the user has excluded all cell types
-    if (nrow(cell_proportions) == 0) stop("All cells have been excluded")
   }
   
   # Get frequency total for all cells
@@ -64,6 +61,7 @@ calculate_cell_proportions3D <- function(spe,
 }
 
 
+
 calculate_entropy_background3D <- function(spe,
                                            cell_types_of_interest, 
                                            feature_colname = "Cell.Type") {
@@ -82,124 +80,119 @@ calculate_entropy_background3D <- function(spe,
 
 ### Cell colocalisation metrics -----------------------------------------------
 
-
-
 calculate_pairwise_distances_between_cell_types3D <- function(spe,
                                                               cell_types_of_interest = NULL,
                                                               feature_colname = "Cell.Type",
                                                               show_summary = TRUE,
                                                               plot_image = TRUE) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   if (is.null(spe[["Cell.ID"]])) {
-    warning("Temporarily adding Cell.Id column to your spe")
+    warning("Temporarily adding Cell.ID column to your spe")
     spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
   }
   
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), 
-                   "Cell.Type" = spe[[feature_colname]], 
-                   "Cell.ID" = spe[["Cell.ID"]])
-  
   # If there are less than two cells, give error
-  if (nrow(df) <= 1) stop("There must be at least two cells in spe")
+  if (ncol(spe) < 2) stop("There must be at least two cells in spe")
   
-  # Select all rows in data frame which only contains the cells of interest
+  # Subset spe to only contain the cells of interest
   if (!is.null(cell_types_of_interest)) {
     
     ## If cell types have been chosen, check they are found in the spe object
-    unknown_cell_types <- setdiff(cell_types_of_interest, df$Cell.Type)
+    unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
     if (length(unknown_cell_types) != 0) {
       stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                  paste(unknown_cell_types, collapse = ", ")))
     }
     
-    df <- df[df[["Cell.Type"]] %in% cell_types_of_interest, ]
+    spe <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
+  }
+  # If cell_types_of_interest is NULL, use all cells in spe
+  else {
+    cell_types_of_interest <- unique(spe[[feature_colname]])
   }
   
-  # Create a list of the number of cell types with their
-  # corresponding cell ID's
-  cell_types <- list()
-  for (cell_type in unique(df[["Cell.Type"]])) {
-    cell_types[[cell_type]] <- as.character(df$Cell.ID[df[["Cell.Type"]] == cell_type])
+  # Create a list containing the cell IDs of each cell type
+  cell_type_ids <- list()
+  for (cell_type in cell_types_of_interest) {
+    cell_type_ids[[cell_type]] <- as.character(spe$Cell.ID[spe[[feature_colname]] == cell_type])
   }
   
   # Calculate cell to cell distances
-  dist_all <- -1 * apcluster::negDistMat(df[, c("Cell.X.Position",
-                                                "Cell.Y.Position",
-                                                "Cell.Z.Position")])
+  distance_matrix <- -1 * apcluster::negDistMat(spatialCoords(spe))
+  rownames(distance_matrix) <- spe$Cell.ID
+  colnames(distance_matrix) <- spe$Cell.ID
   
-  cell_id_vector <- df$Cell.ID
-  colnames(dist_all) <- cell_id_vector
-  rownames(dist_all) <- cell_id_vector
+  result <- data.frame()
   
-  cell_to_cell_dist_all <- vector()
-  
-  for (i in seq(length(cell_types))) {
+  for (i in seq(length(cell_types_of_interest))) {
     
-    for (j in i:length(cell_types)) {
+    for (j in i:length(cell_types_of_interest)) {
       
-      cell_name1 <- names(cell_types)[i]
-      cell_name2 <- names(cell_types)[j]
+      # Get current cell types and cell ids
+      cell_type1 <- names(cell_type_ids)[i]
+      cell_type2 <- names(cell_type_ids)[j]
       
-      cell_ids1 <- cell_types[[cell_name1]]
-      cell_ids2 <- cell_types[[cell_name2]]
+      cell_type1_ids <- cell_type_ids[[cell_type1]]
+      cell_type2_ids <- cell_type_ids[[cell_type2]]
       
       ## Same cell type, only one cell
-      if (cell_name1 == cell_name2 && length(cell_ids1) == 1) next
+      if (cell_type1 == cell_type2 && length(cell_type1_ids) == 1) next
       
-      cell_to_cell <- dist_all[cell_id_vector %in% cell_ids1, 
-                               cell_id_vector %in% cell_ids2]
+      # Subset distance_matrix for current cell types
+      distance_matrix_subset <- distance_matrix[rownames(distance_matrix) %in% cell_type1_ids, 
+                                                colnames(distance_matrix) %in% cell_type2_ids]
       
       ## Different cell types, each only has one cell
-      if (length(cell_ids1) == 1 && length(cell_ids2) == 1) {
-        cell_to_cell <- as.matrix(cell_to_cell)
-        rownames(cell_to_cell) <- cell_ids1
-        colnames(cell_to_cell) <- cell_ids2
+      if (length(cell_type1_ids) == 1 && length(cell_type2_ids) == 1) {
+        distance_matrix_subset <- as.matrix(distance_matrix_subset)
+        rownames(distance_matrix_subset) <- cell_type1_ids
+        colnames(distance_matrix_subset) <- cell_type2_ids
       }    
       ## Different cell types, only one cell of cell_type1
-      else if (length(cell_ids1) == 1) {
-        cell_to_cell <- as.matrix(cell_to_cell)
-        colnames(cell_to_cell) <- cell_ids1
+      else if (length(cell_type1_ids) == 1) {
+        distance_matrix_subset <- as.matrix(distance_matrix_subset)
+        colnames(distance_matrix_subset) <- cell_type1_ids
       }
       ## Different cell types, only one cell of cell_type2
-      else if (length(cell_ids2) == 1) {
-        cell_to_cell <- as.matrix(cell_to_cell)
-        colnames(cell_to_cell) <- cell_ids2
+      else if (length(cell_type2_ids) == 1) {
+        distance_matrix_subset <- as.matrix(distance_matrix_subset)
+        colnames(distance_matrix_subset) <- cell_type2_ids
       }
+      ## Same cell type, only need part of the matrix (make irrelevant part of matrix equal to NA)
+      if (cell_type1 == cell_type2) distance_matrix_subset[upper.tri(distance_matrix_subset, diag = TRUE)] <- NA
       
-      ## Same cell type, only need part of the matrix
-      if (cell_name1 == cell_name2) cell_to_cell[upper.tri(cell_to_cell, diag = TRUE)] <- NA
+      # Convert distance_matrix_subset to a data frame
+      df <- reshape2::melt(distance_matrix_subset, na.rm = TRUE)
+      df$cell_type1 <- cell_type1
+      df$cell_type2 <- cell_type2
+      df$pair <- paste(cell_type1, cell_type2, sep="/")
       
-      # Melts dist_all to produce dataframe of target and nearest 
-      # cell ID's columns and distance column
-      cell_to_cell_dist <- reshape2::melt(cell_to_cell, na.rm = TRUE)
-      cell_to_cell_dist$cell_type1 <- cell_name1
-      cell_to_cell_dist$cell_type2 <- cell_name2
-      cell_to_cell_dist$pair <- paste(cell_name1, cell_name2, sep="/")
-      
-      cell_to_cell_dist_all <- rbind(cell_to_cell_dist_all, 
-                                     cell_to_cell_dist)
+      result <- rbind(result, df)
     }
   }
   
-  colnames(cell_to_cell_dist_all)[c(1,2,3)] <- c("cell_id1", "cell_id2", "distance")
+  # Rearrange columns 
+  colnames(result)[c(1, 2, 3)] <- c("cell_type1_id", "cell_type2_id", "distance")
+  result <- result[ , c("cell_type1_id", "cell_type1", "cell_type2_id", "cell_type2", "distance", "pair")]
   
   # Plot
   if (plot_image) {
-    fig <- plot_cell_distances_violin3D(cell_to_cell_dist_all)
+    fig <- plot_cell_distances_violin3D(result)
     methods::show(fig)
   }
   
   # Print summary
   if (show_summary) {
-    print(summarise_distances_between_cell_types3D(cell_to_cell_dist_all))  
+    print(summarise_distances_between_cell_types3D(result))  
   }
   
-  return(cell_to_cell_dist_all)
+  return(result)
 }
 
 
+## Please ensure there is no factoring in any of the columns!!!
 
 calculate_minimum_distances_between_cell_types3D <- function(spe,
                                                              cell_types_of_interest = NULL,
@@ -207,91 +200,88 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
                                                              show_summary = TRUE,
                                                              plot_image = TRUE) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   if (is.null(spe[["Cell.ID"]])) {
-    warning("Temporarily adding Cell.Id column to your spe")
+    warning("Temporarily adding Cell.ID column to your spe")
     spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
-  }
-  
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), 
-                   "Cell.Type" = spe[[feature_colname]], 
-                   "Cell.ID" = spe[["Cell.ID"]])
+  }  
   
   # If there are less than two cells, give error
-  if (nrow(df) <= 1) stop("There must be at least two cells in spe")
+  if (ncol(spe) < 2) stop("There must be at least two cells in spe")
   
-  # Select all rows in data frame which only contains the cells of interest
+  # Subset spe to only contain the cells of interest
   if (!is.null(cell_types_of_interest)) {
     
     ## If cell types have been chosen, check they are found in the spe object
-    unknown_cell_types <- setdiff(cell_types_of_interest, df$Cell.Type)
+    unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
     if (length(unknown_cell_types) != 0) {
       stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                  paste(unknown_cell_types, collapse = ", ")))
     }
     
-    df <- df[df[["Cell.Type"]] %in% cell_types_of_interest, ]
+    spe <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
+  }
+  # If cell_types_of_interest is NULL, use all cells in spe
+  else {
+    cell_types_of_interest <- unique(spe[[feature_colname]])
   }
   
-  # Create a list of the number of cell types with their corresponding cell ID's
-  cell_types <- list()
-  for (cell_type in unique(df[["Cell.Type"]])) {
-    cell_types[[cell_type]] <- as.character(df$Cell.ID[df[["Cell.Type"]] == cell_type])
+  # Create a list containing the cell IDs of each cell type
+  cell_type_ids <- list()
+  for (cell_type in cell_types_of_interest) {
+    cell_type_ids[[cell_type]] <- as.character(spe$Cell.ID[spe[[feature_colname]] == cell_type])
   }
+  
+  # Get spe coords
+  spe_coords <- data.frame(spatialCoords(spe))
   
   # Get different possible cell type combinations
   # Each row represents a combination
   # If a row is [1 , 2], then we are comparing cell type 1 and cell type 2
-  unique_cells <- unique(df[["Cell.Type"]]) # unique cell types
-  permu <- gtools::permutations(length(unique_cells), 2, repeats.allowed = TRUE)
+  permu <- gtools::permutations(length(cell_types_of_interest), 2, repeats.allowed = TRUE)
   
-  result <- vector()
+  result <- data.frame()
   
   for (i in seq(nrow(permu))) {
-    name1 <- unique_cells[permu[i, 1]]
-    name2 <- unique_cells[permu[i, 2]]
+    cell_type1 <- cell_types_of_interest[permu[i, 1]]
+    cell_type2 <- cell_types_of_interest[permu[i, 2]]
     
-    # Get x,y,z coords for all cells of cell_type1 and cell_type2
-    all_cell_type1_coord <- df[df[, "Cell.Type"] == name1, 
-                               c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
-    
-    all_cell_type2_coord <- df[df[, "Cell.Type"] == name2, 
-                               c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+    # Get x, y, z coords for all cells of cell_type1 and cell_type2
+    cell_type1_coords <- spe_coords[spe[[feature_colname]] == cell_type1, ]
+    cell_type2_coords <- spe_coords[spe[[feature_colname]] == cell_type2, ]
     
     # Find all of closest points
     # For each cell of cell_type1, find the closest cell of cell_type2
-    if (name1 != name2) {
-      all_closest <- RANN::nn2(data = all_cell_type2_coord, 
-                               query = all_cell_type1_coord, 
-                               k = 1)  
+    if (cell_type1 != cell_type2) {
+      nearest_neighbours <- RANN::nn2(data = cell_type2_coords, 
+                                      query = cell_type1_coords, 
+                                      k = 1)  
     }
     # If we are comparing the same cell_type, and there is only one of this cell type, move on
-    else if (nrow(all_cell_type1_coord) == 1) {
-      warning("There is only 1 '", name1, "' cell in your data. It has no nearest neighbour of the same cell type.", sep = "")
+    else if (nrow(cell_type1_coords) == 1) {
+      warning("There is only 1 '", cell_type1, "' cell in your data. It has no nearest neighbour of the same cell type.", sep = "")
       next
     }
     # If we are comparing the same cell_type, use the second closest neighbour
     else {
-      all_closest <- RANN::nn2(data = all_cell_type2_coord, 
-                               query = all_cell_type1_coord, 
-                               k = 2)
-      all_closest[['nn.idx']] <- all_closest[['nn.idx']][, 2]
-      all_closest[['nn.dists']] <- all_closest[['nn.dists']][, 2]
+      nearest_neighbours <- RANN::nn2(data = cell_type2_coords, 
+                                      query = cell_type1_coords, 
+                                      k = 2)
+      nearest_neighbours[['nn.idx']] <- nearest_neighbours[['nn.idx']][ , 2]
+      nearest_neighbours[['nn.dists']] <- nearest_neighbours[['nn.dists']][ , 2]
     }
     
-    # Create the data frame containing the chosen cells and their ids, as well as
-    # the nearest cell to them and their ids, and the distance between
-    cell_type2_cell_IDs <- df[df[ , "Cell.Type"] == name2, "Cell.ID"]
+    # Create the data frame containing the chosen cells and their ids, as well as the nearest cell to them and their ids, and the distance between
     
-    local_dist_mins <- data.frame(
-      ref_cell_id = cell_types[[name1]],
-      ref_cell_type = name1,
-      nearest_cell_id = cell_type2_cell_IDs[as.vector(all_closest$nn.idx)],
-      nearest_cell_type = name2,
-      distance = all_closest$nn.dists
+    df <- data.frame(
+      ref_cell_id = cell_type_ids[[cell_type1]],
+      ref_cell_type = cell_type1,
+      nearest_cell_id = cell_type_ids[[cell_type2]][c(nearest_neighbours$nn.idx)],
+      nearest_cell_type = cell_type2,
+      distance = nearest_neighbours$nn.dists
     )
-    result <- rbind(result, local_dist_mins)
+    result <- rbind(result, df)
   }
   
   result$pair <- paste(result$ref_cell_type, result$nearest_cell_type,sep = "/")
@@ -312,12 +302,13 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
 
 
 
-summarise_distances_between_cell_types3D <- function(df) {
+
+summarise_distances_between_cell_types3D <- function(distances_df) {
   
   pair <- distance <- NULL
   
   # summarise the results
-  summarised_dists <- df %>% 
+  distances_df_summarised <- distances_df %>% 
     dplyr::group_by(pair) %>%
     dplyr::summarise(mean(distance, na.rm = TRUE), 
                      min(distance, na.rm = TRUE), 
@@ -325,34 +316,35 @@ summarise_distances_between_cell_types3D <- function(df) {
                      stats::median(distance, na.rm = TRUE), 
                      stats::sd(distance, na.rm = TRUE))
   
-  summarised_dists <- data.frame(summarised_dists)
+  distances_df_summarised <- data.frame(distances_df_summarised)
   
-  colnames(summarised_dists) <- c("pair", 
-                                  "mean", 
-                                  "min", 
-                                  "max", 
-                                  "median", 
-                                  "std_dev")
+  colnames(distances_df_summarised) <- c("pair", 
+                                         "mean", 
+                                         "min", 
+                                         "max", 
+                                         "median", 
+                                         "std_dev")
   
-  for (i in seq(nrow(summarised_dists))) {
+  for (i in seq(nrow(distances_df_summarised))) {
     # Get cell_types for each pair
-    cell_types <- strsplit(summarised_dists[i,"pair"], "/")[[1]]
+    cell_types <- strsplit(distances_df_summarised[i,"pair"], "/")[[1]]
     
-    summarised_dists[i, "reference"] <- cell_types[1]
-    summarised_dists[i, "target"] <- cell_types[2]
+    distances_df_summarised[i, "reference"] <- cell_types[1]
+    distances_df_summarised[i, "target"] <- cell_types[2]
   }
   
-  return(summarised_dists)
+  return(distances_df_summarised)
 }
 
 
+
 ## For scales parameter, use "free_x" or "free". "free_y" looks silly
-plot_cell_distances_violin3D <- function(cell_to_cell_dist, scales = "free_x") {
+plot_distances_between_cell_types_violin3D <- function(distances_df, scales = "free_x") {
   
   # setting these variables to NULL as otherwise get "no visible binding for global variable" in R check
   pair <- distance <- NULL
   
-  fig <- ggplot(cell_to_cell_dist, aes(x = pair, y = distance)) + 
+  fig <- ggplot(distances_df, aes(x = pair, y = distance)) + 
     geom_violin() +
     facet_wrap(~pair, scales=scales, strip.position="bottom") +
     theme_bw() +
@@ -374,18 +366,18 @@ calculate_mixing_scores3D <- function(spe,
                                       radius, 
                                       feature_colname = "Cell.Type") {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), "Cell.Type" = spe[[feature_colname]])
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   
   ## For reference_cell_types, check they are found in the spe object
-  unknown_cell_types <- setdiff(reference_cell_types, df$Cell.Type)
+  unknown_cell_types <- setdiff(reference_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     stop(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
   }
   
   ## For target_cell_types, check they are found in the spe object
-  unknown_cell_types <- setdiff(target_cell_types, df$Cell.Type)
+  unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
@@ -394,18 +386,21 @@ calculate_mixing_scores3D <- function(spe,
   # Check if radius is numeric
   if (!is.numeric(radius)) stop(paste(radius, " is not of type 'numeric'"))
   
+  # Get spe coords
+  spe_coords <- spatialCoords(spe)
   
-  result <- data.frame(matrix(ncol=8, nrow=0))
+  # Define result
+  result <- data.frame()
   
   for (reference_cell_type in reference_cell_types) {
     
-    # Get all info for cells of reference cell_type
-    reference_cells <- df[df[["Cell.Type"]] == reference_cell_type, ]
+    # Get coords for reference_cell_type
+    reference_cell_type_coords <- spe_coords[spe[[feature_colname]] == reference_cell_type, ]
     
     for (target_cell_type in target_cell_types) {
       
-      # Get all info for cells of target cell_type      
-      target_cells <- df[df[["Cell.Type"]] == target_cell_type, ]
+      # Get coords for target_cell_type
+      target_cell_type_coords <- spe_coords[spe[[feature_colname]] == target_cell_type, ]
       
       # No point getting mixing scores if comparing the same cell type
       if (reference_cell_type == target_cell_type) {
@@ -413,7 +408,7 @@ calculate_mixing_scores3D <- function(spe,
       }
       
       # Can't get mixing scores if there are no reference cells
-      if (nrow(reference_cells) == 0) {
+      if (nrow(reference_cell_type_coords) == 0) {
         methods::show(paste("There are no unique reference cells of specified cell type ", reference_cell_type, "for target cell", target_cell_type))
         result <-  rbind(result, 
                          c(reference_cell_type, 
@@ -427,17 +422,16 @@ calculate_mixing_scores3D <- function(spe,
       }
       
       # Can't get mixing scores if there are no target cells
-      else if (nrow(target_cells) == 0) {
+      else if (nrow(target_cell_type_coords) == 0) {
         methods::show(paste("There are no unique target cells of specified cell type", target_cell_type, "for reference cell", reference_cell_type))
         
-        reference_cell_coords <- reference_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
-        reference_reference_result <- dbscan::frNN(reference_cell_coords, 
-                                                   eps = radius, 
-                                                   query = NULL,
-                                                   sort = FALSE)
+        ref_ref_result <- dbscan::frNN(reference_cell_type_coords, 
+                                       eps = radius, 
+                                       query = NULL,
+                                       sort = FALSE)
         
         # halve it to avoid counting each ref-ref interaction twice
-        reference_reference_interactions <- 0.5 * sum(rapply(reference_reference_result$id, length)) 
+        n_ref_ref_interactions <- 0.5 * sum(rapply(ref_ref_result$id, length)) 
         
         result <-  rbind(result, 
                          c(reference_cell_type, 
@@ -445,40 +439,37 @@ calculate_mixing_scores3D <- function(spe,
                            nrow(reference_cells), 
                            0, 
                            0, 
-                           reference_reference_interactions, 
+                           n_ref_ref_interactions, 
                            NA, 
                            NA))
       }
       
       # Generic case: We have reference cells and target cells
       else {
-        # Get x,y,z coords for reference cells and target cells
-        reference_cell_coords <- reference_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
-        target_cell_coords <- target_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
         
         # For each reference cell, find all target cells within the chosen radius
-        reference_target_result <- dbscan::frNN(target_cell_coords, 
-                                                eps = radius, 
-                                                query = reference_cell_coords, 
-                                                sort = FALSE)
+        ref_tar_result <- dbscan::frNN(target_cell_type_coords, 
+                                       eps = radius, 
+                                       query = reference_cell_type_coords, 
+                                       sort = FALSE)
         
         # Find the total sum of how many target cells were close enough to reference cells
-        reference_target_interactions <- sum(rapply(reference_target_result$id, length))
+        n_ref_tar_interactions <- sum(rapply(ref_tar_result$id, length))
         
         # For each reference cell, find all other reference cells within the chosen radius
-        reference_reference_result <- dbscan::frNN(reference_cell_coords, 
-                                                   eps = radius,
-                                                   query = NULL,
-                                                   sort = FALSE)
+        ref_ref_result <- dbscan::frNN(reference_cell_type_coords, 
+                                       eps = radius,
+                                       query = NULL,
+                                       sort = FALSE)
         
         # Find the the total sum of how many other reference cells were close enough to reference cells
         # Halve it to avoid counting each ref-ref interaction twice
-        reference_reference_interactions <- 0.5 * sum(rapply(reference_reference_result$id, length)) 
+        n_ref_ref_interactions <- 0.5 * sum(rapply(ref_ref_result$id, length)) 
         
         
-        if (reference_reference_interactions != 0) {
-          mixing_score <- reference_target_interactions / reference_reference_interactions
-          normalised_mixing_score <- 0.5 * mixing_score * (nrow(reference_cells) - 1) / nrow(target_cells)
+        if (n_ref_ref_interactions != 0) {
+          mixing_score <- n_ref_tar_interactions / n_ref_ref_interactions
+          normalised_mixing_score <- 0.5 * mixing_score * (nrow(reference_cell_type_coords) - 1) / nrow(target_cell_type_coords)
         }
         else {
           mixing_score <- 0
@@ -489,10 +480,10 @@ calculate_mixing_scores3D <- function(spe,
         result <-  rbind(result, 
                          c(reference_cell_type, 
                            target_cell_type, 
-                           nrow(reference_cells), 
-                           nrow(target_cells), 
-                           reference_target_interactions, 
-                           reference_reference_interactions, 
+                           nrow(reference_cell_type_coords), 
+                           nrow(target_cell_type_coords), 
+                           n_ref_tar_interactions, 
+                           n_ref_ref_interactions, 
                            mixing_score, 
                            normalised_mixing_score))
       }
@@ -516,32 +507,29 @@ calculate_mixing_scores3D <- function(spe,
 }
 
 
+
 calculate_cells_in_neighbourhood3D <- function(spe, 
-                                              reference_cell_type, 
-                                              target_cell_types, 
-                                              radius, 
-                                              feature_colname = "Cell.Type",
-                                              show_summary = TRUE,
-                                              plot_image = TRUE) {
+                                               reference_cell_type, 
+                                               target_cell_types, 
+                                               radius, 
+                                               feature_colname = "Cell.Type",
+                                               show_summary = TRUE,
+                                               plot_image = TRUE) {
+  
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   if (is.null(spe[["Cell.ID"]])) {
-    warning("Temporarily adding Cell.Id column to your spe")
+    warning("Temporarily adding Cell.ID column to your spe")
     spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
-  }
-  
-  
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), 
-                   "Cell.Type" = spe[[feature_colname]], 
-                   "Cell.ID" = spe[["Cell.ID"]])
+  }  
   
   ## For reference_cell_type, check it is found in the spe object
-  if (!(reference_cell_type %in% df$Cell.Type)) {
+  if (!(reference_cell_type %in% spe[[feature_colname]])) {
     stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
   }
   
   ## For target_cell_types, check they are found in the spe object
-  unknown_cell_types <- setdiff(target_cell_types, df$Cell.Type)
+  unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
@@ -552,33 +540,35 @@ calculate_cells_in_neighbourhood3D <- function(spe,
     stop(paste(radius, " is not of type 'numeric'"))
   }
   
-  ## Get data for reference cells
-  reference_cells <- df[df[[feature_colname]] == reference_cell_type, ]
-  reference_cell_coords <- reference_cells[, c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
-  rownames(reference_cell_coords) <- reference_cells$Cell.ID
+  # Get spe coords
+  spe_coords <- data.frame(spatialCoords(spe))
   
-  result <- data.frame(matrix(nrow = nrow(reference_cells), ncol = 0))
+  # Get reference_cell_type coords
+  reference_cell_type_coords <- spe_coords[spe[[feature_colname]] == reference_cell_type, ]
+  
+  result <- data.frame(matrix(nrow = nrow(reference_cell_type_coords), ncol = 0))
   
   for (target_cell_type in target_cell_types) {
-    ## Get df for target cells
-    target_cells <- df[df[[feature_colname]] == target_cell_type, ]
-    target_cell_coords <- target_cells[, c("Cell.X.Position","Cell.Y.Position", "Cell.Z.Position")]
+    
+    ## Get target_cell_type coords
+    target_cell_type_coords <- spe_coords[spe[[feature_colname]] == target_cell_type, ]
     
     ## Determine number of target cells specified distance for each reference cell
-    reference_target_result <- dbscan::frNN(target_cell_coords, 
-                                            eps = radius,
-                                            query = reference_cell_coords, 
-                                            sort = FALSE)
-    n_targets <- rapply(reference_target_result$id, length)
+    ref_tar_result <- dbscan::frNN(target_cell_type_coords, 
+                                   eps = radius,
+                                   query = reference_cell_type_coords, 
+                                   sort = FALSE)
+    
+    n_targets <- rapply(ref_tar_result$id, length)
     
     ## Add to data frame
     result[[target_cell_type]] <- n_targets
   }
   
-  result <- data.frame(ref_cell_id = reference_cells$Cell.ID, result)
+  result <- data.frame(ref_cell_id = spe$Cell.ID[spe[[feature_colname]] == reference_cell_type], result)
   
+  ## Show summarised results
   if (show_summary) {
-    ## Show summarised results
     print(summarise_cells_in_neighbourhood3D(result))    
   }
   
@@ -593,53 +583,16 @@ calculate_cells_in_neighbourhood3D <- function(spe,
 }
 
 
-calculate_cells_in_neighbourhood_gradient3D <- function(spe, 
-                                                        reference_cell_type, 
-                                                        target_cell_types, 
-                                                        radii, 
-                                                        feature_colname = "Cell.Type",
-                                                        plot_image = TRUE) {
-  
-  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
-  colnames(result) <- target_cell_types
-  
-  for (radius in seq(radii)) {
-    cells_in_neighborhood_data <- calculate_cells_in_neighbourhood3D(spe,
-                                                                     reference_cell_type,
-                                                                     target_cell_types,
-                                                                     radius,
-                                                                     feature_colname,
-                                                                     FALSE,
-                                                                     FALSE)
-    
-    cells_in_neighborhood_data$ref_cell_id <- NULL
-    result[radius, ] <- apply(cells_in_neighborhood_data, 2, mean)
-  }
-  # Add a radius column to the result
-  result$radius <- seq(radii)
-  
-  if (plot_image) {
-    plot_result <- reshape2::melt(result, "radius")
-    
-    fig <- ggplot(plot_result, aes(radius, value, color = variable)) + 
-      geom_line() + 
-      labs(x = "Radius", y = "Average cells in neighbourhood") + 
-      scale_color_discrete(name = "Cell type")
-    
-    methods::show(fig)
-  }
-  
-  return(result)
-}
 
 
 
-summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_data) {
-  
-  df <- cells_in_neighbourhood_data
+
+
+
+summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_df) {
   
   ## Target cell types will be all the columns except the first column
-  target_cell_types <- colnames(cells_in_neighbourhood_data)[c(-1)]
+  target_cell_types <- colnames(cells_in_neighbourhood_df)[c(-1)]
   
   ## Set up data frame for summarised_results list
   df <- data.frame(row.names = c("mean", "min", "max", "median", "st_dev"))
@@ -647,7 +600,7 @@ summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_data) {
   for (target_cell_type in target_cell_types) {
     
     ## Get statistical measures for each target cell type
-    target_cell_type_values <- cells_in_neighbourhood_data[[target_cell_type]]
+    target_cell_type_values <- cells_in_neighbourhood_df[[target_cell_type]]
     df[[target_cell_type]] <- c(mean(target_cell_type_values),
                                 min(target_cell_type_values),
                                 max(target_cell_type_values),
@@ -656,8 +609,9 @@ summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_data) {
     
   }
   
-  return (data.frame(t(df)))
+  return(data.frame(t(df)))
 }
+
 
 
 calculate_cells_in_neighbourhood_proportions3D <- function(spe, 
@@ -667,13 +621,13 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
                                                            feature_colname = "Cell.Type") {
   
   ## Get 'count' neighbourhood data
-  cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
-                                                                    reference_cell_type,
-                                                                    target_cell_types,
-                                                                    radius,
-                                                                    feature_colname,
-                                                                    FALSE,
-                                                                    FALSE)
+  cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
+                                                                  reference_cell_type,
+                                                                  target_cell_types,
+                                                                  radius,
+                                                                  feature_colname,
+                                                                  FALSE,
+                                                                  FALSE)
   
   
   
@@ -683,7 +637,7 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
   result$target_cell_type <- target_cell_types
   
   ## Get frequency of each target cell type
-  result$frequency <- apply(cells_in_neighbourhood_data[ , target_cell_types], 2, sum)
+  result$frequency <- apply(cells_in_neighbourhood_df[ , target_cell_types], 2, sum)
   
   ## Use frequency to get proportion and percentage of each cell type
   total <- sum(result$frequency)
@@ -701,57 +655,19 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
 }
 
 
-calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe, 
-                                                                    reference_cell_type, 
-                                                                    target_cell_types, 
-                                                                    radii, 
-                                                                    feature_colname = "Cell.Type",
-                                                                    plot_image = TRUE) {
-  
-  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
-  colnames(result) <- target_cell_types
-  
-  for (radius in seq(radii)) {
-    cell_proportions_neighbourhood_data <- calculate_cells_in_neighbourhood_proportions3D(spe,
-                                                                                          reference_cell_type,
-                                                                                          target_cell_types,
-                                                                                          radius,
-                                                                                          feature_colname)
-    
-    result[radius, ] <- cell_proportions_neighbourhood_data$proportion
-  }
-  
-  # Add a radius column to the result
-  result$radius <- seq(radii)
-  
-  # Plot
-  if (plot_image) {
-    plot_result <- reshape2::melt(result, id.vars = c("radius"))
-    fig <- ggplot(plot_result, aes(radius, value, color = variable)) +
-      geom_point() +
-      geom_line() +
-      labs(title = "Neighbourhood cell proportion gradients", x = "Radius", y = "Cell proportion", color = "Cell type") +
-      theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5)) +
-      ylim(0, 1)
-    
-    methods::show(fig)
-  }
-  
-  return(result)
-}
+
 
 
 
 
 
 ## For scales parameter, use "free_x" or "free". "free_y" looks silly
-plot_cells_in_neighbourhood_violin3D <- function(cells_in_neighbourhood_data, reference_cell_type, scales = "free_x") {
+plot_cells_in_neighbourhood_violin3D <- function(cells_in_neighbourhood_df, reference_cell_type, scales = "free_x") {
   
   ## Target cell types will be all the columns except the first column
-  target_cell_types <- colnames(cells_in_neighbourhood_data)[c(-1)]
+  target_cell_types <- colnames(cells_in_neighbourhood_df)[c(-1)]
   
-  df <- reshape2::melt(cells_in_neighbourhood_data, measure.vars = target_cell_types)
+  df <- reshape2::melt(cells_in_neighbourhood_df, measure.vars = target_cell_types)
   colnames(df) <- c("ref_cell_id", "tar_cell_type", "count")
   
   # setting these variables to NULL as otherwise get "no visible binding for global variable" in R check
@@ -773,6 +689,7 @@ plot_cells_in_neighbourhood_violin3D <- function(cells_in_neighbourhood_data, re
 
 
 
+
 calculate_entropy3D <- function(spe,
                                 reference_cell_type,
                                 target_cell_types,
@@ -780,58 +697,55 @@ calculate_entropy3D <- function(spe,
                                 feature_colname = "Cell.Type",
                                 plot_image = TRUE) {
   
-  # Check if radius is numeric
-  if (!is.numeric(radius)) {
-    stop(paste(radius, " is not of type 'numeric'"))
-  }
+  # Check
+  if (length(target_cell_types) < 2) stop("Need at least two target cell types")
   
   ## Users should ensure include the reference_cell_type as one of the target_cell_types
-  cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
-                                                                  reference_cell_type,
-                                                                  target_cell_types,
-                                                                  radius,
-                                                                  feature_colname,
-                                                                  FALSE,
-                                                                  FALSE)
+  cells_in_neighborhood_df <- calculate_cells_in_neighbourhood3D(spe,
+                                                                 reference_cell_type,
+                                                                 target_cell_types,
+                                                                 radius,
+                                                                 feature_colname,
+                                                                 FALSE,
+                                                                 FALSE)
   
-  ## Get total number of target cells for each row
-  cells_in_neighbourhood_data$total <- apply(cells_in_neighbourhood_data[ , c(-1)], 1, sum)
+  ## Get total number of target cells for each row (first column is the reference cell id column, so we exclude it)
+  cells_in_neighborhood_df$total <- apply(cells_in_neighborhood_df[ , c(-1)], 1, sum)
   
   ## Get entropy for each row
-  cells_in_neighbourhood_data$entropy <- 0
+  cells_in_neighborhood_df$entropy <- 0
   
   for (target_cell_type in target_cell_types) {
     
-    target_cell_type_proportions <- (cells_in_neighbourhood_data[[target_cell_type]] / cells_in_neighbourhood_data$total)
+    target_cell_type_proportions <- (cells_in_neighborhood_df[[target_cell_type]] / cells_in_neighborhood_df$total)
     
     ## If an element in target_cell_type_proportion is 0, just add 0.    
     target_cell_entropy <- ifelse(target_cell_type_proportions == 0,
                                   0,
                                   -1 * target_cell_type_proportions * log(target_cell_type_proportions, length(target_cell_types)))
     
-    cells_in_neighbourhood_data$entropy <- cells_in_neighbourhood_data$entropy + target_cell_entropy
+    cells_in_neighborhood_df$entropy <- cells_in_neighborhood_df$entropy + target_cell_entropy
     
   }
   
-  ## Case when row has 0 target cells
-  cells_in_neighbourhood_data[cells_in_neighbourhood_data$Total == 0, "entropy"] <- 0
-  
+  ## Plot
   if (plot_image) {
-    fig <- plot_entropy_violin3D(cells_in_neighbourhood_data)
+    fig <- plot_entropy_violin3D(cells_in_neighborhood_df)
     methods::show(fig)
   }
   
-  return(cells_in_neighbourhood_data)
+  return(cells_in_neighborhood_df)
 }
 
 
+
 ## For scales parameter, use "free_x" or "free". "free_y" looks silly
-plot_entropy_violin3D <- function(entropy_data, scales = "free_x") {
+plot_entropy_violin3D <- function(entropy_df, scales = "free_x") {
   
   # setting these variables to NULL as otherwise get "no visible binding for global variable" in R check
   entropy <- NULL
   
-  fig <- ggplot(entropy_data, aes(x = "", y = entropy)) +
+  fig <- ggplot(entropy_df, aes(x = "", y = entropy)) +
     geom_violin() +
     theme_bw() +
     labs(x = "", y = "Entropy") +
@@ -846,46 +760,47 @@ plot_entropy_violin3D <- function(entropy_data, scales = "free_x") {
 
 
 
-
-
-
 calculate_cross_K3D <- function(spe, 
                                 reference_cell_type, 
                                 target_cell_type, 
                                 radius, 
                                 feature_colname = "Cell.Type") {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), 
-                   "Cell.Type" = spe[[feature_colname]])
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
+  if (is.null(spe[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.ID column to your spe")
+    spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
+  }  
   
   ## For reference_cell_type, check it is found in the spe object
-  if (!(reference_cell_type %in% df$Cell.Type)) {
+  if (!(reference_cell_type %in% spe[[feature_colname]])) {
     stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
   }
   
   ## For target_cell_type, check it is found in the spe object
-  if (!(target_cell_type %in% df$Cell.Type)) {
+  if (!(target_cell_type %in% spe[[feature_colname]])) {
     stop(paste("The target_cell_type", target_cell_type,"is not found in the spe object"))
   }
   
+  cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
+                                                                  reference_cell_type,
+                                                                  target_cell_type,
+                                                                  radius,
+                                                                  feature_colname,
+                                                                  show_summary = FALSE,
+                                                                  plot_image = FALSE)
   
-  cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
-                                                                   reference_cell_type,
-                                                                   target_cell_type,
-                                                                   radius,
-                                                                   feature_colname,
-                                                                   show_summary = FALSE,
-                                                                   plot_image = FALSE)
-  
-  n_ref_tar_interactions <- sum(cells_in_neighbourhood_data[[target_cell_type]])
-  n_ref_cells <- sum(df$Cell.Type == reference_cell_type)
-  n_tar_cells <- sum(df$Cell.Type == target_cell_type)
+  n_ref_tar_interactions <- sum(cells_in_neighbourhood_df[[target_cell_type]])
+  n_ref_cells <- sum(spe[[feature_colname]] == reference_cell_type)
+  n_tar_cells <- sum(spe[[feature_colname]] == target_cell_type)
   
   ## Get rough dimensions of the window the points are in
-  length <- round(max(df$Cell.X.Position) - min(df$Cell.X.Position))
-  width  <- round(max(df$Cell.Y.Position) - min(df$Cell.Y.Position))
-  height <- round(max(df$Cell.Z.Position) - min(df$Cell.Z.Position))
+  spe_coords <- data.frame(spatialCoords(spe))
+  
+  length <- round(max(spe_coords$Cell.X.Position) - min(spe_coords$Cell.X.Position))
+  width  <- round(max(spe_coords$Cell.Y.Position) - min(spe_coords$Cell.Y.Position))
+  height <- round(max(spe_coords$Cell.Z.Position) - min(spe_coords$Cell.Z.Position))
   ## Get volume of the window the cells are in
   volume <- length * width * height
   
@@ -894,7 +809,7 @@ calculate_cross_K3D <- function(spe,
   observed_cross_K <- (volume * n_ref_tar_interactions) / (n_ref_cells * n_tar_cells)
   
   ## Get expected cross K-function
-  expected_cross_K <- (4/3) * (pi * radius^3)
+  expected_cross_K <- (4/3) * pi * radius^3
   
   result <- data.frame(observed_cross_K = observed_cross_K,
                        expected_cross_K = expected_cross_K)
@@ -951,7 +866,86 @@ calculate_mixing_scores_gradient3D <- function(spe,
 }
 
 
+calculate_cells_in_neighbourhood_gradient3D <- function(spe, 
+                                                        reference_cell_type, 
+                                                        target_cell_types, 
+                                                        radii, 
+                                                        feature_colname = "Cell.Type",
+                                                        plot_image = TRUE) {
+  
+  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
+  colnames(result) <- target_cell_types
+  
+  for (radius in seq(radii)) {
+    cells_in_neighborhood_df <- calculate_cells_in_neighbourhood3D(spe,
+                                                                   reference_cell_type,
+                                                                   target_cell_types,
+                                                                   radius,
+                                                                   feature_colname,
+                                                                   FALSE,
+                                                                   FALSE)
+    
+    cells_in_neighborhood_df$ref_cell_id <- NULL
+    result[radius, ] <- apply(cells_in_neighborhood_df, 2, mean)
+  }
+  # Add a radius column to the result
+  result$radius <- seq(radii)
+  
+  if (plot_image) {
+    plot_result <- reshape2::melt(result, "radius")
+    
+    fig <- ggplot(plot_result, aes(radius, value, color = variable)) + 
+      geom_line() + 
+      labs(x = "Radius", y = "Average cells in neighbourhood") + 
+      scale_color_discrete(name = "Cell type")
+    
+    methods::show(fig)
+  }
+  
+  return(result)
+}
 
+
+
+calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe, 
+                                                                    reference_cell_type, 
+                                                                    target_cell_types, 
+                                                                    radii, 
+                                                                    feature_colname = "Cell.Type",
+                                                                    plot_image = TRUE) {
+  
+  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
+  colnames(result) <- target_cell_types
+  
+  for (radius in seq(radii)) {
+    cell_proportions_neighbourhood_proportions_df <- calculate_cells_in_neighbourhood_proportions3D(spe,
+                                                                                                    reference_cell_type,
+                                                                                                    target_cell_types,
+                                                                                                    radius,
+                                                                                                    feature_colname)
+    
+    result[radius, ] <- cell_proportions_neighbourhood_proportions_df$proportion
+  }
+  
+  # Add a radius column to the result
+  result$radius <- seq(radii)
+  
+  # Plot
+  if (plot_image) {
+    plot_result <- reshape2::melt(result, id.vars = c("radius"))
+    fig <- ggplot(plot_result, aes(radius, value, color = variable)) +
+      geom_point() +
+      geom_line() +
+      labs(title = "Neighbourhood cell proportion gradients", x = "Radius", y = "Cell proportion", color = "Cell type") +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5)) +
+      ylim(0, 1)
+    
+    methods::show(fig)
+  }
+  
+  return(result)
+}
 
 
 
@@ -967,13 +961,13 @@ calculate_cross_K_gradient3D <- function(spe,
                         "expected_cross_K")
   
   for (radius in seq(radii)) {
-    cross_K_data <- calculate_cross_K3D(spe,
-                                        reference_cell_type,
-                                        target_cell_type,
-                                        radius,
-                                        feature_colname)
+    cross_K_df <- calculate_cross_K3D(spe,
+                                      reference_cell_type,
+                                      target_cell_type,
+                                      radius,
+                                      feature_colname)
     
-    result[radius, ] <- cross_K_data
+    result[radius, ] <- cross_K_df
   }
   
   # Add a radius column to the result
@@ -1007,16 +1001,16 @@ calculate_entropy_gradient3D <- function(spe,
   colnames(result) <- target_cell_types
   
   for (radius in seq(radii)) {
-    cells_in_neighbourhood_data <- calculate_cells_in_neighbourhood3D(spe,
-                                                                      reference_cell_type,
-                                                                      target_cell_types,
-                                                                      radius,
-                                                                      feature_colname,
-                                                                      FALSE,
-                                                                      FALSE)
+    cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
+                                                                    reference_cell_type,
+                                                                    target_cell_types,
+                                                                    radius,
+                                                                    feature_colname,
+                                                                    FALSE,
+                                                                    FALSE)
     
-    cells_in_neighbourhood_data$ref_cell_id <- NULL
-    result[radius, ] <- apply(cells_in_neighbourhood_data, 2, sum)
+    cells_in_neighbourhood_df$ref_cell_id <- NULL
+    result[radius, ] <- apply(cells_in_neighbourhood_df, 2, sum)
   }
   
   ## Get total number of target cells for each row
@@ -1061,10 +1055,11 @@ calculate_entropy_gradient3D <- function(spe,
 
 
 
-plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_results) {
+
+plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_df) {
   
-  plot_result <- data.frame(radius = cross_K_gradient_results$radius,
-                            observed_cross_K_gradient_ratio = cross_K_gradient_results$observed_cross_K / cross_K_gradient_results$expected_cross_K,
+  plot_result <- data.frame(radius = cross_K_gradient_df$radius,
+                            observed_cross_K_gradient_ratio = cross_K_gradient_df$observed_cross_K / cross_K_gradient_df$expected_cross_K,
                             expected_cross_K_gradient_ratio = 1)
   
   plot_result <- reshape2::melt(plot_result, "radius", c("observed_cross_K_gradient_ratio", "expected_cross_K_gradient_ratio"))
@@ -1085,6 +1080,8 @@ plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_results) {
 get_spe_grid_metrics3D <- function(spe, 
                                    n_splits, 
                                    feature_colname = "Cell.Type") {
+  
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   # Check if n_splits is numeric
   if (!is.numeric(n_splits)) {
@@ -1125,12 +1122,15 @@ get_spe_grid_metrics3D <- function(spe,
 }
 
 
+
 calculate_cell_proportion_grid_metrics3D <- function(spe, 
                                                      n_splits,
                                                      reference_cell_types,
                                                      target_cell_types,
                                                      feature_colname = "Cell.Type",
                                                      plot_image = TRUE) {
+  
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   ## Check reference_cell_types are found in the spe object
   unknown_cell_types <- setdiff(reference_cell_types, spe[[feature_colname]])
@@ -1189,11 +1189,14 @@ calculate_cell_proportion_grid_metrics3D <- function(spe,
 
 
 
+
 calculate_entropy_grid_metrics3D <- function(spe, 
                                              n_splits,
                                              cell_types_of_interest,
                                              feature_colname = "Cell.Type",
                                              plot_image = TRUE) {
+  
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   ## If cell types have been chosen, check they are found in the spe object
   unknown_cell_types <- setdiff(cell_types_of_interest, unique(spe[[feature_colname]]))
@@ -1234,6 +1237,7 @@ calculate_entropy_grid_metrics3D <- function(spe,
 }
 
 
+
 plot_grid_metrics_continuous3D <- function(grid_metrics, metric_colname) {
   
   ## Color of each dot is related to its entropy
@@ -1260,6 +1264,7 @@ plot_grid_metrics_continuous3D <- function(grid_metrics, metric_colname) {
   
   return(fig)
 }
+
 
 
 plot_grid_metrics_discrete3D <- function(grid_metrics, metric_colname) {
@@ -1293,25 +1298,27 @@ plot_grid_metrics_discrete3D <- function(grid_metrics, metric_colname) {
 }
 
 
-calculate_prevalence3D <- function(grid_data,
+
+calculate_prevalence3D <- function(grid_metrics,
                                    metric_colname,
                                    threshold,
                                    above = TRUE) {
   
   ## Exclude rows with NA values
-  grid_data <- grid_data[!is.na(grid_data[[metric_colname]]), ]
+  grid_metrics <- grid_metrics[!is.na(grid_metrics[[metric_colname]]), ]
   
   if (above) {
-    p <- sum(grid_data[[metric_colname]] >= threshold) / nrow(grid_data) * 100
+    p <- sum(grid_metrics[[metric_colname]] >= threshold) / nrow(grid_metrics) * 100
   }
   else {
-    p <- sum(grid_data[[metric_colname]] < threshold) / nrow(grid_data) * 100    
+    p <- sum(grid_metrics[[metric_colname]] < threshold) / nrow(grid_metrics) * 100    
   }
   
   return(p)
 }
 
-calculate_prevalence_gradient3D <- function(grid_data,
+
+calculate_prevalence_gradient3D <- function(grid_metrics,
                                             metric_colname,
                                             show_AUC = T,
                                             plot_image = T) {
@@ -1324,7 +1331,7 @@ calculate_prevalence_gradient3D <- function(grid_data,
   
   # Get prevalences for each threshold
   result$prevalence <- sapply(thresholds, function(threshold) { 
-    calculate_prevalence3D(grid_data, metric_colname, threshold) 
+    calculate_prevalence3D(grid_metrics, metric_colname, threshold) 
   })
   
   # Show AUC of prevalence gradient graph
@@ -1350,19 +1357,21 @@ calculate_prevalence_gradient3D <- function(grid_data,
 
 
 
+
 calculate_prevalence_gradient_AUC3D <- function(prevalence_gradient_df) {
   
   return(sum(prevalence_gradient_df$prevalence) * 0.01)
 }
 
 
-calculate_spatial_autocorrelation3D <- function(grid_data,
+
+calculate_spatial_autocorrelation3D <- function(grid_metrics,
                                                 metric_colname,
                                                 weight_method = "binary") {
   
   
   ## Get number of grid prisms
-  n_grid_prisms <- nrow(grid_data)
+  n_grid_prisms <- nrow(grid_metrics)
   
   ## Get splitting number (should be the cube root of n_grid_prisms)
   n_splits <- (n_grid_prisms)^(1/3)
@@ -1374,8 +1383,8 @@ calculate_spatial_autocorrelation3D <- function(grid_data,
   grid_prism_coords <- data.frame(x = x, y = y, z = z)
   
   ## Subset for non NA rows
-  grid_prism_coords <- grid_prism_coords[!is.na(grid_data[[metric_colname]]), ]
-  grid_data <- grid_data[!is.na(grid_data[[metric_colname]]), ]
+  grid_prism_coords <- grid_prism_coords[!is.na(grid_metrics[[metric_colname]]), ]
+  grid_metrics <- grid_metrics[!is.na(grid_metrics[[metric_colname]]), ]
   
   weight_matrix <- -1 * apcluster::negDistMat(grid_prism_coords)
   ## Use the inverse distance between two points as the weight (IDW is 'inverse distance weighting')
@@ -1394,10 +1403,10 @@ calculate_spatial_autocorrelation3D <- function(grid_data,
   ## Points along the diagonal are comparing the same point so its weight is zero
   diag(weight_matrix) <- 0
   
-  n <- nrow(grid_data)
+  n <- nrow(grid_metrics)
   
   # Center the data
-  data_centered <- grid_data[, metric_colname] - mean(grid_data[, metric_colname])
+  data_centered <- grid_metrics[, metric_colname] - mean(grid_metrics[, metric_colname])
   
   # Calculate numerator using matrix multiplication
   numerator <- sum(data_centered * (weight_matrix %*% data_centered))
@@ -1416,7 +1425,10 @@ calculate_spatial_autocorrelation3D <- function(grid_data,
 
 
 
+
 ### Clustering algorithms ----------------------------------------------------
+library(alphashape3d)
+
 library(alphashape3d)
 
 alpha_hull_clustering3D <- function(spe, 
@@ -1426,8 +1438,10 @@ alpha_hull_clustering3D <- function(spe,
                                     feature_colname = "Cell.Type", 
                                     plot_image = T) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   ## Check cell types of interst are found in the spe object
-  unknown_cell_types <- setdiff(cell_types_of_interest, spe$Cell.Type)
+  unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
@@ -1446,11 +1460,11 @@ alpha_hull_clustering3D <- function(spe,
   alpha_hull_clusters <- components_ashape3d(alpha_hull)
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), 
-                   "Cell.Type" = spe[[feature_colname]])
+  df <- data.frame(spatialCoords(spe), colData(spe))
   
-  df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
-  df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]
+  df_cell_types_of_interest <- df[df[[feature_colname]] %in% cell_types_of_interest, ]
+  df_other_cell_types <- df[!(df[[feature_colname]] %in% cell_types_of_interest), ]
+  
   df_cell_types_of_interest$alpha_hull_cluster <- alpha_hull_clusters
   df_other_cell_types$alpha_hull_cluster <- 0
   
@@ -1494,18 +1508,18 @@ alpha_hull_clustering3D <- function(spe,
 
 
 
+
 plot_alpha_hull_clusters3D <- function(spe_with_alpha_hull, 
                                        plot_cell_types = NULL,
                                        plot_colours = NULL,
                                        feature_colname = "Cell.Type") {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe_with_alpha_hull), "Cell.Type" = spe_with_alpha_hull[[feature_colname]])
+  # Check
+  if (is.null(spe_with_alpha_hull[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   ## If no cell types chosen, use all cell types found in data frame
-  if (is.null(plot_cell_types)) {
-    plot_cell_types <- unique(df[["Cell.Type"]])
-  }
+  if (is.null(plot_cell_types)) plot_cell_types <- unique(spe_with_alpha_hull[[feature_colname]])
+  
   ## If cell types have been chosen, check they are found in the spe object
   unknown_cell_types <- setdiff(plot_cell_types, spe_with_alpha_hull[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
@@ -1523,8 +1537,11 @@ plot_alpha_hull_clusters3D <- function(spe_with_alpha_hull,
     stop("Length of plot_cell_types is not equal to length of plot_colours")
   }
   
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe_with_alpha_hull), "Cell.Type" = spe_with_alpha_hull[[feature_colname]])
+  
   ## Factor for feature column
-  df[, "Cell.Type"] <- factor(df[, "Cell.Type"],
+  df[["Cell.Type"]] <- factor(df[, "Cell.Type"],
                               levels = plot_cell_types)
   
   ## Add points to fig
@@ -1584,6 +1601,9 @@ plot_alpha_hull_clusters3D <- function(spe_with_alpha_hull,
 
 
 
+
+library(dbscan)
+
 library(dbscan)
 
 dbscan_clustering3D <- function(spe,
@@ -1593,19 +1613,19 @@ dbscan_clustering3D <- function(spe,
                                 feature_colname = "Cell.Type",
                                 plot_image = T) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   spe_subset <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
   spe_subset_coords <- spatialCoords(spe_subset)
   
   db <- dbscan::dbscan(spe_subset_coords, eps = radius, minPts = minimum_cells_in_radius, borderPoints = F)
   
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe), colData(spe))
   
+  df_cell_types_of_interest <- df[df[[feature_colname]] %in% cell_types_of_interest, ]
+  df_other_cell_types <- df[!(df[[feature_colname]] %in% cell_types_of_interest), ]
   
-  # Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe),
-                   "Cell.Type" = spe[[feature_colname]])
-  
-  df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
-  df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]
   df_cell_types_of_interest$dbscan_cluster <- db$cluster
   df_other_cell_types$dbscan_cluster <- 0
   
@@ -1643,11 +1663,14 @@ dbscan_clustering3D <- function(spe,
 
 
 
+
 grid_based_clustering3D <- function(spe,
                                     cell_types_of_interest,
                                     n_splits,
                                     feature_colname = "Cell.Type",
                                     plot_image = TRUE) {
+  
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   # Check if n_splits is numeric
   if (!is.numeric(n_splits)) {
@@ -1718,7 +1741,7 @@ grid_based_clustering3D <- function(spe,
     maximum_cell_proportion <- max(grid_prism_cell_proportions)
     maximum_cell_proportion_prism_number <- as.numeric(names(which.max(grid_prism_cell_proportions)))
     
-    # Break out the loop if maximum cell proportion is less than 0.25
+    # Break out the loop if maximum cell proportion is less than 0.5
     if (maximum_cell_proportion < 0.5) break 
     
     # Else, find all the grid prisms adjacent to the maximum cell proportion grid prism. 
@@ -1746,7 +1769,7 @@ grid_based_clustering3D <- function(spe,
                                                                    0.75 * maximum_cell_proportion,
                                                                    grid_prism_x, grid_prism_y, grid_prism_z,
                                                                    d_row, d_col, d_lay,
-                                                                   "Cell.Type",
+                                                                   feature_colname,
                                                                    data.frame()))
     }
     
@@ -1795,6 +1818,7 @@ grid_based_clustering3D <- function(spe,
   
   return(spe)
 }
+
 
 
 ### Start from the grid_prism with the maximum cell proportion.
@@ -1995,13 +2019,11 @@ plot_grid_based_clusters3D <- function(spe_with_grid,
                                        plot_colours = NULL,
                                        feature_colname = "Cell.Type") {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe_with_grid), "Cell.Type" = spe_with_grid[[feature_colname]])
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   ## If no cell types chosen, use all cell types found in data frame
-  if (is.null(plot_cell_types)) {
-    plot_cell_types <- unique(df[["Cell.Type"]])
-  }
+  if (is.null(plot_cell_types)) plot_cell_types <- unique(spe_with_grid[[feature_colname]])
+  
   ## If cell types have been chosen, check they are found in the spe object
   unknown_cell_types <- setdiff(plot_cell_types, spe_with_grid[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
@@ -2010,18 +2032,16 @@ plot_grid_based_clusters3D <- function(spe_with_grid,
   }
   
   ## If no colours inputted, use rainbow palette
-  if (is.null(plot_colours)) {
-    plot_colours <- rainbow(length(plot_cell_types))
-  }
+  if (is.null(plot_colours)) plot_colours <- rainbow(length(plot_cell_types))
   
   ## User inputs mismatching cell types and colours
-  if (length(plot_cell_types) != length(plot_colours)) {
-    stop("Length of plot_cell_types is not equal to length of plot_colours")
-  }
+  if (length(plot_cell_types) != length(plot_colours)) stop("Length of plot_cell_types is not equal to length of plot_colours")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe_with_grid), colData(spe_with_grid))
   
   ## Factor for feature column
-  df[, "Cell.Type"] <- factor(df[, "Cell.Type"],
-                              levels = plot_cell_types)
+  df[[feature_colname]] <- factor(df[[feature_colname]], levels = plot_cell_types)
   
   ## Add points to fig
   fig <- plot_ly() %>%
@@ -2033,7 +2053,7 @@ plot_grid_based_clusters3D <- function(spe_with_grid,
       y = ~Cell.Y.Position,
       z = ~Cell.Z.Position,
       marker = list(size = 2),
-      color = ~Cell.Type,
+      color = ~.data[[feature_colname]],
       colors = plot_colours
     ) %>% 
     layout(scene = list(xaxis = list(title = 'x'),
@@ -2090,6 +2110,7 @@ plot_grid_based_clusters3D <- function(spe_with_grid,
 
 
 
+
 calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, feature_colname = "Cell.Type", plot_image = T) {
   
   # Get number of clusters
@@ -2129,9 +2150,6 @@ calculate_cell_proportions_of_clusters3D <- function(spe, cluster_colname, featu
   
   return(result)
 }
-
-
-
 
 
 
@@ -2215,7 +2233,8 @@ calculate_minimum_distances_to_clusters3D <- function(spe,
 
 
 
-calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname = "Cell.Type") {
+
+calculate_volume_of_clusters3D <- function(spe, cluster_colname) {
   
   # Get number of clusters
   n_clusters <- max(spe[[cluster_colname]])
@@ -2227,9 +2246,7 @@ calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname
   colnames(result) <- c("cluster_number", "n_cells")
   
   for (i in seq(n_clusters)) {
-    cells_in_cluster <- spe[[feature_colname]][spe[[cluster_colname]] == i]
-    result[i, "n_cells"] <- length(cells_in_cluster)
-    
+    result[i, "n_cells"] <- sum(spe[[cluster_colname]] == i)
   }
   result$cluster_number <- as.character(seq(n_clusters))
   
@@ -2269,8 +2286,14 @@ calculate_volume_of_clusters3D <- function(spe, cluster_colname, feature_colname
 
 
 
-### Assume that clusters have uniform density and that the centre of each cluster is defined by its centre of mass
-### Centre of mass can be estimated by taking the average of the x, y, and z coordinates of cells in the cluster
+
+
+
+
+
+
+
+
 
 ### Assume that clusters have uniform density and that the centre of each cluster is defined by its centre of mass
 ### Centre of mass can be estimated by taking the average of the x, y, and z coordinates of cells in the cluster
@@ -2280,19 +2303,23 @@ calculate_center_of_clusters3D <- function(spe, cluster_colname) {
   # Get number of clusters
   n_clusters <- max(spe[[cluster_colname]])
   
+  # Get spe coords
+  spe_coords <- spatialCoords(spe)
+  
   ## For each cluster, determine the number of cells in each cluster of each cluster
   result <- data.frame(matrix(nrow = n_clusters, ncol = 4))
   colnames(result) <- c("cluster_number", "Centre.X.Position", "Centre.Y.Position", "Centre.Z.Position")
   
   result$cluster_number <- as.character(seq(n_clusters))
   for (i in seq(n_clusters)) {
-    spe_cluster <- spe[ , spe[[cluster_colname]] == i]
+    spe_cluster_coords <- spe_coords[spe[[cluster_colname]] == i, ]
     result[i, c("Centre.X.Position", "Centre.Y.Position", "Centre.Z.Position")] <- 
-      apply(spatialCoords(spe_cluster), 2, mean)
+      apply(spe_cluster_coords, 2, mean)
   }
   
   return(result)
 }
+
 
 
 

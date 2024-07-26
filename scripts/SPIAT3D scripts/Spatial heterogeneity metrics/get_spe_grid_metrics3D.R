@@ -2,6 +2,8 @@ get_spe_grid_metrics3D <- function(spe,
                                    n_splits, 
                                    feature_colname = "Cell.Type") {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   # Check if n_splits is numeric
   if (!is.numeric(n_splits)) {
     stop(paste(n_splits, " n_splits is not of type 'numeric'"))

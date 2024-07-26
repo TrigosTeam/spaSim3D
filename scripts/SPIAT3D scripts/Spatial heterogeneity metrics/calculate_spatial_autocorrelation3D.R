@@ -1,10 +1,10 @@
-calculate_spatial_autocorrelation3D <- function(grid_data,
+calculate_spatial_autocorrelation3D <- function(grid_metrics,
                                                 metric_colname,
                                                 weight_method = "binary") {
   
   
   ## Get number of grid prisms
-  n_grid_prisms <- nrow(grid_data)
+  n_grid_prisms <- nrow(grid_metrics)
   
   ## Get splitting number (should be the cube root of n_grid_prisms)
   n_splits <- (n_grid_prisms)^(1/3)
@@ -16,8 +16,8 @@ calculate_spatial_autocorrelation3D <- function(grid_data,
   grid_prism_coords <- data.frame(x = x, y = y, z = z)
   
   ## Subset for non NA rows
-  grid_prism_coords <- grid_prism_coords[!is.na(grid_data[[metric_colname]]), ]
-  grid_data <- grid_data[!is.na(grid_data[[metric_colname]]), ]
+  grid_prism_coords <- grid_prism_coords[!is.na(grid_metrics[[metric_colname]]), ]
+  grid_metrics <- grid_metrics[!is.na(grid_metrics[[metric_colname]]), ]
   
   weight_matrix <- -1 * apcluster::negDistMat(grid_prism_coords)
   ## Use the inverse distance between two points as the weight (IDW is 'inverse distance weighting')
@@ -36,10 +36,10 @@ calculate_spatial_autocorrelation3D <- function(grid_data,
   ## Points along the diagonal are comparing the same point so its weight is zero
   diag(weight_matrix) <- 0
   
-  n <- nrow(grid_data)
+  n <- nrow(grid_metrics)
   
   # Center the data
-  data_centered <- grid_data[, metric_colname] - mean(grid_data[, metric_colname])
+  data_centered <- grid_metrics[, metric_colname] - mean(grid_metrics[, metric_colname])
   
   # Calculate numerator using matrix multiplication
   numerator <- sum(data_centered * (weight_matrix %*% data_centered))

@@ -3,13 +3,11 @@ plot_grid_based_clusters3D <- function(spe_with_grid,
                                        plot_colours = NULL,
                                        feature_colname = "Cell.Type") {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe_with_grid), "Cell.Type" = spe_with_grid[[feature_colname]])
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   ## If no cell types chosen, use all cell types found in data frame
-  if (is.null(plot_cell_types)) {
-    plot_cell_types <- unique(df[["Cell.Type"]])
-  }
+  if (is.null(plot_cell_types)) plot_cell_types <- unique(spe_with_grid[[feature_colname]])
+  
   ## If cell types have been chosen, check they are found in the spe object
   unknown_cell_types <- setdiff(plot_cell_types, spe_with_grid[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
@@ -18,18 +16,16 @@ plot_grid_based_clusters3D <- function(spe_with_grid,
   }
   
   ## If no colours inputted, use rainbow palette
-  if (is.null(plot_colours)) {
-    plot_colours <- rainbow(length(plot_cell_types))
-  }
+  if (is.null(plot_colours)) plot_colours <- rainbow(length(plot_cell_types))
   
   ## User inputs mismatching cell types and colours
-  if (length(plot_cell_types) != length(plot_colours)) {
-    stop("Length of plot_cell_types is not equal to length of plot_colours")
-  }
+  if (length(plot_cell_types) != length(plot_colours)) stop("Length of plot_cell_types is not equal to length of plot_colours")
+  
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe_with_grid), colData(spe_with_grid))
   
   ## Factor for feature column
-  df[, "Cell.Type"] <- factor(df[, "Cell.Type"],
-                              levels = plot_cell_types)
+  df[[feature_colname]] <- factor(df[[feature_colname]], levels = plot_cell_types)
   
   ## Add points to fig
   fig <- plot_ly() %>%
@@ -41,7 +37,7 @@ plot_grid_based_clusters3D <- function(spe_with_grid,
       y = ~Cell.Y.Position,
       z = ~Cell.Z.Position,
       marker = list(size = 2),
-      color = ~Cell.Type,
+      color = ~.data[[feature_colname]],
       colors = plot_colours
     ) %>% 
     layout(scene = list(xaxis = list(title = 'x'),

@@ -7,8 +7,10 @@ alpha_hull_clustering3D <- function(spe,
                                     feature_colname = "Cell.Type", 
                                     plot_image = T) {
   
+  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  
   ## Check cell types of interst are found in the spe object
-  unknown_cell_types <- setdiff(cell_types_of_interest, spe$Cell.Type)
+  unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
@@ -27,11 +29,11 @@ alpha_hull_clustering3D <- function(spe,
   alpha_hull_clusters <- components_ashape3d(alpha_hull)
   
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), 
-                   "Cell.Type" = spe[[feature_colname]])
+  df <- data.frame(spatialCoords(spe), colData(spe))
   
-  df_cell_types_of_interest <- df[df$Cell.Type %in% cell_types_of_interest, ]
-  df_other_cell_types <- df[!(df$Cell.Type %in% cell_types_of_interest), ]
+  df_cell_types_of_interest <- df[df[[feature_colname]] %in% cell_types_of_interest, ]
+  df_other_cell_types <- df[!(df[[feature_colname]] %in% cell_types_of_interest), ]
+  
   df_cell_types_of_interest$alpha_hull_cluster <- alpha_hull_clusters
   df_other_cell_types$alpha_hull_cluster <- 0
   

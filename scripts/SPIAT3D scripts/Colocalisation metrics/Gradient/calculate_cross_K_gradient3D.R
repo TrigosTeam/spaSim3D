@@ -10,13 +10,13 @@ calculate_cross_K_gradient3D <- function(spe,
                         "expected_cross_K")
   
   for (radius in seq(radii)) {
-    cross_K_data <- calculate_cross_K3D(spe,
-                                        reference_cell_type,
-                                        target_cell_type,
-                                        radius,
-                                        feature_colname)
+    cross_K_df <- calculate_cross_K3D(spe,
+                                      reference_cell_type,
+                                      target_cell_type,
+                                      radius,
+                                      feature_colname)
     
-    result[radius, ] <- cross_K_data
+    result[radius, ] <- cross_K_df
   }
   
   # Add a radius column to the result
@@ -32,7 +32,7 @@ calculate_cross_K_gradient3D <- function(spe,
       theme_bw()
     
     methods::show(fig)
-
+    
   }
   
   return(result)

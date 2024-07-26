@@ -9,16 +9,16 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
   colnames(result) <- target_cell_types
   
   for (radius in seq(radii)) {
-    cells_in_neighborhood_data <- calculate_cells_in_neighbourhood3D(spe,
-                                                                     reference_cell_type,
-                                                                     target_cell_types,
-                                                                     radius,
-                                                                     feature_colname,
-                                                                     FALSE,
-                                                                     FALSE)
+    cells_in_neighborhood_df <- calculate_cells_in_neighbourhood3D(spe,
+                                                                   reference_cell_type,
+                                                                   target_cell_types,
+                                                                   radius,
+                                                                   feature_colname,
+                                                                   FALSE,
+                                                                   FALSE)
     
-    cells_in_neighborhood_data$ref_cell_id <- NULL
-    result[radius, ] <- apply(cells_in_neighborhood_data, 2, mean)
+    cells_in_neighborhood_df$ref_cell_id <- NULL
+    result[radius, ] <- apply(cells_in_neighborhood_df, 2, mean)
   }
   # Add a radius column to the result
   result$radius <- seq(radii)

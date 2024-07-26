@@ -1,10 +1,10 @@
 ## For scales parameter, use "free_x" or "free". "free_y" looks silly
-plot_cell_distances_violin3D <- function(cell_to_cell_dist, scales = "free_x") {
+plot_distances_between_cell_types_violin3D <- function(distances_df, scales = "free_x") {
   
   # setting these variables to NULL as otherwise get "no visible binding for global variable" in R check
   pair <- distance <- NULL
   
-  fig <- ggplot(cell_to_cell_dist, aes(x = pair, y = distance)) + 
+  fig <- ggplot(distances_df, aes(x = pair, y = distance)) + 
     geom_violin() +
     facet_wrap(~pair, scales=scales, strip.position="bottom") +
     theme_bw() +

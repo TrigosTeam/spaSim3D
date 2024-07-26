@@ -3,13 +3,12 @@ plot_alpha_hull_clusters3D <- function(spe_with_alpha_hull,
                                        plot_colours = NULL,
                                        feature_colname = "Cell.Type") {
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe_with_alpha_hull), "Cell.Type" = spe_with_alpha_hull[[feature_colname]])
+  # Check
+  if (is.null(spe_with_alpha_hull[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   ## If no cell types chosen, use all cell types found in data frame
-  if (is.null(plot_cell_types)) {
-    plot_cell_types <- unique(df[["Cell.Type"]])
-  }
+  if (is.null(plot_cell_types)) plot_cell_types <- unique(spe_with_alpha_hull[[feature_colname]])
+  
   ## If cell types have been chosen, check they are found in the spe object
   unknown_cell_types <- setdiff(plot_cell_types, spe_with_alpha_hull[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
@@ -27,8 +26,11 @@ plot_alpha_hull_clusters3D <- function(spe_with_alpha_hull,
     stop("Length of plot_cell_types is not equal to length of plot_colours")
   }
   
+  ## Convert spe object to data frame
+  df <- data.frame(spatialCoords(spe_with_alpha_hull), "Cell.Type" = spe_with_alpha_hull[[feature_colname]])
+  
   ## Factor for feature column
-  df[, "Cell.Type"] <- factor(df[, "Cell.Type"],
+  df[["Cell.Type"]] <- factor(df[, "Cell.Type"],
                               levels = plot_cell_types)
   
   ## Add points to fig

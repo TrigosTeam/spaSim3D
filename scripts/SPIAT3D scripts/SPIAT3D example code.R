@@ -119,32 +119,32 @@ entropy_gradient <- calculate_entropy_gradient3D(spe1,
 
 ### 3. Spatial Heterogeneity metrics ------------------------------------------
 
-### Determine entropy grid metrics
-entropy_grid_metrics <- determine_entropy_grid_metrics3D(spe1,
+### calculate entropy grid metrics
+entropy_grid_metrics <- calculate_entropy_grid_metrics3D(spe1,
                                                          n_splits = 8,
                                                          cell_types_of_interest = c("Tumour", "Immune"),
                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(entropy_grid_metrics, "entropy")
 
 
-### Determine entropy prevalence
-entropy_prevalence <- determine_prevalence3D(entropy_grid_metrics,
+### calculate entropy prevalence
+entropy_prevalence <- calculate_prevalence3D(entropy_grid_metrics,
                                              metric_colname = "entropy",
                                              threshold = 0.5)
 print(entropy_prevalence)
 
-entropy_prevalence_gradient <- determine_prevalence_gradient3D(entropy_grid_metrics,
+entropy_prevalence_gradient <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                                "entropy")
 
-### Determine spatial autocorrelation
-entropy_spatial_autocorrelation <- determine_spatial_autocorrelation3D(entropy_grid_metrics,
+### calculate spatial autocorrelation
+entropy_spatial_autocorrelation <- calculate_spatial_autocorrelation3D(entropy_grid_metrics,
                                                                        metric_colname = "entropy",
                                                                        weight_method = "IDW")
 print(entropy_spatial_autocorrelation)
 
 
-### Determine cell proportion grid metrics
-cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(spe1,
+### calculate cell proportion grid metrics
+cell_proportion_grid_metrics <- calculate_cell_proportion_grid_metrics3D(spe1,
                                                                          n_splits = 8,
                                                                          reference_cell_types = c("Tumour"),
                                                                          target_cell_types = c("Immune"),
@@ -152,17 +152,17 @@ cell_proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(spe1,
 plot_grid_metrics_discrete3D(cell_proportion_grid_metrics, "proportion")
 
 
-### Determine cell proportion prevalence
-cell_proportion_prevalence <- determine_prevalence3D(cell_proportion_grid_metrics,
+### calculate cell proportion prevalence
+cell_proportion_prevalence <- calculate_prevalence3D(cell_proportion_grid_metrics,
                                                      metric_colname = "proportion",
                                                      threshold = 0.5)
 print(cell_proportion_prevalence)
 
-cell_proportion_prevalence_gradient <- determine_prevalence_gradient3D(cell_proportion_grid_metrics,
+cell_proportion_prevalence_gradient <- calculate_prevalence_gradient3D(cell_proportion_grid_metrics,
                                                                        metric_colname = "proportion")
 
-## Determine spatial autocorrelation for cell proportions
-cell_proportion_spatial_autocorrelation <- determine_spatial_autocorrelation3D(cell_proportion_grid_metrics,
+## calculate spatial autocorrelation for cell proportions
+cell_proportion_spatial_autocorrelation <- calculate_spatial_autocorrelation3D(cell_proportion_grid_metrics,
                                                                                metric_colname = "proportion",
                                                                                weight_method = "binary")
 print(cell_proportion_spatial_autocorrelation)
