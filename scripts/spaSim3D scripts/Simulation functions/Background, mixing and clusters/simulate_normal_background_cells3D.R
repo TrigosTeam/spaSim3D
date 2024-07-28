@@ -79,13 +79,14 @@ simulate_normal_background_cells3D <- function(n_cells,
                               "jitter_proportion" = jitter_proportion,
                               "cell_types" = background_cell_type,
                               "cell_proportions" = 1)
+  simulation_metadata <- list(background = background_metadata)
   
   ## Convert data frame to spe object
   spe <- SpatialExperiment(
     assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
     colData = df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = list(background = background_metadata))
+    metadata = list(simulation = simulation_metadata))
   
   # Plot
   if (plot_image) {

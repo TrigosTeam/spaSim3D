@@ -17,8 +17,8 @@ simulate_mixing3D <- function(bg_spe,
   
   bg_spe[["Cell.Type"]] <- sample(cell_types, size = ncol(bg_spe), replace = TRUE, prob = cell_proportions)
   
-  bg_spe@metadata[["background"]][["cell_types"]] <- cell_types
-  bg_spe@metadata[["background"]][["cell_proportions"]] <- cell_proportions
+  bg_spe@metadata[["simulation"]][["background"]][["cell_types"]] <- cell_types
+  bg_spe@metadata[["simulation"]][["background"]][["cell_proportions"]] <- cell_proportions
   
   # Plot
   if (plot_image) {

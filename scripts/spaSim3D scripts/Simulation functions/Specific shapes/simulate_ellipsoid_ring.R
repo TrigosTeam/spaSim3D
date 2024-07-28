@@ -82,7 +82,7 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   
   # Update current meta data
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- ring_properties
   
   return(bg_spe)
 }

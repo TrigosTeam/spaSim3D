@@ -222,13 +222,14 @@ simulate_random_background_cells3D <- function(n_cells,
                               "minimum_distance_between_cells" = minimum_distance_between_cells,
                               "cell_types" = background_cell_type,
                               "cell_proportions" = 1)
+  simulation_metadata <- list(background = background_metadata)
   
   ## Convert data frame to spe object
   spe <- SpatialExperiment(
     assay = matrix(data = NA, nrow = nrow(pois_df), ncol = nrow(pois_df)),
     colData = pois_df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = list(background = background_metadata))
+    metadata = list(simulation = simulation_metadata))
   
   # Plot
   if (plot_image) {
@@ -241,11 +242,12 @@ simulate_random_background_cells3D <- function(n_cells,
   return(spe)
 }
 
+
 simulate_normal_background_cells3D <- function(n_cells, 
                                                length, 
                                                width, 
                                                height,
-                                               jitter_proportion,
+                                               jitter_proportion = 0.25,
                                                background_cell_type = "Others", 
                                                plot_image = TRUE) {
   
@@ -322,13 +324,14 @@ simulate_normal_background_cells3D <- function(n_cells,
                               "jitter_proportion" = jitter_proportion,
                               "cell_types" = background_cell_type,
                               "cell_proportions" = 1)
+  simulation_metadata <- list(background = background_metadata)
   
   ## Convert data frame to spe object
   spe <- SpatialExperiment(
     assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
     colData = df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = list(background = background_metadata))
+    metadata = list(simulation = simulation_metadata))
   
   # Plot
   if (plot_image) {
@@ -340,6 +343,8 @@ simulate_normal_background_cells3D <- function(n_cells,
   
   return(spe)
 }
+
+
 
 simulate_mixing3D <- function(bg_spe,
                               cell_types,
@@ -360,8 +365,8 @@ simulate_mixing3D <- function(bg_spe,
   
   bg_spe[["Cell.Type"]] <- sample(cell_types, size = ncol(bg_spe), replace = TRUE, prob = cell_proportions)
   
-  bg_spe@metadata[["background"]][["cell_types"]] <- cell_types
-  bg_spe@metadata[["background"]][["cell_proportions"]] <- cell_proportions
+  bg_spe@metadata[["simulation"]][["background"]][["cell_types"]] <- cell_types
+  bg_spe@metadata[["simulation"]][["background"]][["cell_proportions"]] <- cell_proportions
   
   # Plot
   if (plot_image) {
@@ -540,7 +545,7 @@ simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
   
   # Update current meta data
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- cluster_properties
   
   return(bg_spe)
 }
@@ -594,7 +599,7 @@ simulate_sphere_ring <- function(bg_spe, ring_properties) {
   
   # Update current meta data
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- ring_properties
   
   return(bg_spe)
 }
@@ -668,7 +673,7 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
   
   # Update current meta data
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- dr_properties
   
   return(bg_spe)
 }
@@ -737,7 +742,7 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   
   # Update current meta data
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- cluster_properties
   
   return(bg_spe)
 }
@@ -826,7 +831,7 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   
   # Update current meta data
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- ring_properties
   
   return(bg_spe)
 }
@@ -933,7 +938,7 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   
   # Update current meta data
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- dr_properties
   
   return(bg_spe)
 }
@@ -983,7 +988,7 @@ simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
   
   # Update current meta data
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- cluster_properties
   
   return(bg_spe)
 }
@@ -1052,7 +1057,7 @@ simulate_cylinder_ring <- function(bg_spe, ring_properties) {
   
   # Update current meta data
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- ring_properties
   
   return(bg_spe)
 }
@@ -1140,7 +1145,7 @@ simulate_cylinder_dr <- function(bg_spe, dr_properties) {
   
   # Update current meta data
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- dr_properties
   
   return(bg_spe)
 }
@@ -1274,7 +1279,7 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
-  metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep="_")]] <- cluster_properties
   
   # Convert data frame to spe object
   cluster_spe <- SpatialExperiment(
@@ -1429,7 +1434,7 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
-  metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep="_")]] <- ring_properties
   
   # Convert data frame to spe object
   cluster_spe <- SpatialExperiment(
@@ -1601,7 +1606,7 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
-  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep="_")]] <- dr_properties
   
   # Convert data frame to spe object
   cluster_spe <- SpatialExperiment(
@@ -2605,8 +2610,8 @@ get_cell_types_and_proportions_for_clusters <- function(simulated_spe, simulate_
       
       # Update current meta data
       metadata <- simulated_spe@metadata
-      metadata[[length(metadata)]][[cell_type_option]] <- cell_types
-      metadata[[length(metadata)]][[cell_proportion_option]] <- cell_proportions
+      metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_type_option]] <- cell_types
+      metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_proportion_option]] <- cell_proportions
       
       # Convert data frame to spe object
       simulated_spe_new <- SpatialExperiment(

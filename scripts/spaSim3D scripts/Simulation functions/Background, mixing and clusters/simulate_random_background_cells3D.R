@@ -72,13 +72,14 @@ simulate_random_background_cells3D <- function(n_cells,
                               "minimum_distance_between_cells" = minimum_distance_between_cells,
                               "cell_types" = background_cell_type,
                               "cell_proportions" = 1)
+  simulation_metadata <- list(background = background_metadata)
   
   ## Convert data frame to spe object
   spe <- SpatialExperiment(
     assay = matrix(data = NA, nrow = nrow(pois_df), ncol = nrow(pois_df)),
     colData = pois_df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = list(background = background_metadata))
+    metadata = list(simulation = simulation_metadata))
   
   # Plot
   if (plot_image) {

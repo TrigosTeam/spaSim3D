@@ -123,7 +123,7 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
-  metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep="_")]] <- cluster_properties
   
   # Convert data frame to spe object
   cluster_spe <- SpatialExperiment(

@@ -156,7 +156,7 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
-  metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep="_")]] <- dr_properties
   
   # Convert data frame to spe object
   cluster_spe <- SpatialExperiment(

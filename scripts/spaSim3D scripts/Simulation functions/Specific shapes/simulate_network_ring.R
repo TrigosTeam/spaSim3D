@@ -140,7 +140,7 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
-  metadata[[paste("cluster", length(metadata), sep="_")]] <- ring_properties
+  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep="_")]] <- ring_properties
   
   # Convert data frame to spe object
   cluster_spe <- SpatialExperiment(

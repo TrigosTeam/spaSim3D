@@ -67,7 +67,7 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
   
   # Update current meta data
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- dr_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- dr_properties
   
   return(bg_spe)
 }

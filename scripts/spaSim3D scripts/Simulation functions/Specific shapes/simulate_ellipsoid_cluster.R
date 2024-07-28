@@ -59,7 +59,7 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   
   # Update current meta data
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
-  bg_spe@metadata[[paste("cluster", length(metadata), sep="_")]] <- cluster_properties
+  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- cluster_properties
   
   return(bg_spe)
 }

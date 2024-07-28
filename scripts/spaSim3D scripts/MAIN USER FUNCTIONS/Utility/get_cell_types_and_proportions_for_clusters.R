@@ -86,8 +86,8 @@ get_cell_types_and_proportions_for_clusters <- function(simulated_spe, simulate_
       
       # Update current meta data
       metadata <- simulated_spe@metadata
-      metadata[[length(metadata)]][[cell_type_option]] <- cell_types
-      metadata[[length(metadata)]][[cell_proportion_option]] <- cell_proportions
+      metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_type_option]] <- cell_types
+      metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_proportion_option]] <- cell_proportions
       
       # Convert data frame to spe object
       simulated_spe_new <- SpatialExperiment(
