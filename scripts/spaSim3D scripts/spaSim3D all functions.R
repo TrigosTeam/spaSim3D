@@ -1625,11 +1625,7 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
 ### Message background integrator strings and function ------------------------------------------------------------
 message_background <- paste("Hello spaSim-3D user, how do you want your background cells to look like?\n
           1. Random pattern\n
-<<<<<<< HEAD
           2. Ordered pattern\n\n",
-=======
-          2. ordered pattern\n\n",
->>>>>>> 87747cc60cb1cb9b474621daa429ee0f20ab94f6
                             "In a random pattern, cells are placed randomly...\n",
                             "In a ordered pattern, cells follow a regularly spaced in a hexagonal grid\n",
                             "To choose, please enter 1 or 2.\n", sep = "")
