@@ -10,8 +10,8 @@ spe_metadata_background_template <- function(background_type) {
                                                   cell_types = c("Tumour", "Others"),
                                                   cell_proportions = c(0.05, 0.95)))
   }
-  else if (background_type == "normal") {
-    background_metadata <- list(background = list(background_type = "normal",
+  else if (background_type == "ordered") {
+    background_metadata <- list(background = list(background_type = "ordered",
                                                   n_cells = 10000,
                                                   length = 100,
                                                   width = 100,
@@ -21,7 +21,7 @@ spe_metadata_background_template <- function(background_type) {
                                                   cell_proportions = c(0.05, 0.95)))
   }
   else {
-    stop("background_type parameter must be 'random' or 'normal'.")
+    stop("background_type parameter must be 'random' or 'ordered'.")
   }
   
   return(background_metadata)

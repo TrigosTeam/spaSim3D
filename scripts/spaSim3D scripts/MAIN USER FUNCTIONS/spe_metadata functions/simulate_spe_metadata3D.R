@@ -10,8 +10,8 @@ simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
                                               bg_metadata$minimum_distance_between_cells,
                                               plot_image = plot_image)    
   }
-  else if (bg_metadata$background_type == "normal") {
-    spe <- simulate_normal_background_cells3D(bg_metadata$n_cells,
+  else if (bg_metadata$background_type == "ordered") {
+    spe <- simulate_ordered_background_cells3D(bg_metadata$n_cells,
                                               bg_metadata$length,
                                               bg_metadata$width,
                                               bg_metadata$height,
@@ -19,7 +19,7 @@ simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
                                               plot_image = plot_image) 
   }
   else {
-    stop("background_type parameter found in the first list must be 'random' or 'normal'.")
+    stop("background_type parameter found in the first list must be 'random' or 'ordered'.")
   }
   # Apply background mixing
   spe <- simulate_mixing3D(spe,

@@ -1,10 +1,10 @@
-simulate_normal_background_cells3D <- function(n_cells, 
-                                               length, 
-                                               width, 
-                                               height,
-                                               jitter_proportion = 0.25,
-                                               background_cell_type = "Others", 
-                                               plot_image = TRUE) {
+simulate_ordered_background_cells3D <- function(n_cells, 
+                                                length, 
+                                                width, 
+                                                height,
+                                                jitter_proportion = 0.25,
+                                                background_cell_type = "Others", 
+                                                plot_image = TRUE) {
   
   # Check
   if (!is.numeric(n_cells) | !is.numeric(length) | !is.numeric(width) | 
@@ -62,7 +62,7 @@ simulate_normal_background_cells3D <- function(n_cells,
   x <- x + jitter_x
   y <- y + jitter_y
   z <- z + jitter_z
-
+  
   # Put data into data frame
   df <- data.frame("Cell.X.Position" = x,
                    "Cell.Y.Position" = y,

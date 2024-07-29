@@ -7,9 +7,9 @@ library(SpatialExperiment)
 ### Message strings------------------------------------------------------------
 message_background <- paste("Hello spaSim-3D user, how do you want your background cells to look like?\n
           1. Random pattern\n
-          2. Normal pattern\n\n",
+          2. Ordered pattern\n\n",
                             "In a random pattern, cells are placed randomly...\n",
-                            "In a normal pattern, cells follow a regularly spaced in a hexagonal grid\n",
+                            "In a ordered pattern, cells follow a regularly spaced in a hexagonal grid\n",
                             "To choose, please enter 1 or 2.\n", sep = "")
 
 message_background_random <- paste("We will need a few parameters before we can obtain the simulation\n",
@@ -18,7 +18,7 @@ message_background_random <- paste("We will need a few parameters before we can 
                                    "    Minimum distance between cells (e.g. minimum distance of 2)\n",
                                    "If you want to change your inputs, you'll be able to at the end.\n", sep = "")
 
-message_background_normal <- paste("We will need a few parameters before we can obtain the simulation\n",
+message_background_ordered <- paste("We will need a few parameters before we can obtain the simulation\n",
                                    "    Window size - length, width and height (e.g. 100 x 100 x 100)\n",
                                    "    Number of cells (e.g. 10000 cells)\n",
                                    "    Amount of jitter (choose to give a bit or a lot of randomness)\n",
@@ -30,7 +30,7 @@ message_mixing <- paste("Would you like to MIX the background cells with chosen 
 ### Functions -----------------------------------------------------------------
 spaSim3D_background_integrator <- function() {
   
-  # Ask if user wants a 'random' or 'normal' patterned background
+  # Ask if user wants a 'random' or 'ordered' patterned background
   message(message_background)
   user_input_background <- get_integer_input_from_options(c(1, 2))
   
@@ -81,11 +81,11 @@ spaSim3D_background_integrator <- function() {
       change_input_parameters_y_or_n <- get_y_or_n_input()
     }
   }
-  ### Simulate normal pattern
+  ### Simulate ordered pattern
   else if (user_input_background == 2) {
 
-    # Get required parameters for a normal background from user
-    message(message_background_normal)
+    # Get required parameters for a ordered background from user
+    message(message_background_ordered)
     parameter_values <- list("length" = get_positive_numeric_input("length"),
                              "width" = get_positive_numeric_input("width"),
                              "height" = get_positive_numeric_input("height"),
@@ -93,9 +93,9 @@ spaSim3D_background_integrator <- function() {
                              "amount of jitter" = get_numeric_between_input("amount of jitter", 0, 1))
     display_parameters(parameter_values)
     
-    # Generate normal background simulation using these parameters
+    # Generate ordered background simulation using these parameters
     message("Generating simulation...")
-    simulated_spe <- simulate_normal_background_cells3D(parameter_values[["number of cells"]],
+    simulated_spe <- simulate_ordered_background_cells3D(parameter_values[["number of cells"]],
                                                         parameter_values[["length"]],
                                                         parameter_values[["width"]],
                                                         parameter_values[["height"]],
@@ -115,10 +115,10 @@ spaSim3D_background_integrator <- function() {
       if (user_input_parameter_choice == 4) parameter_values[["number of cells"]] <- get_positive_numeric_input("number of cells")
       if (user_input_parameter_choice == 5) parameter_values[["amount of jitter"]] <- get_numeric_between_input("amount of jitter", 0, 1)
       
-      # Generate normal background simulation using updated parameters
+      # Generate ordered background simulation using updated parameters
       display_parameters(parameter_values)
       message("Generating simulation...")
-      simulated_spe <- simulate_normal_background_cells3D(parameter_values[["number of cells"]],
+      simulated_spe <- simulate_ordered_background_cells3D(parameter_values[["number of cells"]],
                                                           parameter_values[["length"]],
                                                           parameter_values[["width"]],
                                                           parameter_values[["height"]],
