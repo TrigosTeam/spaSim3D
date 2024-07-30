@@ -3,7 +3,7 @@ library(ggplot2)
 
 ### 1.1.1. Function to get plot for APD ----------------------------------------
 ### 1.1.2. Function to get plot for AMD -------------------------------------
-plot_AMD_metric <- function(spes_table, AMD_df, arrangements) {
+plot_AMD_metric <- function(spes_table, AMD_df, bg_AMD_df, arrangements) {
   
   # AMD pairs are A/A, A/B, B/A, B/B
   AMD_pairs <- data.frame(cell1 = c("A", "A", "B", "B"),
@@ -25,28 +25,34 @@ plot_AMD_metric <- function(spes_table, AMD_df, arrangements) {
     # Create a 'key' column which groups simulations if they have the same bg_type, shape and size (but not arrangement)
     plot_df$key <- paste(plot_df$bg_type, plot_df$shape, plot_df$size, sep = "_")
     
+    # Get plot_bg_df from bg_AMD_df
+    plot_bg_df <- data.frame(arrangement = arrangements, 
+                             AMD = bg_AMD_df[bg_AMD_df$reference == AMD_pairs[i, "cell1"] & bg_AMD_df$target == AMD_pairs[i, "cell2"], "AMD"],
+                             key = "bg")
+    
     # Factor
     plot_df$bg_type <- factor(plot_df$bg_type, c("O", "A", "B", "AB"))
     plot_df$shape <- factor(plot_df$shape, c("Sphere", "Ellipsoid", "Network"))
     plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
     plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
     
-    if(i == 4) return(plot_df)
-    
     fig_bg_type <- ggplot(plot_df, aes(arrangement, AMD, group = key, col = bg_type)) +
       geom_line() +
       theme_bw() +
-      theme(legend.position="bottom")
+      theme(legend.position="bottom") +
+      geom_line(data = plot_bg_df, aes(arrangement, AMD), col = "black", linetype = 2)
     
     fig_shape <- ggplot(plot_df, aes(arrangement, AMD, group = key, col = shape)) +
       geom_line() +
       theme_bw() +
-      theme(legend.position="bottom")
+      theme(legend.position="bottom") +
+      geom_line(data = plot_bg_df, aes(arrangement, AMD), col = "black", linetype = 2)
     
     fig_size <- ggplot(plot_df, aes(arrangement, AMD, group = key, col = size)) +
       geom_line() +
       theme_bw() +
-      theme(legend.position="bottom")
+      theme(legend.position="bottom") +
+      geom_line(data = plot_bg_df, aes(arrangement, AMD), col = "black", linetype = 2)
     
     all_plots_list[[AMD_pairs[i, "pair"]]] <- list(bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
   }
@@ -85,7 +91,7 @@ plot_AMD_metric <- function(spes_table, AMD_df, arrangements) {
 
 ### 1.2.1. Function to get plot for MS, NMS, ACINP, AE gradient metrics ------------
 
-plot_gradient_metrics_type1 <- function(spes_table, gradient_metric_df, metric, arrangements) {
+plot_gradient_metrics_type1 <- function(spes_table, gradient_metric_df, bg_gradient_metric_df, metric, arrangements) {
   
   # Constants
   cell_types <- c("A", "B") # Use A as reference, and B as target, and vice versa
@@ -105,7 +111,7 @@ plot_gradient_metrics_type1 <- function(spes_table, gradient_metric_df, metric, 
     
     # Melt
     plot_df <- reshape2::melt(plot_df, , radii_colnames)
-    
+  
     # Extract radius value from radius strings (r1 -> 1, r2 -> 2...)
     plot_df$variable <- unfactor(plot_df$variable)
     plot_df$variable <- as.numeric(substr(plot_df$variable, 2, nchar(plot_df$variable)))
@@ -116,29 +122,39 @@ plot_gradient_metrics_type1 <- function(spes_table, gradient_metric_df, metric, 
     plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
     plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
     
+    # Do the same for the bg_gradient_metric_df
+    plot_bg_df <- bg_gradient_metric_df[bg_gradient_metric_df$reference == cell_types[i], ]
+    plot_bg_df <- reshape2::melt(plot_bg_df, , radii_colnames)
+    plot_bg_df$variable <- unfactor(plot_bg_df$variable)
+    plot_bg_df$variable <- as.numeric(substr(plot_bg_df$variable, 2, nchar(plot_bg_df$variable)))
+    
     fig_arrangement <- ggplot(plot_df, aes(variable, value, group = spe, col = arrangement)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "radius", y = metric)
-    
+      labs(x = "radius", y = metric) +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2)
+
     fig_bg_type <- ggplot(plot_df, aes(variable, value, group = spe, col = bg_type)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "radius", y = metric)
+      labs(x = "radius", y = metric) +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2)
     
     fig_shape <- ggplot(plot_df, aes(variable, value, group = spe, col = shape)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "radius", y = metric)
+      labs(x = "radius", y = metric) +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_size <- ggplot(plot_df, aes(variable, value, group = spe, col = size)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "radius", y = metric)
+      labs(x = "radius", y = metric) +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2)
     
     all_plots_list[[cell_types[i]]] <- list(arrangement = fig_arrangement, bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
     
@@ -182,7 +198,7 @@ plot_gradient_metrics_type1 <- function(spes_table, gradient_metric_df, metric, 
 
 ### 1.2.2. Function to get plot for ACIN, CKR gradient metrics ------------------
 
-plot_gradient_metrics_type2 <- function(spes_table, gradient_metric_df, metric, arrangements, min_radius, max_radius) {
+plot_gradient_metrics_type2 <- function(spes_table, gradient_metric_df, bg_gradient_metric_df, metric, arrangements, min_radius, max_radius) {
   
   # Constants
   pairs <- data.frame(cell1 = c("A", "A", "B", "B"),
@@ -219,29 +235,42 @@ plot_gradient_metrics_type2 <- function(spes_table, gradient_metric_df, metric, 
     plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
     plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
     
+    # Do the same for the bg_gradient_metric_df
+    plot_bg_df <- bg_gradient_metric_df[bg_gradient_metric_df$reference == pairs[i, "cell1"] &
+                                          bg_gradient_metric_df$target == pairs[i, "cell2"], ]
+    plot_bg_df <- reshape2::melt(plot_bg_df, , radii_colnames)
+    plot_bg_df$variable <- unfactor(plot_bg_df$variable)
+    plot_bg_df$variable <- as.numeric(substr(plot_bg_df$variable, 2, nchar(plot_bg_df$variable)))
+    
+    plot_bg_df <- plot_bg_df[plot_bg_df$variable >= min_radius & plot_bg_df$variable <= max_radius, ]
+    
     fig_arrangement <- ggplot(plot_df, aes(variable, value, group = spe, col = arrangement)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "radius", y = metric)
+      labs(x = "radius", y = metric) +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_bg_type <- ggplot(plot_df, aes(variable, value, group = spe, col = bg_type)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "radius", y = metric)
+      labs(x = "radius", y = metric) +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_shape <- ggplot(plot_df, aes(variable, value, group = spe, col = shape)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "radius", y = metric)
+      labs(x = "radius", y = metric) +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_size <- ggplot(plot_df, aes(variable, value, group = spe, col = size)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "radius", y = metric)
+      labs(x = "radius", y = metric) +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     all_plots_list[[pairs[i, "pair"]]] <- list(arrangement = fig_arrangement, bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
     
@@ -282,7 +311,7 @@ plot_gradient_metrics_type2 <- function(spes_table, gradient_metric_df, metric, 
 
 
 ### 1.3.1. Function to get plot for proportion SAC ----------------------------------------
-plot_proportion_SAC <- function(spes_table, SAC_df, arrangements) {
+plot_proportion_SAC <- function(spes_table, SAC_df, bg_SAC_df, arrangements) {
   
   # Get possible reference and target cell combinations
   prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
@@ -302,6 +331,11 @@ plot_proportion_SAC <- function(spes_table, SAC_df, arrangements) {
     # Create a 'key' column which groups simulations if they have the same bg_type, shape and size (but not arrangement)
     plot_df$key <- paste(plot_df$bg_type, plot_df$shape, plot_df$size, sep = "_")
 
+    # Get plot_bg_df from bg_SAC_df
+    plot_bg_df <- data.frame(arrangement = arrangements, 
+                             proportion = bg_SAC_df[bg_SAC_df$reference == prop_cell_types$ref[i], "proportion"],
+                             key = "bg")
+    
     # Factor
     plot_df$bg_type <- factor(plot_df$bg_type, c("O", "A", "B", "AB"))
     plot_df$shape <- factor(plot_df$shape, c("Sphere", "Ellipsoid", "Network"))
@@ -312,19 +346,22 @@ plot_proportion_SAC <- function(spes_table, SAC_df, arrangements) {
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("SAC")
+      ylab("SAC") +
+      geom_line(data = plot_bg_df, aes(arrangement, proportion), col = "black", linetype = 2)
     
     fig_shape <- ggplot(plot_df, aes(arrangement, proportion, group = key, col = shape)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("SAC")
+      ylab("SAC") +
+      geom_line(data = plot_bg_df, aes(arrangement, proportion), col = "black", linetype = 2)
     
     fig_size <- ggplot(plot_df, aes(arrangement, proportion, group = key, col = size)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("SAC")
+      ylab("SAC") +
+      geom_line(data = plot_bg_df, aes(arrangement, proportion), col = "black", linetype = 2)
     
     all_plots_list[[prop_cell_types$pair[i]]] <- list(bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
   }
@@ -360,7 +397,7 @@ plot_proportion_SAC <- function(spes_table, SAC_df, arrangements) {
 
 
 ### 1.3.2. Function to get plot for entropy SAC ----------------------------------------
-plot_entropy_SAC <- function(spes_table, SAC_df, arrangements) {
+plot_entropy_SAC <- function(spes_table, SAC_df, bg_SAC_df, arrangements) {
   
   # Get possible cell type of interest combinations
   entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
@@ -379,6 +416,11 @@ plot_entropy_SAC <- function(spes_table, SAC_df, arrangements) {
     # Create a 'key' column which groups simulations if they have the same bg_type, shape and size (but not arrangement)
     plot_df$key <- paste(plot_df$bg_type, plot_df$shape, plot_df$size, sep = "_")
     
+    # Get plot_bg_df from bg_SAC_df
+    plot_bg_df <- data.frame(arrangement = arrangements, 
+                             proportion = bg_SAC_df[bg_SAC_df$cell_types == entropy_cell_types$cell_types[i], "entropy"],
+                             key = "bg")
+    
     # Factor
     plot_df$bg_type <- factor(plot_df$bg_type, c("O", "A", "B", "AB"))
     plot_df$shape <- factor(plot_df$shape, c("Sphere", "Ellipsoid", "Network"))
@@ -389,19 +431,22 @@ plot_entropy_SAC <- function(spes_table, SAC_df, arrangements) {
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("SAC")
+      ylab("SAC") +
+      geom_line(data = plot_bg_df, aes(arrangement, proportion), col = "black", linetype = 2)
     
     fig_shape <- ggplot(plot_df, aes(arrangement, entropy, group = key, col = shape)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("SAC")
+      ylab("SAC") +
+      geom_line(data = plot_bg_df, aes(arrangement, proportion), col = "black", linetype = 2)
     
     fig_size <- ggplot(plot_df, aes(arrangement, entropy, group = key, col = size)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("SAC")
+      ylab("SAC") +
+      geom_line(data = plot_bg_df, aes(arrangement, proportion), col = "black", linetype = 2)
     
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
   }
@@ -434,7 +479,7 @@ plot_entropy_SAC <- function(spes_table, SAC_df, arrangements) {
   return(SAC_plot)
 }
 ### 1.3.3. Function to get plot for proportion prevalence ----------------------------------
-plot_proportion_prevalence <- function(spes_table, prevalence_df, arrangements) {
+plot_proportion_prevalence <- function(spes_table, prevalence_df, bg_df, arrangements) {
   
   # Constants
   prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
@@ -467,29 +512,39 @@ plot_proportion_prevalence <- function(spes_table, prevalence_df, arrangements) 
     plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
     plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
     
+    # Do the same for the bg_df
+    plot_bg_df <- bg_df[bg_df$reference == prop_cell_types$ref[i], ]
+    plot_bg_df <- reshape2::melt(plot_bg_df, , threshold_colnames)
+    plot_bg_df$variable <- unfactor(plot_bg_df$variable)
+    plot_bg_df$variable <- as.numeric(substr(plot_bg_df$variable, 2, nchar(plot_bg_df$variable)))
+    
     fig_arrangement <- ggplot(plot_df, aes(variable, value, group = spe, col = arrangement)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "threshold", y = "prevalence")
+      labs(x = "threshold", y = "prevalence") +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_bg_type <- ggplot(plot_df, aes(variable, value, group = spe, col = bg_type)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "threshold", y = "prevalence")
+      labs(x = "threshold", y = "prevalence") +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_shape <- ggplot(plot_df, aes(variable, value, group = spe, col = shape)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "threshold", y = "prevalence")
+      labs(x = "threshold", y = "prevalence") +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_size <- ggplot(plot_df, aes(variable, value, group = spe, col = size)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "threshold", y = "prevalence")
+      labs(x = "threshold", y = "prevalence") +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     all_plots_list[[prop_cell_types$pair[i]]] <- list(arrangement = fig_arrangement, bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
     
@@ -529,7 +584,7 @@ plot_proportion_prevalence <- function(spes_table, prevalence_df, arrangements) 
 
 
 ### 1.3.4. Function to get plot for entropy prevalence ----------------------------------
-plot_entropy_prevalence <- function(spes_table, prevalence_df, arrangements) {
+plot_entropy_prevalence <- function(spes_table, prevalence_df, bg_df, arrangements) {
   
   # Constants
   entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
@@ -560,29 +615,39 @@ plot_entropy_prevalence <- function(spes_table, prevalence_df, arrangements) {
     plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
     plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
     
+    # Do the same for the bg_df
+    plot_bg_df <- bg_df[bg_df$cell_types == entropy_cell_types$cell_types[i], ]
+    plot_bg_df <- reshape2::melt(plot_bg_df, , threshold_colnames)
+    plot_bg_df$variable <- unfactor(plot_bg_df$variable)
+    plot_bg_df$variable <- as.numeric(substr(plot_bg_df$variable, 2, nchar(plot_bg_df$variable)))
+    
     fig_arrangement <- ggplot(plot_df, aes(variable, value, group = spe, col = arrangement)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "threshold", y = "prevalence")
+      labs(x = "threshold", y = "prevalence") +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_bg_type <- ggplot(plot_df, aes(variable, value, group = spe, col = bg_type)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "threshold", y = "prevalence")
+      labs(x = "threshold", y = "prevalence") +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_shape <- ggplot(plot_df, aes(variable, value, group = spe, col = shape)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "threshold", y = "prevalence")
+      labs(x = "threshold", y = "prevalence") +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     fig_size <- ggplot(plot_df, aes(variable, value, group = spe, col = size)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      labs(x = "threshold", y = "prevalence")
+      labs(x = "threshold", y = "prevalence") +
+      geom_line(data = plot_bg_df, aes(variable, value), col = "black", linetype = 2) 
     
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(arrangement = fig_arrangement, bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
     
@@ -621,7 +686,7 @@ plot_entropy_prevalence <- function(spes_table, prevalence_df, arrangements) {
 
 
 ### 1.3.5. Function to get plot for proportion prevalence AUC -----------------
-plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, arrangements) {
+plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, bg_df, arrangements) {
   
   # Constants
   thresholds <- seq(0.01, 1, 0.01)
@@ -633,6 +698,10 @@ plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, arrangemen
   # Get AUC for each prevalence gradient
   prevalence_df$AUC <- apply(prevalence_df[ , threshold_colnames], 1, sum) * 0.01
   prevalence_df <- prevalence_df[ , c("spe", "reference", "target", "AUC")]
+  
+  # Do the same for bg
+  bg_df$AUC <- apply(bg_df[ , threshold_colnames], 1, sum) * 0.01
+  bg_df <- bg_df[ , c("spe", "reference", "target", "AUC")]
   
   # Put all plots into an organised list
   all_plots_list <- list()
@@ -654,23 +723,31 @@ plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, arrangemen
     plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
     plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
     
+    # Get plot_bg_df from bg_df
+    plot_bg_df <- data.frame(arrangement = arrangements,
+                             AUC = bg_df[bg_df$reference == prop_cell_types$ref[i], "AUC"],
+                             key = "bg")
+    
     fig_bg_type <- ggplot(plot_df, aes(arrangement, AUC, group = key, col = bg_type)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("AUC")
+      ylab("AUC") +
+      geom_line(data = plot_bg_df, aes(arrangement, AUC), col = "black", linetype = 2)
     
     fig_shape <- ggplot(plot_df, aes(arrangement, AUC, group = key, col = shape)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("AUC")
+      ylab("AUC") +
+      geom_line(data = plot_bg_df, aes(arrangement, AUC), col = "black", linetype = 2)
     
     fig_size <- ggplot(plot_df, aes(arrangement, AUC, group = key, col = size)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("AUC")
+      ylab("AUC") +
+      geom_line(data = plot_bg_df, aes(arrangement, AUC), col = "black", linetype = 2)
     
     all_plots_list[[prop_cell_types$pair[i]]] <- list(bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
   }
@@ -705,7 +782,7 @@ plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, arrangemen
 }
 
 ### 1.3.6. Function to get plot for entropy prevalence AUC ----------------------------------------
-plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, arrangements) {
+plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, bg_df, arrangements) {
   
   # Constants
   thresholds <- seq(0.01, 1, 0.01)
@@ -716,6 +793,10 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, arrangements)
   # Get AUC for each prevalence gradient
   prevalence_df$AUC <- apply(prevalence_df[ , threshold_colnames], 1, sum) * 0.01
   prevalence_df <- prevalence_df[ , c("spe", "cell_types", "AUC")]
+  
+  # Do the same for bg
+  bg_df$AUC <- apply(bg_df[ , threshold_colnames], 1, sum) * 0.01
+  bg_df <- bg_df[ , c("spe", "cell_types", "AUC")]
   
   # Put all plots into an organised list
   all_plots_list <- list()
@@ -737,23 +818,31 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, arrangements)
     plot_df$size <- factor(plot_df$size, c("Small", "Medium", "Large"))
     plot_df$arrangement <- factor(plot_df$arrangement, arrangements)
     
+    # Get plot_bg_df from bg_df
+    plot_bg_df <- data.frame(arrangement = arrangements,
+                             AUC = bg_df[bg_df$cell_types == entropy_cell_types$cell_types[i], "AUC"],
+                             key = "bg")
+    
     fig_bg_type <- ggplot(plot_df, aes(arrangement, AUC, group = key, col = bg_type)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("AUC")
+      ylab("AUC") +
+      geom_line(data = plot_bg_df, aes(arrangement, AUC), col = "black", linetype = 2)
     
     fig_shape <- ggplot(plot_df, aes(arrangement, AUC, group = key, col = shape)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("AUC")
+      ylab("AUC") +
+      geom_line(data = plot_bg_df, aes(arrangement, AUC), col = "black", linetype = 2)
     
     fig_size <- ggplot(plot_df, aes(arrangement, AUC, group = key, col = size)) +
       geom_line() +
       theme_bw() +
       theme(legend.position="bottom") +
-      ylab("AUC")
+      ylab("AUC") +
+      geom_line(data = plot_bg_df, aes(arrangement, AUC), col = "black", linetype = 2)
     
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(bg_type = fig_bg_type, shape = fig_shape, size = fig_size)
   }
@@ -798,10 +887,14 @@ mixed_spes_table <- read.table("mixed_spes_table.csv")
 setwd("~/Objects/mixed_spes/analysis_3D")
 mixed_AMD_df <- read.table("mixed_AMD_df.csv")
 
-mixed_AMD_plot <- plot_AMD_metric(mixed_spes_table, mixed_AMD_df, c("M1", "M2", "M3"))
+# Read bg_AMD_df
+setwd("~/Objects/background_spe")
+bg_AMD_df <- read.table("bg_AMD_df.csv")
+
+mixed_AMD_plot <- plot_AMD_metric(mixed_spes_table, mixed_AMD_df, bg_AMD_df, c("M1", "M2", "M3"))
 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
-saveRDS(mixed_AMD_plot, "mixed_AMD_plot.rds")
+# saveRDS(mixed_AMD_plot, "mixed_AMD_plot.rds")
 
 
 
@@ -819,10 +912,17 @@ mixed_NMS_df <- read.table("mixed_NMS_df.csv")
 mixed_ACINP_df <- read.table("mixed_ACINP_df.csv")
 mixed_AE_df <- read.table("mixed_AE_df.csv")
 
-mixed_MS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_MS_df, "MS", c("M1", "M2", "M3"))
-mixed_NMS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_NMS_df, "NMS", c("M1", "M2", "M3"))
-mixed_ACINP_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_ACINP_df, "ACINP", c("M1", "M2", "M3"))
-mixed_AE_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_AE_df, "AE", c("M1", "M2", "M3"))
+# Read bg_dfs
+setwd("~/Objects/background_spe")
+bg_MS_df <- read.table("bg_MS_df.csv")
+bg_NMS_df <- read.table("bg_NMS_df.csv")
+bg_ACINP_df <- read.table("bg_ACINP_df.csv")
+bg_AE_df <- read.table("bg_AE_df.csv")
+
+mixed_MS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_MS_df, bg_MS_df, "MS", c("M1", "M2", "M3"))
+mixed_NMS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_NMS_df, bg_NMS_df, "NMS", c("M1", "M2", "M3"))
+mixed_ACINP_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_ACINP_df, bg_ACINP_df, "ACINP", c("M1", "M2", "M3"))
+mixed_AE_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_AE_df, bg_AE_df, "AE", c("M1", "M2", "M3"))
 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS()
@@ -838,10 +938,15 @@ setwd("~/Objects/mixed_spes/analysis_3D")
 mixed_ACIN_df <- read.table("mixed_ACIN_df.csv")
 mixed_CKR_df <- read.table("mixed_CKR_df.csv")
 
-# Get plots
-mixed_ACIN_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_ACIN_df, "ACIN", c("M1", "M2", "M3"), 0, 50)
+# Read bg_dfs
+setwd("~/Objects/background_spe")
+bg_ACIN_df <- read.table("bg_ACIN_df.csv")
+bg_CKR_df <- read.table("bg_CKR_df.csv")
 
-mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, "CKR", c("M1", "M2", "M3"), 15, 50)
+# Get plots
+mixed_ACIN_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_ACIN_df, bg_ACIN_df, "ACIN", c("M1", "M2", "M3"), 0, 50)
+
+mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, bg_CKR_df, "CKR", c("M1", "M2", "M3"), 15, 50)
 
 
 ### 2.5. Mixed spes SAC ------------------------------------------------------
@@ -855,8 +960,13 @@ setwd("~/Objects/mixed_spes/analysis_3D")
 mixed_prop_SAC_df <- read.table("mixed_prop_SAC_df.csv")
 mixed_entropy_SAC_df <- read.table("mixed_entropy_SAC_df.csv")
 
-mixed_prop_SAC_plot <- plot_proportion_SAC(mixed_spes_table, mixed_prop_SAC_df, c("M1", "M2", "M3"))
-mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_df, c("M1", "M2", "M3"))
+# Read bg_SAC_df
+setwd("~/Objects/background_spe")
+bg_prop_SAC_df <- read.table("bg_prop_SAC_df.csv")
+bg_entropy_SAC_df <- read.table("bg_entropy_SAC_df.csv")
+
+mixed_prop_SAC_plot <- plot_proportion_SAC(mixed_spes_table, mixed_prop_SAC_df, bg_prop_SAC_df, c("M1", "M2", "M3"))
+mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_df, bg_entropy_SAC_df, c("M1", "M2", "M3"))
 
 # setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS(mixed_SAC_plot, "mixed_SAC_plot.rds")
@@ -867,23 +977,28 @@ mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_d
 setwd("~/Objects/spes_table")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
 
-# Read mixed_AMD_df
+# Read mixed prevalence dfs
 setwd("~/Objects/mixed_spes/analysis_3D")
 mixed_prop_prevalence_df <- read.table("mixed_prop_prevalence_df.csv")
 mixed_entropy_prevalence_df <- read.table("mixed_entropy_prevalence_df.csv")
 
-mixed_prop_prevalence_plot <- plot_proportion_prevalence(mixed_spes_table, mixed_prop_prevalence_df, c("M1", "M2", "M3"))
-mixed_entropy_prevalence_plot <- plot_entropy_prevalence(mixed_spes_table, mixed_entropy_prevalence_df, c("M1", "M2", "M3"))
+# Read bg prevalence dfs
+setwd("~/Objects/background_spe")
+bg_prop_prevalence_df <- read.table("bg_prop_prevalence_df.csv")
+bg_entropy_prevalence_df <- read.table("bg_entropy_prevalence_df.csv")
 
-mixed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(mixed_spes_table, mixed_prop_prevalence_df, c("M1", "M2", "M3"))
-mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_table, mixed_entropy_prevalence_df, c("M1", "M2", "M3"))
+mixed_prop_prevalence_plot <- plot_proportion_prevalence(mixed_spes_table, mixed_prop_prevalence_df, bg_prop_prevalence_df, c("M1", "M2", "M3"))
+mixed_entropy_prevalence_plot <- plot_entropy_prevalence(mixed_spes_table, mixed_entropy_prevalence_df, bg_entropy_prevalence_df, c("M1", "M2", "M3"))
+
+mixed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(mixed_spes_table, mixed_prop_prevalence_df, bg_prop_prevalence_df, c("M1", "M2", "M3"))
+mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_table, mixed_entropy_prevalence_df, bg_entropy_prevalence_df, c("M1", "M2", "M3"))
 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS(mixed_prevalence_plot, "mixed_prevalence_plot.rds")
 
 
-### 3.1. Ringed spes APD ------------------------------------------------------
-### 3.2. Ringed spes AMD -------------------------------------------------
+### 2.1. Ringed spes APD ------------------------------------------------------
+### 2.2. Ringed spes AMD ------------------------------------------------------
 
 # Read ringed_spes_table
 setwd("~/Objects/spes_table")
@@ -893,13 +1008,20 @@ ringed_spes_table <- read.table("ringed_spes_table.csv")
 setwd("~/Objects/ringed_spes/analysis_3D")
 ringed_AMD_df <- read.table("ringed_AMD_df.csv")
 
-ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, c("R1", "R2", "R3"))
+# Read bg_AMD_df
+setwd("~/Objects/background_spe")
+bg_AMD_df <- read.table("bg_AMD_df.csv")
+
+ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, bg_AMD_df, c("M1", "M2", "M3"))
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
-saveRDS(ringed_AMD_plot, "ringed_AMD_plot.rds")
+# saveRDS(ringed_AMD_plot, "ringed_AMD_plot.rds")
 
 
-### 3.3. Ringed spes MS, NMS, ACINP, AE ---------------------------------------
+
+
+### 2.3. Ringed spes MS, NMS, ACINP, AE -----------------------------------
+
 # Read ringed_spes_table
 setwd("~/Objects/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
@@ -911,16 +1033,22 @@ ringed_NMS_df <- read.table("ringed_NMS_df.csv")
 ringed_ACINP_df <- read.table("ringed_ACINP_df.csv")
 ringed_AE_df <- read.table("ringed_AE_df.csv")
 
-ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, "MS", c("R1", "R2", "R3"))
-ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, "NMS", c("R1", "R2", "R3"))
-ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, "ACINP", c("R1", "R2", "R3"))
-ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, "AE", c("R1", "R2", "R3"))
+# Read bg_dfs
+setwd("~/Objects/background_spe")
+bg_MS_df <- read.table("bg_MS_df.csv")
+bg_NMS_df <- read.table("bg_NMS_df.csv")
+bg_ACINP_df <- read.table("bg_ACINP_df.csv")
+bg_AE_df <- read.table("bg_AE_df.csv")
+
+ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, bg_MS_df, "MS", c("M1", "M2", "M3"))
+ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, bg_NMS_df, "NMS", c("M1", "M2", "M3"))
+ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, bg_ACINP_df, "ACINP", c("M1", "M2", "M3"))
+ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, bg_AE_df, "AE", c("M1", "M2", "M3"))
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS()
 
-
-### 3.4. Ringed spes ACIN, CKR ------------------------------------------------
+### 2.4. Ringed spes ACIN, CKR ------------------------------------------------
 
 # Read ringed_spes_table
 setwd("~/Objects/spes_table")
@@ -931,18 +1059,18 @@ setwd("~/Objects/ringed_spes/analysis_3D")
 ringed_ACIN_df <- read.table("ringed_ACIN_df.csv")
 ringed_CKR_df <- read.table("ringed_CKR_df.csv")
 
+# Read bg_dfs
+setwd("~/Objects/background_spe")
+bg_ACIN_df <- read.table("bg_ACIN_df.csv")
+bg_CKR_df <- read.table("bg_CKR_df.csv")
+
 # Get plots
-ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, "ACIN", c("R1", "R2", "R3"), 0, 50)
+ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, bg_ACIN_df, "ACIN", c("M1", "M2", "M3"), 0, 50)
 
-ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, "CKR", c("R1", "R2", "R3"), 10, 50)
-
-
-# setwd("~/Objects/ringed_spes/analysis_3D/plots")
-# saveRDS(ringed_ACIN_plot, "ringed_ACIN_plot.rds")
-# saveRDS(ringed_CKR_plot, "ringed_CKR_plot.rds")
+ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, bg_CKR_df, "CKR", c("M1", "M2", "M3"), 15, 50)
 
 
-### 3.5. Ringed spes SAC ------------------------------------------------------
+### 2.5. Ringed spes SAC ------------------------------------------------------
 
 # Read ringed_spes_table
 setwd("~/Objects/spes_table")
@@ -953,28 +1081,38 @@ setwd("~/Objects/ringed_spes/analysis_3D")
 ringed_prop_SAC_df <- read.table("ringed_prop_SAC_df.csv")
 ringed_entropy_SAC_df <- read.table("ringed_entropy_SAC_df.csv")
 
-ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, c("R1", "R2", "R3"))
-ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, c("R1", "R2", "R3"))
+# Read bg_SAC_df
+setwd("~/Objects/background_spe")
+bg_prop_SAC_df <- read.table("bg_prop_SAC_df.csv")
+bg_entropy_SAC_df <- read.table("bg_entropy_SAC_df.csv")
+
+ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, bg_prop_SAC_df, c("R1", "R2", "R3"))
+ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, bg_entropy_SAC_df, c("R1", "R2", "R3"))
 
 # setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
 
-### 3.6. Ringed spes prevalence ------------------------------------------------
+### 2.6. Ringed spes prevalence ------------------------------------------------
 
 # Read ringed_spes_table
 setwd("~/Objects/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
 
-# Read ringed_AMD_df
+# Read ringed prevalence dfs
 setwd("~/Objects/ringed_spes/analysis_3D")
 ringed_prop_prevalence_df <- read.table("ringed_prop_prevalence_df.csv")
 ringed_entropy_prevalence_df <- read.table("ringed_entropy_prevalence_df.csv")
 
-ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, c("R1", "R2", "R3"))
-ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, c("R1", "R2", "R3"))
+# Read bg prevalence dfs
+setwd("~/Objects/background_spe")
+bg_prop_prevalence_df <- read.table("bg_prop_prevalence_df.csv")
+bg_entropy_prevalence_df <- read.table("bg_entropy_prevalence_df.csv")
 
-ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, c("R1", "R2", "R3"))
-ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, c("R1", "R2", "R3"))
+ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, bg_prop_prevalence_df, c("R1", "R2", "R3"))
+ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, bg_entropy_prevalence_df, c("R1", "R2", "R3"))
+
+ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, bg_prop_prevalence_df, c("R1", "R2", "R3"))
+ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, bg_entropy_prevalence_df, c("R1", "R2", "R3"))
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_prevalence_plot, "ringed_prevalence_plot.rds")
