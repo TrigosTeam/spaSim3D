@@ -210,6 +210,7 @@ calculate_minimum_distances_between_cell_types3D <- function(df,
                                query = all_cell_type1_coord, 
                                k = 1)  
     }
+    # If we are comparing the same cell_type, and there is only one of this cell type, move on
     else if (nrow(all_cell_type1_coord) == 1) {
       warning("There is only 1 '", name1, "' cell in your data. It has no nearest neighbour of the same cell type.", sep = "")
       next
@@ -408,13 +409,13 @@ average_shortest_5_percent_minimum_distance_within_slices_df <- readRDS("average
 library(ggplot2)
 # function for number of observations 
 median.n <- function(x) {
-  return(c(y = 5, label = round(median(x))))
+  return(c(y = 5, label = round(median(x), 2)))
   # experiment with the multiplier to find the perfect position
 }
 
 # function for mean labels
 mean.n <- function(x) {
-  return(c(y = 4.5, label = round(mean(x)))) 
+  return(c(y = 4.75, label = round(mean(x), 2))) 
   # experiment with the multiplier to find the perfect position
 }
 
@@ -448,6 +449,8 @@ cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.",
 minimum_distance_metrics_slice_averages <- data.frame(AMD = apply(average_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE),
                                                       LQMD = apply(lower_quantile_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE),
                                                       AS_5_PMD = apply(average_shortest_5_percent_minimum_distance_within_slices_df, 2, mean, na.rm = TRUE))
+setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated")
+df <- readRDS("CRC1_df.rds")
 minimum_distance_metrics_slice_averages$log_n_cells <- log(as.numeric(table(df$Cell.Type.Specific)[cell_types]), 2)
 minimum_distance_metrics_slice_averages$Cell.Type <- rownames(minimum_distance_metrics_slice_averages)
 

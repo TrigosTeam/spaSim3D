@@ -32,7 +32,7 @@ bg_metadata <- spe_metadata_background_template("random")
 
 # Change background metadata
 bg_metadata$background$minimum_distance_between_cells <- 0
-bg_metadata$background$n_cells <- 15000
+bg_metadata$background$n_cells <- 10000
 
 # Cluster metadata (using background metadata as background)
 cluster_metadata <- spe_metadata_cluster_template(bg_metadata, "regular", "Sphere")

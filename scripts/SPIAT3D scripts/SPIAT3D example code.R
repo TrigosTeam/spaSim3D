@@ -122,7 +122,7 @@ entropy_gradient <- calculate_entropy_gradient3D(spe1,
 ### calculate entropy grid metrics
 entropy_grid_metrics <- calculate_entropy_grid_metrics3D(spe1,
                                                          n_splits = 8,
-                                                         cell_types_of_interest = c("Tumour", "Immune"),
+                                                         cell_types_of_interest = c("Tumour", "Immune", "Immune1"),
                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(entropy_grid_metrics, "entropy")
 
