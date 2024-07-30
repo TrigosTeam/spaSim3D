@@ -36,16 +36,16 @@ calculate_cell_proportion_grid_metrics3D <- function(spe,
   
   # Fill in the result data frame
   if (length(reference_cell_types) == 1) {
-    result$reference <- grid_prism_cell_matrix[reference_cell_types, ]
+    result$reference <- grid_prism_cell_matrix[[reference_cell_types]]
   }
   else {
-    result$reference <- rowSums(grid_prism_cell_matrix[reference_cell_types, ])
+    result$reference <- rowSums(grid_prism_cell_matrix[ , reference_cell_types])
   }
   if (length(target_cell_types) == 1) {
-    result$target <- grid_prism_cell_matrix[target_cell_types, ]
+    result$target <- grid_prism_cell_matrix[[target_cell_types]]
   }
   else {
-    result$target <- rowSums(grid_prism_cell_matrix[target_cell_types, ])
+    result$target <- rowSums(grid_prism_cell_matrix[ , target_cell_types])
   }
   result$total <- result$reference + result$target
   result$proportion <- result$target / result$total

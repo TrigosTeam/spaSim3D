@@ -24,13 +24,19 @@ calculate_entropy_grid_metrics3D <- function(spe,
   result <- data.frame(row.names = seq(n_grid_prisms))
   
   for (cell_type in cell_types_of_interest) {
-    result[[cell_type]] <- grid_prism_cell_matrix[cell_type, ]
+    result[[cell_type]] <- grid_prism_cell_matrix[[cell_type]]
   }
   result$total <- rowSums(result)
   
+  ## Get data frame containing proportions for cell_types_of_interest
   df_props <- result[ , cell_types_of_interest] / result$total
-  result$entropy <- -1 * rowSums(df_props * log(df_props, length(cell_types_of_interest)))
-  result[apply(df_props, 1, function(x) 1 %in% x), "entropy"] <- 0
+  
+  ## Use proportion data frame to get entropy
+  calculate_entropy <- function(x) {
+    entropy <- -1 * sum(x * ifelse(is.infinite(log(x, length(x))), 0, log(x, length(x))))
+    return(entropy)
+  }
+  result$entropy <- apply(df_props, 1, calculate_entropy)
   
   # Add grid_prism_coordinates info to result
   result <- cbind(result, spe@metadata$grid_metrics$grid_prism_coordinates)

@@ -233,17 +233,17 @@ for (i in seq(n_mixed_spes)) {
   
   # Get proportion grid metrics
   for (j in seq_len(nrow(prop_cell_types))) {
-    proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(mixed_spe, 
+    proportion_grid_metrics <- calculate_cell_proportion_grid_metrics3D(mixed_spe, 
                                                                         n_splits,
                                                                         strsplit(prop_cell_types$ref[j], ",")[[1]], 
                                                                         strsplit(prop_cell_types$tar[j], ",")[[1]],
                                                                         plot_image = F)
     
-    proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
+    proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                           "proportion",
                                                           "binary")
     
-    proportion_prevalence_df <- determine_prevalence_gradient3D(proportion_grid_metrics,
+    proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
                                                                 show_AUC = T,
                                                                 plot_image = F)
@@ -258,16 +258,16 @@ for (i in seq(n_mixed_spes)) {
   
   # Get entropy grid metrics
   for (j in seq_len(nrow(entropy_cell_types))) {
-    entropy_grid_metrics <- determine_entropy_grid_metrics3D(mixed_spe, 
+    entropy_grid_metrics <- calculate_entropy_grid_metrics3D(mixed_spe, 
                                                              n_splits,
                                                              strsplit(entropy_cell_types$cell_types[j], ",")[[1]], 
                                                              plot_image = F)
     
-    entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics, 
+    entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                        "entropy",
                                                        "binary")
     
-    entropy_prevalence_df <- determine_prevalence_gradient3D(entropy_grid_metrics,
+    entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                              "entropy",
                                                              show_AUC = T,
                                                              plot_image = F)
@@ -522,17 +522,17 @@ for (i in seq(n_ringed_spes)) {
   
   # Get proportion grid metrics
   for (j in seq_len(nrow(prop_cell_types))) {
-    proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(ringed_spe, 
+    proportion_grid_metrics <- calculate_cell_proportion_grid_metrics3D(ringed_spe, 
                                                                         n_splits,
                                                                         strsplit(prop_cell_types$ref[j], ",")[[1]], 
                                                                         strsplit(prop_cell_types$tar[j], ",")[[1]],
                                                                         plot_image = F)
     
-    proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
+    proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                           "proportion",
                                                           "binary")
     
-    proportion_prevalence_df <- determine_prevalence_gradient3D(proportion_grid_metrics,
+    proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
                                                                 show_AUC = T,
                                                                 plot_image = F)
@@ -547,16 +547,16 @@ for (i in seq(n_ringed_spes)) {
   
   # Get entropy grid metrics
   for (j in seq_len(nrow(entropy_cell_types))) {
-    entropy_grid_metrics <- determine_entropy_grid_metrics3D(ringed_spe, 
+    entropy_grid_metrics <- calculate_entropy_grid_metrics3D(ringed_spe, 
                                                              n_splits,
                                                              strsplit(entropy_cell_types$cell_types[j], ",")[[1]], 
                                                              plot_image = F)
     
-    entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics, 
+    entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                        "entropy",
                                                        "binary")
     
-    entropy_prevalence_df <- determine_prevalence_gradient3D(entropy_grid_metrics,
+    entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                              "entropy",
                                                              show_AUC = T,
                                                              plot_image = F)
@@ -819,17 +819,17 @@ for (i in seq(n_separated_spes)) {
   
   # Get proportion grid metrics
   for (j in seq_len(nrow(prop_cell_types))) {
-    proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(separated_spe, 
+    proportion_grid_metrics <- calculate_cell_proportion_grid_metrics3D(separated_spe, 
                                                                         n_splits,
                                                                         strsplit(prop_cell_types$ref[j], ",")[[1]], 
                                                                         strsplit(prop_cell_types$tar[j], ",")[[1]],
                                                                         plot_image = F)
     
-    proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
+    proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                           "proportion",
                                                           "binary")
     
-    proportion_prevalence_df <- determine_prevalence_gradient3D(proportion_grid_metrics,
+    proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
                                                                 show_AUC = T,
                                                                 plot_image = F)
@@ -844,16 +844,16 @@ for (i in seq(n_separated_spes)) {
   
   # Get entropy grid metrics
   for (j in seq_len(nrow(entropy_cell_types))) {
-    entropy_grid_metrics <- determine_entropy_grid_metrics3D(separated_spe, 
+    entropy_grid_metrics <- calculate_entropy_grid_metrics3D(separated_spe, 
                                                              n_splits,
                                                              strsplit(entropy_cell_types$cell_types[j], ",")[[1]], 
                                                              plot_image = F)
     
-    entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics, 
+    entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                        "entropy",
                                                        "binary")
     
-    entropy_prevalence_df <- determine_prevalence_gradient3D(entropy_grid_metrics,
+    entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                              "entropy",
                                                              show_AUC = T,
                                                              plot_image = F)
@@ -1074,17 +1074,17 @@ colnames(bg_entropy_prevalence_df) <- bg_entropy_prevalence_df_colnames
 
 # Get proportion grid metrics
 for (i in seq_len(nrow(prop_cell_types))) {
-  proportion_grid_metrics <- determine_cell_proportion_grid_metrics3D(bg_spe_A_B, 
+  proportion_grid_metrics <- calculate_cell_proportion_grid_metrics3D(bg_spe_A_B, 
                                                                       n_splits,
                                                                       strsplit(prop_cell_types$ref[i], ",")[[1]], 
                                                                       strsplit(prop_cell_types$tar[i], ",")[[1]],
                                                                       plot_image = F)
   
-  proportion_SAC <- determine_spatial_autocorrelation3D(proportion_grid_metrics, 
+  proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                         "proportion",
                                                         "binary")
   
-  proportion_prevalence_df <- determine_prevalence_gradient3D(proportion_grid_metrics,
+  proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                               "proportion",
                                                               show_AUC = T,
                                                               plot_image = F)
@@ -1098,16 +1098,16 @@ for (i in seq_len(nrow(prop_cell_types))) {
 
 # Get entropy grid metrics
 for (i in seq_len(nrow(entropy_cell_types))) {
-  entropy_grid_metrics <- determine_entropy_grid_metrics3D(bg_spe_A_B, 
+  entropy_grid_metrics <- calculate_entropy_grid_metrics3D(bg_spe_A_B, 
                                                            n_splits,
                                                            strsplit(entropy_cell_types$cell_types[i], ",")[[1]], 
                                                            plot_image = F)
   
-  entropy_SAC <- determine_spatial_autocorrelation3D(entropy_grid_metrics, 
+  entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                      "entropy",
                                                      "binary")
   
-  entropy_prevalence_df <- determine_prevalence_gradient3D(entropy_grid_metrics,
+  entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                            "entropy",
                                                            show_AUC = T,
                                                            plot_image = F)
