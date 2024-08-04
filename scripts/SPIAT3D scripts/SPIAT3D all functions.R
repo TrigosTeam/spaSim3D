@@ -179,7 +179,7 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
   
   # Plot
   if (plot_image) {
-    fig <- plot_cell_distances_violin3D(result)
+    fig <- plot_distances_between_cell_types_violin3D(result)
     methods::show(fig)
   }
   
@@ -288,7 +288,7 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
   
   # Plot
   if (plot_image) {
-    fig <- plot_cell_distances_violin3D(result)
+    fig <- plot_distances_between_cell_types_violin3D(result)
     methods::show(fig)
   }
   
@@ -584,11 +584,6 @@ calculate_cells_in_neighbourhood3D <- function(spe,
 
 
 
-
-
-
-
-
 summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_df) {
   
   ## Target cell types will be all the columns except the first column
@@ -653,10 +648,6 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
   
   return(result)
 }
-
-
-
-
 
 
 

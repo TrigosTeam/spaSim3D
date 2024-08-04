@@ -97,7 +97,7 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
   
   # Plot
   if (plot_image) {
-    fig <- plot_cell_distances_violin3D(result)
+    fig <- plot_distances_between_cell_types_violin3D(result)
     methods::show(fig)
   }
   
