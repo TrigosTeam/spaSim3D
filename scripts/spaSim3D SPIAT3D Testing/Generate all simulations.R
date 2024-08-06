@@ -337,7 +337,7 @@ for (bg_type in bg_types) {
   }
 }
 
-setwd("~Objects/spes_table")
+setwd("~/Objects/spes_table")
 # write.table(separated_spes_table, "separated_spes_table.csv")
 
 
@@ -369,7 +369,7 @@ clusterA_cell_props <- c(1)
 clusterB_cell_types <- c("B")
 clusterB_cell_props <- c(1)
 
-### Generate metadata for ringed simulations
+### Generate metadata for separated simulations
 
 # Get background data
 setwd("~/Objects/spes_metadata")
@@ -398,12 +398,12 @@ for (i in seq(nrow(separated_spes_table))) {
   centre_locB <- c(centre_x_loc[arrangement, "clusterB"], 50, 50)
   
   # Get metadata template for current simulation parameters for both clusters
-  curr_metadata <- spe_metadata_cluster_template(bg_spe_metadata, "regular", shape)
+  curr_metadata <- spe_metadata_cluster_template(bg_spe_metadata, "regular", shapeA)
   curr_metadata$cluster_1$cluster_cell_types <- clusterA_cell_types
   curr_metadata$cluster_1$cluster_cell_proportions <- clusterA_cell_props
   curr_metadata$cluster_1$centre_loc <- centre_locA
   
-  curr_metadata <- spe_metadata_cluster_template(curr_metadata, "regular", shape)
+  curr_metadata <- spe_metadata_cluster_template(curr_metadata, "regular", shapeB)
   curr_metadata$cluster_2$cluster_cell_types <- clusterB_cell_types
   curr_metadata$cluster_2$cluster_cell_proportions <- clusterB_cell_props
   curr_metadata$cluster_2$centre_loc <- centre_locB
@@ -455,7 +455,8 @@ for (i in seq(nrow(separated_spes_table))) {
   }
   separated_spes_metadata[[i]] <- curr_metadata
 }
-
+setwd("~/Objects/spes_metadata")
+# saveRDS(separated_spes_metadata, "separated_spes_metadata.rds")
 
 ## 3.1. Simulate mixed clusters from metadata --------------------------------
 setwd("~/Objects/spes_metadata")
