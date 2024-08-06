@@ -15,7 +15,7 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
@@ -28,7 +28,7 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   if (sum(inner_ring_cell_proportions < 0 | inner_ring_cell_proportions > 1) != 0) stop("Inner ring cell proportions cannot be negative or greater than 1")
   
   ## Check inner ring cell proportions add up to 1
-  if (sum(inner_ring_cell_proportions) != 1) stop("Sum of inner ring cell proportions is NOT 1")
+  if (!all.equal(sum(inner_ring_cell_proportions), 1)) stop("Sum of inner ring cell proportions is NOT 1")
   
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
@@ -41,7 +41,7 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   if (sum(outer_ring_cell_proportions < 0 | outer_ring_cell_proportions > 1) != 0) stop("Outer ring cell proportions cannot be negative or greater than 1")
   
   ## Check outer ring cell proportions add up to 1
-  if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
+  if (!all.equal(sum(outer_ring_cell_proportions), 1)) stop("Sum of outer ring cell proportions is NOT 1")
   
   # Rotation angles
   theta <- dr_properties$y_z_rotation * (pi/180) # rotation in x-axis

@@ -360,7 +360,7 @@ simulate_mixing3D <- function(bg_spe,
   if (sum(cell_proportions < 0 | cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   
   bg_spe[["Cell.Type"]] <- sample(cell_types, size = ncol(bg_spe), replace = TRUE, prob = cell_proportions)
@@ -532,7 +532,7 @@ simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   ## Change cell types in the sphere cluster
   spe_coords <- data.frame(spatialCoords(bg_spe))
@@ -565,7 +565,7 @@ simulate_sphere_ring <- function(bg_spe, ring_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
@@ -578,7 +578,7 @@ simulate_sphere_ring <- function(bg_spe, ring_properties) {
   if (sum(ring_cell_proportions < 0 | ring_cell_proportions > 1) != 0) stop("Ring cell proportions cannot be negative or greater than 1")
   
   ## Check ring cell proportions add up to 1
-  if (sum(ring_cell_proportions) != 1) stop("Sum of ring cell proportions is NOT 1")
+  if (!all.equal(sum(ring_cell_proportions), 1)) stop("Sum of ring cell proportions is NOT 1")
   
   ## Change cell types in the sphere ringed cluster
   spe_coords <- data.frame(spatialCoords(bg_spe))
@@ -619,7 +619,7 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
@@ -632,7 +632,7 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
   if (sum(inner_ring_cell_proportions < 0 | inner_ring_cell_proportions > 1) != 0) stop("Inner ring cell proportions cannot be negative or greater than 1")
   
   ## Check inner ring cell proportions add up to 1
-  if (sum(inner_ring_cell_proportions) != 1) stop("Sum of inner ring cell proportions is NOT 1")
+  if (!all.equal(sum(inner_ring_cell_proportions), 1)) stop("Sum of inner ring cell proportions is NOT 1")
   
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
@@ -645,7 +645,7 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
   if (sum(outer_ring_cell_proportions < 0 | outer_ring_cell_proportions > 1) != 0) stop("Outer ring cell proportions cannot be negative or greater than 1")
   
   ## Check outer ring cell proportions add up to 1
-  if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
+  if (!all.equal(sum(outer_ring_cell_proportions), 1)) stop("Sum of outer ring cell proportions is NOT 1")
   
   ## Change cell types in the sphere ringed cluster
   spe_coords <- data.frame(spatialCoords(bg_spe))
@@ -698,7 +698,7 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   
   # Rotation angles
@@ -764,7 +764,7 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
@@ -777,7 +777,7 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   if (sum(ring_cell_proportions < 0 | ring_cell_proportions > 1) != 0) stop("Ring cell proportions cannot be negative or greater than 1")
   
   ## Check ring cell proportions add up to 1
-  if (sum(ring_cell_proportions) != 1) stop("Sum of ring cell proportions is NOT 1")
+  if (!all.equal(sum(ring_cell_proportions), 1)) stop("Sum of ring cell proportions is NOT 1")
   
   # Rotation angles
   theta <- ring_properties$y_z_rotation * (pi/180) # rotation in x-axis
@@ -853,7 +853,7 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
@@ -866,7 +866,7 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   if (sum(inner_ring_cell_proportions < 0 | inner_ring_cell_proportions > 1) != 0) stop("Inner ring cell proportions cannot be negative or greater than 1")
   
   ## Check inner ring cell proportions add up to 1
-  if (sum(inner_ring_cell_proportions) != 1) stop("Sum of inner ring cell proportions is NOT 1")
+  if (!all.equal(sum(inner_ring_cell_proportions), 1)) stop("Sum of inner ring cell proportions is NOT 1")
   
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
@@ -879,7 +879,7 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   if (sum(outer_ring_cell_proportions < 0 | outer_ring_cell_proportions > 1) != 0) stop("Outer ring cell proportions cannot be negative or greater than 1")
   
   ## Check outer ring cell proportions add up to 1
-  if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
+  if (!all.equal(sum(outer_ring_cell_proportions), 1)) stop("Sum of outer ring cell proportions is NOT 1")
   
   # Rotation angles
   theta <- dr_properties$y_z_rotation * (pi/180) # rotation in x-axis
@@ -962,7 +962,7 @@ simulate_cylinder_cluster <- function(bg_spe, cluster_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1.")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1.")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   ## Check if start and end coordinates of the cylinder are the same
   if (identical(start_loc, end_loc)) warning("Start and end coordinates of the cylinder are the same.")
@@ -1009,7 +1009,7 @@ simulate_cylinder_ring <- function(bg_spe, ring_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
@@ -1022,7 +1022,7 @@ simulate_cylinder_ring <- function(bg_spe, ring_properties) {
   if (sum(ring_cell_proportions < 0 | ring_cell_proportions > 1) != 0) stop("Ring cell proportions cannot be negative or greater than 1")
   
   ## Check ring cell proportions add up to 1
-  if (sum(ring_cell_proportions) != 1) stop("Sum of ring cell proportions is NOT 1")
+  if (!all.equal(sum(ring_cell_proportions), 1)) stop("Sum of ring cell proportions is NOT 1")
   
   ## Check if start and end coordinates of the cylinder are the same
   if (identical(start_loc, end_loc)) warning("Start and end coordinates of the cylinder are the same.")
@@ -1078,7 +1078,7 @@ simulate_cylinder_dr <- function(bg_spe, dr_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
@@ -1091,7 +1091,7 @@ simulate_cylinder_dr <- function(bg_spe, dr_properties) {
   if (sum(inner_ring_cell_proportions < 0 | inner_ring_cell_proportions > 1) != 0) stop("Inner ring cell proportions cannot be negative or greater than 1")
   
   ## Check inner ring cell proportions add up to 1
-  if (sum(inner_ring_cell_proportions) != 1) stop("Sum of inner ring cell proportions is NOT 1")
+  if (!all.equal(sum(inner_ring_cell_proportions), 1)) stop("Sum of inner ring cell proportions is NOT 1")
   
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
@@ -1104,7 +1104,7 @@ simulate_cylinder_dr <- function(bg_spe, dr_properties) {
   if (sum(outer_ring_cell_proportions < 0 | outer_ring_cell_proportions > 1) != 0) stop("Outer ring cell proportions cannot be negative or greater than 1")
   
   ## Check outer ring cell proportions add up to 1
-  if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
+  if (!all.equal(sum(outer_ring_cell_proportions), 1)) stop("Sum of outer ring cell proportions is NOT 1")
   
   ## Check if start and end coordinates of the cylinder are the same
   if (identical(start_loc, end_loc)) warning("Start and end coordinates of the cylinder are the same.")
@@ -1171,7 +1171,7 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(bg_spe), 
@@ -1309,7 +1309,7 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
@@ -1322,7 +1322,7 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   if (sum(ring_cell_proportions < 0 | ring_cell_proportions > 1) != 0) stop("Ring cell proportions cannot be negative or greater than 1")
   
   ## Check ring cell proportions add up to 1
-  if (sum(ring_cell_proportions) != 1) stop("Sum of ring cell proportions is NOT 1")
+  if (!all.equal(sum(ring_cell_proportions), 1)) stop("Sum of ring cell proportions is NOT 1")
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(bg_spe), 
@@ -1465,7 +1465,7 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
@@ -1478,7 +1478,7 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   if (sum(inner_ring_cell_proportions < 0 | inner_ring_cell_proportions > 1) != 0) stop("Inner ring cell proportions cannot be negative or greater than 1")
   
   ## Check inner ring cell proportions add up to 1
-  if (sum(inner_ring_cell_proportions) != 1) stop("Sum of inner ring cell proportions is NOT 1")
+  if (!all.equal(sum(inner_ring_cell_proportions), 1)) stop("Sum of inner ring cell proportions is NOT 1")
   
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
@@ -1491,7 +1491,7 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   if (sum(outer_ring_cell_proportions < 0 | outer_ring_cell_proportions > 1) != 0) stop("Outer ring cell proportions cannot be negative or greater than 1")
   
   ## Check outer ring cell proportions add up to 1
-  if (sum(outer_ring_cell_proportions) != 1) stop("Sum of outer ring cell proportions is NOT 1")
+  if (!all.equal(sum(outer_ring_cell_proportions), 1)) stop("Sum of outer ring cell proportions is NOT 1")
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(bg_spe), 

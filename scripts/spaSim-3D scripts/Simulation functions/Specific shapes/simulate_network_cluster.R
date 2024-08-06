@@ -15,7 +15,7 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cluster_cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(bg_spe), 

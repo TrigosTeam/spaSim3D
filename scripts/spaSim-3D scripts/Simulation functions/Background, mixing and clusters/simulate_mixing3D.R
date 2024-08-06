@@ -12,7 +12,7 @@ simulate_mixing3D <- function(bg_spe,
   if (sum(cell_proportions < 0 | cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
   
   ## Check cell proportions add up to 1
-  if (sum(cell_proportions) != 1) stop("Sum of cell proportions is NOT 1")
+  if (!all.equal(sum(cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   
   bg_spe[["Cell.Type"]] <- sample(cell_types, size = ncol(bg_spe), replace = TRUE, prob = cell_proportions)
