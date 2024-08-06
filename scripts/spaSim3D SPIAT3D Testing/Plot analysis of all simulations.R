@@ -1,5 +1,8 @@
 library(cowplot)
 library(ggplot2)
+mixed_arrangements <- c("M1", "M2", "M3")
+ringed_arrangements <- c("R1", "R2", "R3")
+separated_arrangements <- c("S1", "S2", "S3")
 
 ### 1.1.1. Function to get plot for APD ----------------------------------------
 ### 1.1.2. Function to get plot for AMD -------------------------------------
@@ -891,7 +894,7 @@ mixed_AMD_df <- read.table("mixed_AMD_df.csv")
 setwd("~/Objects/background_spe")
 bg_AMD_df <- read.table("bg_AMD_df.csv")
 
-mixed_AMD_plot <- plot_AMD_metric(mixed_spes_table, mixed_AMD_df, bg_AMD_df, c("M1", "M2", "M3"))
+mixed_AMD_plot <- plot_AMD_metric(mixed_spes_table, mixed_AMD_df, bg_AMD_df, mixed_arrangements)
 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS(mixed_AMD_plot, "mixed_AMD_plot.rds")
@@ -919,10 +922,10 @@ bg_NMS_df <- read.table("bg_NMS_df.csv")
 bg_ACINP_df <- read.table("bg_ACINP_df.csv")
 bg_AE_df <- read.table("bg_AE_df.csv")
 
-mixed_MS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_MS_df, bg_MS_df, "MS", c("M1", "M2", "M3"))
-mixed_NMS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_NMS_df, bg_NMS_df, "NMS", c("M1", "M2", "M3"))
-mixed_ACINP_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_ACINP_df, bg_ACINP_df, "ACINP", c("M1", "M2", "M3"))
-mixed_AE_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_AE_df, bg_AE_df, "AE", c("M1", "M2", "M3"))
+mixed_MS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_MS_df, bg_MS_df, "MS", mixed_arrangements)
+mixed_NMS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_NMS_df, bg_NMS_df, "NMS", mixed_arrangements)
+mixed_ACINP_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_ACINP_df, bg_ACINP_df, "ACINP", mixed_arrangements)
+mixed_AE_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_AE_df, bg_AE_df, "AE", mixed_arrangements)
 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS()
@@ -944,9 +947,9 @@ bg_ACIN_df <- read.table("bg_ACIN_df.csv")
 bg_CKR_df <- read.table("bg_CKR_df.csv")
 
 # Get plots
-mixed_ACIN_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_ACIN_df, bg_ACIN_df, "ACIN", c("M1", "M2", "M3"), 0, 50)
+mixed_ACIN_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_ACIN_df, bg_ACIN_df, "ACIN", mixed_arrangements, 0, 50)
 
-mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, bg_CKR_df, "CKR", c("M1", "M2", "M3"), 15, 50)
+mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, bg_CKR_df, "CKR", mixed_arrangements, 15, 50)
 
 
 ### 2.5. Mixed spes SAC ------------------------------------------------------
@@ -965,8 +968,8 @@ setwd("~/Objects/background_spe")
 bg_prop_SAC_df <- read.table("bg_prop_SAC_df.csv")
 bg_entropy_SAC_df <- read.table("bg_entropy_SAC_df.csv")
 
-mixed_prop_SAC_plot <- plot_proportion_SAC(mixed_spes_table, mixed_prop_SAC_df, bg_prop_SAC_df, c("M1", "M2", "M3"))
-mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_df, bg_entropy_SAC_df, c("M1", "M2", "M3"))
+mixed_prop_SAC_plot <- plot_proportion_SAC(mixed_spes_table, mixed_prop_SAC_df, bg_prop_SAC_df, mixed_arrangements)
+mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_df, bg_entropy_SAC_df, mixed_arrangements)
 
 # setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS(mixed_SAC_plot, "mixed_SAC_plot.rds")
@@ -987,11 +990,11 @@ setwd("~/Objects/background_spe")
 bg_prop_prevalence_df <- read.table("bg_prop_prevalence_df.csv")
 bg_entropy_prevalence_df <- read.table("bg_entropy_prevalence_df.csv")
 
-mixed_prop_prevalence_plot <- plot_proportion_prevalence(mixed_spes_table, mixed_prop_prevalence_df, bg_prop_prevalence_df, c("M1", "M2", "M3"))
-mixed_entropy_prevalence_plot <- plot_entropy_prevalence(mixed_spes_table, mixed_entropy_prevalence_df, bg_entropy_prevalence_df, c("M1", "M2", "M3"))
+mixed_prop_prevalence_plot <- plot_proportion_prevalence(mixed_spes_table, mixed_prop_prevalence_df, bg_prop_prevalence_df, mixed_arrangements)
+mixed_entropy_prevalence_plot <- plot_entropy_prevalence(mixed_spes_table, mixed_entropy_prevalence_df, bg_entropy_prevalence_df, mixed_arrangements)
 
-mixed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(mixed_spes_table, mixed_prop_prevalence_df, bg_prop_prevalence_df, c("M1", "M2", "M3"))
-mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_table, mixed_entropy_prevalence_df, bg_entropy_prevalence_df, c("M1", "M2", "M3"))
+mixed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(mixed_spes_table, mixed_prop_prevalence_df, bg_prop_prevalence_df, mixed_arrangements)
+mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_table, mixed_entropy_prevalence_df, bg_entropy_prevalence_df, mixed_arrangements)
 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS(mixed_prevalence_plot, "mixed_prevalence_plot.rds")
@@ -1012,7 +1015,7 @@ ringed_AMD_df <- read.table("ringed_AMD_df.csv")
 setwd("~/Objects/background_spe")
 bg_AMD_df <- read.table("bg_AMD_df.csv")
 
-ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, bg_AMD_df, c("M1", "M2", "M3"))
+ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, bg_AMD_df, ringed_arrangements)
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_AMD_plot, "ringed_AMD_plot.rds")
@@ -1040,10 +1043,10 @@ bg_NMS_df <- read.table("bg_NMS_df.csv")
 bg_ACINP_df <- read.table("bg_ACINP_df.csv")
 bg_AE_df <- read.table("bg_AE_df.csv")
 
-ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, bg_MS_df, "MS", c("M1", "M2", "M3"))
-ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, bg_NMS_df, "NMS", c("M1", "M2", "M3"))
-ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, bg_ACINP_df, "ACINP", c("M1", "M2", "M3"))
-ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, bg_AE_df, "AE", c("M1", "M2", "M3"))
+ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, bg_MS_df, "MS", ringed_arrangements)
+ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, bg_NMS_df, "NMS", ringed_arrangements)
+ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, bg_ACINP_df, "ACINP", ringed_arrangements)
+ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, bg_AE_df, "AE", ringed_arrangements)
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS()
@@ -1065,9 +1068,9 @@ bg_ACIN_df <- read.table("bg_ACIN_df.csv")
 bg_CKR_df <- read.table("bg_CKR_df.csv")
 
 # Get plots
-ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, bg_ACIN_df, "ACIN", c("M1", "M2", "M3"), 0, 50)
+ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, bg_ACIN_df, "ACIN", ringed_arrangements, 0, 50)
 
-ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, bg_CKR_df, "CKR", c("M1", "M2", "M3"), 15, 50)
+ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, bg_CKR_df, "CKR", ringed_arrangements, 15, 50)
 
 
 ### 2.5. Ringed spes SAC ------------------------------------------------------
@@ -1086,8 +1089,8 @@ setwd("~/Objects/background_spe")
 bg_prop_SAC_df <- read.table("bg_prop_SAC_df.csv")
 bg_entropy_SAC_df <- read.table("bg_entropy_SAC_df.csv")
 
-ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, bg_prop_SAC_df, c("R1", "R2", "R3"))
-ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, bg_entropy_SAC_df, c("R1", "R2", "R3"))
+ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, bg_prop_SAC_df, ringed_arrangements)
+ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, bg_entropy_SAC_df, ringed_arrangements)
 
 # setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
@@ -1129,6 +1132,9 @@ separated_spes_table <- read.table("separated_spes_table.csv")
 setwd("~/Objects/separated_spes/analysis_3D")
 separated_AMD_df <- read.table("separated_AMD_df.csv")
 
+# Read bg_AMD_df
+setwd("~/Objects/background_spe")
+bg_AMD_df <- read.table("bg_AMD_df.csv")
 
 # Plot when shapes and sizes are the same
 separated_spes_table_subset <- separated_spes_table[separated_spes_table$shapeA == separated_spes_table$shapeB &
@@ -1139,10 +1145,8 @@ colnames(separated_spes_table_subset) <- c("bg_type", "shape", "size", "arrangem
 separated_AMD_df_subset <- separated_AMD_df[separated_AMD_df$spe %in% paste("separated_spe_", rownames(separated_spes_table_subset), sep = ""), ]
 
 
-separated_AMD_plot <- plot_AMD_metric(separated_spes_table_subset, separated_AMD_df_subset, c("S1", "S2", "S3"))
+separated_AMD_plot <- plot_AMD_metric(separated_spes_table_subset, separated_AMD_df_subset, bg_AMD_df, separated_arrangements)
 
 setwd("~/Objects/separated_spes/analysis_3D/plots")
-saveRDS(separated_AMD_plot, "separated_AMD_plot.rds")
-
-
+# saveRDS(separated_AMD_plot, "separated_AMD_plot.rds")
 
