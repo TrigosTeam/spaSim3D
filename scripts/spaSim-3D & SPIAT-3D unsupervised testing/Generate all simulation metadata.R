@@ -110,3 +110,9 @@ separated_spes_table$width_N_B <- ifelse(separated_spes_table$shape_B == "Networ
 
 separated_spes_table$centre_x_coord_A <- runif(n_separated_simulations, centre_x_coord_A_range["min"], centre_x_coord_A_range["max"])
 separated_spes_table$centre_x_coord_B <- 200 - separated_spes_table$centre_x_coord_A # Where 200 is the 'length' of the separated window
+
+### 5. Save tables
+setwd("~/Objects/unsupervised/spes_table")
+write.table(mixed_spes_table, "mixed_spes_table_unsupervised.csv")
+write.table(ringed_spes_table, "ringed_spes_table_unsupervised.csv")
+write.table(separated_spes_table, "separated_spes_table_unsupervised.csv")
