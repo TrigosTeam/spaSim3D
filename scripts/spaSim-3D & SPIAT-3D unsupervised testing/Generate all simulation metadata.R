@@ -1,0 +1,112 @@
+### 1. Set up all parameters -----------------------------------------------
+
+## Background
+bg_prop_A_range <- c("min" = 0, "max" = 0.10)   # bg_prop_A ranges from 0 to 0.1
+bg_prop_A_equals_zero_prob <- 1/3               # Give higher probability of bg_prop_A equals 0
+bg_prop_B_range <- c("min" = 0, "max" = 0.10)   # bg_prop_B ranges from 0 to 0.1
+bg_prop_B_equals_zero_prob <- 1/3               # Give higher probability of bg_prop_B equals 0
+
+# Function to get bg props using bg_prop_range and probability prop equals 0
+get_bg_props <- function(n_simulations, bg_prop_range, bg_prop_equals_zero_prob) {
+  probs <- runif(n_simulations)
+  props <- ifelse(probs <= bg_prop_equals_zero_prob, 0, runif(n_simulations, min = bg_prop_range["min"], max = bg_prop_range["max"]))
+  return(props)
+}
+
+
+## Shapes
+shapes <- c("Sphere", "Ellipsoid", "Network")
+radius_S_range <- c("min" = 25, "max" = 50)
+
+radius_x_E_range <- c("min" = 25, "max" = 50)
+radius_y_E_range <- c("min" = 25, "max" = 50)
+radius_z_E_range <- c("min" = 25, "max" = 50)
+
+radius_N_range <- c("min" = 25, "max" = 50)
+width_N_range <- c("min" = 2, "max" = 8)
+
+
+## Mixed clusters
+cluster_prop_A_range <- c("min" = 0, "max" = 1)   # Proportion of A cells in cluster will range from 0 to 1, proportion of B cells in cluster will be 1 - prop(A)
+
+
+## Ringed clusters
+width_ring_range_factor <- c("min" = 0.1, "max" = 0.2)  # The width of the ring is proportional to the size (radius/width) of the cluster, for an ellipsoid, use the average of the three radii
+
+
+## Separated clusters
+centre_x_coord_A_range <- c("min" = 25, "max" = 75)   # centre_x_coord_B_range = 200 - centre_x_coord_A_range
+
+
+### 2. Generate mixed_spes_table----------------------------------------------
+n_mixed_simulations <- 5000
+mixed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "radius_S", "radius_x_E", "radius_y_E", "radius_z_E", "radius_N", "width_N", "cluster_prop_A", "cluster_prop_B")
+mixed_spes_table <- data.frame(matrix(nrow = n_mixed_simulations, ncol = length(mixed_spes_table_colnames))) 
+colnames(mixed_spes_table) <- mixed_spes_table_colnames
+
+mixed_spes_table$bg_prop_A <- get_bg_props(n_mixed_simulations, bg_prop_A_range, bg_prop_A_equals_zero_prob)
+mixed_spes_table$bg_prop_B <- get_bg_props(n_mixed_simulations, bg_prop_B_range, bg_prop_B_equals_zero_prob)
+
+mixed_spes_table$shape <- sample(shapes, n_mixed_simulations, replace = T)
+mixed_spes_table$radius_S <- ifelse(mixed_spes_table$shape == "Sphere", runif(n_mixed_simulations, radius_S_range["min"], radius_S_range["max"]), NA)
+mixed_spes_table$radius_x_E <- ifelse(mixed_spes_table$shape == "Ellipsoid", runif(n_mixed_simulations, radius_x_E_range["min"], radius_x_E_range["max"]), NA)
+mixed_spes_table$radius_y_E <- ifelse(mixed_spes_table$shape == "Ellipsoid", runif(n_mixed_simulations, radius_y_E_range["min"], radius_y_E_range["max"]), NA)
+mixed_spes_table$radius_z_E <- ifelse(mixed_spes_table$shape == "Ellipsoid", runif(n_mixed_simulations, radius_z_E_range["min"], radius_z_E_range["max"]), NA)
+mixed_spes_table$radius_N <- ifelse(mixed_spes_table$shape == "Network", runif(n_mixed_simulations, radius_N_range["min"], radius_N_range["max"]), NA)
+mixed_spes_table$width_N <- ifelse(mixed_spes_table$shape == "Network", runif(n_mixed_simulations, width_N_range["min"], width_N_range["max"]), NA)
+
+mixed_spes_table$cluster_prop_A <- runif(n_mixed_simulations, cluster_prop_A_range["min"], cluster_prop_A_range["max"])
+mixed_spes_table$cluster_prop_B <- 1 - mixed_spes_table$cluster_prop_A
+
+
+### 3. Generate ringed_spes_table  -------------------------------------
+n_ringed_simulations <- 5000
+ringed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "radius_S", "radius_x_E", "radius_y_E", "radius_z_E", "radius_N", "width_N", "width_ring")
+ringed_spes_table <- data.frame(matrix(nrow = n_ringed_simulations, ncol = length(ringed_spes_table_colnames))) 
+colnames(ringed_spes_table) <- ringed_spes_table_colnames
+
+ringed_spes_table$bg_prop_A <- get_bg_props(n_ringed_simulations, bg_prop_A_range, bg_prop_A_equals_zero_prob)
+ringed_spes_table$bg_prop_B <- get_bg_props(n_ringed_simulations, bg_prop_B_range, bg_prop_B_equals_zero_prob)
+
+ringed_spes_table$shape <- sample(shapes, n_ringed_simulations, replace = T)
+ringed_spes_table$radius_S <- ifelse(ringed_spes_table$shape == "Sphere", runif(n_ringed_simulations, radius_S_range["min"], radius_S_range["max"]), NA)
+ringed_spes_table$radius_x_E <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, radius_x_E_range["min"], radius_x_E_range["max"]), NA)
+ringed_spes_table$radius_y_E <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, radius_y_E_range["min"], radius_y_E_range["max"]), NA)
+ringed_spes_table$radius_z_E <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, radius_z_E_range["min"], radius_z_E_range["max"]), NA)
+ringed_spes_table$radius_N <- ifelse(ringed_spes_table$shape == "Network", runif(n_ringed_simulations, radius_N_range["min"], radius_N_range["max"]), NA)
+ringed_spes_table$width_N <- ifelse(ringed_spes_table$shape == "Network", runif(n_ringed_simulations, width_N_range["min"], width_N_range["max"]), NA)
+
+radius_width_colnames <- c( "radius_S", "radius_x_E", "radius_y_E", "radius_z_E", "width_N") # Ignore radius_N as this refers to the radius spanned by the cluster, not the width of a branch 
+ringed_spes_table$width_ring <- runif(n_ringed_simulations, 
+                                      width_ring_range_factor["min"], width_ring_range_factor["max"]) * apply(ringed_spes_table[, radius_width_colnames], 1, mean, na.rm = T)
+
+
+### 4. Generate separated_spes_table --------------------------------------
+n_separated_simulations <- 5000
+separated_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", 
+                                   "shape_A", "radius_S_A", "radius_x_E_A", "radius_y_E_A", "radius_z_E_A", "radius_N_A", "width_N_A", "centre_x_coord_A",
+                                   "shape_B", "radius_S_B", "radius_x_E_B", "radius_y_E_B", "radius_z_E_B", "radius_N_B", "width_N_B", "centre_x_coord_B")
+separated_spes_table <- data.frame(matrix(nrow = n_separated_simulations, ncol = length(separated_spes_table_colnames))) 
+colnames(separated_spes_table) <- separated_spes_table_colnames
+
+separated_spes_table$bg_prop_A <- get_bg_props(n_separated_simulations, bg_prop_A_range, bg_prop_A_equals_zero_prob)
+separated_spes_table$bg_prop_B <- get_bg_props(n_separated_simulations, bg_prop_B_range, bg_prop_B_equals_zero_prob)
+
+separated_spes_table$shape_A <- sample(shapes, n_separated_simulations, replace = T)
+separated_spes_table$radius_S_A <- ifelse(separated_spes_table$shape_A == "Sphere", runif(n_separated_simulations, radius_S_range["min"], radius_S_range["max"]), NA)
+separated_spes_table$radius_x_E_A <- ifelse(separated_spes_table$shape_A == "Ellipsoid", runif(n_separated_simulations, radius_x_E_range["min"], radius_x_E_range["max"]), NA)
+separated_spes_table$radius_y_E_A <- ifelse(separated_spes_table$shape_A == "Ellipsoid", runif(n_separated_simulations, radius_y_E_range["min"], radius_y_E_range["max"]), NA)
+separated_spes_table$radius_z_E_A <- ifelse(separated_spes_table$shape_A == "Ellipsoid", runif(n_separated_simulations, radius_z_E_range["min"], radius_z_E_range["max"]), NA)
+separated_spes_table$radius_N_A <- ifelse(separated_spes_table$shape_A == "Network", runif(n_separated_simulations, radius_N_range["min"], radius_N_range["max"]), NA)
+separated_spes_table$width_N_A <- ifelse(separated_spes_table$shape_A == "Network", runif(n_separated_simulations, width_N_range["min"], width_N_range["max"]), NA)
+
+separated_spes_table$shape_B <- sample(shapes, n_separated_simulations, replace = T)
+separated_spes_table$radius_S_B <- ifelse(separated_spes_table$shape_B == "Sphere", runif(n_separated_simulations, radius_S_range["min"], radius_S_range["max"]), NA)
+separated_spes_table$radius_x_E_B <- ifelse(separated_spes_table$shape_B == "Ellipsoid", runif(n_separated_simulations, radius_x_E_range["min"], radius_x_E_range["max"]), NA)
+separated_spes_table$radius_y_E_B <- ifelse(separated_spes_table$shape_B == "Ellipsoid", runif(n_separated_simulations, radius_y_E_range["min"], radius_y_E_range["max"]), NA)
+separated_spes_table$radius_z_E_B <- ifelse(separated_spes_table$shape_B == "Ellipsoid", runif(n_separated_simulations, radius_z_E_range["min"], radius_z_E_range["max"]), NA)
+separated_spes_table$radius_N_B <- ifelse(separated_spes_table$shape_B == "Network", runif(n_separated_simulations, radius_N_range["min"], radius_N_range["max"]), NA)
+separated_spes_table$width_N_B <- ifelse(separated_spes_table$shape_B == "Network", runif(n_separated_simulations, width_N_range["min"], width_N_range["max"]), NA)
+
+separated_spes_table$centre_x_coord_A <- runif(n_separated_simulations, centre_x_coord_A_range["min"], centre_x_coord_A_range["max"])
+separated_spes_table$centre_x_coord_B <- 200 - separated_spes_table$centre_x_coord_A # Where 200 is the 'length' of the separated window
