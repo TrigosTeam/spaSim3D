@@ -464,3 +464,53 @@ ggplot(plot_df, aes(Cell.Type, value, color = Cell.Type)) +
   scale_color_discrete(name = "cell type") +
   theme_bw()
 
+
+### Plot violin plots for minimum distances between cell types ----------------------
+
+# Read minimum distance df for all slices COMBINED
+setwd("~/Lin et al - human colorectal cancer/objects/minimum_distances_data")
+minimum_distances_within_slices_specific_df <- readRDS("minimum_distances_within_slices_specific_df.rds")
+minimum_distances_within_slices_specific_df <- minimum_distances_within_slices_specific_df[ , c("ref_cell_type", "distance", "slice_z_coord")]
+
+# Get each cell type
+cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.", 
+                "Endothelial", "Muscle/Fibroblast", "Macrophage(I)", 
+                "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage",
+                "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",
+                "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg",
+                "B cells") # Excludes "Other cell type
+
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+# Assign color to each cell type
+colors <- gg_color_hue(length(cell_types))
+names(colors) <- cell_types
+
+# Factor df by cell types
+minimum_distances_within_slices_specific_df$ref_cell_type <- factor(minimum_distances_within_slices_specific_df$ref_cell_type, cell_types)
+
+# Get z-coords for each slice
+slice_z_coords <- unique(minimum_distances_within_slices_specific_df$slice_z_coord)
+
+library(ggplot2)
+
+
+# Save plots into pdf
+setwd("~/Lin et al - human colorectal cancer/plots")
+# pdf("minimum_distances_within_slices_specific_violin_plots.pdf")
+for (slice_z_coord in slice_z_coords) {
+  slice_df <- minimum_distances_within_slices_specific_df[minimum_distances_within_slices_specific_df$slice_z_coord == slice_z_coord, ]
+    
+  fig <- ggplot(slice_df, aes(ref_cell_type, distance, col = ref_cell_type, fill = ref_cell_type)) +
+    geom_violin() + 
+    labs(title = paste("slice z-coord:", slice_z_coord, "microns"), x = "") +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
+    facet_wrap(.~ref_cell_type, scales = "free")
+  print(fig)
+    
+}
+dev.off()
