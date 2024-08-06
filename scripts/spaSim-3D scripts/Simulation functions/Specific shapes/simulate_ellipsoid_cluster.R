@@ -46,13 +46,13 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   z <- spe_coords$Cell.Z.Position - centre_loc[3]
   
   # Transform  x, y and z coordinates using rotation transformation matrix
-  x <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
-  y <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
-  z <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
+  x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
+  y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
+  z_new <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
   
-  bg_spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
-                                    (y / y_radius)^2 +
-                                    (z / z_radius)^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x_new / x_radius)^2 +
+                                    (y_new / y_radius)^2 +
+                                    (z_new / z_radius)^2 <= 1,
                                   sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   

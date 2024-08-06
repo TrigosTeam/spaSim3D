@@ -729,13 +729,13 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   z <- spe_coords$Cell.Z.Position - centre_loc[3]
   
   # Transform  x, y and z coordinates using rotation transformation matrix
-  x <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
-  y <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
-  z <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
+  x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
+  y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
+  z_new <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
   
-  bg_spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
-                                    (y / y_radius)^2 +
-                                    (z / z_radius)^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x_new / x_radius)^2 +
+                                    (y_new / y_radius)^2 +
+                                    (z_new / z_radius)^2 <= 1,
                                   sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
@@ -809,22 +809,22 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   z <- spe_coords$Cell.Z.Position - centre_loc[3]
   
   # Transform  x, y and z coordinates using rotation transformation matrix
-  x <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
-  y <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
-  z <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
+  x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
+  y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
+  z_new <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
   
   # Start with cells in ring  
-  bg_spe[["Cell.Type"]] <- ifelse((x / (x_radius + ring_width))^2 +
-                                    (y / (y_radius + ring_width))^2 +
-                                    (z / (z_radius + ring_width))^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x_new / (x_radius + ring_width))^2 +
+                                    (y_new / (y_radius + ring_width))^2 +
+                                    (z_new / (z_radius + ring_width))^2 <= 1,
                                   sample(ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = ring_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
   
   # Then do cells in the cluster  
-  bg_spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
-                                    (y / y_radius)^2 +
-                                    (z / z_radius)^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x_new / x_radius)^2 +
+                                    (y_new / y_radius)^2 +
+                                    (z_new / z_radius)^2 <= 1,
                                   sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
@@ -904,9 +904,9 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   spe_coords <- data.frame(spatialCoords(bg_spe))
   
   # Adjust x, y and z coordinates relative to the ellipsoid centre
-  x <- spe_coords$Cell.X.Position - centre_loc[1]
-  y <- spe_coords$Cell.Y.Position - centre_loc[2]
-  z <- spe_coords$Cell.Z.Position - centre_loc[3]
+  x_new <- spe_coords$Cell.X.Position - centre_loc[1]
+  y_new <- spe_coords$Cell.Y.Position - centre_loc[2]
+  z_new <- spe_coords$Cell.Z.Position - centre_loc[3]
   
   # Transform  x, y and z coordinates using rotation transformation matrix
   x <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
@@ -915,24 +915,24 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   
   
   # Start with cells in outer ring  
-  bg_spe[["Cell.Type"]] <- ifelse((x / (x_radius + inner_ring_width + outer_ring_width))^2 +
-                                    (y / (y_radius + inner_ring_width + outer_ring_width))^2 +
-                                    (z / (z_radius + inner_ring_width + outer_ring_width))^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x_new / (x_radius + inner_ring_width + outer_ring_width))^2 +
+                                    (y_new / (y_radius + inner_ring_width + outer_ring_width))^2 +
+                                    (z_new / (z_radius + inner_ring_width + outer_ring_width))^2 <= 1,
                                   sample(outer_ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = outer_ring_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
   # Then do cells in inner ring  
-  bg_spe[["Cell.Type"]] <- ifelse((x / (x_radius + inner_ring_width))^2 +
-                                    (y / (y_radius + inner_ring_width))^2 +
-                                    (z / (z_radius + inner_ring_width))^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x_new / (x_radius + inner_ring_width))^2 +
+                                    (y_new / (y_radius + inner_ring_width))^2 +
+                                    (z_new / (z_radius + inner_ring_width))^2 <= 1,
                                   sample(inner_ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = inner_ring_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
   
   # Then do cells in the cluster  
-  bg_spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
-                                    (y / y_radius)^2 +
-                                    (z / z_radius)^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x_new / x_radius)^2 +
+                                    (y_new / y_radius)^2 +
+                                    (z_new / z_radius)^2 <= 1,
                                   sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
