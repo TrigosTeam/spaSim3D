@@ -1,6 +1,3 @@
-### Using the scripts found in the "MAIN USER FUNCTIONS" folder
-
-
 ### Using the integrator functions --------------------------------------------
 spe_bg <- spaSim3D_background_integrator()
 
