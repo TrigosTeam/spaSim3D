@@ -5,9 +5,10 @@ calculate_cross_K_gradient3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = 2))
+  result <- data.frame(matrix(nrow = radii, ncol = 3))
   colnames(result) <- c("observed_cross_K", 
-                        "expected_cross_K")
+                        "expected_cross_K",
+                        "cross_K_ratio")
   
   for (radius in seq(radii)) {
     cross_K_df <- calculate_cross_K3D(spe,
@@ -23,7 +24,8 @@ calculate_cross_K_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   if (plot_image) {
-    plot_result <- reshape2::melt(result, "radius", c("observed_cross_K", "expected_cross_K"))
+    plot_result <- reshape2::melt(result, "radius", c("observed_cross_K", "expected_cross_K", "cross_K_ratio"))
+    plot_result <- plot_result[plot_result$variable != "cross_K_ratio", ]
     
     fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
       geom_line() +

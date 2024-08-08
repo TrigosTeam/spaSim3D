@@ -50,7 +50,8 @@ calculate_cross_K3D <- function(spe,
   expected_cross_K <- (4/3) * pi * radius^3
   
   result <- data.frame(observed_cross_K = observed_cross_K,
-                       expected_cross_K = expected_cross_K)
+                       expected_cross_K = expected_cross_K,
+                       cross_K_ratio = observed_cross_K / expected_cross_K)
   
   return(result)
 }

@@ -803,7 +803,8 @@ calculate_cross_K3D <- function(spe,
   expected_cross_K <- (4/3) * pi * radius^3
   
   result <- data.frame(observed_cross_K = observed_cross_K,
-                       expected_cross_K = expected_cross_K)
+                       expected_cross_K = expected_cross_K,
+                       cross_K_ratio = observed_cross_K / expected_cross_K)
   
   return(result)
 }
@@ -899,7 +900,8 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
     fig <- ggplot(plot_result, aes(radius, value, color = variable)) + 
       geom_line() + 
       labs(x = "Radius", y = "Average cells in neighbourhood") + 
-      scale_color_discrete(name = "Cell type")
+      scale_color_discrete(name = "Cell type") +
+      theme_bw()
     
     methods::show(fig)
   }
@@ -958,9 +960,10 @@ calculate_cross_K_gradient3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = 2))
+  result <- data.frame(matrix(nrow = radii, ncol = 3))
   colnames(result) <- c("observed_cross_K", 
-                        "expected_cross_K")
+                        "expected_cross_K",
+                        "cross_K_ratio")
   
   for (radius in seq(radii)) {
     cross_K_df <- calculate_cross_K3D(spe,
@@ -976,7 +979,8 @@ calculate_cross_K_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   if (plot_image) {
-    plot_result <- reshape2::melt(result, "radius", c("observed_cross_K", "expected_cross_K"))
+    plot_result <- reshape2::melt(result, "radius", c("observed_cross_K", "expected_cross_K", "cross_K_ratio"))
+    plot_result <- plot_result[plot_result$variable != "cross_K_ratio", ]
     
     fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
       geom_line() +
@@ -1061,7 +1065,7 @@ calculate_entropy_gradient3D <- function(spe,
 plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_df) {
   
   plot_result <- data.frame(radius = cross_K_gradient_df$radius,
-                            observed_cross_K_gradient_ratio = cross_K_gradient_df$observed_cross_K / cross_K_gradient_df$expected_cross_K,
+                            observed_cross_K_gradient_ratio = cross_K_gradient_df$cross_K_ratio,
                             expected_cross_K_gradient_ratio = 1)
   
   plot_result <- reshape2::melt(plot_result, "radius", c("observed_cross_K_gradient_ratio", "expected_cross_K_gradient_ratio"))

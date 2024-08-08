@@ -53,8 +53,8 @@ neighbourhood_cells <- calculate_cells_in_neighbourhood3D(spe1,
                                                           plot_image = F)
 
 neighbourhood_cells_gradient <- calculate_cells_in_neighbourhood_gradient3D(spe1,
-                                                                            reference_cell_type = "A",
-                                                                            target_cell_types = c("A", "B"),
+                                                                            reference_cell_type = "Tumour",
+                                                                            target_cell_types = c("Tumour", "Immune"),
                                                                             radii = 30,
                                                                             plot_image = T)
 
@@ -85,7 +85,7 @@ cross_K_gradient <- calculate_cross_K_gradient3D(spe1,
                                                  target_cell_type = "Immune",
                                                  radii = 50)
 
-plot_cross_K_gradient_ratio3D(cross_K_gradient_results = cross_K_gradient)
+plot_cross_K_gradient_ratio3D(cross_K_gradient_df = cross_K_gradient)
 
 # Kcross_intersection <- calculate_Kcross_intersection3D(Kcross_results)
 # 

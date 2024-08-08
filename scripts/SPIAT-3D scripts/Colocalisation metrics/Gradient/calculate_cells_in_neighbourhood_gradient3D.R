@@ -29,7 +29,8 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
     fig <- ggplot(plot_result, aes(radius, value, color = variable)) + 
       geom_line() + 
       labs(x = "Radius", y = "Average cells in neighbourhood") + 
-      scale_color_discrete(name = "Cell type")
+      scale_color_discrete(name = "Cell type") +
+      theme_bw()
       
     methods::show(fig)
   }
