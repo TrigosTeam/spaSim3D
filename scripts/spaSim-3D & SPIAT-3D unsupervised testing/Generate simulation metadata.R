@@ -186,9 +186,9 @@ for (i in seq(nrow(mixed_spes_table))) {
     curr_metadata$cluster_1$x_radius <- mixed_spes_table$radius_x_E[i]
     curr_metadata$cluster_1$y_radius <- mixed_spes_table$radius_y_E[i]
     curr_metadata$cluster_1$z_radius <- mixed_spes_table$radius_z_E[i]
-    curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 90)
-    curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 90)
-    curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 90)
+    curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 180)
     
   }
   else if (shape == "Network") {
@@ -245,9 +245,9 @@ for (i in seq(nrow(ringed_spes_table))) {
     curr_metadata$cluster_1$x_radius <- ringed_spes_table$radius_x_E[i]
     curr_metadata$cluster_1$y_radius <- ringed_spes_table$radius_y_E[i]
     curr_metadata$cluster_1$z_radius <- ringed_spes_table$radius_z_E[i]
-    curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 90)
-    curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 90)
-    curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 90)
+    curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 180)
     
   }
   else if (shape == "Network") {
@@ -301,9 +301,9 @@ for (i in seq(nrow(separated_spes_table))) {
     curr_metadata$cluster_1$x_radius <- separated_spes_table$radius_x_E_A[i]
     curr_metadata$cluster_1$y_radius <- separated_spes_table$radius_y_E_A[i]
     curr_metadata$cluster_1$z_radius <- separated_spes_table$radius_z_E_A[i]
-    curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 90)
-    curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 90)
-    curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 90)
+    curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 180)
     
   }
   else if (shape_A == "Network") {
@@ -320,9 +320,9 @@ for (i in seq(nrow(separated_spes_table))) {
     curr_metadata$cluster_2$x_radius <- separated_spes_table$radius_x_E_B[i]
     curr_metadata$cluster_2$y_radius <- separated_spes_table$radius_y_E_B[i]
     curr_metadata$cluster_2$z_radius <- separated_spes_table$radius_z_E_B[i]
-    curr_metadata$cluster_2$x_y_rotation <- runif(1, 0, 90)
-    curr_metadata$cluster_2$x_z_rotation <- runif(1, 0, 90)
-    curr_metadata$cluster_2$y_z_rotation <- runif(1, 0, 90)
+    curr_metadata$cluster_2$x_y_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_2$x_z_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_2$y_z_rotation <- runif(1, 0, 180)
     
   }
   else if (shape_B == "Network") {

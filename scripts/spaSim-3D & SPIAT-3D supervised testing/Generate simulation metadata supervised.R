@@ -24,12 +24,15 @@ for (i in seq(ncol(cell_props))) {
   bg_spes_metadata[[bg_types[i]]] <- bg_meta
 }
 
+# setwd("~/Objects/supervised/spes_metadata")
+# saveRDS(bg_spes_metadata, "bg_spes_metadata_100_100_100.rds")
+
 ## 1.2. Generate the different background cell arrangements metadata for separate cluster arrangements -----------------
 # 200 x 100 x 100, 40000 cells
 
 bg_meta <- spe_metadata_background_template("random")
-bg_meta$background$n_cells <- 40000
-bg_meta$background$length <- 200
+bg_meta$background$n_cells <- 30000
+bg_meta$background$length <- 150
 bg_meta$background$width <- 100
 bg_meta$background$height <- 100
 bg_meta$background$minimum_distance_between_cells <- 0
@@ -50,7 +53,10 @@ for (i in seq(ncol(cell_props))) {
   bg_spes_metadata[[bg_types[i]]] <- bg_meta
 }
 
-## 2.1. Generate metadata for mixed clusters ------------------------------------------
+# setwd("~/Objects/supervised/spes_metadata")
+# saveRDS(bg_spes_metadata, "bg_spes_metadata_150_100_100.rds")
+
+## 2.1. Generate table for mixed clusters ------------------------------------------
 
 # Determine possible values for different parameters
 bg_types <- c("O", "A", "B", "AB")
@@ -82,25 +88,24 @@ for (bg_type in bg_types) {
   }
 }
 
-setwd("~/Objects/spes_table")
+# setwd("~/Objects/supervised/spes_table")
 # write.table(mixed_spes_table, "mixed_spes_table.csv")
 
+### 2.2. Generate metadata for mixed clusters -----------------------
 
 # Define shape parameters based on the size (Small, Medium, Large)
 shape_parameters_list <- list()
 shape_parameters_list[["Sphere"]] <- data.frame(Small = c(20), Medium = c(30), Large = c(40))
 rownames(shape_parameters_list[["Sphere"]]) <- c("radius")
-shape_parameters_list[["Ellipsoid"]] <- data.frame(Small = c(25, 20, 15), Medium = c(37.5, 30, 22.5), Large = c(50, 40, 30))
+shape_parameters_list[["Ellipsoid"]] <- data.frame(Small = c(20, 25, 15), Medium = c(30, 35, 25), Large = c(40, 45, 35))
 rownames(shape_parameters_list[["Ellipsoid"]]) <- c("x_radius", "y_radius", "z_radius")
-shape_parameters_list[["Network"]] <- data.frame(Small = c(3, 30), Medium = c(6, 40), Large = c(9, 50))
-rownames(shape_parameters_list[["Network"]]) <- c("width", "radius")
+shape_parameters_list[["Network"]] <- data.frame(Small = c(5), Medium = c(7.5), Large = c(10))
+rownames(shape_parameters_list[["Network"]]) <- c("width")
 
 
 # Define constant shape parameters (constant regardless of size)
 centre_loc <- c(50, 50, 50)
-ellipsoid_x_y_rotation <- 0
-ellipsoid_x_z_rotation <- 0
-ellipsoid_y_z_rotation <- 0
+network_radius <- 40
 network_n_edges <- 15
 cell_types <- c("A", "B")
 
@@ -113,11 +118,11 @@ mixing_props <- data.frame(A = c(0.9, 0.7, 0.5),
 rownames(mixing_props) <- c("M1", "M2", "M3")
 
 # Get background data
-setwd("~/Objects/spes_metadata")
+setwd("~/Objects/supervised/spes_metadata")
 bg_spes_metadata <- readRDS("bg_spes_metadata_100_100_100.rds")
 
 # Get table for mixed simulations
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
 
 mixed_spes_metadata <- list()
@@ -153,15 +158,15 @@ for (i in seq(nrow(mixed_spes_table))) {
     curr_metadata$cluster_1$x_radius <- shape_parameters["x_radius", size]
     curr_metadata$cluster_1$y_radius <- shape_parameters["y_radius", size]
     curr_metadata$cluster_1$z_radius <- shape_parameters["z_radius", size]
-    curr_metadata$cluster_1$x_y_rotation <- ellipsoid_x_y_rotation
-    curr_metadata$cluster_1$x_z_rotation <- ellipsoid_x_z_rotation
-    curr_metadata$cluster_1$y_z_rotation <- ellipsoid_y_z_rotation
+    curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 180)
     
   }
   else if (shape == "Network") {
     curr_metadata$cluster_1$n_edges <- network_n_edges
     curr_metadata$cluster_1$width <- shape_parameters["width", size]
-    curr_metadata$cluster_1$radius <- shape_parameters["radius", size]
+    curr_metadata$cluster_1$radius <- network_radius
   }
   else {
     stop(paste(shape, "Shape not found"))
@@ -170,8 +175,10 @@ for (i in seq(nrow(mixed_spes_table))) {
   mixed_spes_metadata[[i]] <- curr_metadata
 }
 
+setwd("~/Objects/supervised/spes_metadata")
+# saveRDS(mixed_spes_metadata, "mixed_spes_metadata_supervised.rds")
 
-## 2.2. Generate metadata for ringed clusters ------------------------------------------
+## 2.3. Generate table for ringed clusters ------------------------------------------
 
 # Determine possible values for different parameters
 bg_types <- c("O", "A", "B", "AB")
@@ -203,32 +210,28 @@ for (bg_type in bg_types) {
   }
 }
 
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 # write.table(ringed_spes_table, "ringed_spes_table.csv")
 
 
+## 2.4. Generate metadata for ringed clusters -------------
 
 # Define shape parameters based on the size (Small, Medium, Large)
 shape_parameters_list <- list()
 shape_parameters_list[["Sphere"]] <- data.frame(Small = c(20), Medium = c(30), Large = c(40))
 rownames(shape_parameters_list[["Sphere"]]) <- c("radius")
-shape_parameters_list[["Ellipsoid"]] <- data.frame(Small = c(25, 20, 15), Medium = c(37.5, 30, 22.5), Large = c(50, 40, 30))
+shape_parameters_list[["Ellipsoid"]] <- data.frame(Small = c(20, 25, 15), Medium = c(30, 35, 25), Large = c(40, 45, 35))
 rownames(shape_parameters_list[["Ellipsoid"]]) <- c("x_radius", "y_radius", "z_radius")
-shape_parameters_list[["Network"]] <- data.frame(Small = c(3, 30), Medium = c(6, 40), Large = c(9, 50))
-rownames(shape_parameters_list[["Network"]]) <- c("width", "radius")
+shape_parameters_list[["Network"]] <- data.frame(Small = c(5), Medium = c(7.5), Large = c(10))
+rownames(shape_parameters_list[["Network"]]) <- c("width")
 
 
 # Choose ring width for each arrangement and shape
-ring_widths <- data.frame(Sphere = c(3, 6, 9),
-                          Ellipsoid = c(3, 6, 9),
-                          Network = c(1, 2, 3))
-rownames(ring_widths) <- c("R1", "R2", "R3")
+ring_width_factors <- c("R1" = 0.1, "R2" = 0.15, "R3" = 0.2)
 
 # Define constant shape parameters (constant regardless of size)
 centre_loc <- c(50, 50, 50)
-ellipsoid_x_y_rotation <- 0
-ellipsoid_x_z_rotation <- 0
-ellipsoid_y_z_rotation <- 0
+network_radius <- 40
 network_n_edges <- 15
 cell_types <- c("A")
 cell_props <- c(1)
@@ -238,11 +241,11 @@ ring_cell_props <- c(1)
 ### Generate metadata for ringed simulations
 
 # Get background data
-setwd("~/Objects/spes_metadata")
+setwd("~/Objects/supervised/spes_metadata")
 bg_spes_metadata <- readRDS("bg_spes_metadata_100_100_100.rds")
 
 # Get table for ringed simulations
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
 
 ringed_spes_metadata <- list()
@@ -258,9 +261,6 @@ for (i in seq(nrow(ringed_spes_table))) {
   # Get bg_spe_metadata from bg_type
   bg_spe_metadata <- bg_spes_metadata[[bg_type]]
   
-  # Get cluster mixing cell proportions from arrangement and shape
-  ring_width <- ring_widths[arrangement, shape]
-  
   # Get metadata template for current simulation parameters
   curr_metadata <- spe_metadata_cluster_template(bg_spe_metadata, "ring", shape)
   curr_metadata$cluster_1$cluster_cell_types <- cell_types
@@ -268,7 +268,6 @@ for (i in seq(nrow(ringed_spes_table))) {
   curr_metadata$cluster_1$centre_loc <- centre_loc
   curr_metadata$cluster_1$ring_cell_types <- ring_cell_types
   curr_metadata$cluster_1$ring_cell_proportions <- ring_cell_props
-  curr_metadata$cluster_1$ring_width <- ring_width
   
   # Get specific shape-size parameters
   shape_parameters <- shape_parameters_list[[shape]]
@@ -276,20 +275,23 @@ for (i in seq(nrow(ringed_spes_table))) {
   # Specify metadata for each shape and size
   if (shape == "Sphere") {
     curr_metadata$cluster_1$radius <- shape_parameters["radius", size]
+    curr_metadata$cluster_1$ring_width <- ring_width_factors[arrangement] * shape_parameters["radius", size]
   }
   else if (shape == "Ellipsoid") {
     curr_metadata$cluster_1$x_radius <- shape_parameters["x_radius", size]
     curr_metadata$cluster_1$y_radius <- shape_parameters["y_radius", size]
     curr_metadata$cluster_1$z_radius <- shape_parameters["z_radius", size]
-    curr_metadata$cluster_1$x_y_rotation <- ellipsoid_x_y_rotation
-    curr_metadata$cluster_1$x_z_rotation <- ellipsoid_x_z_rotation
-    curr_metadata$cluster_1$y_z_rotation <- ellipsoid_y_z_rotation
+    curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$ring_width <- ring_width_factors[arrangement] * shape_parameters["x_radius", size]
     
   }
   else if (shape == "Network") {
     curr_metadata$cluster_1$n_edges <- network_n_edges
     curr_metadata$cluster_1$width <- shape_parameters["width", size]
-    curr_metadata$cluster_1$radius <- shape_parameters["radius", size]
+    curr_metadata$cluster_1$radius <- network_radius
+    curr_metadata$cluster_1$ring_width <- ring_width_factors[arrangement] * shape_parameters["width", size]
   }
   else {
     stop(paste(shape, "Shape not found"))
@@ -299,8 +301,11 @@ for (i in seq(nrow(ringed_spes_table))) {
 }
 
 
+setwd("~/Objects/supervised/spes_metadata")
+# saveRDS(ringed_spes_metadata, "ringed_spes_metadata_supervised.rds")
 
-## 2.3. Generate metadata for separated clusters ----------------------------------
+
+## 2.5. Generate table for separated clusters ----------------------------------
 # Determine possible values for different parameters
 bg_types <- c("O", "A", "B", "AB")
 shapes <- c("Sphere", "Ellipsoid", "Network")
@@ -337,33 +342,29 @@ for (bg_type in bg_types) {
   }
 }
 
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 # write.table(separated_spes_table, "separated_spes_table.csv")
 
 
+## 2.6. Generate metadata for separated clusters ----------------------------------
 # Define shape parameters based on the size (Small, Medium, Large)
 shape_parameters_list <- list()
 shape_parameters_list[["Sphere"]] <- data.frame(Small = c(20), Medium = c(30), Large = c(40))
 rownames(shape_parameters_list[["Sphere"]]) <- c("radius")
-shape_parameters_list[["Ellipsoid"]] <- data.frame(Small = c(25, 20, 15), Medium = c(37.5, 30, 22.5), Large = c(50, 40, 30))
+shape_parameters_list[["Ellipsoid"]] <- data.frame(Small = c(20, 25, 15), Medium = c(30, 35, 25), Large = c(40, 45, 35))
 rownames(shape_parameters_list[["Ellipsoid"]]) <- c("x_radius", "y_radius", "z_radius")
-shape_parameters_list[["Network"]] <- data.frame(Small = c(3, 30), Medium = c(6, 40), Large = c(9, 50))
-rownames(shape_parameters_list[["Network"]]) <- c("width", "radius")
+shape_parameters_list[["Network"]] <- data.frame(Small = c(5), Medium = c(7.5), Large = c(10))
+rownames(shape_parameters_list[["Network"]]) <- c("width")
 
 
 # Choose cluster centre location for each arrangement
-centre_x_loc <- data.frame(clusterA = c(40, 50, 60),
-                           clusterB = c(160, 150, 140))
+centre_x_loc <- data.frame(clusterA = c(25, 37.5, 50),
+                           clusterB = c(125, 112.5, 100))
 rownames(centre_x_loc) <- c("S1", "S2", "S3")
 
 # Define constant shape parameters (constant regardless of size)
-ellipsoidA_x_y_rotation <- 45
-ellipsoidA_x_z_rotation <- 0
-ellipsoidA_y_z_rotation <- 0
-ellipsoidB_x_y_rotation <- 0
-ellipsoidB_x_z_rotation <- 45
-ellipsoidB_y_z_rotation <- 0
 network_n_edges <- 15
+network_radius <- 40
 clusterA_cell_types <- c("A")
 clusterA_cell_props <- c(1)
 clusterB_cell_types <- c("B")
@@ -372,11 +373,11 @@ clusterB_cell_props <- c(1)
 ### Generate metadata for separated simulations
 
 # Get background data
-setwd("~/Objects/spes_metadata")
-bg_spes_metadata <- readRDS("bg_spes_metadata_200_100_100.rds")
+setwd("~/Objects/supervised/spes_metadata")
+bg_spes_metadata <- readRDS("bg_spes_metadata_150_100_100.rds")
 
 # Get table for ringed simulations
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 separated_spes_table <- read.table("separated_spes_table.csv")
 
 separated_spes_metadata <- list()
@@ -421,14 +422,14 @@ for (i in seq(nrow(separated_spes_table))) {
     curr_metadata$cluster_1$x_radius <- shape_parametersA["x_radius", sizeA]
     curr_metadata$cluster_1$y_radius <- shape_parametersA["y_radius", sizeA]
     curr_metadata$cluster_1$z_radius <- shape_parametersA["z_radius", sizeA]
-    curr_metadata$cluster_1$x_y_rotation <- ellipsoidA_x_y_rotation
-    curr_metadata$cluster_1$x_z_rotation <- ellipsoidA_x_z_rotation
-    curr_metadata$cluster_1$y_z_rotation <- ellipsoidA_y_z_rotation
+    curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 180)
   }
   else if (shapeA == "Network") {
     curr_metadata$cluster_1$n_edges <- network_n_edges
     curr_metadata$cluster_1$width <- shape_parametersA["width", sizeA]
-    curr_metadata$cluster_1$radius <- shape_parametersA["radius", sizeA]
+    curr_metadata$cluster_1$radius <- network_radius
   }
   else {
     stop(paste(shapeA, "ShapeA not found"))
@@ -441,77 +442,19 @@ for (i in seq(nrow(separated_spes_table))) {
     curr_metadata$cluster_2$x_radius <- shape_parametersB["x_radius", sizeB]
     curr_metadata$cluster_2$y_radius <- shape_parametersB["y_radius", sizeB]
     curr_metadata$cluster_2$z_radius <- shape_parametersB["z_radius", sizeB]
-    curr_metadata$cluster_2$x_y_rotation <- ellipsoidB_x_y_rotation
-    curr_metadata$cluster_2$x_z_rotation <- ellipsoidB_x_z_rotation
-    curr_metadata$cluster_2$y_z_rotation <- ellipsoidB_y_z_rotation
+    curr_metadata$cluster_2$x_y_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_2$x_z_rotation <- runif(1, 0, 180)
+    curr_metadata$cluster_2$y_z_rotation <- runif(1, 0, 180)
   }
   else if (shapeB == "Network") {
     curr_metadata$cluster_2$n_edges <- network_n_edges
     curr_metadata$cluster_2$width <- shape_parametersB["width", sizeB]
-    curr_metadata$cluster_2$radius <- shape_parametersB["radius", sizeB]
+    curr_metadata$cluster_2$radius <- network_radius
   }
   else {
     stop(paste(shapeB, "ShapeB not found"))
   }
   separated_spes_metadata[[i]] <- curr_metadata
 }
-setwd("~/Objects/spes_metadata")
-# saveRDS(separated_spes_metadata, "separated_spes_metadata.rds")
-
-## 3.1. Simulate mixed clusters from metadata --------------------------------
-setwd("~/Objects/spes_metadata")
-mixed_spes_metadata <- readRDS("mixed_spes_metadata.rds")
-
-setwd("~/Objects/mixed_spes")
-i <- 1
-for (mixed_spe_metadata in mixed_spes_metadata) {
-  
-  curr_spe <- simulate_spe_metadata3D(mixed_spe_metadata)
-  file_name <- paste("mixed_spe_", i, ".rds", sep = "")
-  
-  saveRDS(curr_spe, file = file_name)
-  
-  i <- i + 1
-}
-
-
-## 3.2. Simulate ringed clusters from metadata --------------------------------
-setwd("~/Objects/spes_metadata")
-ringed_spes_metadata <- readRDS("ringed_spes_metadata.rds")
-
-setwd("~/Objects/ringed_spes")
-i <- 1
-for (ringed_spe_metadata in ringed_spes_metadata) {
-  
-  curr_spe <- simulate_spe_metadata3D(ringed_spe_metadata)
-  file_name <- paste("ringed_spe_", i, ".rds", sep = "")
-  
-  saveRDS(curr_spe, file = file_name)
-  
-  i <- i + 1
-}
-## 3.3. Simulate separated clusters from metadata --------------------------------
-setwd("~/Objects/spes_metadata")
-separated_spes_metadata <- readRDS("separated_spes_metadata.rds")
-
-setwd("~/Objects/spes_table")
-separated_spes_table <- read.table("separated_spes_table.csv")
-
-setwd("~/Objects/separated_spes")
-i <- 1
-for (separated_spe_metadata in separated_spes_metadata) {
-  
-  print(i)
-  
-  curr_spe <- simulate_spe_metadata3D(separated_spe_metadata, plot_image = FALSE)
-  file_name <- paste("separated_spe_", i, ".rds", sep = "")
-  
-  saveRDS(curr_spe, file = file_name)
-  
-  i <- i + 1
-}
-
-## Spacer --------------------------------------------------------------------
-
-
-
+setwd("~/Objects/supervised/spes_metadata")
+saveRDS(separated_spes_metadata, "separated_spes_metadata_supervised.rds")
