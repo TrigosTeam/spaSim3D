@@ -615,7 +615,7 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
                                                            radius, 
                                                            feature_colname = "Cell.Type") {
   
-  ## Get 'count' neighbourhood data
+  ## Get cells in neighbourhood df
   cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
                                                                   reference_cell_type,
                                                                   target_cell_types,
@@ -624,30 +624,14 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
                                                                   FALSE,
                                                                   FALSE)
   
+  ## Get total number of target cells for each row (first column is the reference cell id column, so we exclude it)
+  cells_in_neighbourhood_df$total <- apply(cells_in_neighbourhood_df[ , c(-1)], 1, sum)
   
+  cells_in_neighbourhood_df[ , paste(target_cell_types, "_prop", sep = "")] <- cells_in_neighbourhood_df[ , target_cell_types] / cells_in_neighbourhood_df$total
   
-  result <- data.frame(matrix(nrow = length(target_cell_types), ncol = 4))
-  colnames(result) <- c("target_cell_type", "frequency", "proportion", "percentage")
-  
-  result$target_cell_type <- target_cell_types
-  
-  ## Get frequency of each target cell type
-  result$frequency <- apply(cells_in_neighbourhood_df[ , target_cell_types], 2, sum)
-  
-  ## Use frequency to get proportion and percentage of each cell type
-  total <- sum(result$frequency)
-  if (total != 0) {
-    result$proportion <- result$frequency / total
-    result$percentage <- result$proportion * 100  
-  }
-  else {
-    result$proportion <- NA
-    result$percentage <- NA
-  }
-  
-  
-  return(result)
+  return(cells_in_neighbourhood_df)
 }
+
 
 
 
@@ -680,7 +664,6 @@ plot_cells_in_neighbourhood_violin3D <- function(cells_in_neighbourhood_df, refe
 
 
 
-
 calculate_entropy3D <- function(spe,
                                 reference_cell_type,
                                 target_cell_types,
@@ -692,41 +675,30 @@ calculate_entropy3D <- function(spe,
   if (length(target_cell_types) < 2) stop("Need at least two target cell types")
   
   ## Users should ensure include the reference_cell_type as one of the target_cell_types
-  cells_in_neighborhood_df <- calculate_cells_in_neighbourhood3D(spe,
-                                                                 reference_cell_type,
-                                                                 target_cell_types,
-                                                                 radius,
-                                                                 feature_colname,
-                                                                 FALSE,
-                                                                 FALSE)
+  cells_in_neighbourhood_proportion_df <- calculate_cells_in_neighbourhood_proportions3D(spe,
+                                                                                         reference_cell_type,
+                                                                                         target_cell_types,
+                                                                                         radius,
+                                                                                         feature_colname)
   
-  ## Get total number of target cells for each row (first column is the reference cell id column, so we exclude it)
-  cells_in_neighborhood_df$total <- apply(cells_in_neighborhood_df[ , c(-1)], 1, sum)
   
   ## Get entropy for each row
-  cells_in_neighborhood_df$entropy <- 0
-  
-  for (target_cell_type in target_cell_types) {
-    
-    target_cell_type_proportions <- (cells_in_neighborhood_df[[target_cell_type]] / cells_in_neighborhood_df$total)
-    
-    ## If an element in target_cell_type_proportion is 0, just add 0.    
-    target_cell_entropy <- ifelse(target_cell_type_proportions == 0,
-                                  0,
-                                  -1 * target_cell_type_proportions * log(target_cell_type_proportions, length(target_cell_types)))
-    
-    cells_in_neighborhood_df$entropy <- cells_in_neighborhood_df$entropy + target_cell_entropy
-    
-  }
+  cells_in_neighbourhood_proportion_df$entropy <- apply(cells_in_neighbourhood_proportion_df[ , paste(target_cell_types, "_prop", sep = "")],
+                                                        1,
+                                                        function(x) -1 * sum(x * log(x, length(target_cell_types))))
+  cells_in_neighbourhood_proportion_df$entropy <- ifelse(cells_in_neighbourhood_proportion_df$total > 0 & is.nan(cells_in_neighbourhood_proportion_df$entropy), 
+                                                         0,
+                                                         cells_in_neighbourhood_proportion_df$entropy)
   
   ## Plot
   if (plot_image) {
-    fig <- plot_entropy_violin3D(cells_in_neighborhood_df)
+    fig <- plot_entropy_violin3D(cells_in_neighbourhood_df)
     methods::show(fig)
   }
   
-  return(cells_in_neighborhood_df)
+  return(cells_in_neighbourhood_proportion_df)
 }
+
 
 
 
@@ -880,16 +852,16 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
   colnames(result) <- target_cell_types
   
   for (radius in seq(radii)) {
-    cells_in_neighborhood_df <- calculate_cells_in_neighbourhood3D(spe,
-                                                                   reference_cell_type,
-                                                                   target_cell_types,
-                                                                   radius,
-                                                                   feature_colname,
-                                                                   FALSE,
-                                                                   FALSE)
+    cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
+                                                                    reference_cell_type,
+                                                                    target_cell_types,
+                                                                    radius,
+                                                                    feature_colname,
+                                                                    FALSE,
+                                                                    FALSE)
     
-    cells_in_neighborhood_df$ref_cell_id <- NULL
-    result[radius, ] <- apply(cells_in_neighborhood_df, 2, mean)
+    cells_in_neighbourhood_df$ref_cell_id <- NULL
+    result[radius, ] <- apply(cells_in_neighbourhood_df, 2, mean)
   }
   # Add a radius column to the result
   result$radius <- seq(radii)
@@ -911,6 +883,7 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
 
 
 
+
 calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe, 
                                                                     reference_cell_type, 
                                                                     target_cell_types, 
@@ -928,7 +901,7 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
                                                                                                     radius,
                                                                                                     feature_colname)
     
-    result[radius, ] <- cell_proportions_neighbourhood_proportions_df$proportion
+    result[radius, ] <- apply(cell_proportions_neighbourhood_proportions_df[ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
   }
   
   # Add a radius column to the result
@@ -950,6 +923,7 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
   
   return(result)
 }
+
 
 
 
@@ -1003,39 +977,18 @@ calculate_entropy_gradient3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
-  colnames(result) <- target_cell_types
+  result <- data.frame(matrix(nrow = radii, ncol = 1))
+  colnames(result) <- "entropy"
   
   for (radius in seq(radii)) {
-    cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
-                                                                    reference_cell_type,
-                                                                    target_cell_types,
-                                                                    radius,
-                                                                    feature_colname,
-                                                                    FALSE,
-                                                                    FALSE)
+    entropy_df <- calculate_entropy3D(spe,
+                                      reference_cell_type,
+                                      target_cell_types,
+                                      radius,
+                                      feature_colname,
+                                      FALSE)
     
-    cells_in_neighbourhood_df$ref_cell_id <- NULL
-    result[radius, ] <- apply(cells_in_neighbourhood_df, 2, sum)
-  }
-  
-  ## Get total number of target cells for each row
-  result$total <- apply(result, 1, sum)
-  
-  ## Set intial entropy to 0
-  result$entropy <- 0
-  
-  for (target_cell_type in target_cell_types) {
-    
-    target_cell_type_proportions <- (result[[target_cell_type]] / result$total)
-    
-    ## If an element in target_cell_type_proportion is 0, just add 0.    
-    target_cell_entropy <- ifelse(target_cell_type_proportions == 0,
-                                  0,
-                                  -1 * target_cell_type_proportions * log(target_cell_type_proportions, length(target_cell_types)))
-    
-    result$entropy <- result$entropy + target_cell_entropy
-    
+    result[radius, "entropy"] <- mean(entropy_df$entropy)
   }
   
   # Add a radius column to the result

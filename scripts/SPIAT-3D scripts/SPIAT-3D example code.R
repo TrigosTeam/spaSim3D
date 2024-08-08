@@ -103,7 +103,7 @@ entropy_result <- calculate_entropy3D(spe1,
                                       radius = 20,
                                       reference_cell_type = "Tumour",
                                       target_cell_types = c("Tumour", "Immune"),
-                                      plot_image = TRUE)
+                                      plot_image = F)
 
 
 
@@ -112,7 +112,7 @@ entropy_result <- calculate_entropy3D(spe1,
 entropy_gradient <- calculate_entropy_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_types = c("Tumour", "Immune"),
-                                                 radii = 100,
+                                                 radii = 50,
                                                  plot_image = TRUE)
 
 

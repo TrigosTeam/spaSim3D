@@ -6,34 +6,17 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
   
   ## Get cells in neighbourhood df
   cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
-                                                                  reference_cell_type,
-                                                                  target_cell_types,
-                                                                  radius,
-                                                                  feature_colname,
-                                                                  FALSE,
-                                                                  FALSE)
+                                               reference_cell_type,
+                                               target_cell_types,
+                                               radius,
+                                               feature_colname,
+                                               FALSE,
+                                               FALSE)
   
+  ## Get total number of target cells for each row (first column is the reference cell id column, so we exclude it)
+  cells_in_neighbourhood_df$total <- apply(cells_in_neighbourhood_df[ , c(-1)], 1, sum)
   
+  cells_in_neighbourhood_df[ , paste(target_cell_types, "_prop", sep = "")] <- cells_in_neighbourhood_df[ , target_cell_types] / cells_in_neighbourhood_df$total
   
-  result <- data.frame(matrix(nrow = length(target_cell_types), ncol = 4))
-  colnames(result) <- c("target_cell_type", "frequency", "proportion", "percentage")
-  
-  result$target_cell_type <- target_cell_types
-  
-  ## Get frequency of each target cell type
-  result$frequency <- apply(cells_in_neighbourhood_df[ , target_cell_types], 2, sum)
-  
-  ## Use frequency to get proportion and percentage of each cell type
-  total <- sum(result$frequency)
-  if (total != 0) {
-    result$proportion <- result$frequency / total
-    result$percentage <- result$proportion * 100  
-  }
-  else {
-    result$proportion <- NA
-    result$percentage <- NA
-  }
-  
-  
-  return(result)
+  return(cells_in_neighbourhood_df)
 }
