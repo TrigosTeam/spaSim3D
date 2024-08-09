@@ -26,7 +26,7 @@ width_N_range <- c("min" = 5, "max" = 10)
 
 
 ## Mixed clusters
-cluster_prop_A_range <- c("min" = 0, "max" = 1)   # Proportion of A cells in cluster will range from 0 to 1, proportion of B cells in cluster will be 1 - prop(A)
+cluster_prop_A_range <- c("min" = 0.5, "max" = 0.9)   # Proportion of A cells in cluster will range from 0.5 to 0.9, proportion of B cells in cluster will be 1 - prop(A)
 
 
 ## Ringed clusters
@@ -107,7 +107,7 @@ separated_spes_table$centre_x_coord_A <- runif(n_separated_simulations, centre_x
 separated_spes_table$centre_x_coord_B <- 150 - separated_spes_table$centre_x_coord_A # Where 150 is the 'length' of the separated window
 
 ### 1.4. Save tables -------------------------------------------------
-# setwd("~/Objects/unsupervised/spes_table")
+setwd("~/Objects/unsupervised/spes_table")
 # write.table(mixed_spes_table, "mixed_spes_table_unsupervised.csv")
 # write.table(ringed_spes_table, "ringed_spes_table_unsupervised.csv")
 # write.table(separated_spes_table, "separated_spes_table_unsupervised.csv")
