@@ -879,19 +879,19 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, bg_df, arrang
 }
 
 
-### 2.1. Mixed spes APD ------------------------------------------------------
-### 2.2. Mixed spes AMD ------------------------------------------------------
+### 2.1. mixed spes APD ------------------------------------------------------
+### 2.2. mixed spes AMD ------------------------------------------------------
 
 # Read mixed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
 
 # Read mixed_AMD_df
-setwd("~/Objects/mixed_spes/analysis_3D")
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
 mixed_AMD_df <- read.table("mixed_AMD_df.csv")
 
 # Read bg_AMD_df
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_AMD_df <- read.table("bg_AMD_df.csv")
 
 mixed_AMD_plot <- plot_AMD_metric(mixed_spes_table, mixed_AMD_df, bg_AMD_df, mixed_arrangements)
@@ -902,21 +902,21 @@ setwd("~/Objects/mixed_spes/analysis_3D/plots")
 
 
 
-### 2.3. Mixed spes MS, NMS, ACINP, AE -----------------------------------
+### 2.3. mixed spes MS, NMS, ACINP, AE -----------------------------------
 
 # Read mixed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
 
 # Read mixed MS, NMS, ACINP, AE dfs
-setwd("~/Objects/mixed_spes/analysis_3D")
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
 mixed_MS_df <- read.table("mixed_MS_df.csv")
 mixed_NMS_df <- read.table("mixed_NMS_df.csv")
 mixed_ACINP_df <- read.table("mixed_ACINP_df.csv")
 mixed_AE_df <- read.table("mixed_AE_df.csv")
 
 # Read bg_dfs
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_MS_df <- read.table("bg_MS_df.csv")
 bg_NMS_df <- read.table("bg_NMS_df.csv")
 bg_ACINP_df <- read.table("bg_ACINP_df.csv")
@@ -930,19 +930,19 @@ mixed_AE_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_AE_df, bg_A
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS()
 
-### 2.4. Mixed spes ACIN, CKR ------------------------------------------------
+### 2.4. mixed spes ACIN, CKR ------------------------------------------------
 
 # Read mixed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
 
 # Read mixed ACIN, CKR
-setwd("~/Objects/mixed_spes/analysis_3D")
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
 mixed_ACIN_df <- read.table("mixed_ACIN_df.csv")
 mixed_CKR_df <- read.table("mixed_CKR_df.csv")
 
 # Read bg_dfs
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_ACIN_df <- read.table("bg_ACIN_df.csv")
 bg_CKR_df <- read.table("bg_CKR_df.csv")
 
@@ -952,19 +952,19 @@ mixed_ACIN_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_ACIN_df, 
 mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, bg_CKR_df, "CKR", mixed_arrangements, 15, 50)
 
 
-### 2.5. Mixed spes SAC ------------------------------------------------------
+### 2.5. mixed spes SAC ------------------------------------------------------
 
 # Read mixed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
 
 # Read mixed_SAC_df
-setwd("~/Objects/mixed_spes/analysis_3D")
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
 mixed_prop_SAC_df <- read.table("mixed_prop_SAC_df.csv")
 mixed_entropy_SAC_df <- read.table("mixed_entropy_SAC_df.csv")
 
 # Read bg_SAC_df
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_prop_SAC_df <- read.table("bg_prop_SAC_df.csv")
 bg_entropy_SAC_df <- read.table("bg_entropy_SAC_df.csv")
 
@@ -974,19 +974,19 @@ mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_d
 # setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS(mixed_SAC_plot, "mixed_SAC_plot.rds")
 
-### 2.6. Mixed spes prevalence ------------------------------------------------
+### 2.6. mixed spes prevalence ------------------------------------------------
 
 # Read mixed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
 
 # Read mixed prevalence dfs
-setwd("~/Objects/mixed_spes/analysis_3D")
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
 mixed_prop_prevalence_df <- read.table("mixed_prop_prevalence_df.csv")
 mixed_entropy_prevalence_df <- read.table("mixed_entropy_prevalence_df.csv")
 
 # Read bg prevalence dfs
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_prop_prevalence_df <- read.table("bg_prop_prevalence_df.csv")
 bg_entropy_prevalence_df <- read.table("bg_entropy_prevalence_df.csv")
 
@@ -1000,44 +1000,45 @@ setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS(mixed_prevalence_plot, "mixed_prevalence_plot.rds")
 
 
-### 2.1. Ringed spes APD ------------------------------------------------------
-### 2.2. Ringed spes AMD ------------------------------------------------------
+
+### 3.1. ringed spes APD ------------------------------------------------------
+### 3.2. ringed spes AMD ------------------------------------------------------
 
 # Read ringed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
 
 # Read ringed_AMD_df
-setwd("~/Objects/ringed_spes/analysis_3D")
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
 ringed_AMD_df <- read.table("ringed_AMD_df.csv")
 
 # Read bg_AMD_df
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_AMD_df <- read.table("bg_AMD_df.csv")
 
 ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, bg_AMD_df, ringed_arrangements)
 
-setwd("~/Objects/ringed_spes/analysis_3D/plots")
+# setwd("~/Objects/supervised/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_AMD_plot, "ringed_AMD_plot.rds")
 
 
 
 
-### 2.3. Ringed spes MS, NMS, ACINP, AE -----------------------------------
+### 3.3. ringed spes MS, NMS, ACINP, AE -----------------------------------
 
 # Read ringed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
 
 # Read ringed MS, NMS, ACINP, AE dfs
-setwd("~/Objects/ringed_spes/analysis_3D")
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
 ringed_MS_df <- read.table("ringed_MS_df.csv")
 ringed_NMS_df <- read.table("ringed_NMS_df.csv")
 ringed_ACINP_df <- read.table("ringed_ACINP_df.csv")
 ringed_AE_df <- read.table("ringed_AE_df.csv")
 
 # Read bg_dfs
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_MS_df <- read.table("bg_MS_df.csv")
 bg_NMS_df <- read.table("bg_NMS_df.csv")
 bg_ACINP_df <- read.table("bg_ACINP_df.csv")
@@ -1051,19 +1052,19 @@ ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, b
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS()
 
-### 2.4. Ringed spes ACIN, CKR ------------------------------------------------
+### 3.4. ringed spes ACIN, CKR ------------------------------------------------
 
 # Read ringed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
 
 # Read ringed ACIN, CKR
-setwd("~/Objects/ringed_spes/analysis_3D")
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
 ringed_ACIN_df <- read.table("ringed_ACIN_df.csv")
 ringed_CKR_df <- read.table("ringed_CKR_df.csv")
 
 # Read bg_dfs
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_ACIN_df <- read.table("bg_ACIN_df.csv")
 bg_CKR_df <- read.table("bg_CKR_df.csv")
 
@@ -1073,19 +1074,19 @@ ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_d
 ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, bg_CKR_df, "CKR", ringed_arrangements, 15, 50)
 
 
-### 2.5. Ringed spes SAC ------------------------------------------------------
+### 3.5. ringed spes SAC ------------------------------------------------------
 
 # Read ringed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
 
 # Read ringed_SAC_df
-setwd("~/Objects/ringed_spes/analysis_3D")
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
 ringed_prop_SAC_df <- read.table("ringed_prop_SAC_df.csv")
 ringed_entropy_SAC_df <- read.table("ringed_entropy_SAC_df.csv")
 
 # Read bg_SAC_df
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_prop_SAC_df <- read.table("bg_prop_SAC_df.csv")
 bg_entropy_SAC_df <- read.table("bg_entropy_SAC_df.csv")
 
@@ -1095,58 +1096,29 @@ ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SA
 # setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
 
-### 2.6. Ringed spes prevalence ------------------------------------------------
+### 3.6. ringed spes prevalence ------------------------------------------------
 
 # Read ringed_spes_table
-setwd("~/Objects/spes_table")
+setwd("~/Objects/supervised/spes_table")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
 
 # Read ringed prevalence dfs
-setwd("~/Objects/ringed_spes/analysis_3D")
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
 ringed_prop_prevalence_df <- read.table("ringed_prop_prevalence_df.csv")
 ringed_entropy_prevalence_df <- read.table("ringed_entropy_prevalence_df.csv")
 
 # Read bg prevalence dfs
-setwd("~/Objects/background_spe")
+setwd("~/Objects/supervised/background_spe")
 bg_prop_prevalence_df <- read.table("bg_prop_prevalence_df.csv")
 bg_entropy_prevalence_df <- read.table("bg_entropy_prevalence_df.csv")
 
-ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, bg_prop_prevalence_df, c("R1", "R2", "R3"))
-ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, bg_entropy_prevalence_df, c("R1", "R2", "R3"))
+ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, bg_prop_prevalence_df, ringed_arrangements)
+ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, bg_entropy_prevalence_df, ringed_arrangements)
 
-ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, bg_prop_prevalence_df, c("R1", "R2", "R3"))
-ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, bg_entropy_prevalence_df, c("R1", "R2", "R3"))
+ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, bg_prop_prevalence_df, ringed_arrangements)
+ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, bg_entropy_prevalence_df, ringed_arrangements)
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_prevalence_plot, "ringed_prevalence_plot.rds")
 
-
-### 4.1. Separated spes APD ------------------------------------------------------
-### 4.2. Separated spes AMD -------------------------------------------------
-
-# Read separated_spes_table
-setwd("~/Objects/spes_table")
-separated_spes_table <- read.table("separated_spes_table.csv")
-
-# Read separated_AMD_df
-setwd("~/Objects/separated_spes/analysis_3D")
-separated_AMD_df <- read.table("separated_AMD_df.csv")
-
-# Read bg_AMD_df
-setwd("~/Objects/background_spe")
-bg_AMD_df <- read.table("bg_AMD_df.csv")
-
-# Plot when shapes and sizes are the same
-separated_spes_table_subset <- separated_spes_table[separated_spes_table$shapeA == separated_spes_table$shapeB &
-                                                      separated_spes_table$sizeA == separated_spes_table$sizeB, c("bg_type", "shapeA", "sizeA", "arrangement")]
-
-colnames(separated_spes_table_subset) <- c("bg_type", "shape", "size", "arrangement")
-
-separated_AMD_df_subset <- separated_AMD_df[separated_AMD_df$spe %in% paste("separated_spe_", rownames(separated_spes_table_subset), sep = ""), ]
-
-
-separated_AMD_plot <- plot_AMD_metric(separated_spes_table_subset, separated_AMD_df_subset, bg_AMD_df, separated_arrangements)
-
-setwd("~/Objects/separated_spes/analysis_3D/plots")
-# saveRDS(separated_AMD_plot, "separated_AMD_plot.rds")
 
