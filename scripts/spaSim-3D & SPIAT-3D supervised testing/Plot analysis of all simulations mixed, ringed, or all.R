@@ -2,7 +2,7 @@ library(cowplot)
 library(ggplot2)
 mixed_arrangements <- c("M1", "M2", "M3")
 ringed_arrangements <- c("R1", "R2", "R3")
-separated_arrangements <- c("S1", "S2", "S3")
+all_arrangements <- c("M2", "R2", "S2")
 
 ### 1.1.1. Function to get plot for APD ----------------------------------------
 ### 1.1.2. Function to get plot for AMD -------------------------------------
@@ -1117,6 +1117,352 @@ ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, rin
 
 ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, bg_prop_prevalence_df, ringed_arrangements)
 ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, bg_entropy_prevalence_df, ringed_arrangements)
+
+setwd("~/Objects/ringed_spes/analysis_3D/plots")
+# saveRDS(ringed_prevalence_plot, "ringed_prevalence_plot.rds")
+
+
+
+### 4.1. all spes APD ------------------------------------------------------
+### 4.2. all spes AMD ------------------------------------------------------
+
+# Read spes_table
+setwd("~/Objects/supervised/spes_table")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
+separated_spes_table <- read.table("separated_spes_table.csv")
+
+mixed_spes_table$spe <- paste("mixed_spe_", seq(nrow(mixed_spes_table)), sep = "")
+ringed_spes_table$spe <- paste("ringed_spe_", seq(nrow(ringed_spes_table)), sep = "")
+separated_spes_table$spe <- paste("separated_spe_", seq(nrow(separated_spes_table)), sep = "")
+
+# Subset separated_spes_table for when the shapes are the same, and the sizes are the same
+# Subset all spes_table for "M2", "R2" and "S2" arrangement
+mixed_spes_table <- mixed_spes_table[mixed_spes_table$arrangement == "M2", ]
+ringed_spes_table <- ringed_spes_table[ringed_spes_table$arrangement == "R2", ]
+separated_spes_table <- separated_spes_table[separated_spes_table$shapeA == separated_spes_table$shapeB & 
+                                               separated_spes_table$sizeA == separated_spes_table$sizeB &
+                                               separated_spes_table$arrangement == "S2", c("bg_type", "shapeA", "sizeA", "arrangement", "spe")]
+colnames(separated_spes_table) <- c("bg_type", "shape", "size", "arrangement", "spe")
+
+# Combine all spes tables together
+all_spes_table <- rbind(mixed_spes_table, ringed_spes_table, separated_spes_table)
+
+
+# Read AMD dfs
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
+mixed_AMD_df <- read.table("mixed_AMD_df.csv")
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
+ringed_AMD_df <- read.table("ringed_AMD_df.csv")
+setwd("~/Objects/supervised/separated_spes/analysis_3D")
+separated_AMD_df <- read.table("separated_AMD_df.csv")
+
+# Subset all AMD df to align with spes_table
+mixed_AMD_df <- mixed_AMD_df[mixed_AMD_df$spe %in% mixed_spes_table$spe, ]
+ringed_AMD_df <- ringed_AMD_df[ringed_AMD_df$spe %in% ringed_spes_table$spe, ]
+separated_AMD_df <- separated_AMD_df[separated_AMD_df$spe %in% separated_spes_table$spe, ]
+
+# Remove spe column in spes_table
+all_spes_table$spe <- NULL
+
+# Combine all AMD dfs together
+all_AMD_df <- rbind(mixed_AMD_df, ringed_AMD_df, separated_AMD_df)
+
+# Read bg_AMD_df
+setwd("~/Objects/supervised/background_spe")
+bg_AMD_df <- read.table("bg_AMD_df.csv")
+
+all_AMD_plot <- plot_AMD_metric(all_spes_table, all_AMD_df, bg_AMD_df, all_arrangements)
+
+# setwd("~/Objects/supervised/ringed_spes/analysis_3D/plots")
+# saveRDS(ringed_AMD_plot, "ringed_AMD_plot.rds")
+
+
+
+
+### 4.3. all spes MS, NMS, ACINP, AE -----------------------------------
+
+# Read spes_table
+setwd("~/Objects/supervised/spes_table")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
+separated_spes_table <- read.table("separated_spes_table.csv")
+
+mixed_spes_table$spe <- paste("mixed_spe_", seq(nrow(mixed_spes_table)), sep = "")
+ringed_spes_table$spe <- paste("ringed_spe_", seq(nrow(ringed_spes_table)), sep = "")
+separated_spes_table$spe <- paste("separated_spe_", seq(nrow(separated_spes_table)), sep = "")
+
+# Subset separated_spes_table for when the shapes are the same, and the sizes are the same
+# Subset all spes_table for "M2", "R2" and "S2" arrangement
+mixed_spes_table <- mixed_spes_table[mixed_spes_table$arrangement == "M2", ]
+ringed_spes_table <- ringed_spes_table[ringed_spes_table$arrangement == "R2", ]
+separated_spes_table <- separated_spes_table[separated_spes_table$shapeA == separated_spes_table$shapeB & 
+                                               separated_spes_table$sizeA == separated_spes_table$sizeB &
+                                               separated_spes_table$arrangement == "S2", c("bg_type", "shapeA", "sizeA", "arrangement", "spe")]
+colnames(separated_spes_table) <- c("bg_type", "shape", "size", "arrangement", "spe")
+
+# Combine all spes tables together
+all_spes_table <- rbind(mixed_spes_table, ringed_spes_table, separated_spes_table)
+
+
+
+# Read ringed MS, NMS, ACINP, AE dfs
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
+mixed_MS_df <- read.table("mixed_MS_df.csv")
+mixed_NMS_df <- read.table("mixed_NMS_df.csv")
+mixed_ACINP_df <- read.table("mixed_ACINP_df.csv")
+mixed_AE_df <- read.table("mixed_AE_df.csv")
+
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
+ringed_MS_df <- read.table("ringed_MS_df.csv")
+ringed_NMS_df <- read.table("ringed_NMS_df.csv")
+ringed_ACINP_df <- read.table("ringed_ACINP_df.csv")
+ringed_AE_df <- read.table("ringed_AE_df.csv")
+
+setwd("~/Objects/supervised/separated_spes/analysis_3D")
+separated_MS_df <- read.table("separated_MS_df.csv")
+separated_NMS_df <- read.table("separated_NMS_df.csv")
+separated_ACINP_df <- read.table("separated_ACINP_df.csv")
+separated_AE_df <- read.table("separated_AE_df.csv")
+
+
+
+# Subset gradient_df to allign with spes_table
+mixed_MS_df <- mixed_MS_df[mixed_MS_df$spe %in% mixed_spes_table$spe, ]
+mixed_NMS_df <- mixed_NMS_df[mixed_NMS_df$spe %in% mixed_spes_table$spe, ]
+mixed_ACINP_df <- mixed_ACINP_df[mixed_ACINP_df$spe %in% mixed_spes_table$spe, ]
+mixed_AE_df <- mixed_AE_df[mixed_AE_df$spe %in% mixed_spes_table$spe, ]
+
+ringed_MS_df <- ringed_MS_df[ringed_MS_df$spe %in% ringed_spes_table$spe, ]
+ringed_NMS_df <- ringed_NMS_df[ringed_NMS_df$spe %in% ringed_spes_table$spe, ]
+ringed_ACINP_df <- ringed_ACINP_df[ringed_ACINP_df$spe %in% ringed_spes_table$spe, ]
+ringed_AE_df <- ringed_AE_df[ringed_AE_df$spe %in% ringed_spes_table$spe, ]
+
+separated_MS_df <- separated_MS_df[separated_MS_df$spe %in% separated_spes_table$spe, ]
+separated_NMS_df <- separated_NMS_df[separated_NMS_df$spe %in% separated_spes_table$spe, ]
+separated_ACINP_df <- separated_ACINP_df[separated_ACINP_df$spe %in% separated_spes_table$spe, ]
+separated_AE_df <- separated_AE_df[separated_AE_df$spe %in% separated_spes_table$spe, ]
+
+# Remove spe column in spes_table
+all_spes_table$spe <- NULL
+
+# Combine all MS, NMS, ACINP, AE dfs together
+all_MS_df <- rbind(mixed_MS_df, ringed_MS_df, separated_MS_df)
+all_NMS_df <- rbind(mixed_NMS_df, ringed_NMS_df, separated_NMS_df)
+all_ACINP_df <- rbind(mixed_ACINP_df, ringed_ACINP_df, separated_ACINP_df)
+all_AE_df <- rbind(mixed_AE_df, ringed_AE_df, separated_AE_df)
+
+
+# Read bg_dfs
+setwd("~/Objects/supervised/background_spe")
+bg_MS_df <- read.table("bg_MS_df.csv")
+bg_NMS_df <- read.table("bg_NMS_df.csv")
+bg_ACINP_df <- read.table("bg_ACINP_df.csv")
+bg_AE_df <- read.table("bg_AE_df.csv")
+
+all_MS_plot <- plot_gradient_metrics_type1(all_spes_table, all_MS_df, bg_MS_df, "MS", all_arrangements)
+all_NMS_plot <- plot_gradient_metrics_type1(all_spes_table, all_NMS_df, bg_NMS_df, "NMS", all_arrangements)
+all_ACINP_plot <- plot_gradient_metrics_type1(all_spes_table, all_ACINP_df, bg_ACINP_df, "ACINP", all_arrangements)
+all_AE_plot <- plot_gradient_metrics_type1(all_spes_table, all_AE_df, bg_AE_df, "AE", all_arrangements)
+
+setwd("~/Objects/supervised/ringed_spes/analysis_3D/plots")
+# saveRDS()
+
+### 4.4. all spes ACIN, CKR ------------------------------------------------
+
+# Read spes_table
+setwd("~/Objects/supervised/spes_table")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
+separated_spes_table <- read.table("separated_spes_table.csv")
+
+mixed_spes_table$spe <- paste("mixed_spe_", seq(nrow(mixed_spes_table)), sep = "")
+ringed_spes_table$spe <- paste("ringed_spe_", seq(nrow(ringed_spes_table)), sep = "")
+separated_spes_table$spe <- paste("separated_spe_", seq(nrow(separated_spes_table)), sep = "")
+
+# Subset separated_spes_table for when the shapes are the same, and the sizes are the same
+# Subset all spes_table for "M2", "R2" and "S2" arrangement
+mixed_spes_table <- mixed_spes_table[mixed_spes_table$arrangement == "M2", ]
+ringed_spes_table <- ringed_spes_table[ringed_spes_table$arrangement == "R2", ]
+separated_spes_table <- separated_spes_table[separated_spes_table$shapeA == separated_spes_table$shapeB & 
+                                               separated_spes_table$sizeA == separated_spes_table$sizeB &
+                                               separated_spes_table$arrangement == "S2", c("bg_type", "shapeA", "sizeA", "arrangement", "spe")]
+colnames(separated_spes_table) <- c("bg_type", "shape", "size", "arrangement", "spe")
+
+# Combine all spes tables together
+all_spes_table <- rbind(mixed_spes_table, ringed_spes_table, separated_spes_table)
+
+
+# Read ringed CKR and ACIN
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
+mixed_ACIN_df <- read.table("mixed_ACIN_df.csv")
+mixed_CKR_df <- read.table("mixed_CKR_df.csv")
+
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
+ringed_ACIN_df <- read.table("ringed_ACIN_df.csv")
+ringed_CKR_df <- read.table("ringed_CKR_df.csv")
+
+setwd("~/Objects/supervised/separated_spes/analysis_3D")
+separated_ACIN_df <- read.table("separated_ACIN_df.csv")
+separated_CKR_df <- read.table("separated_CKR_df.csv")
+
+
+
+# Subset gradient_df to allign with spes_table
+mixed_ACIN_df <- mixed_ACIN_df[mixed_ACIN_df$spe %in% mixed_spes_table$spe, ]
+mixed_CKR_df <- mixed_CKR_df[mixed_CKR_df$spe %in% mixed_spes_table$spe, ]
+
+ringed_ACIN_df <- ringed_ACIN_df[ringed_ACIN_df$spe %in% ringed_spes_table$spe, ]
+ringed_CKR_df <- ringed_CKR_df[ringed_CKR_df$spe %in% ringed_spes_table$spe, ]
+
+separated_ACIN_df <- separated_ACIN_df[separated_ACIN_df$spe %in% separated_spes_table$spe, ]
+separated_CKR_df <- separated_CKR_df[separated_CKR_df$spe %in% separated_spes_table$spe, ]
+
+# Remove spe column in spes_table
+all_spes_table$spe <- NULL
+
+# Combine all MS, NMS, ACINP, AE dfs together
+all_ACIN_df <- rbind(mixed_ACIN_df, ringed_ACIN_df, separated_ACIN_df)
+all_CKR_df <- rbind(mixed_CKR_df, ringed_CKR_df, separated_CKR_df)
+
+# Read bg_dfs
+setwd("~/Objects/supervised/background_spe")
+bg_ACIN_df <- read.table("bg_ACIN_df.csv")
+bg_CKR_df <- read.table("bg_CKR_df.csv")
+
+# Get plots
+all_ACIN_plot <- plot_gradient_metrics_type2(all_spes_table, all_ACIN_df, bg_ACIN_df, "ACIN", all_arrangements, 0, 50)
+
+all_CKR_plot <- plot_gradient_metrics_type2(all_spes_table, all_CKR_df, bg_CKR_df, "CKR", all_arrangements, 15, 50)
+
+
+### 4.5. all spes SAC ------------------------------------------------------
+
+# Read spes_table
+setwd("~/Objects/supervised/spes_table")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
+separated_spes_table <- read.table("separated_spes_table.csv")
+
+mixed_spes_table$spe <- paste("mixed_spe_", seq(nrow(mixed_spes_table)), sep = "")
+ringed_spes_table$spe <- paste("ringed_spe_", seq(nrow(ringed_spes_table)), sep = "")
+separated_spes_table$spe <- paste("separated_spe_", seq(nrow(separated_spes_table)), sep = "")
+
+# Subset separated_spes_table for when the shapes are the same, and the sizes are the same
+# Subset all spes_table for "M2", "R2" and "S2" arrangement
+mixed_spes_table <- mixed_spes_table[mixed_spes_table$arrangement == "M2", ]
+ringed_spes_table <- ringed_spes_table[ringed_spes_table$arrangement == "R2", ]
+separated_spes_table <- separated_spes_table[separated_spes_table$shapeA == separated_spes_table$shapeB & 
+                                               separated_spes_table$sizeA == separated_spes_table$sizeB &
+                                               separated_spes_table$arrangement == "S2", c("bg_type", "shapeA", "sizeA", "arrangement", "spe")]
+colnames(separated_spes_table) <- c("bg_type", "shape", "size", "arrangement", "spe")
+
+# Combine all spes tables together
+all_spes_table <- rbind(mixed_spes_table, ringed_spes_table, separated_spes_table)
+
+
+
+# Read SAC dfs
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
+mixed_prop_SAC_df <- read.table("mixed_prop_SAC_df.csv")
+mixed_entropy_SAC_df <- read.table("mixed_entropy_SAC_df.csv")
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
+ringed_prop_SAC_df <- read.table("ringed_prop_SAC_df.csv")
+ringed_entropy_SAC_df <- read.table("ringed_entropy_SAC_df.csv")
+setwd("~/Objects/supervised/separated_spes/analysis_3D")
+separated_prop_SAC_df <- read.table("separated_prop_SAC_df.csv")
+separated_entropy_SAC_df <- read.table("separated_entropy_SAC_df.csv")
+
+# Subset all prop_SAC df to align with spes_table
+mixed_prop_SAC_df <- mixed_prop_SAC_df[mixed_prop_SAC_df$spe %in% mixed_spes_table$spe, ]
+ringed_prop_SAC_df <- ringed_prop_SAC_df[ringed_prop_SAC_df$spe %in% ringed_spes_table$spe, ]
+separated_prop_SAC_df <- separated_prop_SAC_df[separated_prop_SAC_df$spe %in% separated_spes_table$spe, ]
+mixed_entropy_SAC_df <- mixed_entropy_SAC_df[mixed_entropy_SAC_df$spe %in% mixed_spes_table$spe, ]
+ringed_entropy_SAC_df <- ringed_entropy_SAC_df[ringed_entropy_SAC_df$spe %in% ringed_spes_table$spe, ]
+separated_entropy_SAC_df <- separated_entropy_SAC_df[separated_entropy_SAC_df$spe %in% separated_spes_table$spe, ]
+
+# Remove spe column in spes_table
+all_spes_table$spe <- NULL
+
+# Combine all SAC dfs together
+all_prop_SAC_df <- rbind(mixed_prop_SAC_df, ringed_prop_SAC_df, separated_prop_SAC_df)
+all_entropy_SAC_df <- rbind(mixed_entropy_SAC_df, ringed_entropy_SAC_df, separated_entropy_SAC_df)
+
+# Read bg_SAC_df
+setwd("~/Objects/supervised/background_spe")
+bg_prop_SAC_df <- read.table("bg_prop_SAC_df.csv")
+bg_entropy_SAC_df <- read.table("bg_entropy_SAC_df.csv")
+
+all_prop_SAC_plot <- plot_proportion_SAC(all_spes_table, all_prop_SAC_df, bg_prop_SAC_df, all_arrangements)
+all_entropy_SAC_plot <- plot_entropy_SAC(all_spes_table, all_entropy_SAC_df, bg_entropy_SAC_df, all_arrangements)
+
+# setwd("~/Objects/ringed_spes/analysis_3D/plots")
+# saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
+
+### 4.6. all spes prevalence ------------------------------------------------
+
+# Read spes_table
+setwd("~/Objects/supervised/spes_table")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
+separated_spes_table <- read.table("separated_spes_table.csv")
+
+mixed_spes_table$spe <- paste("mixed_spe_", seq(nrow(mixed_spes_table)), sep = "")
+ringed_spes_table$spe <- paste("ringed_spe_", seq(nrow(ringed_spes_table)), sep = "")
+separated_spes_table$spe <- paste("separated_spe_", seq(nrow(separated_spes_table)), sep = "")
+
+# Subset separated_spes_table for when the shapes are the same, and the sizes are the same
+# Subset all spes_table for "M2", "R2" and "S2" arrangement
+mixed_spes_table <- mixed_spes_table[mixed_spes_table$arrangement == "M2", ]
+ringed_spes_table <- ringed_spes_table[ringed_spes_table$arrangement == "R2", ]
+separated_spes_table <- separated_spes_table[separated_spes_table$shapeA == separated_spes_table$shapeB & 
+                                               separated_spes_table$sizeA == separated_spes_table$sizeB &
+                                               separated_spes_table$arrangement == "S2", c("bg_type", "shapeA", "sizeA", "arrangement", "spe")]
+colnames(separated_spes_table) <- c("bg_type", "shape", "size", "arrangement", "spe")
+
+# Combine all spes tables together
+all_spes_table <- rbind(mixed_spes_table, ringed_spes_table, separated_spes_table)
+
+
+
+# Read prevalence dfs
+setwd("~/Objects/supervised/mixed_spes/analysis_3D")
+mixed_prop_prevalence_df <- read.table("mixed_prop_prevalence_df.csv")
+mixed_entropy_prevalence_df <- read.table("mixed_entropy_prevalence_df.csv")
+setwd("~/Objects/supervised/ringed_spes/analysis_3D")
+ringed_prop_prevalence_df <- read.table("ringed_prop_prevalence_df.csv")
+ringed_entropy_prevalence_df <- read.table("ringed_entropy_prevalence_df.csv")
+setwd("~/Objects/supervised/separated_spes/analysis_3D")
+separated_prop_prevalence_df <- read.table("separated_prop_prevalence_df.csv")
+separated_entropy_prevalence_df <- read.table("separated_entropy_prevalence_df.csv")
+
+# Subset all prop_prevalence df to align with spes_table
+mixed_prop_prevalence_df <- mixed_prop_prevalence_df[mixed_prop_prevalence_df$spe %in% mixed_spes_table$spe, ]
+ringed_prop_prevalence_df <- ringed_prop_prevalence_df[ringed_prop_prevalence_df$spe %in% ringed_spes_table$spe, ]
+separated_prop_prevalence_df <- separated_prop_prevalence_df[separated_prop_prevalence_df$spe %in% separated_spes_table$spe, ]
+mixed_entropy_prevalence_df <- mixed_entropy_prevalence_df[mixed_entropy_prevalence_df$spe %in% mixed_spes_table$spe, ]
+ringed_entropy_prevalence_df <- ringed_entropy_prevalence_df[ringed_entropy_prevalence_df$spe %in% ringed_spes_table$spe, ]
+separated_entropy_prevalence_df <- separated_entropy_prevalence_df[separated_entropy_prevalence_df$spe %in% separated_spes_table$spe, ]
+
+# Remove spe column in spes_table
+all_spes_table$spe <- NULL
+
+# Combine all prevalence dfs together
+all_prop_prevalence_df <- rbind(mixed_prop_prevalence_df, ringed_prop_prevalence_df, separated_prop_prevalence_df)
+all_entropy_prevalence_df <- rbind(mixed_entropy_prevalence_df, ringed_entropy_prevalence_df, separated_entropy_prevalence_df)
+
+
+
+# Read bg prevalence dfs
+setwd("~/Objects/supervised/background_spe")
+bg_prop_prevalence_df <- read.table("bg_prop_prevalence_df.csv")
+bg_entropy_prevalence_df <- read.table("bg_entropy_prevalence_df.csv")
+
+all_prop_prevalence_plot <- plot_proportion_prevalence(all_spes_table, all_prop_prevalence_df, bg_prop_prevalence_df, all_arrangements)
+all_entropy_prevalence_plot <- plot_entropy_prevalence(all_spes_table, all_entropy_prevalence_df, bg_entropy_prevalence_df, all_arrangements)
+
+all_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(all_spes_table, all_prop_prevalence_df, bg_prop_prevalence_df, all_arrangements)
+all_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(all_spes_table, all_entropy_prevalence_df, bg_entropy_prevalence_df, all_arrangements)
 
 setwd("~/Objects/ringed_spes/analysis_3D/plots")
 # saveRDS(ringed_prevalence_plot, "ringed_prevalence_plot.rds")
