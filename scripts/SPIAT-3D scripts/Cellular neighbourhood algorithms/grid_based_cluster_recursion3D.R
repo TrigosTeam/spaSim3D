@@ -23,7 +23,7 @@ grid_based_cluster_recursion3D <- function(spe,
   if (length(spe_cell_types) <= 2) return(data.frame())
   
   # Get total cell proportion for chosen cell_types_of_interest
-  cell_proportion <- sum(spe_cell_types %in% cell_types_of_interest) / length(spe_cell_types)
+  cell_proportion <- mean(spe_cell_types %in% cell_types_of_interest)
   
   # Keep grid prism if cell proportion is above the threshold cell proportion
   if (cell_proportion >= threshold_cell_proportion) {

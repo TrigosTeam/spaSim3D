@@ -1815,6 +1815,8 @@ dbscan_clustering3D <- function(spe,
 
 
 
+library(data.table)
+
 grid_based_clustering3D <- function(spe,
                                     cell_types_of_interest,
                                     n_splits,
@@ -1835,51 +1837,38 @@ grid_based_clustering3D <- function(spe,
                paste(unknown_cell_types, collapse = ", ")))
   }
   
-  spe_coords <- data.frame(spatialCoords(spe))
+  # Add grid metrics to spe
+  spe <- get_spe_grid_metrics3D(spe, n_splits, feature_colname)
   
-  ## Get dimensions of the window
-  length <- round(max(spe_coords$Cell.X.Position) - min(spe_coords$Cell.X.Position))
-  width  <- round(max(spe_coords$Cell.Y.Position) - min(spe_coords$Cell.Y.Position))
-  height <- round(max(spe_coords$Cell.Z.Position) - min(spe_coords$Cell.Z.Position))
-  
-  
-  ## Get distance of row, col and lay
-  d_row <- length / n_splits
-  d_col <- width / n_splits
-  d_lay <- height / n_splits
-  
-  ## Figure out which 'grid prism number' each cell is inside
-  spe$Prism.Num <- floor(spe_coords$Cell.X.Position / d_row) +
-    floor(spe_coords$Cell.Y.Position / d_col) * n_splits + 
-    floor(spe_coords$Cell.Z.Position / d_lay) * n_splits^2 + 1
+  # Get grid_prism_cell_matrix from spe
+  grid_prism_cell_matrix <- spe@metadata$grid_metrics$grid_prism_cell_matrix
   
   ## Calculate proportions for each grid prism
-  n_grid_prisms <- n_splits^3
-  grid_prism_cell_proportions <- c()
-  for (grid_prism_num in seq(n_grid_prisms)) {
-    
-    ## Get spe object for current grid_prism
-    spe_temp <- spe[ , spe$Prism.Num == grid_prism_num]
-    
-    ## Get total number of cells and number of cell_types_of_interest in current grid_prism
-    n_total <- ncol(spe_temp)
-    n_cell_types_of_interest <- sum(spe_temp[[feature_colname]] %in% cell_types_of_interest)
-    
-    if (n_total == 0) {
-      grid_prism_cell_proportion <- 0
-    }
-    else {
-      grid_prism_cell_proportion <- n_cell_types_of_interest / n_total
-    }
-    
-    grid_prism_cell_proportions <- c(grid_prism_cell_proportions, grid_prism_cell_proportion)
+  if (length(cell_types_of_interest) == 1) {
+    grid_prism_cell_proportions <- grid_prism_cell_matrix[ , cell_types_of_interest]
   }
+  else {
+    grid_prism_cell_proportions <- rowSums(grid_prism_cell_matrix[ , cell_types_of_interest])
+  }
+  grid_prism_cell_proportions <- grid_prism_cell_proportions / rowSums(grid_prism_cell_matrix[ , unique(spe[[feature_colname]])])
+  n_grid_prisms <- n_splits^3
   names(grid_prism_cell_proportions) <- seq(n_grid_prisms)
   
   
   ## Create template for final result
   result <- list()
   n_clusters <- 1
+  
+  ## Get dimensions of the window
+  spe_coords <- data.frame(spatialCoords(spe))
+  length <- round(max(spe_coords$Cell.X.Position) - min(spe_coords$Cell.X.Position))
+  width  <- round(max(spe_coords$Cell.Y.Position) - min(spe_coords$Cell.Y.Position))
+  height <- round(max(spe_coords$Cell.Z.Position) - min(spe_coords$Cell.Z.Position))
+  
+  ## Get distance of row, col and lay
+  d_row <- length / n_splits
+  d_col <- width / n_splits
+  d_lay <- height / n_splits
   
   
   ### CLUSTER DETECTION RECURSIVE ALGORITHM LOOP ###
@@ -1905,26 +1894,27 @@ grid_based_clustering3D <- function(spe,
                                                                         c())
     
     # Perform the recursive algorithm on each grid prism potentially apart of the cluster to get a more precise shape of each cluster
-    result[[n_clusters]] <- data.frame()
-    for (grid_prism in as.numeric(grid_prisms_in_cluster)) {
-      
-      spe_prism <- spe[ , spe$Prism.Num == grid_prism]
-      
-      grid_prism_x <- ((grid_prism - 1) %% n_splits) * d_row
-      grid_prism_y <- (floor(((grid_prism - 1) %% n_splits^2) / n_splits)) * d_col
-      grid_prism_z <- (floor((grid_prism - 1) / n_splits^2)) * d_lay
-      
-      result[[n_clusters]] <- rbind(result[[n_clusters]], 
-                                    grid_based_cluster_recursion3D(spe_prism, 
-                                                                   cell_types_of_interest, 
-                                                                   0.75 * maximum_cell_proportion,
-                                                                   grid_prism_x, grid_prism_y, grid_prism_z,
-                                                                   d_row, d_col, d_lay,
-                                                                   feature_colname,
-                                                                   data.frame()))
-    }
+    curr_result <- sapply(as.numeric(grid_prisms_in_cluster), function(x) grid_based_cluster_recursion3D(spe,
+                                                                                                         cell_types_of_interest,
+                                                                                                         0.75 * maximum_cell_proportion,
+                                                                                                         ((x - 1) %% n_splits) * d_row,
+                                                                                                         (floor(((x - 1) %% n_splits^2) / n_splits)) * d_col,
+                                                                                                         (floor((x - 1) / n_splits^2)) * d_lay,
+                                                                                                         d_row, d_col, d_lay,
+                                                                                                         feature_colname,
+                                                                                                         data.frame()))
+
     
-    colnames(result[[n_clusters]]) <- c("x", "y", "z", "l", "w", "h")
+    
+    if (is.array(curr_result))  {
+      curr_result <- data.frame(t(unlist(curr_result)))
+      colnames(curr_result) <- c("x", "y", "z", "l", "w", "h")
+      result[[n_clusters]] <- curr_result
+    }
+    else {
+      result[[n_clusters]] <- rbindlist(curr_result)
+    }
+
     n_clusters <- n_clusters + 1
     
     # Remove grid prisms which have just been examined
@@ -1932,10 +1922,9 @@ grid_based_clustering3D <- function(spe,
                                                                        grid_prisms_in_cluster)]
     
   }
-  
+
   ## Add all the information to the spe
   spe@metadata[["grid_prisms"]] <- result
-  spe$Prism.Num <- NULL
   spe$grid_based_cluster <- 0
   cluster_number <- 1
   
@@ -1969,6 +1958,7 @@ grid_based_clustering3D <- function(spe,
   
   return(spe)
 }
+
 
 
 
@@ -2083,7 +2073,7 @@ grid_based_cluster_recursion3D <- function(spe,
   if (length(spe_cell_types) <= 2) return(data.frame())
   
   # Get total cell proportion for chosen cell_types_of_interest
-  cell_proportion <- sum(spe_cell_types %in% cell_types_of_interest) / length(spe_cell_types)
+  cell_proportion <- mean(spe_cell_types %in% cell_types_of_interest)
   
   # Keep grid prism if cell proportion is above the threshold cell proportion
   if (cell_proportion >= threshold_cell_proportion) {
