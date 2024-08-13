@@ -48,53 +48,50 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   alpha <- dr_properties$x_z_rotation * (pi/180) # rotation in y-axis
   beta  <- dr_properties$x_y_rotation * (pi/180) # rotation in z-axis
   
-  # 3x3 Transformation matrix using rotation angles
-  T_M <- matrix(data = c(cos(alpha) * cos(beta), 
-                         cos(alpha) * sin(beta), 
-                         sin(alpha),
-                         -sin(theta) * sin(alpha) * cos(beta) - cos(theta) * sin(beta),
-                         -sin(theta) * sin(alpha) * sin(beta) + cos(theta) * cos(beta),
-                         sin(theta) * cos(alpha),
-                         -cos(theta) * sin(alpha) * cos(beta) + sin(theta) * sin(beta),
-                         -cos(theta) * sin(alpha) * sin(beta) - sin(theta) * cos(beta),
-                         cos(theta) * cos(alpha)), 
-                nrow = 3, 
-                ncol = 3, 
-                byrow = TRUE)
+  # Get rotation matrices for rotation in the y-z plane (T2), x-z plane (T3) and x-y plane (T4)
+  T1 <- matrix(data = c(1, 0, 0,
+                        0, cos(theta), -sin(theta),
+                        0, sin(theta), cos(theta)), nrow = 3, ncol = 3, byrow = TRUE)
+  T2 <- matrix(data = c(cos(alpha), 0, -sin(alpha),
+                        0, 1, 0,
+                        sin(alpha), 0, cos(alpha)), nrow = 3, ncol = 3, byrow = TRUE)
+  T3 <- matrix(data = c(cos(beta), -sin(beta), 0,
+                        sin(beta), cos(beta), 0,
+                        0, 0, 1), nrow = 3, ncol = 3, byrow = TRUE)
+  
+  # Get translation matrix from ellipsoid centre (same as centre...)
+  T4 <- centre_loc
   
   ## Change cell types in the ellipsoid cluster
-  spe_coords <- data.frame(spatialCoords(bg_spe))
+  # Get spatial coords from spe (rows are x, y, z, columns are each cell)
+  spe_coords <- t(spatialCoords(bg_spe))
   
-  # Adjust x, y and z coordinates relative to the ellipsoid centre
-  x <- spe_coords$Cell.X.Position - centre_loc[1]
-  y <- spe_coords$Cell.Y.Position - centre_loc[2]
-  z <- spe_coords$Cell.Z.Position - centre_loc[3]
-  
-  # Transform  x, y and z coordinates using rotation transformation matrix
-  x_new <- T_M[1, 1] * x + T_M[1, 2] * y + T_M[1, 3] * z
-  y_new <- T_M[2, 1] * x + T_M[2, 2] * y + T_M[2, 3] * z
-  z_new <- T_M[3, 1] * x + T_M[3, 2] * y + T_M[3, 3] * z
+  # Apply transformations to spe_coords'
+  spe_coords <- inv(T1) %*% inv(T2) %*% inv(T3) %*% (spe_coords - T4)
+  x <- spe_coords[1, ]
+  y <- spe_coords[2, ]
+  z <- spe_coords[3, ]
   
   
   # Start with cells in outer ring  
-  bg_spe[["Cell.Type"]] <- ifelse((x_new / (x_radius + inner_ring_width + outer_ring_width))^2 +
-                                    (y_new / (y_radius + inner_ring_width + outer_ring_width))^2 +
-                                    (z_new / (z_radius + inner_ring_width + outer_ring_width))^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x / (x_radius + inner_ring_width + outer_ring_width))^2 +
+                                    (y / (y_radius + inner_ring_width + outer_ring_width))^2 +
+                                    (z / (z_radius + inner_ring_width + outer_ring_width))^2 <= 1,
                                   sample(outer_ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = outer_ring_cell_proportions),
                                   bg_spe[["Cell.Type"]])
     
   # Then do cells in inner ring  
-  bg_spe[["Cell.Type"]] <- ifelse((x_new / (x_radius + inner_ring_width))^2 +
-                                    (y_new / (y_radius + inner_ring_width))^2 +
-                                    (z_new / (z_radius + inner_ring_width))^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x / (x_radius + inner_ring_width))^2 +
+                                    (y / (y_radius + inner_ring_width))^2 +
+                                    (z / (z_radius + inner_ring_width))^2 <= 1,
                                   sample(inner_ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = inner_ring_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
   
   # Then do cells in the cluster  
-  bg_spe[["Cell.Type"]] <- ifelse((x_new / x_radius)^2 +
-                                    (y_new / y_radius)^2 +
-                                    (z_new / z_radius)^2 <= 1,
+  bg_spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
+                                    (y / y_radius)^2 +
+                                    (z / z_radius)^2 <= 1,
                                   sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
