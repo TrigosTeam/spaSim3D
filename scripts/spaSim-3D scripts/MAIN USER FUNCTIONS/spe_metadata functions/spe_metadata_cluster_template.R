@@ -1,4 +1,4 @@
-spe_metadata_cluster_template <- function(background_metadata, cluster_type, shape) {
+spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_metadata = NULL) {
   
   
   ### Get template for different shapes
@@ -65,7 +65,16 @@ spe_metadata_cluster_template <- function(background_metadata, cluster_type, sha
     stop("cluster_type parameter must be 'regular', 'ring' or 'double ring'")
   }
   
-  background_metadata[[paste("cluster", length(background_metadata), sep="_")]] <- cluster_metadata
+  # If original_spe_metadata input is not null, add new cluster_metadata to it
+  if (!is.null(original_spe_metadata) && !is.null(original_spe_metadata[["background"]])) {
+    original_spe_metadata[[paste("cluster", length(original_spe_metadata), sep="_")]] <- cluster_metadata    
+      return(original_spe_metadata)
+  }
+  else if (!is.null(original_spe_metadata) && is.null(original_spe_metadata[["background"]])) {
+    original_spe_metadata[[paste("cluster", length(original_spe_metadata) + 1, sep="_")]] <- cluster_metadata
+    return(original_spe_metadata)
+  }
   
-  return(background_metadata)
+  # Else, just return the new cluster_metadata
+  return(list("cluster_1" = cluster_metadata))
 }

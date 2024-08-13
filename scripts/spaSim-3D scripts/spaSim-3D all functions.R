@@ -2542,7 +2542,7 @@ display_parameters <- function(parameter_values) {
 
 ### spe_metadata functions -----------------------------------------------------------------
 
-spe_metadata_background_template <- function(background_type) {
+spe_metadata_background_template <- function(background_type, original_spe_metadata = NULL) {
   
   if (background_type == "random") {
     background_metadata <- list(background = list(background_type = "random",
@@ -2568,12 +2568,25 @@ spe_metadata_background_template <- function(background_type) {
     stop("background_type parameter must be 'random' or 'ordered'.")
   }
   
+  
+  # If original_spe_metadata input is not null, replace its background metadata with new background metadata
+  if (!is.null(original_spe_metadata) && !is.null(original_spe_metadata[["background"]])) {
+    original_spe_metadata[["background"]] <- background_metadata    
+    return(original_spe_metadata)
+  }
+  else if (!is.null(original_spe_metadata) && is.null(original_spe_metadata[["background"]])) {
+    original_spe_metadata <- c(background_metadata, original_spe_metadata)
+    return(original_spe_metadata)
+  }
+  
+  # Else, just return the background_metadata
   return(background_metadata)
 }
 
 
 
-spe_metadata_cluster_template <- function(background_metadata, cluster_type, shape) {
+
+spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_metadata = NULL) {
   
   
   ### Get template for different shapes
@@ -2640,10 +2653,20 @@ spe_metadata_cluster_template <- function(background_metadata, cluster_type, sha
     stop("cluster_type parameter must be 'regular', 'ring' or 'double ring'")
   }
   
-  background_metadata[[paste("cluster", length(background_metadata), sep="_")]] <- cluster_metadata
+  # If original_spe_metadata input is not null, add new cluster_metadata to it
+  if (!is.null(original_spe_metadata) && !is.null(original_spe_metadata[["background"]])) {
+    original_spe_metadata[[paste("cluster", length(original_spe_metadata), sep="_")]] <- cluster_metadata    
+    return(original_spe_metadata)
+  }
+  else if (!is.null(original_spe_metadata) && is.null(original_spe_metadata[["background"]])) {
+    original_spe_metadata[[paste("cluster", length(original_spe_metadata) + 1, sep="_")]] <- cluster_metadata
+    return(original_spe_metadata)
+  }
   
-  return(background_metadata)
+  # Else, just return the new cluster_metadata
+  return(list("cluster_1" = cluster_metadata))
 }
+
 
 
 simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
