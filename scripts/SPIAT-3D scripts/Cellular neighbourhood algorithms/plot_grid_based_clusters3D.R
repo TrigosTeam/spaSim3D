@@ -3,7 +3,7 @@ plot_grid_based_clusters3D <- function(spe_with_grid,
                                        plot_colours = NULL,
                                        feature_colname = "Cell.Type") {
   
-  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  if (is.null(spe_with_grid[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
   ## If no cell types chosen, use all cell types found in data frame
   if (is.null(plot_cell_types)) plot_cell_types <- unique(spe_with_grid[[feature_colname]])
