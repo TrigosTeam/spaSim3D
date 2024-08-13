@@ -93,6 +93,54 @@ prims_algorithm <- function(graph) {
   return(tree_edges)
 }
 
+get_tree_depth <- function(tree_edges) {
+  
+  tree_edges <- data.frame(tree_edges)
+  colnames(tree_edges) <- c("vertex1", "vertex2")
+  tree_edges$depth <- NA # If tree_edge is not NA, we have already accounted for it
+  
+  # Get cells on the 'outskirts' of MST (i.e. leaf_vertices)
+  tree_vertices <- c(tree_edges[ , 1], tree_edges[ , 2])
+  
+  leaf_vertices <- names(table(tree_vertices))[table(tree_vertices) == 1]
+  leaf_vertices <- as.numeric(leaf_vertices)
+  
+  # Start with leaf_vertices
+  curr_vertices <- leaf_vertices
+  curr_depth <- 1
+  
+  while (NA %in% tree_edges$depth) {
+    
+    # New vertices will be those adjacent to the current vertices
+    new_vertices <- c()
+    
+    # Check each current vertex
+    for (vertex in curr_vertices) {
+      # Start with vertex1
+      curr_edges <- which(tree_edges$vertex1 == vertex)
+      
+      tree_edges[curr_edges, "depth"][is.na(tree_edges[curr_edges, "depth"])] <- curr_depth
+      
+      new_vertices <- c(new_vertices, tree_edges[curr_edges, "vertex2"])
+      
+      # Then vertex2
+      curr_edges <- which(tree_edges$vertex2 == vertex)
+      
+      tree_edges[curr_edges, "depth"][is.na(tree_edges[curr_edges, "depth"])] <- curr_depth
+      
+      new_vertices <- c(new_vertices, tree_edges[curr_edges, "vertex1"])
+      
+      # Only keep unique vertices
+      new_vertices <- unique(new_vertices)
+    }
+    
+    curr_depth <- curr_depth + 1
+    curr_vertices <- new_vertices
+  }
+  
+  return(tree_edges)
+}
+
 plot_cells3D <- function(spe,
                          plot_cell_types = NULL,
                          plot_colours = NULL,
@@ -1162,94 +1210,48 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   ## Check cell proportions add up to 1
   if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
-  
   # Number of vertices is always one more than the number of edges for the MST will we make
   n_vertices <- n_edges + 1 
   
-  ## Choose cells within the radius of the centre_loc
-  R <- radius^2
+  ## Generate n_vertices random points with coords inside a sphere with given radius and centre loc. 
+  # Starting with 1000 points inside a cube should be a good enough buffer, unless the user wants more than 1000 edges...
+  # Lets stop them from inputting more than 99
+  max_edges <- 99
+  if (n_edges > max_edges) stop("Only networks with less than 100 edges can be simulated")
+  random_coords <- data.frame(x = runif(1000, centre_loc[1] - radius, centre_loc[1] + radius),
+                              y = runif(1000, centre_loc[2] - radius, centre_loc[2] + radius),
+                              z = runif(1000, centre_loc[3] - radius, centre_loc[3] + radius))
   
-  D <- (df$Cell.X.Position - centre_loc[1])^2 +
-    (df$Cell.Y.Position - centre_loc[2])^2 +
-    (df$Cell.Z.Position - centre_loc[3])^2
+  # Then subset points which are inside the sphere
+  random_coords <- random_coords[(random_coords$x - centre_loc[1])^2 +
+                                   (random_coords$y - centre_loc[2])^2 +
+                                   (random_coords$z- centre_loc[3])^2 <= radius^2, ]
   
-  cells_chosen <- df[D <= R, ]
-  
-  ## Subset further and pick 'n_vertices' cells to represent the vertices
-  cells_chosen <- sample_n(cells_chosen, n_vertices)
-  
-  ## Get coordinates of cells chosen for vertices
-  cells_chosen <- cells_chosen[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+  ## Subset further and pick 'n_vertices' coords to represent the vertices
+  random_coords <- sample_n(random_coords, n_vertices)
   
   ## Get adjacency matrix from points (pairwise distance between points)
   # Assume all points have an edge between each other
   # Assume weight of each edge is equal to the distance between points
-  adj_mat <- -1 * apcluster::negDistMat(cells_chosen)
+  adj_mat <- -1 * apcluster::negDistMat(random_coords)
   
   ## Use prim's algorithm to get edges (i.e. the cells connected by each edge)
   tree_edges <- prims_algorithm(adj_mat)
   
   ### Determine width of cylinders so that cylinders further away are thinner
-  tree_edges <- data.frame(tree_edges)
-  colnames(tree_edges) <- c("Cell1", "Cell2")
-  tree_edges$Depth <- NA # If tree_edge is not NA, we have already accounted for it
-  
-  # Get cells on the 'outskirts' of MST (i.e. leaf_vertices)
-  tree_vertices <- c(tree_edges[ , 1], tree_edges[ , 2])
-  
-  leaf_vertices <- names(table(tree_vertices))[table(tree_vertices) == 1]
-  leaf_vertices <- as.numeric(leaf_vertices)
-  
-  # Start with leaf_vertices
-  curr_vertices <- leaf_vertices
-  curr_depth <- 1
-  
-  while (NA %in% tree_edges$Depth) {
-    
-    # New vertices will be those adjacent to the current vertices
-    new_vertices <- c()
-    
-    # Check each current vertex
-    for (vertex in curr_vertices) {
-      # Start with Cell1
-      curr_edges <- which(tree_edges$Cell1 == vertex)
-      
-      tree_edges[curr_edges, "Depth"][is.na(tree_edges[curr_edges, "Depth"])] <- curr_depth
-      
-      new_vertices <- c(new_vertices, tree_edges[curr_edges, "Cell2"])
-      
-      # Then Cell2
-      curr_edges <- which(tree_edges$Cell2 == vertex)
-      
-      tree_edges[curr_edges, "Depth"][is.na(tree_edges[curr_edges, "Depth"])] <- curr_depth
-      
-      new_vertices <- c(new_vertices, tree_edges[curr_edges, "Cell1"])
-      
-      # Only keep unique vertices
-      new_vertices <- unique(new_vertices)
-    }
-    
-    curr_depth <- curr_depth + 1
-    curr_vertices <- new_vertices
-  }
+  tree_edges <- get_tree_depth(tree_edges)
   
   ## Get cluster properties using edge data
   network_cluster_properties <- list()
-  max_depth <- max(tree_edges[["Depth"]])
+  max_depth <- max(tree_edges[["depth"]])
   
-  for (i in seq(n_vertices - 1)) {
-    start_loc <- as.numeric(cells_chosen[tree_edges[i, "Cell1"], ])
-    end_loc <- as.numeric(cells_chosen[tree_edges[i, "Cell2"], ])
-    curr_width <- (1 - 0.10 * (max_depth - tree_edges[i, "Depth"])) * width # 10% decrease with each depth
+  for (i in seq(n_edges)) {
+    start_loc <- as.numeric(random_coords[tree_edges[i, "vertex1"], ])
+    end_loc <- as.numeric(random_coords[tree_edges[i, "vertex2"], ])
+    curr_width <- (1 - 0.10 * (max_depth - tree_edges[i, "depth"])) * width # 10% decrease with each depth
     
     # Very unlikely case when width is negative, just ignore these cylinders
-    if (width < 0) {
-      width <- 0
-    }
+    if (curr_width < 0) curr_width <- 0
     
     network_cluster_properties[[i]] <- list(shape = "Cylinder",
                                             cluster_cell_types = cluster_cell_types,
@@ -1262,24 +1264,17 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   network_spe <- simulate_clusters3D(bg_spe,
                                      cluster_properties = network_cluster_properties,
                                      plot_image = F)
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]], "Cell.ID" = network_spe[["Cell.ID"]])
   
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
-  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep="_")]] <- cluster_properties
+  cluster_properties[["cylinders"]] <- network_cluster_properties # Include metadata of cylinders used to make up network
+  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep = "_")]] <- cluster_properties
   
-  # Convert data frame to spe object
-  cluster_spe <- SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
-    colData = df,
-    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = metadata)
+  network_spe@metadata <- metadata
   
-  return(cluster_spe)
+  return(network_spe)
 }
-
 
 simulate_network_ring <- function(bg_spe, ring_properties) {  
   
@@ -1313,89 +1308,45 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   ## Check ring cell proportions add up to 1
   if (!all.equal(sum(ring_cell_proportions), 1)) stop("Sum of ring cell proportions is NOT 1")
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
-  
-  # number of vertices is always one more than the number of edges for the MST will we make
+  # Number of vertices is always one more than the number of edges for the MST will we make
   n_vertices <- n_edges + 1 
   
-  ## Subset coordinate within the radius of the centre_loc
-  R <- radius^2
+  ## Generate n_vertices random points with coords inside a sphere with given radius and centre loc. 
+  # Starting with 1000 points inside a cube should be a good enough buffer, unless the user wants more than 1000 edges...
+  # Lets stop them from inputting more than 99
+  max_edges <- 99
+  if (n_edges > max_edges) stop("Only networks with less than 100 edges can be simulated")
+  random_coords <- data.frame(x = runif(1000, centre_loc[1] - radius, centre_loc[1] + radius),
+                              y = runif(1000, centre_loc[2] - radius, centre_loc[2] + radius),
+                              z = runif(1000, centre_loc[3] - radius, centre_loc[3] + radius))
   
-  D <- (df$Cell.X.Position - centre_loc[1])^2 +
-    (df$Cell.Y.Position - centre_loc[2])^2 +
-    (df$Cell.Z.Position - centre_loc[3])^2
+  # Then subset points which are inside the sphere
+  random_coords <- random_coords[(random_coords$x - centre_loc[1])^2 +
+                                   (random_coords$y - centre_loc[2])^2 +
+                                   (random_coords$z- centre_loc[3])^2 <= radius^2, ]
   
-  cells_chosen <- df[D <= R, ]
-  
-  ## Subset further and pick 'n_vertices' cells to represent the vertices
-  cells_chosen <- sample_n(cells_chosen, n_vertices)
-  
-  ## Get coordinates of cells chosen for vertices
-  cells_chosen <- cells_chosen[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+  ## Subset further and pick 'n_vertices' coords to represent the vertices
+  random_coords <- sample_n(random_coords, n_vertices)
   
   ## Get adjacency matrix from points (pairwise distance between points)
   # Assume all points have an edge between each other
   # Assume weight of each edge is equal to the distance between points
-  adj_mat <- -1 * apcluster::negDistMat(cells_chosen)
+  adj_mat <- -1 * apcluster::negDistMat(random_coords)
   
   ## Use prim's algorithm to get edges (i.e. the cells connected by each edge)
   tree_edges <- prims_algorithm(adj_mat)
   
   ### Determine width of cylinders so that cylinders further away are thinner
-  tree_edges <- data.frame(tree_edges)
-  colnames(tree_edges) <- c("Cell1", "Cell2")
-  tree_edges$Depth <- NA # If tree_edge is not NA, we have already accounted for it
-  
-  # Get cells on the 'outskirts' of MST (i.e. leaf_vertices)
-  tree_vertices <- c(tree_edges[ , 1], tree_edges[ , 2])
-  
-  leaf_vertices <- names(table(tree_vertices))[table(tree_vertices) == 1]
-  leaf_vertices <- as.numeric(leaf_vertices)
-  
-  # Start with leaf_vertices
-  curr_vertices <- leaf_vertices
-  curr_depth <- 1
-  
-  while (NA %in% tree_edges$Depth) {
-    
-    # New vertices will be those adjacent to the current vertices
-    new_vertices <- c()
-    
-    # Check each current vertex
-    for (vertex in curr_vertices) {
-      # Start with Cell1
-      curr_edges <- which(tree_edges$Cell1 == vertex)
-      
-      tree_edges[curr_edges, "Depth"][is.na(tree_edges[curr_edges, "Depth"])] <- curr_depth
-      
-      new_vertices <- c(new_vertices, tree_edges[curr_edges, "Cell2"])
-      
-      # Then Cell2
-      curr_edges <- which(tree_edges$Cell2 == vertex)
-      
-      tree_edges[curr_edges, "Depth"][is.na(tree_edges[curr_edges, "Depth"])] <- curr_depth
-      
-      new_vertices <- c(new_vertices, tree_edges[curr_edges, "Cell1"])
-      
-      # Only keep unique vertices
-      new_vertices <- unique(new_vertices)
-    }
-    
-    curr_depth <- curr_depth + 1
-    curr_vertices <- new_vertices
-  }
+  tree_edges <- get_tree_depth(tree_edges)
   
   ## Get cluster properties using edge data
   network_ring_properties <- list()
-  max_depth <- max(tree_edges[["Depth"]])
+  max_depth <- max(tree_edges[["depth"]])
   
   for (i in seq(n_edges)) {
-    start_loc <- as.numeric(cells_chosen[tree_edges[i, "Cell1"], ])
-    end_loc <- as.numeric(cells_chosen[tree_edges[i, "Cell2"], ])
-    curr_width <- (1 - 0.10 * (max_depth - tree_edges[i, "Depth"])) * width # 10% decrease with each depth
+    start_loc <- as.numeric(random_coords[tree_edges[i, "vertex1"], ])
+    end_loc <- as.numeric(random_coords[tree_edges[i, "vertex2"], ])
+    curr_width <- (1 - 0.10 * (max_depth - tree_edges[i, "depth"])) * width # 10% decrease with each depth
     
     # Very unlikely case when width is negative, just ignore these cylinders
     if (width < 0) {
@@ -1417,25 +1368,17 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
                                   ring_properties = network_ring_properties,
                                   plot_image = F)
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]], "Cell.ID" = network_spe[["Cell.ID"]])
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
-  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep="_")]] <- ring_properties
+  ring_properties[["cylinders"]] <- network_ring_properties # Include metadata of cylinders used to make up network
+  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep = "_")]] <- ring_properties
   
-  # Convert data frame to spe object
-  cluster_spe <- SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
-    colData = df,
-    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = metadata)
+  network_spe@metadata <- metadata
   
-  return(cluster_spe)
+  return(network_spe)
   
 }
-
 
 simulate_network_dr <- function(bg_spe, dr_properties) {  
   
@@ -1482,89 +1425,45 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
   ## Check outer ring cell proportions add up to 1
   if (!all.equal(sum(outer_ring_cell_proportions), 1)) stop("Sum of outer ring cell proportions is NOT 1")
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(bg_spe), 
-                   "Cell.Type" = bg_spe[["Cell.Type"]],
-                   "Cell.ID" = bg_spe[["Cell.ID"]])
-  
-  # number of vertices is always one more than the number of edges for the MST will we make
+  # Number of vertices is always one more than the number of edges for the MST will we make
   n_vertices <- n_edges + 1 
   
-  ## Subset coordinate within the radius of the centre_loc
-  R <- radius^2
+  ## Generate n_vertices random points with coords inside a sphere with given radius and centre loc. 
+  # Starting with 1000 points inside a cube should be a good enough buffer, unless the user wants more than 1000 edges...
+  # Lets stop them from inputting more than 99
+  max_edges <- 99
+  if (n_edges > max_edges) stop("Only networks with less than 100 edges can be simulated")
+  random_coords <- data.frame(x = runif(1000, centre_loc[1] - radius, centre_loc[1] + radius),
+                              y = runif(1000, centre_loc[2] - radius, centre_loc[2] + radius),
+                              z = runif(1000, centre_loc[3] - radius, centre_loc[3] + radius))
   
-  D <- (df$Cell.X.Position - centre_loc[1])^2 +
-    (df$Cell.Y.Position - centre_loc[2])^2 +
-    (df$Cell.Z.Position - centre_loc[3])^2
+  # Then subset points which are inside the sphere
+  random_coords <- random_coords[(random_coords$x - centre_loc[1])^2 +
+                                   (random_coords$y - centre_loc[2])^2 +
+                                   (random_coords$z- centre_loc[3])^2 <= radius^2, ]
   
-  cells_chosen <- df[D <= R, ]
-  
-  ## Subset further and pick 'n_vertices' cells to represent the vertices
-  cells_chosen <- sample_n(cells_chosen, n_vertices)
-  
-  ## Get coordinates of cells chosen for vertices
-  cells_chosen <- cells_chosen[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]
+  ## Subset further and pick 'n_vertices' coords to represent the vertices
+  random_coords <- sample_n(random_coords, n_vertices)
   
   ## Get adjacency matrix from points (pairwise distance between points)
   # Assume all points have an edge between each other
   # Assume weight of each edge is equal to the distance between points
-  adj_mat <- -1 * apcluster::negDistMat(cells_chosen)
+  adj_mat <- -1 * apcluster::negDistMat(random_coords)
   
   ## Use prim's algorithm to get edges (i.e. the cells connected by each edge)
   tree_edges <- prims_algorithm(adj_mat)
   
   ### Determine width of cylinders so that cylinders further away are thinner
-  tree_edges <- data.frame(tree_edges)
-  colnames(tree_edges) <- c("Cell1", "Cell2")
-  tree_edges$Depth <- NA # If tree_edge is not NA, we have already accounted for it
-  
-  # Get cells on the 'outskirts' of MST (i.e. leaf_vertices)
-  tree_vertices <- c(tree_edges[ , 1], tree_edges[ , 2])
-  
-  leaf_vertices <- names(table(tree_vertices))[table(tree_vertices) == 1]
-  leaf_vertices <- as.numeric(leaf_vertices)
-  
-  # Start with leaf_vertices
-  curr_vertices <- leaf_vertices
-  curr_depth <- 1
-  
-  while (NA %in% tree_edges$Depth) {
-    
-    # New vertices will be those adjacent to the current vertices
-    new_vertices <- c()
-    
-    # Check each current vertex
-    for (vertex in curr_vertices) {
-      # Start with Cell1
-      curr_edges <- which(tree_edges$Cell1 == vertex)
-      
-      tree_edges[curr_edges, "Depth"][is.na(tree_edges[curr_edges, "Depth"])] <- curr_depth
-      
-      new_vertices <- c(new_vertices, tree_edges[curr_edges, "Cell2"])
-      
-      # Then Cell2
-      curr_edges <- which(tree_edges$Cell2 == vertex)
-      
-      tree_edges[curr_edges, "Depth"][is.na(tree_edges[curr_edges, "Depth"])] <- curr_depth
-      
-      new_vertices <- c(new_vertices, tree_edges[curr_edges, "Cell1"])
-      
-      # Only keep unique vertices
-      new_vertices <- unique(new_vertices)
-    }
-    
-    curr_depth <- curr_depth + 1
-    curr_vertices <- new_vertices
-  }
+  tree_edges <- get_tree_depth(tree_edges)
   
   ## Get cluster properties using edge data
   network_dr_properties <- list()
-  max_depth <- max(tree_edges[["Depth"]])
+  max_depth <- max(tree_edges[["depth"]])
   
   for (i in seq(n_edges)) {
-    start_loc <- as.numeric(cells_chosen[tree_edges[i, "Cell1"], ])
-    end_loc <- as.numeric(cells_chosen[tree_edges[i, "Cell2"], ])
-    curr_width <- (1 - 0.10 * (max_depth - tree_edges[i, "Depth"])) * width # 10% decrease with each depth
+    start_loc <- as.numeric(random_coords[tree_edges[i, "vertex1"], ])
+    end_loc <- as.numeric(random_coords[tree_edges[i, "vertex2"], ])
+    curr_width <- (1 - 0.10 * (max_depth - tree_edges[i, "depth"])) * width # 10% decrease with each depth
     
     # Very unlikely case when width is negative, just ignore these cylinders
     if (width < 0) {
@@ -1589,26 +1488,16 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
                                          dr_properties = network_dr_properties,
                                          plot_image = F)
   
-  ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(network_spe), "Cell.Type" = network_spe[["Cell.Type"]], "Cell.ID" = network_spe[["Cell.ID"]])
-  
   # Update current meta data
   metadata <- bg_spe@metadata
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)
-  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep="_")]] <- dr_properties
+  dr_properties[["cylinders"]] <- network_dr_properties # Include metadata of cylinders used to make up network
+  metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep = "_")]] <- dr_properties
   
-  # Convert data frame to spe object
-  cluster_spe <- SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
-    colData = df,
-    spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
-    metadata = metadata)
+  network_spe@metadata <- metadata
   
-  return(cluster_spe)
-  
+  return(network_spe)
 }
-
-
 
 
 ### Message background integrator strings and function ------------------------------------------------------------
