@@ -21,52 +21,55 @@ simulate_ordered_background_cells3D <- function(n_cells,
   # Obtain distance between each point using MAGIC formula
   s <- ((sqrt(2) * length * width * height)/n_cells)^(1/3)
   
-  # Get value for x_cells (points in 1 row),
-  #               y_cells (points in 1 column) and 
-  #               z_cells (points in 1 vertical thing), rounded
-  x_cells <- round(length/s)
-  y_cells <- round((2 * width)/(sqrt(3) * s))
-  z_cells <- round((3 * height)/(sqrt(6) * s))
+  # Get distance between rows, columns and layers using 's'
+  d_rows <- s
+  d_cols <- (sqrt(3) / 2) * s
+  d_lays <- (sqrt(6) / 3) * s
+  
+  # Get number of rows, columns and layers
+  n_rows <- round(length / d_rows)
+  n_cols <- round(width / d_cols)
+  n_lays <- round(height / d_lays)
   
   # Phase 0. Assume points are on a 3D rectangular grid
-  x <- rep(1:x_cells, y_cells * z_cells) * s
-  y <- rep(rep(1:y_cells, each = x_cells), z_cells) * ((sqrt(3)*s)/2)
-  z <- rep(1:z_cells, each = x_cells * y_cells) * ((sqrt(6)*s)/3)
+  rows <- rep(seq(n_rows), n_cols * n_lays) * d_rows
+  cols <- rep(rep(seq(n_cols), each = n_rows), n_lays) * d_cols
+  lays <- rep(seq(n_lays), each = n_rows * n_cols) * d_lays
   
   # Phase 1. For every odd sheet, every even row shifts by s/2 right
-  if (y_cells %% 2 == 0) {
-    shift <- rep(c(rep(0, x_cells), rep(s/2, x_cells)), y_cells/2)
+  if (n_cols %% 2 == 0) {
+    shift <- rep(c(rep(0, n_rows), rep(s/2, n_rows)), n_cols/2)
   } else {
-    shift <- c(rep(c(rep(0, x_cells), rep(s/2, x_cells)), y_cells/2), rep(0, x_cells))
+    shift <- c(rep(c(rep(0, n_rows), rep(s/2, n_rows)), n_cols/2), rep(0, n_rows))
   }
-  x <- x + c(shift, rep(0, x_cells * y_cells)) # Shift each even row by s/2 right
+  rows <- rows + c(shift, rep(0, n_rows * n_cols)) # Shift each even row by s/2 right
   
   # Phase 2. For every even sheet, odd rows shift s/2 right, all rows shift s/(2*sqrt(3)) up
-  if (y_cells %% 2 == 0) {
-    shift <- rep(c(rep(s/2, x_cells), rep(0, x_cells)), y_cells/2)
+  if (n_cols %% 2 == 0) {
+    shift <- rep(c(rep(s/2, n_rows), rep(0, n_rows)), n_cols/2)
   } else {
-    shift <- c(rep(c(rep(s/2, x_cells), rep(0, x_cells)), y_cells/2), rep(s/2, x_cells))
+    shift <- c(rep(c(rep(s/2, n_rows), rep(0, n_rows)), n_cols/2), rep(s/2, n_rows))
   }
-  x <- x + c(rep(0, x_cells * y_cells), shift) # Shift each odd row by s/2 right
-  y <- y + rep(c(0, s/(2*sqrt(3))), each = x_cells*y_cells) # Shift all rows by s/(2*sqrt(3)) up
+  rows <- rows + c(rep(0, n_rows * n_cols), shift) # Shift each odd row by s/2 right
+  cols <- cols + rep(c(0, s/(2 * sqrt(3))), each = n_rows * n_cols) # Shift all rows by s/(2*sqrt(3)) up
   
   # Get total number of cells (should be roughly equal to n_cells)
-  n_total <- x_cells * y_cells * z_cells
+  n_total <- n_rows * n_cols * n_lays
   
   # Add randomness to the location of the cells
   jitter <- jitter_proportion * s # Jitter is proportional to distance between points in hexagonal grid
-  jitter_x <- runif(n_total, -jitter, jitter)
-  jitter_y <- runif(n_total, -jitter, jitter)
-  jitter_z <- runif(n_total, -jitter, jitter)
+  jitter_row <- runif(n_total, -jitter, jitter)
+  jitter_col <- runif(n_total, -jitter, jitter)
+  jitter_lay <- runif(n_total, -jitter, jitter)
   
-  x <- x + jitter_x
-  y <- y + jitter_y
-  z <- z + jitter_z
+  rows <- rows + jitter_row
+  cols <- cols + jitter_col
+  lays <- lays + jitter_lay
   
   # Put data into data frame
-  df <- data.frame("Cell.X.Position" = x,
-                   "Cell.Y.Position" = y,
-                   "Cell.Z.Position" = z,
+  df <- data.frame("Cell.X.Position" = rows,
+                   "Cell.Y.Position" = cols,
+                   "Cell.Z.Position" = lays,
                    "Cell.Type" = background_cell_type)
   df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
   
@@ -93,7 +96,7 @@ simulate_ordered_background_cells3D <- function(n_cells,
     fig <- plot_cells3D(spe,
                         background_cell_type,
                         "lightgray")
-    print(fig)
+    methods::show(fig)
   }
   
   return(spe)
