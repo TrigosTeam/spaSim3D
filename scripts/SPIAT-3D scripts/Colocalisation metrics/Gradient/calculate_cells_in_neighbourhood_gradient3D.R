@@ -23,7 +23,7 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
   # Add a radius column to the result
   result$radius <- seq(radii)
   
-  if (plot_image) plot_cells_in_neighbourhood_gradient3D(result)
+  if (plot_image) plot_cells_in_neighbourhood_gradient3D(result, reference_cell_type)
   
   return(result)
 }

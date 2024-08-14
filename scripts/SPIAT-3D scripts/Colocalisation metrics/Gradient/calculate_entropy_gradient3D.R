@@ -24,7 +24,7 @@ calculate_entropy_gradient3D <- function(spe,
   
   if (plot_image) {
     expected_entropy <- calculate_entropy_background3D(spe, target_cell_types, feature_colname)
-    plot_entropy_gradient3D(result, expected_entropy)
+    plot_entropy_gradient3D(result, expected_entropy, reference_cell_type, target_cell_types)
   }
   
   return(result)

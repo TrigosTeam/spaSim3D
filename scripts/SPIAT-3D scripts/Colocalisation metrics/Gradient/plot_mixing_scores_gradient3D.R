@@ -6,7 +6,9 @@ plot_mixing_scores_gradient3D <- function(mixing_scores_gradient_df) {
   
   fig1 <- ggplot(plot_result1, aes(x = radius, y = value, color = variable)) +
     geom_line() +
-    labs(x = "Radius", y = "Normalised mixing score (NMS)") +
+    labs(title = "Normalised mixing score (NMS) gradient", 
+         subtitle = paste("Reference: ", mixing_scores_gradient_df$ref_cell_type[1], ", Target: ", mixing_scores_gradient_df$tar_cell_type[1], sep = ""), 
+         x = "Radius", y = "NMS") +
     scale_colour_discrete(name = "", labels = c("Observed NMS", "Expected CSR NMS")) +
     theme_bw()
   
@@ -19,7 +21,9 @@ plot_mixing_scores_gradient3D <- function(mixing_scores_gradient_df) {
   
   fig2 <- ggplot(plot_result2, aes(x = radius, y = value, color = variable)) +
     geom_line() +
-    labs(x = "Radius", y = "Mixing score (MS)") +
+    labs(title = "Mixing score (MS) gradient", 
+         subtitle = paste("Reference: ", mixing_scores_gradient_df$ref_cell_type[1], ", Target: ", mixing_scores_gradient_df$tar_cell_type[1], sep = ""), 
+         x = "Radius", y = "MS") +
     scale_colour_discrete(name = "", labels = c("Observed MS", "Expected CSR MS  ")) +
     theme_bw()
   

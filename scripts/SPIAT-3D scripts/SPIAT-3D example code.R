@@ -85,7 +85,7 @@ cross_K_gradient <- calculate_cross_K_gradient3D(spe1,
                                                  target_cell_type = "Immune",
                                                  radii = 50)
 
-plot_cross_K_gradient_ratio3D(cross_K_gradient_df = cross_K_gradient)
+plot_cross_K_gradient_ratio3D(cross_K_gradient_df = cross_K_gradient, reference_cell_type = "Tumour", target_cell_type = "Immune")
 
 # Kcross_intersection <- calculate_Kcross_intersection3D(Kcross_results)
 # 

@@ -22,7 +22,7 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   # Plot
-  if (plot_image) plot_cells_in_neighbourhood_proportions_gradient3D(result)
+  if (plot_image) plot_cells_in_neighbourhood_proportions_gradient3D(result, reference_cell_type)
   
   return(result)
 }
