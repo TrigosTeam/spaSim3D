@@ -23,7 +23,10 @@ calculate_cross_K_gradient3D <- function(spe,
   # Add a radius column to the result
   result$radius <- seq(radii)
   
-  if (plot_image) plot_cross_K_gradient3D(result, reference_cell_type, target_cell_type)
+  if (plot_image) {
+    plot_cross_K_gradient3D(result, reference_cell_type, target_cell_type)
+    plot_cross_K_gradient_ratio3D(result, reference_cell_type, target_cell_type)
+  }
   
   return(result)
 }
