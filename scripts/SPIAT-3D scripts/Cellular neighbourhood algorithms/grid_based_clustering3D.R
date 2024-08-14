@@ -75,7 +75,10 @@ grid_based_clustering3D <- function(spe,
                                                                         c())
     
     # Perform the recursive algorithm on each grid prism potentially apart of the cluster to get a more precise shape of each cluster
-    curr_result <- sapply(as.numeric(grid_prisms_in_cluster), function(x) grid_based_cluster_recursion3D(spe,
+    # Create data frame with spatial coords and cell types as columns. Use this as input
+    df <- spe_coords
+    df[[feature_colname]] <- spe[[feature_colname]] 
+    curr_result <- sapply(as.numeric(grid_prisms_in_cluster), function(x) grid_based_cluster_recursion3D(df,
                                                                                                          cell_types_of_interest,
                                                                                                          0.75 * maximum_cell_proportion,
                                                                                                          ((x - 1) %% n_splits) * d_row,

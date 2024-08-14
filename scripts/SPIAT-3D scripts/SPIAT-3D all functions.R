@@ -1894,7 +1894,10 @@ grid_based_clustering3D <- function(spe,
                                                                         c())
     
     # Perform the recursive algorithm on each grid prism potentially apart of the cluster to get a more precise shape of each cluster
-    curr_result <- sapply(as.numeric(grid_prisms_in_cluster), function(x) grid_based_cluster_recursion3D(spe,
+    # Create data frame with spatial coords and cell types as columns. Use this as input
+    df <- spe_coords
+    df[[feature_colname]] <- spe[[feature_colname]] 
+    curr_result <- sapply(as.numeric(grid_prisms_in_cluster), function(x) grid_based_cluster_recursion3D(df,
                                                                                                          cell_types_of_interest,
                                                                                                          0.75 * maximum_cell_proportion,
                                                                                                          ((x - 1) %% n_splits) * d_row,
@@ -1903,7 +1906,7 @@ grid_based_clustering3D <- function(spe,
                                                                                                          d_row, d_col, d_lay,
                                                                                                          feature_colname,
                                                                                                          data.frame()))
-
+    
     
     
     if (is.array(curr_result))  {
@@ -1914,7 +1917,7 @@ grid_based_clustering3D <- function(spe,
     else {
       result[[n_clusters]] <- rbindlist(curr_result)
     }
-
+    
     n_clusters <- n_clusters + 1
     
     # Remove grid prisms which have just been examined
@@ -1922,7 +1925,7 @@ grid_based_clustering3D <- function(spe,
                                                                        grid_prisms_in_cluster)]
     
   }
-
+  
   ## Add all the information to the spe
   spe@metadata[["grid_prisms"]] <- result
   spe$grid_based_cluster <- 0
@@ -1958,6 +1961,7 @@ grid_based_clustering3D <- function(spe,
   
   return(spe)
 }
+
 
 
 
@@ -2049,7 +2053,7 @@ calculate_grid_prism_numbers_in_cluster3D <- function(curr_grid_prism_number,
 
 
 
-grid_based_cluster_recursion3D <- function(spe, 
+grid_based_cluster_recursion3D <- function(df,  # Using a df is much faster than using a spe
                                            cell_types_of_interest,
                                            threshold_cell_proportion,
                                            x, y, z, l, w, h,
@@ -2057,23 +2061,21 @@ grid_based_cluster_recursion3D <- function(spe,
                                            answer) {
   
   # Look at cells only in the current grid prism
-  spe_coords <- data.frame(spatialCoords(spe))
-  
-  spe <- spe[ , spe_coords$Cell.X.Position >= x &
-                spe_coords$Cell.X.Position < (x + l) &
-                spe_coords$Cell.Y.Position >= y &
-                spe_coords$Cell.Y.Position < (y + w) &
-                spe_coords$Cell.Z.Position >= z &
-                spe_coords$Cell.Z.Position < (z + h)]
+  df <- df[df$Cell.X.Position >= x &
+             df$Cell.X.Position < (x + l) &
+             df$Cell.Y.Position >= y &
+             df$Cell.Y.Position < (y + w) &
+             df$Cell.Z.Position >= z &
+             df$Cell.Z.Position < (z + h), ]
   
   # Get cell types from spe grid prism
-  spe_cell_types <- spe[[feature_colname]]
+  cell_types <- df[[feature_colname]]
   
   # Number of cells in prism is getting too small
-  if (length(spe_cell_types) <= 2) return(data.frame())
+  if (length(cell_types) <= 2) return(data.frame())
   
   # Get total cell proportion for chosen cell_types_of_interest
-  cell_proportion <- mean(spe_cell_types %in% cell_types_of_interest)
+  cell_proportion <- mean(cell_types %in% cell_types_of_interest)
   
   # Keep grid prism if cell proportion is above the threshold cell proportion
   if (cell_proportion >= threshold_cell_proportion) {
@@ -2083,7 +2085,7 @@ grid_based_cluster_recursion3D <- function(spe,
   # some cell_types_of_interest still in the grid prism, check sub-grid prisms (8 to check)
   else if (cell_proportion > 0) {
     # (0, 0, 0)
-    answer <- rbind(answer, grid_based_cluster_recursion3D(spe,
+    answer <- rbind(answer, grid_based_cluster_recursion3D(df,
                                                            cell_types_of_interest,
                                                            threshold_cell_proportion,
                                                            x, y, z, l/2, w/2, h/2,
@@ -2091,7 +2093,7 @@ grid_based_cluster_recursion3D <- function(spe,
                                                            data.frame()))
     
     # (0.5, 0, 0)
-    answer <- rbind(answer, grid_based_cluster_recursion3D(spe,
+    answer <- rbind(answer, grid_based_cluster_recursion3D(df,
                                                            cell_types_of_interest,
                                                            threshold_cell_proportion,
                                                            x + l/2, y, z, l/2, w/2, h/2,
@@ -2099,14 +2101,14 @@ grid_based_cluster_recursion3D <- function(spe,
                                                            data.frame()))
     
     # (0, 0.5, 0)
-    answer <- rbind(answer, grid_based_cluster_recursion3D(spe,
+    answer <- rbind(answer, grid_based_cluster_recursion3D(df,
                                                            cell_types_of_interest,
                                                            threshold_cell_proportion,
                                                            x, y + w/2, z, l/2, w/2, h/2,
                                                            feature_colname,
                                                            data.frame()))
     # (0.5, 0.5, 0)
-    answer <- rbind(answer, grid_based_cluster_recursion3D(spe,
+    answer <- rbind(answer, grid_based_cluster_recursion3D(df,
                                                            cell_types_of_interest,
                                                            threshold_cell_proportion,
                                                            x + l/2, y + w/2, z, l/2, w/2, h/2,
@@ -2114,7 +2116,7 @@ grid_based_cluster_recursion3D <- function(spe,
                                                            data.frame()))
     
     # (0, 0, 0.5)
-    answer <- rbind(answer, grid_based_cluster_recursion3D(spe,
+    answer <- rbind(answer, grid_based_cluster_recursion3D(df,
                                                            cell_types_of_interest,
                                                            threshold_cell_proportion,
                                                            x, y, z + h/2, l/2, w/2, h/2,
@@ -2122,7 +2124,7 @@ grid_based_cluster_recursion3D <- function(spe,
                                                            data.frame()))
     
     # (0.5, 0, 0.5)
-    answer <- rbind(answer, grid_based_cluster_recursion3D(spe,
+    answer <- rbind(answer, grid_based_cluster_recursion3D(df,
                                                            cell_types_of_interest,
                                                            threshold_cell_proportion,
                                                            x + l/2, y, z + h/2, l/2, w/2, h/2,
@@ -2130,14 +2132,14 @@ grid_based_cluster_recursion3D <- function(spe,
                                                            data.frame()))
     
     # (0, 0.5, 0.5)
-    answer <- rbind(answer, grid_based_cluster_recursion3D(spe,
+    answer <- rbind(answer, grid_based_cluster_recursion3D(df,
                                                            cell_types_of_interest,
                                                            threshold_cell_proportion,
                                                            x, y + w/2, z + h/2, l/2, w/2, h/2,
                                                            feature_colname,
                                                            data.frame()))
     # (0.5, 0.5, 0.5)
-    answer <- rbind(answer, grid_based_cluster_recursion3D(spe,
+    answer <- rbind(answer, grid_based_cluster_recursion3D(df,
                                                            cell_types_of_interest,
                                                            threshold_cell_proportion,
                                                            x + l/2, y + w/2, z + h/2, l/2, w/2, h/2,
