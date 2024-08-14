@@ -20,7 +20,7 @@ simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
   
   bg_spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
                                     (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 < radius^2,
+                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
                                   sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   

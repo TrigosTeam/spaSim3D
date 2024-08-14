@@ -589,7 +589,7 @@ simulate_sphere_cluster <- function(bg_spe, cluster_properties) {
   
   bg_spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
                                     (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 < radius^2,
+                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
                                   sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
@@ -636,14 +636,14 @@ simulate_sphere_ring <- function(bg_spe, ring_properties) {
   # Start with cells in ring  
   bg_spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
                                     (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 < (radius + ring_width)^2,
+                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= (radius + ring_width)^2,
                                   sample(ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = ring_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
   # Then do cells in the cluster 
   bg_spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
                                     (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 < radius^2,
+                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
                                   sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
@@ -703,21 +703,21 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
   # Start with cells in outer ring  
   bg_spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
                                     (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 < (radius + inner_ring_width + outer_ring_width)^2,
+                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= (radius + inner_ring_width + outer_ring_width)^2,
                                   sample(outer_ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = outer_ring_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
   # Then do cells in inner ring  
   bg_spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
                                     (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 < (radius + inner_ring_width)^2,
+                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= (radius + inner_ring_width)^2,
                                   sample(inner_ring_cell_types, size = ncol(bg_spe), replace = TRUE, prob = inner_ring_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
   # Then do cells in the cluster 
   bg_spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
                                     (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 < radius^2,
+                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
                                   sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
                                   bg_spe[["Cell.Type"]])
   
