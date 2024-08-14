@@ -2,8 +2,7 @@ calculate_entropy3D <- function(spe,
                                 reference_cell_type,
                                 target_cell_types,
                                 radius,
-                                feature_colname = "Cell.Type",
-                                plot_image = TRUE) {
+                                feature_colname = "Cell.Type") {
   
   # Check
   if (length(target_cell_types) < 2) stop("Need at least two target cell types")
@@ -23,12 +22,6 @@ calculate_entropy3D <- function(spe,
   cells_in_neighbourhood_proportion_df$entropy <- ifelse(cells_in_neighbourhood_proportion_df$total > 0 & is.nan(cells_in_neighbourhood_proportion_df$entropy), 
                                                          0,
                                                          cells_in_neighbourhood_proportion_df$entropy)
-  
-  ## Plot
-  if (plot_image) {
-    fig <- plot_entropy_violin3D(cells_in_neighbourhood_df)
-    methods::show(fig)
-  }
   
   return(cells_in_neighbourhood_proportion_df)
 }

@@ -690,34 +690,7 @@ calculate_entropy3D <- function(spe,
                                                          0,
                                                          cells_in_neighbourhood_proportion_df$entropy)
   
-  ## Plot
-  if (plot_image) {
-    fig <- plot_entropy_violin3D(cells_in_neighbourhood_df)
-    methods::show(fig)
-  }
-  
   return(cells_in_neighbourhood_proportion_df)
-}
-
-
-
-
-## For scales parameter, use "free_x" or "free". "free_y" looks silly
-plot_entropy_violin3D <- function(entropy_df, scales = "free_x") {
-  
-  # setting these variables to NULL as otherwise get "no visible binding for global variable" in R check
-  entropy <- NULL
-  
-  fig <- ggplot(entropy_df, aes(x = "", y = entropy)) +
-    geom_violin() +
-    theme_bw() +
-    labs(x = "", y = "Entropy") +
-    theme(axis.ticks.x = element_blank()) +
-    stat_summary(fun.data = "mean_sdl", fun.args = list(mult= 1), colour = "red")
-  
-  message("Plot shows mean ± sd")
-  
-  return(fig)
 }
 
 

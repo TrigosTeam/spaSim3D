@@ -102,8 +102,7 @@ print(entropy_background)
 entropy_result <- calculate_entropy3D(spe1,
                                       radius = 20,
                                       reference_cell_type = "Tumour",
-                                      target_cell_types = c("Tumour", "Immune"),
-                                      plot_image = F)
+                                      target_cell_types = c("Tumour", "Immune"))
 
 
 
