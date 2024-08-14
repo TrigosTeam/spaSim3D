@@ -19,12 +19,12 @@ simulate_ordered_background_cells3D <- function(n_cells,
   }
   
   # Obtain distance between each point using MAGIC formula
-  s <- ((sqrt(2) * length * width * height)/n_cells)^(1/3)
+  d_cells <- ((sqrt(2) * length * width * height)/n_cells)^(1/3)
   
-  # Get distance between rows, columns and layers using 's'
-  d_rows <- s
-  d_cols <- (sqrt(3) / 2) * s
-  d_lays <- (sqrt(6) / 3) * s
+  # Get distance between rows, columns and layers using 'd_cells'
+  d_rows <- d_cells
+  d_cols <- (sqrt(3) / 2) * d_cells
+  d_lays <- (sqrt(6) / 3) * d_cells
   
   # Get number of rows, columns and layers
   n_rows <- round(length / d_rows)
@@ -36,28 +36,28 @@ simulate_ordered_background_cells3D <- function(n_cells,
   cols <- rep(rep(seq(n_cols), each = n_rows), n_lays) * d_cols
   lays <- rep(seq(n_lays), each = n_rows * n_cols) * d_lays
   
-  # Phase 1. For every odd sheet, every even row shifts by s/2 right
+  # Phase 1. For every odd sheet, every even row shifts by d_cells/2 right
   if (n_cols %% 2 == 0) {
-    shift <- rep(c(rep(0, n_rows), rep(s/2, n_rows)), n_cols/2)
+    shift <- rep(c(rep(0, n_rows), rep(d_cells/2, n_rows)), n_cols/2)
   } else {
-    shift <- c(rep(c(rep(0, n_rows), rep(s/2, n_rows)), n_cols/2), rep(0, n_rows))
+    shift <- c(rep(c(rep(0, n_rows), rep(d_cells/2, n_rows)), n_cols/2), rep(0, n_rows))
   }
-  rows <- rows + c(shift, rep(0, n_rows * n_cols)) # Shift each even row by s/2 right
+  rows <- rows + c(shift, rep(0, n_rows * n_cols)) # Shift each even row by d_cells/2 right
   
-  # Phase 2. For every even sheet, odd rows shift s/2 right, all rows shift s/(2*sqrt(3)) up
+  # Phase 2. For every even sheet, odd rows shift d_cells/2 right, all rows shift d_cells/(2*sqrt(3)) up
   if (n_cols %% 2 == 0) {
-    shift <- rep(c(rep(s/2, n_rows), rep(0, n_rows)), n_cols/2)
+    shift <- rep(c(rep(d_cells/2, n_rows), rep(0, n_rows)), n_cols/2)
   } else {
-    shift <- c(rep(c(rep(s/2, n_rows), rep(0, n_rows)), n_cols/2), rep(s/2, n_rows))
+    shift <- c(rep(c(rep(d_cells/2, n_rows), rep(0, n_rows)), n_cols/2), rep(d_cells/2, n_rows))
   }
-  rows <- rows + c(rep(0, n_rows * n_cols), shift) # Shift each odd row by s/2 right
-  cols <- cols + rep(c(0, s/(2 * sqrt(3))), each = n_rows * n_cols) # Shift all rows by s/(2*sqrt(3)) up
+  rows <- rows + c(rep(0, n_rows * n_cols), shift) # Shift each odd row by d_cells/2 right
+  cols <- cols + rep(c(0, d_cells/(2 * sqrt(3))), each = n_rows * n_cols) # Shift all rows by d_cells/(2*sqrt(3)) up
   
   # Get total number of cells (should be roughly equal to n_cells)
   n_total <- n_rows * n_cols * n_lays
   
   # Add randomness to the location of the cells
-  jitter <- jitter_proportion * s # Jitter is proportional to distance between points in hexagonal grid
+  jitter <- jitter_proportion * d_cells # Jitter is proportional to distance between points in hexagonal grid
   jitter_row <- runif(n_total, -jitter, jitter)
   jitter_col <- runif(n_total, -jitter, jitter)
   jitter_lay <- runif(n_total, -jitter, jitter)
