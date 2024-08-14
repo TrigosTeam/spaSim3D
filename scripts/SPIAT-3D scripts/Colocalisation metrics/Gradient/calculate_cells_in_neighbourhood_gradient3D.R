@@ -23,17 +23,7 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
   # Add a radius column to the result
   result$radius <- seq(radii)
   
-  if (plot_image) {
-    plot_result <- reshape2::melt(result, "radius")
-    
-    fig <- ggplot(plot_result, aes(radius, value, color = variable)) + 
-      geom_line() + 
-      labs(x = "Radius", y = "Average cells in neighbourhood") + 
-      scale_color_discrete(name = "Cell type") +
-      theme_bw()
-      
-    methods::show(fig)
-  }
+  if (plot_image) plot_cells_in_neighbourhood_gradient3D(result)
   
   return(result)
 }

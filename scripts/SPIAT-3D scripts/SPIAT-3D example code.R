@@ -116,6 +116,12 @@ entropy_gradient <- calculate_entropy_gradient3D(spe1,
                                                  plot_image = TRUE)
 
 
+### Using all_single_radius and all_gradient functions
+
+all_single_radius_result <- calculate_all_single_radius_cc_metrics3D(spe1, "Tumour", c("Tumour", "Immune"), 20)
+
+all_gradient_result <- calculate_all_gradient_cc_metrics3D(spe1, "Tumour", c("Tumour", "Immune"), 50)
+
 
 ### 3. Spatial Heterogeneity metrics ------------------------------------------
 

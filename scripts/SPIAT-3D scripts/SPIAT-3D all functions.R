@@ -781,7 +781,6 @@ calculate_cross_K3D <- function(spe,
   return(result)
 }
 
-
 calculate_mixing_scores_gradient3D <- function(spe, 
                                                reference_cell_type, 
                                                target_cell_type, 
@@ -812,39 +811,42 @@ calculate_mixing_scores_gradient3D <- function(spe,
   # Add a radius column to the result
   result$radius <- seq(radii)
   
-  if (plot_image) {
-    plot_result1 <- result
-    plot_result1$expected_normalised_mixing_score <- 1
-    plot_result1 <- reshape2::melt(plot_result1, "radius", c("normalised_mixing_score", "expected_normalised_mixing_score"))
-    
-    fig1 <- ggplot(plot_result1, aes(x = radius, y = value, color = variable)) +
-      geom_line() +
-      labs(x = "Radius", y = "Normalised mixing score (NMS)") +
-      scale_colour_discrete(name = "", labels = c("Observed NMS", "Expected CSR NMS")) +
-      theme_bw()
-    
-    
-    plot_result2 <- result
-    n_tar_cells <- plot_result2$n_tar_cells[1]
-    n_ref_cells <- plot_result2$n_ref_cells[1]
-    plot_result2$expected_mixing_score <- n_tar_cells * n_ref_cells / ((n_ref_cells - 1) * n_ref_cells / 2)
-    plot_result2 <- reshape2::melt(plot_result2, "radius", c("mixing_score", "expected_mixing_score"))
-    
-    fig2 <- ggplot(plot_result2, aes(x = radius, y = value, color = variable)) +
-      geom_line() +
-      labs(x = "Radius", y = "Mixing score (MS)") +
-      scale_colour_discrete(name = "", labels = c("Observed MS", "Expected CSR MS  ")) +
-      theme_bw()
-    
-    combined_fig <- plot_grid(fig1, fig2, nrow = 2)
-    
-    methods::show(combined_fig)
-  }
+  if (plot_image) plot_mixing_scores_gradient3D(result)
   
   return(result)
 }
 
 
+plot_mixing_scores_gradient3D <- function(mixing_scores_gradient_df) {
+  
+  plot_result1 <- mixing_scores_gradient_df
+  plot_result1$expected_normalised_mixing_score <- 1
+  plot_result1 <- reshape2::melt(plot_result1, "radius", c("normalised_mixing_score", "expected_normalised_mixing_score"))
+  
+  fig1 <- ggplot(plot_result1, aes(x = radius, y = value, color = variable)) +
+    geom_line() +
+    labs(x = "Radius", y = "Normalised mixing score (NMS)") +
+    scale_colour_discrete(name = "", labels = c("Observed NMS", "Expected CSR NMS")) +
+    theme_bw()
+  
+  
+  plot_result2 <- mixing_scores_gradient_df
+  n_tar_cells <- plot_result2$n_tar_cells[1]
+  n_ref_cells <- plot_result2$n_ref_cells[1]
+  plot_result2$expected_mixing_score <- n_tar_cells * n_ref_cells / ((n_ref_cells - 1) * n_ref_cells / 2)
+  plot_result2 <- reshape2::melt(plot_result2, "radius", c("mixing_score", "expected_mixing_score"))
+  
+  fig2 <- ggplot(plot_result2, aes(x = radius, y = value, color = variable)) +
+    geom_line() +
+    labs(x = "Radius", y = "Mixing score (MS)") +
+    scale_colour_discrete(name = "", labels = c("Observed MS", "Expected CSR MS  ")) +
+    theme_bw()
+  
+  combined_fig <- plot_grid(fig1, fig2, nrow = 2)
+  
+  methods::show(combined_fig)
+  
+}
 
 
 calculate_cells_in_neighbourhood_gradient3D <- function(spe, 
@@ -872,22 +874,24 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
   # Add a radius column to the result
   result$radius <- seq(radii)
   
-  if (plot_image) {
-    plot_result <- reshape2::melt(result, "radius")
-    
-    fig <- ggplot(plot_result, aes(radius, value, color = variable)) + 
-      geom_line() + 
-      labs(x = "Radius", y = "Average cells in neighbourhood") + 
-      scale_color_discrete(name = "Cell type") +
-      theme_bw()
-    
-    methods::show(fig)
-  }
+  if (plot_image) plot_cells_in_neighbourhood_gradient3D(result)
   
   return(result)
 }
 
-
+plot_cells_in_neighbourhood_gradient3D <- function(cells_in_neighbourhood_gradient_df) {
+  
+  plot_result <- reshape2::melt(cells_in_neighbourhood_gradient_df, "radius")
+  
+  fig <- ggplot(plot_result, aes(radius, value, color = variable)) + 
+    geom_line() + 
+    labs(x = "Radius", y = "Average cells in neighbourhood") + 
+    scale_color_discrete(name = "Cell type") +
+    theme_bw()
+  
+  methods::show(fig)
+  
+}
 
 
 calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe, 
@@ -914,21 +918,28 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   # Plot
-  if (plot_image) {
-    plot_result <- reshape2::melt(result, id.vars = c("radius"))
-    fig <- ggplot(plot_result, aes(radius, value, color = variable)) +
-      geom_point() +
-      geom_line() +
-      labs(title = "Neighbourhood cell proportion gradients", x = "Radius", y = "Cell proportion", color = "Cell type") +
-      theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5)) +
-      ylim(0, 1)
-    
-    methods::show(fig)
-  }
+  if (plot_image) plot_cells_in_neighbourhood_proportions_gradient3D(result)
   
   return(result)
 }
+
+
+
+plot_cells_in_neighbourhood_proportions_gradient3D <- function(cells_in_neighbourhood_proportions_gradient_df) {
+  
+  plot_result <- reshape2::melt(cells_in_neighbourhood_proportions_gradient_df, id.vars = c("radius"))
+  fig <- ggplot(plot_result, aes(radius, value, color = variable)) +
+    geom_point() +
+    geom_line() +
+    labs(title = "Neighbourhood cell proportion gradients", x = "Radius", y = "Cell proportion", color = "Cell type") +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    ylim(0, 1)
+  
+  methods::show(fig)
+  
+}
+
 
 
 
@@ -958,21 +969,45 @@ calculate_cross_K_gradient3D <- function(spe,
   # Add a radius column to the result
   result$radius <- seq(radii)
   
-  if (plot_image) {
-    plot_result <- reshape2::melt(result, "radius", c("observed_cross_K", "expected_cross_K", "cross_K_ratio"))
-    plot_result <- plot_result[plot_result$variable != "cross_K_ratio", ]
-    
-    fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
-      geom_line() +
-      labs(x = "Radius", y = "Cross K-function value") +
-      scale_colour_discrete(name = "", labels = c("Observed cross K", "Expected CSR cross K")) +
-      theme_bw()
-    
-    methods::show(fig)
-    
-  }
+  if (plot_image) plot_cross_K_gradient3D(result)
   
   return(result)
+}
+
+plot_cross_K_gradient3D <- function(cross_K_gradient_df) {
+  
+  plot_result <- reshape2::melt(cross_K_gradient_df, "radius", c("observed_cross_K", "expected_cross_K", "cross_K_ratio"))
+  plot_result <- plot_result[plot_result$variable != "cross_K_ratio", ]
+  
+  fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
+    geom_line() +
+    labs(x = "Radius", y = "Cross K-function value") +
+    scale_colour_discrete(name = "", labels = c("Observed cross K", "Expected CSR cross K")) +
+    theme_bw()
+  
+  methods::show(fig)
+  
+}
+
+
+
+
+plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_df) {
+  
+  plot_result <- data.frame(radius = cross_K_gradient_df$radius,
+                            observed_cross_K_gradient_ratio = cross_K_gradient_df$cross_K_ratio,
+                            expected_cross_K_gradient_ratio = 1)
+  
+  plot_result <- reshape2::melt(plot_result, "radius", c("observed_cross_K_gradient_ratio", "expected_cross_K_gradient_ratio"))
+  
+  fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
+    geom_line() +
+    labs(x = "Radius", y = "Cross K-function ratio") +
+    scale_colour_discrete(name = "", labels = c("Observed cross K ratio", "Expected CSR cross K ratio")) +
+    theme_bw()
+  
+  methods::show(fig)
+  
 }
 
 
@@ -1001,9 +1036,20 @@ calculate_entropy_gradient3D <- function(spe,
   result$radius <- seq(radii)
   
   if (plot_image) {
-    
-    plot_result <- result
-    plot_result$expected_entropy <- calculate_entropy_background3D(spe, target_cell_types, feature_colname)
+    expected_entropy <- calculate_entropy_background3D(spe, target_cell_types, feature_colname)
+    plot_entropy_gradient3D(result, expected_entropy)
+  }
+  
+  return(result)
+}
+
+
+plot_entropy_gradient3D <- function(entropy_gradient_df, expected_entropy = NULL) {
+  
+  plot_result <- entropy_gradient_df
+  
+  if (!is.null(expected_entropy)) {
+    plot_result$expected_entropy <- expected_entropy
     plot_result <- reshape2::melt(plot_result, "radius", c("entropy", "expected_entropy"))
     
     fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
@@ -1012,32 +1058,21 @@ calculate_entropy_gradient3D <- function(spe,
       scale_colour_discrete(name = "", labels = c("Observed entropy", "Expected CSR entropy")) +
       theme_bw()
     
-    methods::show(fig)
   }
-  
-  return(result)
-}
-
-
-
-
-plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_df) {
-  
-  plot_result <- data.frame(radius = cross_K_gradient_df$radius,
-                            observed_cross_K_gradient_ratio = cross_K_gradient_df$cross_K_ratio,
-                            expected_cross_K_gradient_ratio = 1)
-  
-  plot_result <- reshape2::melt(plot_result, "radius", c("observed_cross_K_gradient_ratio", "expected_cross_K_gradient_ratio"))
-  
-  fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
-    geom_line() +
-    labs(x = "Radius", y = "Cross K-function ratio") +
-    scale_colour_discrete(name = "", labels = c("Observed cross K ratio", "Expected CSR cross K ratio")) +
-    theme_bw()
+  else {
+    plot_result <- reshape2::melt(plot_result, "radius", c("entropy"))
+    
+    fig <- ggplot(plot_result, aes(x = radius, y = value, color = variable)) +
+      geom_line() +
+      labs(x = "Radius", y = "Entropy") +
+      scale_colour_discrete(name = "", labels = c("Observed entropy")) +
+      theme_bw()
+  }
   
   methods::show(fig)
   
 }
+
 
 ### Calculate all single radius cell-colocalisation metrics
 # If a function only requires one target cell type, iterate through each cell type in target_cell_types, else use all target_cell_types
@@ -1150,6 +1185,7 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
   return(result)
 }
 
+
 calculate_all_gradient_cc_metrics3D <- function(spe, 
                                                 reference_cell_type, 
                                                 target_cell_types, 
@@ -1212,6 +1248,25 @@ calculate_all_gradient_cc_metrics3D <- function(spe,
       result[["cross_K"]][[target_cell_type]][radius, ] <- df[["cross_K"]][[target_cell_type]]
     }
   }
+  
+  ## Add radius column to each data frame
+  result[["cells_in_neighbourhood"]]$radius <- seq(radii)
+  result[["cells_in_neighbourhood_proportion"]]$radius <- seq(radii)
+  result[["entropy"]]$radius <- seq(radii)
+  for (target_cell_type in names(df[["mixing_score"]])) {
+    result[["mixing_score"]][[target_cell_type]]$radius <- seq(radii)
+  }
+  
+  for (target_cell_type in names(df[["cross_K"]])) {
+    result[["cross_K"]][[target_cell_type]]$radius <- seq(radii)
+  }
+  
+  
+  ## Plot
+  if (plot_image) {
+    
+  }
+  
   return(result)
 }
 
