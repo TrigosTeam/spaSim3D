@@ -182,6 +182,7 @@ calculate_volume_of_clusters3D(spe_alpha_hull, cluster_colname = "alpha_hull_clu
 
 calculate_center_of_clusters3D(spe_alpha_hull, "alpha_hull_cluster")
 
+spe_alpha_hull <- calculate_border_of_clusters3D(spe_alpha_hull, 8, "alpha_hull_cluster")
 
 
 spe_dbscan <- dbscan_clustering3D(spe1, c("Tumour", "Immune"), radius = 13, minimum_cells_in_radius = 25)
@@ -195,6 +196,8 @@ dbscan_min_distances <- calculate_minimum_distances_to_clusters3D(spe_dbscan, cl
 calculate_volume_of_clusters3D(spe_dbscan, cluster_colname = "dbscan_cluster")
 
 calculate_center_of_clusters3D(spe_dbscan, "dbscan_cluster")
+
+spe_dbscan <- calculate_border_of_clusters3D(spe_dbscan, 8, "dbscan_cluster")
 
 
 spe_grid <- grid_based_clustering3D(spe1, cell_types_of_interest = c("Tumour", "Immune"), n_splits = 10)
@@ -211,6 +214,7 @@ calculate_volume_of_clusters3D(spe_grid, cluster_colname = "grid_based_cluster")
 
 calculate_center_of_clusters3D(spe_grid, "grid_based_cluster")
 
+spe_grid <- calculate_border_of_clusters3D(spe_grid, 8, "grid_based_cluster")
 
 
 ### 5. Presence of cluster metrics --------------------------------------------
