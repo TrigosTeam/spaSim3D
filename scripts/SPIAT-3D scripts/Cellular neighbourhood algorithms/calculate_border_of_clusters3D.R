@@ -10,8 +10,11 @@ calculate_border_of_clusters3D <- function(spe,
   ## Get coords of non-cluster cells
   non_cluster_coords <- spe_coords[spe[[cluster_colname]] == 0, ]
   
-  # New column for spe object: 'cluster_border'
-  spe$cluster_border <- "outside_clusters"
+  # New column for spe object: 'cluster_border'. Default is 'outside'
+  spe$cluster_border <- "outside"
+  
+  # Label cells part of a cluster (e.g. 'cluster1')
+  spe$cluster_border[spe[[cluster_colname]] != 0] <- paste("inside_C", spe[[cluster_colname]][spe[[cluster_colname]] != 0], sep = "")
   
   ## Iterate for each cluster
   n_clusters <- max(spe[[cluster_colname]])
@@ -24,23 +27,20 @@ calculate_border_of_clusters3D <- function(spe,
     # For each cell in the current cluster, check how many other cells in the cluster are in its radius
     cluster_to_cluster_interactions <- dbscan::frNN(cluster_coords, radius)
     
-    # Determine the minimum number of cluster cells found in the radius of cluster cell. Use this as the threshold.
-    threshold <- quantile(unlist(lapply(cluster_to_cluster_interactions$dist, length)), 0.25)
+    # Determine the median minimum number of cluster cells found in the radius of cluster cell. Use this as the threshold for non-cluster cells.
+    non_cluster_threshold <- quantile(unlist(lapply(cluster_to_cluster_interactions$dist, length)), 0.5)
     
     # For each non-cluster cell, check how many cluster cells are in its radius.
     non_cluster_to_cluster_interactions <- dbscan::frNN(cluster_coords, radius, non_cluster_coords)
     
-    # If number of clusters found in the radius of non-cluster cells is greater than threshold, non-cluster cell is probably inside cluster too
-    n_cluster_cells_in_radius <- unlist(lapply(non_cluster_to_cluster_interactions$id, length))
+    # If number of cluster cells found in the radius of non-cluster cells is greater than threshold, non-cluster cell has probably infiltrated cluster too
+    n_cluster_cells_in_non_cluster_cell_radius <- unlist(lapply(non_cluster_to_cluster_interactions$id, length))
     
-    spe$cluster_border[as.numeric(names(non_cluster_to_cluster_interactions$id)[n_cluster_cells_in_radius > threshold])] <- paste("inside_cluster", i, sep = "")
+    spe$cluster_border[as.numeric(names(non_cluster_to_cluster_interactions$id)[n_cluster_cells_in_non_cluster_cell_radius > non_cluster_threshold])] <- paste("infiltrated_C", i, sep = "")
     
-    # If number of clusters found in the radius of non-cluster cells is less than threshold, but greater than 0, non-cluster cell is probably on the border
-    spe$cluster_border[as.numeric(names(non_cluster_to_cluster_interactions$id)[n_cluster_cells_in_radius > 0 & n_cluster_cells_in_radius < threshold])] <- paste("border_cluster", i, sep = "")
+    # If number of cluster cells found in the radius of non-cluster cells is less than threshold, but greater than 0, non-cluster cell is probably on the border
+    spe$cluster_border[as.numeric(names(non_cluster_to_cluster_interactions$id)[n_cluster_cells_in_non_cluster_cell_radius > 0 & n_cluster_cells_in_non_cluster_cell_radius < non_cluster_threshold])] <- paste("border_C", i, sep = "")
   }
-  
-  # Also label cells part of a cluster (e.g. 'cluster1')
-  spe$cluster_border[spe[[cluster_colname]] != 0] <- paste("cluster", spe[[cluster_colname]][spe[[cluster_colname]] != 0], sep = "")
   
   ## Plot
   if (plot_image) {
