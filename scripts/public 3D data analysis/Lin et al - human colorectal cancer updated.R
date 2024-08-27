@@ -347,6 +347,35 @@ for (slice_z_coord in slice_z_coords) {
 # saveRDS(minimum_distances_slice_df, "minimum_distances_within_slices_df.rds")
 
 
+### Get the minimum distance df between cell types after combining slices ---------------
+# Read data
+setwd("~/Lin et al - human colorectal cancer/CRC1_data_updated")
+df <- readRDS("CRC1_df.rds")
+
+# Get minimum distances between each cell type for each slice
+cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.", 
+                "Endothelial", "Muscle/Fibroblast", "Macrophage(I)", 
+                "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage",
+                "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",
+                "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg",
+                "B cells") # Excludes "Other cell type
+
+minimum_distances_slices_combined_df <- data.frame()
+
+
+for (cell_type in cell_types) {
+  # Get minimum_distances_df for current slice and cell
+  curr_minimum_distances_slice_df <- calculate_minimum_distances_between_cell_types3D(df,
+                                                                                      cell_types_of_interest = cell_type,
+                                                                                      feature_colname = "Cell.Type.Specific",
+                                                                                      show_summary = FALSE,
+                                                                                      plot_image = FALSE) 
+  
+  minimum_distances_slices_combined_df <- rbind(minimum_distances_slices_combined_df, curr_minimum_distances_slice_df)
+}
+setwd("~/Lin et al - human colorectal cancer/objects/minimum_distances_data")
+saveRDS(minimum_distances_slices_combined_df, "minimum_distance_all_slices_specific_df.rds")
+
 ### Get 'average_minimum_distance', 'lower_quantile_minimum_distance', 'average_shortest_5_percent_minimum_distance' from minimum distance dfs ----------------
 
 # Read data
@@ -465,9 +494,9 @@ ggplot(plot_df, aes(Cell.Type, value, color = Cell.Type)) +
   theme_bw()
 
 
-### Plot violin plots for minimum distances between cell types ----------------------
+### Plot violin plots for minimum distances between cell types within each slice ----------------------
 
-# Read minimum distance df for all slices COMBINED
+# Read minimum distance df for each slice (altogether)
 setwd("~/Lin et al - human colorectal cancer/objects/minimum_distances_data")
 minimum_distances_within_slices_specific_df <- readRDS("minimum_distances_within_slices_specific_df.rds")
 minimum_distances_within_slices_specific_df <- minimum_distances_within_slices_specific_df[ , c("ref_cell_type", "distance", "slice_z_coord")]
@@ -498,7 +527,9 @@ slice_z_coords <- unique(minimum_distances_within_slices_specific_df$slice_z_coo
 library(ggplot2)
 
 
-# Save plots into pdf
+#### Save plots into pdf
+
+# Violin plot
 setwd("~/Lin et al - human colorectal cancer/plots")
 # pdf("minimum_distances_within_slices_specific_violin_plots.pdf")
 for (slice_z_coord in slice_z_coords) {
@@ -511,6 +542,87 @@ for (slice_z_coord in slice_z_coords) {
     theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
     facet_wrap(.~ref_cell_type, scales = "free")
   print(fig)
-    
 }
+dev.off()
+
+
+# Density plot
+setwd("~/Lin et al - human colorectal cancer/plots")
+pdf("minimum_distances_within_slices_specific_density_plots.pdf")
+for (slice_z_coord in slice_z_coords) {
+  slice_df <- minimum_distances_within_slices_specific_df[minimum_distances_within_slices_specific_df$slice_z_coord == slice_z_coord, ]
+  
+  fig <- ggplot(slice_df, aes(x = distance, col = ref_cell_type, fill = ref_cell_type)) +
+    geom_density() + 
+    labs(title = paste("slice z-coord:", slice_z_coord, "microns"), x = "") +
+    scale_x_continuous(n.breaks = 3) +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
+    facet_wrap(.~ref_cell_type, scales = "free")
+  print(fig)
+}
+dev.off()
+
+
+
+
+### Plot violin plots for minimum distances between cell types for all slices -----------------------
+setwd("~/Lin et al - human colorectal cancer/objects/minimum_distances_data")
+
+minimum_distances_all_slices_specific <- readRDS("minimum_distance_all_slices_specific_df.rds")
+
+# Get each cell type
+cell_types <- c("Tumor/Epi.", "Ki67+ Tumor/Epi.", "PDL1+ Tumor/Epi.", 
+                "Endothelial", "Muscle/Fibroblast", "Macrophage(I)", 
+                "Macrophage(II)", "Macrophage(III)", "Macrophage(IV)", "PDL1+ Macrophage",
+                "PDL1+ lymphocyte",  "DN Lymphocyte", "DP Lymphocyte", "Lymphocyte(III)",
+                "T helper", "PD1+ T helper", "Tc cell", "PD1+ Tc", "Treg",
+                "B cells") # Excludes "Other cell type
+
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+# Assign color to each cell type
+colors <- gg_color_hue(length(cell_types))
+names(colors) <- cell_types
+
+# Factor df by cell types
+minimum_distances_all_slices_specific$ref_cell_type <- factor(minimum_distances_all_slices_specific$ref_cell_type, cell_types)
+
+
+library(ggplot2)
+
+
+#### Save plots into pdf
+
+# Violin plot
+setwd("~/Lin et al - human colorectal cancer/plots")
+pdf("minimum_distances_all_slices_specific_violin_plots.pdf")
+
+fig <- ggplot(minimum_distances_all_slices_specific, aes(ref_cell_type, distance, col = ref_cell_type, fill = ref_cell_type)) +
+  geom_violin() + 
+  labs(x = "") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
+  facet_wrap(.~ref_cell_type, scales = "free")
+print(fig)
+
+dev.off()
+
+
+# Density plot
+setwd("~/Lin et al - human colorectal cancer/plots")
+pdf("minimum_distances_all_slices_specific_density_plots.pdf")
+
+fig <- ggplot(minimum_distances_all_slices_specific, aes(x = distance, col = ref_cell_type, fill = ref_cell_type)) +
+  geom_density() + 
+  labs(x = "") +
+  scale_x_continuous(n.breaks = 3) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
+  facet_wrap(.~ref_cell_type, scales = "free")
+print(fig)
+
 dev.off()
