@@ -12,14 +12,27 @@ get_spe_grid_metrics3D <- function(spe,
   spe_coords <- spatialCoords(spe)
   
   ## Get dimensions of the window
-  length <- round(max(spe_coords[ , "Cell.X.Position"]) - min(spe_coords[ , "Cell.X.Position"]))
-  width  <- round(max(spe_coords[ , "Cell.Y.Position"]) - min(spe_coords[ , "Cell.Y.Position"]))
-  height <- round(max(spe_coords[ , "Cell.Z.Position"]) - min(spe_coords[ , "Cell.Z.Position"]))
+  min_x <- min(spe_coords[ , "Cell.X.Position"])
+  min_y <- min(spe_coords[ , "Cell.Y.Position"])
+  min_z <- min(spe_coords[ , "Cell.Z.Position"])
+  
+  max_x <- max(spe_coords[ , "Cell.X.Position"])
+  max_y <- max(spe_coords[ , "Cell.Y.Position"])
+  max_z <- max(spe_coords[ , "Cell.Z.Position"])
+  
+  length <- round(max_x - min_x)
+  width  <- round(max_y - min_y)
+  height <- round(max_z - min_z)
   
   ## Get distance of row, col and lay
   d_row <- length / n_splits
   d_col <- width / n_splits
   d_lay <- height / n_splits
+  
+  # Shift spe_coords so they begin at the origin
+  spe_coords[, "Cell.X.Position"] <- spe_coords[, "Cell.X.Position"] - min_x
+  spe_coords[, "Cell.Y.Position"] <- spe_coords[, "Cell.Y.Position"] - min_y
+  spe_coords[, "Cell.Z.Position"] <- spe_coords[, "Cell.Z.Position"] - min_z
   
   ## Figure out which 'grid prism number' each cell is inside
   spe$grid_prism_num <- floor(spe_coords[ , "Cell.X.Position"] / d_row) +
@@ -34,9 +47,9 @@ get_spe_grid_metrics3D <- function(spe,
                                                  
   ## Determine centre coordinates of each grid prism
   grid_prism_coordinates <- data.frame(grid_prism_num = seq(n_grid_prisms),
-                                       x_coord = ((seq(n_grid_prisms) - 1) %% n_splits + 0.5) * d_row,
-                                       y_coord = (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits) + 0.5) * d_col,
-                                       z_coord = (floor((seq(n_grid_prisms) - 1) / (n_splits^2)) + 0.5) * d_lay)
+                                       x_coord = ((seq(n_grid_prisms) - 1) %% n_splits + 0.5) * d_row + round(min_x),
+                                       y_coord = (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits) + 0.5) * d_col + round(min_y),
+                                       z_coord = (floor((seq(n_grid_prisms) - 1) / (n_splits^2)) + 0.5) * d_lay + round(min_z))
   
   spe@metadata[["grid_metrics"]] <- list("grid_prism_cell_matrix" = grid_prism_cell_matrix,
                                          "grid_prism_coordinates" = grid_prism_coordinates)
