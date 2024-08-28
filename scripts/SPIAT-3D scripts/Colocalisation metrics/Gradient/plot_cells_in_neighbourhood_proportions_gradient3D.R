@@ -15,4 +15,5 @@ plot_cells_in_neighbourhood_proportions_gradient3D <- function(cells_in_neighbou
   
   methods::show(fig)
   
+  return(fig)
 }

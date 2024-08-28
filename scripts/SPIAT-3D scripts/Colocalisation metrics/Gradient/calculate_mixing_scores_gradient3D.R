@@ -5,7 +5,7 @@ calculate_mixing_scores_gradient3D <- function(spe,
                                                feature_colname = "Cell.Type",
                                                plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = 8))
+  result <- data.frame(matrix(nrow = length(radii), ncol = 8))
   colnames(result) <- c("ref_cell_type", 
                         "tar_cell_type", 
                         "n_ref_cells",
@@ -15,18 +15,18 @@ calculate_mixing_scores_gradient3D <- function(spe,
                         "mixing_score", 
                         "normalised_mixing_score")
   
-  for (radius in seq(radii)) {
+  for (i in seq(length(radii))) {
     mixing_scores <- calculate_mixing_scores3D(spe,
                                                reference_cell_type,
                                                target_cell_type,
-                                               radius,
+                                               radii[i],
                                                feature_colname)
 
-    result[radius, ] <- mixing_scores
+    result[i, ] <- mixing_scores
   }
   
   # Add a radius column to the result
-  result$radius <- seq(radii)
+  result$radius <- radii
   
   if (plot_image) plot_mixing_scores_gradient3D(result)
   

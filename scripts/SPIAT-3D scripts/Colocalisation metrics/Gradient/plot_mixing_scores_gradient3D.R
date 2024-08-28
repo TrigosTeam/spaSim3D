@@ -31,4 +31,5 @@ plot_mixing_scores_gradient3D <- function(mixing_scores_gradient_df) {
   
   methods::show(combined_fig)
   
+  return(combined_fig)
 }

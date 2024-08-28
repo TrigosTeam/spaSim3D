@@ -42,7 +42,7 @@ print(mixing_scores)
 mixing_scores_gradient <- calculate_mixing_scores_gradient3D(spe1,
                                                              reference_cell_type = "Tumour",
                                                              target_cell_type = "Immune",
-                                                             radii = 50)
+                                                             radii = seq(50))
 
 
 ### Calculate cells in the neighbourhood
@@ -55,7 +55,7 @@ neighbourhood_cells <- calculate_cells_in_neighbourhood3D(spe1,
 neighbourhood_cells_gradient <- calculate_cells_in_neighbourhood_gradient3D(spe1,
                                                                             reference_cell_type = "Tumour",
                                                                             target_cell_types = c("Tumour", "Immune"),
-                                                                            radii = 30,
+                                                                            radii = seq(1, 30, 2),
                                                                             plot_image = T)
 
 
@@ -69,7 +69,7 @@ print(neighbourhood_cell_proportions)
 neighbourhood_cell_proportions_gradient <- calculate_cells_in_neighbourhood_proportions_gradient3D(spe1,
                                                                                                    reference_cell_type = "Tumour",
                                                                                                    target_cell_types = c("Tumour", "Immune"),
-                                                                                                   radii = 50)
+                                                                                                   radii = seq(1, 50, 3))
 
 
 ### Calculate cross-K function
@@ -83,7 +83,7 @@ print(cross_K)
 cross_K_gradient <- calculate_cross_K_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_type = "Immune",
-                                                 radii = 50)
+                                                 radii = seq(0, 50, 5))
 
 
 ### Calculate entropy
@@ -104,7 +104,7 @@ entropy_result <- calculate_entropy3D(spe1,
 entropy_gradient <- calculate_entropy_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_types = c("Tumour", "Immune"),
-                                                 radii = 50,
+                                                 radii = seq(1, 50, 2),
                                                  plot_image = TRUE)
 
 
@@ -112,7 +112,7 @@ entropy_gradient <- calculate_entropy_gradient3D(spe1,
 
 all_single_radius_result <- calculate_all_single_radius_cc_metrics3D(spe1, "Tumour", c("Tumour", "Immune"), 20)
 
-all_gradient_result <- calculate_all_gradient_cc_metrics3D(spe1, "Tumour", c("Tumour", "Immune"), 50)
+all_gradient_result <- calculate_all_gradient_cc_metrics3D(spe1, "Tumour", c("Tumour", "Immune"), seq(1, 50, 2))
 
 
 ### 3. Spatial Heterogeneity metrics ------------------------------------------

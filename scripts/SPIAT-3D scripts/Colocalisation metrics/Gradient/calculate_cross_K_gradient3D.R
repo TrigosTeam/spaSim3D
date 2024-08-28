@@ -5,27 +5,32 @@ calculate_cross_K_gradient3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = 3))
+  if (length(radii) <= 1) stop("Please enter at least two numeric values for radii")
+  
+  result <- data.frame(matrix(nrow = length(radii), ncol = 3))
   colnames(result) <- c("observed_cross_K", 
                         "expected_cross_K",
                         "cross_K_ratio")
   
-  for (radius in seq(radii)) {
+  for (i in seq(length(radii))) {
     cross_K_df <- calculate_cross_K3D(spe,
                                       reference_cell_type,
                                       target_cell_type,
-                                      radius,
+                                      radii[i],
                                       feature_colname)
     
-    result[radius, ] <- cross_K_df
+    result[i, ] <- cross_K_df
   }
   
   # Add a radius column to the result
-  result$radius <- seq(radii)
+  result$radius <- radii
   
   if (plot_image) {
-    plot_cross_K_gradient3D(result, reference_cell_type, target_cell_type)
-    plot_cross_K_gradient_ratio3D(result, reference_cell_type, target_cell_type)
+    fig1 <- plot_cross_K_gradient3D(result, reference_cell_type, target_cell_type)
+    fig2 <- plot_cross_K_gradient_ratio3D(result, reference_cell_type, target_cell_type)
+    
+    combined_fig <- plot_grid(fig1, fig2, nrow = 2)
+    methods::show(combined_fig)
   }
   
   return(result)

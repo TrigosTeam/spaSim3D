@@ -14,4 +14,5 @@ plot_cells_in_neighbourhood_gradient3D <- function(cells_in_neighbourhood_gradie
   
   methods::show(fig)
   
+  return(fig)
 }

@@ -738,7 +738,7 @@ calculate_mixing_scores_gradient3D <- function(spe,
                                                feature_colname = "Cell.Type",
                                                plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = 8))
+  result <- data.frame(matrix(nrow = length(radii), ncol = 8))
   colnames(result) <- c("ref_cell_type", 
                         "tar_cell_type", 
                         "n_ref_cells",
@@ -748,23 +748,24 @@ calculate_mixing_scores_gradient3D <- function(spe,
                         "mixing_score", 
                         "normalised_mixing_score")
   
-  for (radius in seq(radii)) {
+  for (i in seq(length(radii))) {
     mixing_scores <- calculate_mixing_scores3D(spe,
                                                reference_cell_type,
                                                target_cell_type,
-                                               radius,
+                                               radii[i],
                                                feature_colname)
     
-    result[radius, ] <- mixing_scores
+    result[i, ] <- mixing_scores
   }
   
   # Add a radius column to the result
-  result$radius <- seq(radii)
+  result$radius <- radii
   
   if (plot_image) plot_mixing_scores_gradient3D(result)
   
   return(result)
 }
+
 
 plot_mixing_scores_gradient3D <- function(mixing_scores_gradient_df) {
   
@@ -799,6 +800,7 @@ plot_mixing_scores_gradient3D <- function(mixing_scores_gradient_df) {
   
   methods::show(combined_fig)
   
+  return(combined_fig)
 }
 
 calculate_cells_in_neighbourhood_gradient3D <- function(spe, 
@@ -808,28 +810,31 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
                                                         feature_colname = "Cell.Type",
                                                         plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
+  if (length(radii) <= 1) stop("Please enter at least two numeric values for radii")
+  
+  result <- data.frame(matrix(nrow = length(radii), ncol = length(target_cell_types)))
   colnames(result) <- target_cell_types
   
-  for (radius in seq(radii)) {
+  for (i in seq(length(radii))) {
     cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
                                                                     reference_cell_type,
                                                                     target_cell_types,
-                                                                    radius,
+                                                                    radii[i],
                                                                     feature_colname,
                                                                     FALSE,
                                                                     FALSE)
     
     cells_in_neighbourhood_df$ref_cell_id <- NULL
-    result[radius, ] <- apply(cells_in_neighbourhood_df, 2, mean)
+    result[i, ] <- apply(cells_in_neighbourhood_df, 2, mean)
   }
   # Add a radius column to the result
-  result$radius <- seq(radii)
+  result$radius <- radii
   
   if (plot_image) plot_cells_in_neighbourhood_gradient3D(result, reference_cell_type)
   
   return(result)
 }
+
 
 
 plot_cells_in_neighbourhood_gradient3D <- function(cells_in_neighbourhood_gradient_df, reference_cell_type = NULL) {
@@ -848,6 +853,7 @@ plot_cells_in_neighbourhood_gradient3D <- function(cells_in_neighbourhood_gradie
   
   methods::show(fig)
   
+  return(fig)
 }
 
 calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe, 
@@ -857,27 +863,30 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
                                                                     feature_colname = "Cell.Type",
                                                                     plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = length(target_cell_types)))
+  if (length(radii) <= 1) stop("Please enter at least two numeric values for radii")
+  
+  result <- data.frame(matrix(nrow = length(radii), ncol = length(target_cell_types)))
   colnames(result) <- target_cell_types
   
-  for (radius in seq(radii)) {
+  for (i in seq(length(radii))) {
     cell_proportions_neighbourhood_proportions_df <- calculate_cells_in_neighbourhood_proportions3D(spe,
                                                                                                     reference_cell_type,
                                                                                                     target_cell_types,
-                                                                                                    radius,
+                                                                                                    radii[i],
                                                                                                     feature_colname)
     
-    result[radius, ] <- apply(cell_proportions_neighbourhood_proportions_df[ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
+    result[i, ] <- apply(cell_proportions_neighbourhood_proportions_df[ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
   }
   
   # Add a radius column to the result
-  result$radius <- seq(radii)
+  result$radius <- radii
   
   # Plot
   if (plot_image) plot_cells_in_neighbourhood_proportions_gradient3D(result, reference_cell_type)
   
   return(result)
 }
+
 
 plot_cells_in_neighbourhood_proportions_gradient3D <- function(cells_in_neighbourhood_proportions_gradient_df, reference_cell_type = NULL) {
   
@@ -896,6 +905,7 @@ plot_cells_in_neighbourhood_proportions_gradient3D <- function(cells_in_neighbou
   
   methods::show(fig)
   
+  return(fig)
 }
 
 calculate_cross_K_gradient3D <- function(spe, 
@@ -905,27 +915,32 @@ calculate_cross_K_gradient3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = 3))
+  if (length(radii) <= 1) stop("Please enter at least two numeric values for radii")
+  
+  result <- data.frame(matrix(nrow = length(radii), ncol = 3))
   colnames(result) <- c("observed_cross_K", 
                         "expected_cross_K",
                         "cross_K_ratio")
   
-  for (radius in seq(radii)) {
+  for (i in seq(length(radii))) {
     cross_K_df <- calculate_cross_K3D(spe,
                                       reference_cell_type,
                                       target_cell_type,
-                                      radius,
+                                      radii[i],
                                       feature_colname)
     
-    result[radius, ] <- cross_K_df
+    result[i, ] <- cross_K_df
   }
   
   # Add a radius column to the result
-  result$radius <- seq(radii)
+  result$radius <- radii
   
   if (plot_image) {
-    plot_cross_K_gradient3D(result, reference_cell_type, target_cell_type)
-    plot_cross_K_gradient_ratio3D(result, reference_cell_type, target_cell_type)
+    fig1 <- plot_cross_K_gradient3D(result, reference_cell_type, target_cell_type)
+    fig2 <- plot_cross_K_gradient_ratio3D(result, reference_cell_type, target_cell_type)
+    
+    combined_fig <- plot_grid(fig1, fig2, nrow = 2)
+    methods::show(combined_fig)
   }
   
   return(result)
@@ -948,6 +963,7 @@ plot_cross_K_gradient3D <- function(cross_K_gradient_df, reference_cell_type = N
   
   methods::show(fig)
   
+  return(fig) 
 }
 
 plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_df, reference_cell_type = NULL, target_cell_type = NULL) {
@@ -970,6 +986,7 @@ plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_df, reference_cell_ty
   
   methods::show(fig)
   
+  return(fig) 
 }
 
 calculate_entropy_gradient3D <- function(spe,
@@ -979,22 +996,22 @@ calculate_entropy_gradient3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  result <- data.frame(matrix(nrow = radii, ncol = 1))
+  result <- data.frame(matrix(nrow = length(radii), ncol = 1))
   colnames(result) <- "entropy"
   
-  for (radius in seq(radii)) {
+  for (i in seq(length(radii))) {
     entropy_df <- calculate_entropy3D(spe,
                                       reference_cell_type,
                                       target_cell_types,
-                                      radius,
+                                      radii[i],
                                       feature_colname,
                                       FALSE)
     
-    result[radius, "entropy"] <- mean(entropy_df$entropy)
+    result[i, "entropy"] <- mean(entropy_df$entropy)
   }
   
   # Add a radius column to the result
-  result$radius <- seq(radii)
+  result$radius <- radii
   
   if (plot_image) {
     expected_entropy <- calculate_entropy_background3D(spe, target_cell_types, feature_colname)
@@ -1003,6 +1020,7 @@ calculate_entropy_gradient3D <- function(spe,
   
   return(result)
 }
+
 
 plot_entropy_gradient3D <- function(entropy_gradient_df, expected_entropy = NULL, reference_cell_type = NULL, target_cell_types = NULL) {
   
@@ -1031,6 +1049,7 @@ plot_entropy_gradient3D <- function(entropy_gradient_df, expected_entropy = NULL
   
   methods::show(fig)
   
+  return(fig)
 }
 
 
@@ -1152,9 +1171,9 @@ calculate_all_gradient_cc_metrics3D <- function(spe,
   
   ## Define result
   result <- list("mixing_score" = list(),
-                 "cells_in_neighbourhood" = data.frame(matrix(nrow = radii, ncol = length(target_cell_types))),
-                 "cells_in_neighbourhood_proportion" = data.frame(matrix(nrow = radii, ncol = length(target_cell_types))),
-                 "entropy" = data.frame(matrix(nrow = radii, ncol = 1)),
+                 "cells_in_neighbourhood" = data.frame(matrix(nrow = length(radii), ncol = length(target_cell_types))),
+                 "cells_in_neighbourhood_proportion" = data.frame(matrix(nrow = length(radii), ncol = length(target_cell_types))),
+                 "entropy" = data.frame(matrix(nrow = length(radii), ncol = 1)),
                  "cross_K" = list())
   colnames(result[["cells_in_neighbourhood"]]) <- target_cell_types
   colnames(result[["cells_in_neighbourhood_proportion"]]) <- target_cell_types
@@ -1178,45 +1197,45 @@ calculate_all_gradient_cc_metrics3D <- function(spe,
   # Define indiviudal data frames for mixing_score and cross_K
   for (target_cell_type in target_cell_types) {
     if (reference_cell_type != target_cell_type) {
-      result[["mixing_score"]][[target_cell_type]] <- data.frame(matrix(nrow = radii, ncol = length(mixing_score_df_colnames)))
+      result[["mixing_score"]][[target_cell_type]] <- data.frame(matrix(nrow = length(radii), ncol = length(mixing_score_df_colnames)))
       colnames(result[["mixing_score"]][[target_cell_type]]) <- mixing_score_df_colnames
     }
-    result[["cross_K"]][[target_cell_type]] <- data.frame(matrix(nrow = radii, ncol = length(cross_K_df_colnames)))
+    result[["cross_K"]][[target_cell_type]] <- data.frame(matrix(nrow = length(radii), ncol = length(cross_K_df_colnames)))
     colnames(result[["cross_K"]][[target_cell_type]]) <- cross_K_df_colnames
   }
   
   # Get gradient results for each metric
-  for (radius in seq_len(radii)) {
+  for (i in seq(length(radii))) {
     df <- calculate_all_single_radius_cc_metrics3D(spe,
                                                    reference_cell_type,
                                                    target_cell_types,
-                                                   radius,
+                                                   radii[i],
                                                    feature_colname)
     df[["cells_in_neighbourhood"]]$ref_cell_id <- NULL
     
-    result[["cells_in_neighbourhood"]][radius, ] <- apply(df[["cells_in_neighbourhood"]], 2, mean)
-    result[["cells_in_neighbourhood_proportion"]][radius, ] <- apply(df[["cells_in_neighbourhood_proportion"]][ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
-    result[["entropy"]][radius, "entropy"] <- mean(df[["entropy"]]$entropy)
+    result[["cells_in_neighbourhood"]][i, ] <- apply(df[["cells_in_neighbourhood"]], 2, mean)
+    result[["cells_in_neighbourhood_proportion"]][i, ] <- apply(df[["cells_in_neighbourhood_proportion"]][ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
+    result[["entropy"]][i, "entropy"] <- mean(df[["entropy"]]$entropy)
     
     for (target_cell_type in names(df[["mixing_score"]])) {
-      result[["mixing_score"]][[target_cell_type]][radius, ] <- df[["mixing_score"]][[target_cell_type]]
+      result[["mixing_score"]][[target_cell_type]][i, ] <- df[["mixing_score"]][[target_cell_type]]
     }
     
     for (target_cell_type in names(df[["cross_K"]])) {
-      result[["cross_K"]][[target_cell_type]][radius, ] <- df[["cross_K"]][[target_cell_type]]
+      result[["cross_K"]][[target_cell_type]][i, ] <- df[["cross_K"]][[target_cell_type]]
     }
   }
   
   # Add radius column to each data frame
-  result[["cells_in_neighbourhood"]]$radius <- seq(radii)
-  result[["cells_in_neighbourhood_proportion"]]$radius <- seq(radii)
-  result[["entropy"]]$radius <- seq(radii)
+  result[["cells_in_neighbourhood"]]$radius <- radii
+  result[["cells_in_neighbourhood_proportion"]]$radius <- radii
+  result[["entropy"]]$radius <- radii
   for (target_cell_type in names(df[["mixing_score"]])) {
-    result[["mixing_score"]][[target_cell_type]]$radius <- seq(radii)
+    result[["mixing_score"]][[target_cell_type]]$radius <- radii
   }
   
   for (target_cell_type in names(df[["cross_K"]])) {
-    result[["cross_K"]][[target_cell_type]]$radius <- seq(radii)
+    result[["cross_K"]][[target_cell_type]]$radius <- radii
   }
   
   
@@ -1238,6 +1257,7 @@ calculate_all_gradient_cc_metrics3D <- function(spe,
   
   return(result)
 }
+
 
 ### Spatial heterogeneity metrics ---------------------------------------------
 get_spe_grid_metrics3D <- function(spe, 

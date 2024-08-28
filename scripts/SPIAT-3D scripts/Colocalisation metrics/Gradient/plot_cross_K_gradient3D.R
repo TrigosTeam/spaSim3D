@@ -14,5 +14,6 @@ plot_cross_K_gradient3D <- function(cross_K_gradient_df, reference_cell_type = N
   }
   
   methods::show(fig)
-  
+ 
+  return(fig) 
 }

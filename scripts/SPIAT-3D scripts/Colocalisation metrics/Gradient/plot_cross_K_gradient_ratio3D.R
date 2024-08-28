@@ -17,5 +17,6 @@ plot_cross_K_gradient_ratio3D <- function(cross_K_gradient_df, reference_cell_ty
   }
   
   methods::show(fig)
-  
+ 
+  return(fig) 
 }

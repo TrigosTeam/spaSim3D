@@ -25,4 +25,5 @@ plot_entropy_gradient3D <- function(entropy_gradient_df, expected_entropy = NULL
   
   methods::show(fig)
   
+  return(fig)
 }
