@@ -2548,7 +2548,6 @@ calculate_border_of_clusters3D <- function(spe,
 
 ### Plot ---------
 
-
 plot_cells3D <- function(spe,
                          plot_cell_types = NULL,
                          plot_colours = NULL,
@@ -2561,21 +2560,29 @@ plot_cells3D <- function(spe,
   if (is.null(plot_cell_types)) {
     plot_cell_types <- unique(df[["Cell.Type"]])
   }
-  ## If cell types have been chosen, check they are found in the spe object
-  unknown_cell_types <- setdiff(plot_cell_types, spe[[feature_colname]])
-  if (length(unknown_cell_types) != 0) {
-    stop(paste("The following plot_cell_types are not found in the spe object:\n   ",
-               paste(unknown_cell_types, collapse = ", ")))
-  }
-  
   ## If no colours inputted, use rainbow palette
   if (is.null(plot_colours)) {
     plot_colours <- rainbow(length(plot_cell_types))
   }
-  
   ## User inputs mismatching cell types and colours
   if (length(plot_cell_types) != length(plot_colours)) {
     stop("Length of plot_cell_types is not equal to length of plot_colours")
+  }
+  
+  
+  ## If cell types have been chosen, check they are found in the spe object
+  spe_cell_types <- unique(spe[[feature_colname]])
+  unknown_cell_types <- setdiff(plot_cell_types, spe_cell_types)
+  
+  if (length(unknown_cell_types) == length(plot_cell_types)) {
+    stop("None of the plot_cell_types are found in the spe object")
+  }
+  
+  if (length(unknown_cell_types) != 0) {
+    warning(paste("The following plot_cell_types are not found in the spe object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
+    plot_colours <- plot_colours[which(plot_cell_types %in% spe_cell_types)]
+    plot_cell_types <- intersect(plot_cell_types, spe_cell_types)
   }
   
   ## Factor for feature column
@@ -2604,4 +2611,5 @@ plot_cells3D <- function(spe,
   
   return (fig)
 }
+
 
