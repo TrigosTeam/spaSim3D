@@ -1254,14 +1254,27 @@ get_spe_grid_metrics3D <- function(spe,
   spe_coords <- spatialCoords(spe)
   
   ## Get dimensions of the window
-  length <- round(max(spe_coords[ , "Cell.X.Position"]) - min(spe_coords[ , "Cell.X.Position"]))
-  width  <- round(max(spe_coords[ , "Cell.Y.Position"]) - min(spe_coords[ , "Cell.Y.Position"]))
-  height <- round(max(spe_coords[ , "Cell.Z.Position"]) - min(spe_coords[ , "Cell.Z.Position"]))
+  min_x <- min(spe_coords[ , "Cell.X.Position"])
+  min_y <- min(spe_coords[ , "Cell.Y.Position"])
+  min_z <- min(spe_coords[ , "Cell.Z.Position"])
+  
+  max_x <- max(spe_coords[ , "Cell.X.Position"])
+  max_y <- max(spe_coords[ , "Cell.Y.Position"])
+  max_z <- max(spe_coords[ , "Cell.Z.Position"])
+  
+  length <- round(max_x - min_x)
+  width  <- round(max_y - min_y)
+  height <- round(max_z - min_z)
   
   ## Get distance of row, col and lay
   d_row <- length / n_splits
   d_col <- width / n_splits
   d_lay <- height / n_splits
+  
+  # Shift spe_coords so they begin at the origin
+  spe_coords[, "Cell.X.Position"] <- spe_coords[, "Cell.X.Position"] - min_x
+  spe_coords[, "Cell.Y.Position"] <- spe_coords[, "Cell.Y.Position"] - min_y
+  spe_coords[, "Cell.Z.Position"] <- spe_coords[, "Cell.Z.Position"] - min_z
   
   ## Figure out which 'grid prism number' each cell is inside
   spe$grid_prism_num <- floor(spe_coords[ , "Cell.X.Position"] / d_row) +
@@ -1276,15 +1289,16 @@ get_spe_grid_metrics3D <- function(spe,
   
   ## Determine centre coordinates of each grid prism
   grid_prism_coordinates <- data.frame(grid_prism_num = seq(n_grid_prisms),
-                                       x_coord = ((seq(n_grid_prisms) - 1) %% n_splits + 0.5) * d_row,
-                                       y_coord = (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits) + 0.5) * d_col,
-                                       z_coord = (floor((seq(n_grid_prisms) - 1) / (n_splits^2)) + 0.5) * d_lay)
+                                       x_coord = ((seq(n_grid_prisms) - 1) %% n_splits + 0.5) * d_row + round(min_x),
+                                       y_coord = (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits) + 0.5) * d_col + round(min_y),
+                                       z_coord = (floor((seq(n_grid_prisms) - 1) / (n_splits^2)) + 0.5) * d_lay + round(min_z))
   
   spe@metadata[["grid_metrics"]] <- list("grid_prism_cell_matrix" = grid_prism_cell_matrix,
                                          "grid_prism_coordinates" = grid_prism_coordinates)
   
   return(spe)
 }
+
 
 
 
@@ -1874,9 +1888,18 @@ grid_based_clustering3D <- function(spe,
   
   ## Get dimensions of the window
   spe_coords <- data.frame(spatialCoords(spe))
-  length <- round(max(spe_coords$Cell.X.Position) - min(spe_coords$Cell.X.Position))
-  width  <- round(max(spe_coords$Cell.Y.Position) - min(spe_coords$Cell.Y.Position))
-  height <- round(max(spe_coords$Cell.Z.Position) - min(spe_coords$Cell.Z.Position))
+  
+  min_x <- min(spe_coords$Cell.X.Position)
+  min_y <- min(spe_coords$Cell.Y.Position)
+  min_z <- min(spe_coords$Cell.Z.Position)
+  
+  max_x <- max(spe_coords$Cell.X.Position)
+  max_y <- max(spe_coords$Cell.Y.Position)
+  max_z <- max(spe_coords$Cell.Z.Position)
+  
+  length <- round(max_x - min_x)
+  width  <- round(max_y - min_y)
+  height <- round(max_z - min_z)
   
   ## Get distance of row, col and lay
   d_row <- length / n_splits
@@ -1913,9 +1936,9 @@ grid_based_clustering3D <- function(spe,
     curr_result <- sapply(as.numeric(grid_prisms_in_cluster), function(x) grid_based_cluster_recursion3D(df,
                                                                                                          cell_types_of_interest,
                                                                                                          0.75 * maximum_cell_proportion,
-                                                                                                         ((x - 1) %% n_splits) * d_row,
-                                                                                                         (floor(((x - 1) %% n_splits^2) / n_splits)) * d_col,
-                                                                                                         (floor((x - 1) / n_splits^2)) * d_lay,
+                                                                                                         ((x - 1) %% n_splits) * d_row + round(min_x),
+                                                                                                         (floor(((x - 1) %% n_splits^2) / n_splits)) * d_col + round(min_y),
+                                                                                                         (floor((x - 1) / n_splits^2)) * d_lay + round(min_z),
                                                                                                          d_row, d_col, d_lay,
                                                                                                          feature_colname,
                                                                                                          data.frame()))
@@ -1958,7 +1981,8 @@ grid_based_clustering3D <- function(spe,
                                          spe_coords$Cell.Y.Position >= y &
                                          spe_coords$Cell.Y.Position < (y + w) &
                                          spe_coords$Cell.Z.Position >= z &
-                                         spe_coords$Cell.Z.Position < (z + h), 
+                                         spe_coords$Cell.Z.Position < (z + h) &
+                                         spe[[feature_colname]] %in% cell_types_of_interest, 
                                        cluster_number, 
                                        spe$grid_based_cluster)
     }
@@ -1974,6 +1998,7 @@ grid_based_clustering3D <- function(spe,
   
   return(spe)
 }
+
 
 
 
