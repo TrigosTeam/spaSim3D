@@ -744,8 +744,6 @@ simulate_sphere_dr <- function(bg_spe, dr_properties) {
 
 
 ### Ellipsoid -----------------------------------------------------------------
-library(matlib)
-
 simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   
   # Get ellipsoid properties
@@ -789,7 +787,7 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   spe_coords <- t(spatialCoords(bg_spe))
   
   # Apply transformations to spe_coords'
-  spe_coords <- inv(T1) %*% inv(T2) %*% inv(T3) %*% (spe_coords - T4)
+  spe_coords <- solve(T1) %*% solve(T2) %*% solve(T3) %*% (spe_coords - T4)
   x <- spe_coords[1, ]
   y <- spe_coords[2, ]
   z <- spe_coords[3, ]
@@ -863,7 +861,7 @@ simulate_ellipsoid_ring <- function(bg_spe, ring_properties) {
   spe_coords <- t(spatialCoords(bg_spe))
   
   # Apply transformations to spe_coords'
-  spe_coords <- inv(T1) %*% inv(T2) %*% inv(T3) %*% (spe_coords - T4)
+  spe_coords <- solve(T1) %*% solve(T2) %*% solve(T3) %*% (spe_coords - T4)
   x <- spe_coords[1, ]
   y <- spe_coords[2, ]
   z <- spe_coords[3, ]
@@ -960,7 +958,7 @@ simulate_ellipsoid_dr <- function(bg_spe, dr_properties) {
   spe_coords <- t(spatialCoords(bg_spe))
   
   # Apply transformations to spe_coords'
-  spe_coords <- inv(T1) %*% inv(T2) %*% inv(T3) %*% (spe_coords - T4)
+  spe_coords <- solve(T1) %*% solve(T2) %*% solve(T3) %*% (spe_coords - T4)
   x <- spe_coords[1, ]
   y <- spe_coords[2, ]
   z <- spe_coords[3, ]
