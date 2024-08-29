@@ -21,31 +21,31 @@ colnames(mixed_AMD_df) <- c("spe", "reference", "target", "AMD")
 
 
 # Define MS, NMS, ACIN, ACINP, CKR, AE data frames as well as constants
-radii <- 50
-radii_colnames <- paste("r", seq(radii), sep = "")
+radii <- seq(10, 300, 10)
+radii_colnames <- paste("r", radii, sep = "")
 
-mixed_MS_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types), ncol = 3 + radii))
+mixed_MS_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types), ncol = 3 + length(radii)))
 colnames(mixed_MS_df) <- c("spe", "reference", "target", radii_colnames)
 
-mixed_NMS_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types), ncol = 3 + radii))
+mixed_NMS_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types), ncol = 3 + length(radii)))
 colnames(mixed_NMS_df) <- c("spe", "reference", "target", radii_colnames)
 
 # Target is always A and B together
 # Only choose prop(A) as prop(B) = 1 - prop(A) always
-mixed_ACINP_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types), ncol = 2 + radii))
+mixed_ACINP_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types), ncol = 2 + length(radii)))
 colnames(mixed_ACINP_df) <- c("spe", "reference", radii_colnames)
 
 # Target is always A and B together
-mixed_AE_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types), ncol = 2 + radii))
+mixed_AE_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types), ncol = 2 + length(radii)))
 colnames(mixed_AE_df) <- c("spe", "reference", radii_colnames)
 
 ## ACIN and CKR are twice as large
 # (ref A and tar A or B) OR (ref B and tar B or A)
-mixed_ACIN_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types)^2, ncol = 3 + radii))
+mixed_ACIN_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types)^2, ncol = 3 + length(radii)))
 colnames(mixed_ACIN_df) <- c("spe", "reference", "target", radii_colnames)
 
 # (ref A and tar A or B) OR (ref B and tar B or A)
-mixed_CKR_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types)^2, ncol = 3 + radii))
+mixed_CKR_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types)^2, ncol = 3 + length(radii)))
 colnames(mixed_CKR_df) <- c("spe", "reference", "target", radii_colnames)
 
 
@@ -166,7 +166,7 @@ for (i in seq_len(n_mixed_spes)) {
     
     proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                           "proportion",
-                                                          "binary")
+                                                          "rook")
     
     proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
@@ -190,7 +190,7 @@ for (i in seq_len(n_mixed_spes)) {
     
     entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                        "entropy",
-                                                       "binary")
+                                                       "rook")
     
     entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                              "entropy",
@@ -248,31 +248,31 @@ colnames(ringed_AMD_df) <- c("spe", "reference", "target", "AMD")
 
 
 # Define MS, NMS, ACIN, ACINP, CKR, AE data frames as well as constants
-radii <- 50
-radii_colnames <- paste("r", seq(radii), sep = "")
+radii <- seq(10, 300, 10)
+radii_colnames <- paste("r", radii, sep = "")
 
-ringed_MS_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types), ncol = 3 + radii))
+ringed_MS_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types), ncol = 3 + length(radii)))
 colnames(ringed_MS_df) <- c("spe", "reference", "target", radii_colnames)
 
-ringed_NMS_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types), ncol = 3 + radii))
+ringed_NMS_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types), ncol = 3 + length(radii)))
 colnames(ringed_NMS_df) <- c("spe", "reference", "target", radii_colnames)
 
 # Target is always A and B together
 # Only choose prop(A) as prop(B) = 1 - prop(A) always
-ringed_ACINP_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types), ncol = 2 + radii))
+ringed_ACINP_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types), ncol = 2 + length(radii)))
 colnames(ringed_ACINP_df) <- c("spe", "reference", radii_colnames)
 
 # Target is always A and B together
-ringed_AE_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types), ncol = 2 + radii))
+ringed_AE_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types), ncol = 2 + length(radii)))
 colnames(ringed_AE_df) <- c("spe", "reference", radii_colnames)
 
 ## ACIN and CKR are twice as large
 # (ref A and tar A or B) OR (ref B and tar B or A)
-ringed_ACIN_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types)^2, ncol = 3 + radii))
+ringed_ACIN_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types)^2, ncol = 3 + length(radii)))
 colnames(ringed_ACIN_df) <- c("spe", "reference", "target", radii_colnames)
 
 # (ref A and tar A or B) OR (ref B and tar B or A)
-ringed_CKR_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types)^2, ncol = 3 + radii))
+ringed_CKR_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types)^2, ncol = 3 + length(radii)))
 colnames(ringed_CKR_df) <- c("spe", "reference", "target", radii_colnames)
 
 
@@ -393,7 +393,7 @@ for (i in seq_len(n_ringed_spes)) {
     
     proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                           "proportion",
-                                                          "binary")
+                                                          "rook")
     
     proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
@@ -417,7 +417,7 @@ for (i in seq_len(n_ringed_spes)) {
     
     entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                        "entropy",
-                                                       "binary")
+                                                       "rook")
     
     entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                              "entropy",
@@ -472,31 +472,31 @@ colnames(separated_AMD_df) <- c("spe", "reference", "target", "AMD")
 
 
 # Define MS, NMS, ACIN, ACINP, CKR, AE data frames as well as constants
-radii <- 50
-radii_colnames <- paste("r", seq(radii), sep = "")
+radii <- seq(10, 300, 10)
+radii_colnames <- paste("r", radii, sep = "")
 
-separated_MS_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types), ncol = 3 + radii))
+separated_MS_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types), ncol = 3 + length(radii)))
 colnames(separated_MS_df) <- c("spe", "reference", "target", radii_colnames)
 
-separated_NMS_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types), ncol = 3 + radii))
+separated_NMS_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types), ncol = 3 + length(radii)))
 colnames(separated_NMS_df) <- c("spe", "reference", "target", radii_colnames)
 
 # Target is always A and B together
 # Only choose prop(A) as prop(B) = 1 - prop(A) always
-separated_ACINP_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types), ncol = 2 + radii))
+separated_ACINP_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types), ncol = 2 + length(radii)))
 colnames(separated_ACINP_df) <- c("spe", "reference", radii_colnames)
 
 # Target is always A and B together
-separated_AE_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types), ncol = 2 + radii))
+separated_AE_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types), ncol = 2 + length(radii)))
 colnames(separated_AE_df) <- c("spe", "reference", radii_colnames)
 
 ## ACIN and CKR are twice as large
 # (ref A and tar A or B) OR (ref B and tar B or A)
-separated_ACIN_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types)^2, ncol = 3 + radii))
+separated_ACIN_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types)^2, ncol = 3 + length(radii)))
 colnames(separated_ACIN_df) <- c("spe", "reference", "target", radii_colnames)
 
 # (ref A and tar A or B) OR (ref B and tar B or A)
-separated_CKR_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types)^2, ncol = 3 + radii))
+separated_CKR_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types)^2, ncol = 3 + length(radii)))
 colnames(separated_CKR_df) <- c("spe", "reference", "target", radii_colnames)
 
 
@@ -617,7 +617,7 @@ for (i in seq_len(n_separated_spes)) {
     
     proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                           "proportion",
-                                                          "binary")
+                                                          "rook")
     
     proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
@@ -641,7 +641,7 @@ for (i in seq_len(n_separated_spes)) {
     
     entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                        "entropy",
-                                                       "binary")
+                                                       "rook")
     
     entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                              "entropy",
