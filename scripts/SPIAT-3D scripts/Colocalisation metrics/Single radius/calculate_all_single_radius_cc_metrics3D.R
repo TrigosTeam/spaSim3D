@@ -11,13 +11,14 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
   
   ## For reference_cell_type, check it is found in the spe object
   if (!(reference_cell_type %in% spe[[feature_colname]])) {
-    stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    warning(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    return(NULL)
   }
   
   ## For target_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
+    warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
   }
   
@@ -62,8 +63,7 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
                                     reference_cell_type, 
                                     target_cell_types, 
                                     radius, 
-                                    feature_colname, 
-                                    plot_image = F)  
+                                    feature_colname)  
   
   ## Cells in neighbourhood ----------
   result[["cells_in_neighbourhood"]] <- entropy_df[ , c("ref_cell_id", target_cell_types)]

@@ -10,14 +10,16 @@ calculate_cell_proportion_grid_metrics3D <- function(spe,
   ## Check reference_cell_types are found in the spe object
   unknown_cell_types <- setdiff(reference_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
+    warning(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
+    return(NULL)
   }
   ## Check target_cell_types are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
+    warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
+    return(NULL)
   }
   # Check if there is intersection between reference_cell_types and target_cell_types
   if (length(intersect(reference_cell_types, target_cell_types)) > 0) {

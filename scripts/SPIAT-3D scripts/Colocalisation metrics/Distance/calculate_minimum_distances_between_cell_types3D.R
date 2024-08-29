@@ -22,7 +22,7 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
     ## If cell types have been chosen, check they are found in the spe object
     unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
     if (length(unknown_cell_types) != 0) {
-      stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
+      warning(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                  paste(unknown_cell_types, collapse = ", ")))
     }
     
@@ -53,6 +53,12 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
     cell_type1 <- cell_types_of_interest[permu[i, 1]]
     cell_type2 <- cell_types_of_interest[permu[i, 2]]
     
+    # Don't have one of the cells
+    if (sum(spe[[feature_colname]] == cell_type1) == 0 || sum(spe[[feature_colname]] == cell_type2) == 0) {
+      result <- rbind(result, data.frame(ref_cell_id = NA, ref_cell_type = cell_type1, nearest_cell_id = NA, nearest_cell_type = cell_type2, distance = NA))
+      next
+    }
+    
     # Get x, y, z coords for all cells of cell_type1 and cell_type2
     cell_type1_coords <- spe_coords[spe[[feature_colname]] == cell_type1, ]
     cell_type2_coords <- spe_coords[spe[[feature_colname]] == cell_type2, ]
@@ -67,6 +73,7 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
     # If we are comparing the same cell_type, and there is only one of this cell type, move on
     else if (nrow(cell_type1_coords) == 1) {
       warning("There is only 1 '", cell_type1, "' cell in your data. It has no nearest neighbour of the same cell type.", sep = "")
+      result <- rbind(result, data.frame(ref_cell_id = NA, ref_cell_type = cell_type1, nearest_cell_id = NA, nearest_cell_type = cell_type2, distance = NA))
       next
     }
     # If we are comparing the same cell_type, use the second closest neighbour

@@ -9,8 +9,9 @@ calculate_entropy_grid_metrics3D <- function(spe,
   ## If cell types have been chosen, check they are found in the spe object
   unknown_cell_types <- setdiff(cell_types_of_interest, unique(spe[[feature_colname]]))
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
+    warning(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
+    return(NULL)
   }
   
   # Add grid metrics to spe

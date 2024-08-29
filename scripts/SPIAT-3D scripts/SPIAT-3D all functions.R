@@ -101,8 +101,8 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
     ## If cell types have been chosen, check they are found in the spe object
     unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
     if (length(unknown_cell_types) != 0) {
-      stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
-                 paste(unknown_cell_types, collapse = ", ")))
+      warning(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
+                    paste(unknown_cell_types, collapse = ", ")))
     }
     
     spe <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
@@ -136,8 +136,18 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
       cell_type1_ids <- cell_type_ids[[cell_type1]]
       cell_type2_ids <- cell_type_ids[[cell_type2]]
       
-      ## Same cell type, only one cell
-      if (cell_type1 == cell_type2 && length(cell_type1_ids) == 1) next
+      ## Don't have a cell type, or the same cell type with only one cell
+      if (length(cell_type1_ids) == 0 || length(cell_type2_ids) == 0) {
+        result <- rbind(result, data.frame(Var1 = NA, Var2 = NA, value = NA, cell_type1 = cell_type1, cell_type2 = cell_type2, pair = paste(cell_type1, cell_type2, sep="/")))
+        next
+      }
+      
+      ## Same cell type only one cell
+      if (cell_type1 == cell_type2 && length(cell_type1_ids) == 1) {
+        warning("There is only 1 '", cell_type1, "' cell in your data. It has no pair of the same cell type.", sep = "")
+        result <- rbind(result, data.frame(Var1 = NA, Var2 = NA, value = NA, cell_type1 = cell_type1, cell_type2 = cell_type2, pair = paste(cell_type1, cell_type2, sep="/")))
+        next
+      }
       
       # Subset distance_matrix for current cell types
       distance_matrix_subset <- distance_matrix[rownames(distance_matrix) %in% cell_type1_ids, 
@@ -190,6 +200,10 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
   return(result)
 }
 
+
+
+## Please ensure there is no factoring in any of the columns!!!
+
 ## Please ensure there is no factoring in any of the columns!!!
 
 calculate_minimum_distances_between_cell_types3D <- function(spe,
@@ -214,8 +228,8 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
     ## If cell types have been chosen, check they are found in the spe object
     unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
     if (length(unknown_cell_types) != 0) {
-      stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
-                 paste(unknown_cell_types, collapse = ", ")))
+      warning(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
+                    paste(unknown_cell_types, collapse = ", ")))
     }
     
     spe <- spe[ , spe[[feature_colname]] %in% cell_types_of_interest]
@@ -245,6 +259,12 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
     cell_type1 <- cell_types_of_interest[permu[i, 1]]
     cell_type2 <- cell_types_of_interest[permu[i, 2]]
     
+    # Don't have one of the cells
+    if (sum(spe[[feature_colname]] == cell_type1) == 0 || sum(spe[[feature_colname]] == cell_type2) == 0) {
+      result <- rbind(result, data.frame(ref_cell_id = NA, ref_cell_type = cell_type1, nearest_cell_id = NA, nearest_cell_type = cell_type2, distance = NA))
+      next
+    }
+    
     # Get x, y, z coords for all cells of cell_type1 and cell_type2
     cell_type1_coords <- spe_coords[spe[[feature_colname]] == cell_type1, ]
     cell_type2_coords <- spe_coords[spe[[feature_colname]] == cell_type2, ]
@@ -259,6 +279,7 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
     # If we are comparing the same cell_type, and there is only one of this cell type, move on
     else if (nrow(cell_type1_coords) == 1) {
       warning("There is only 1 '", cell_type1, "' cell in your data. It has no nearest neighbour of the same cell type.", sep = "")
+      result <- rbind(result, data.frame(ref_cell_id = NA, ref_cell_type = cell_type1, nearest_cell_id = NA, nearest_cell_type = cell_type2, distance = NA))
       next
     }
     # If we are comparing the same cell_type, use the second closest neighbour
@@ -298,6 +319,7 @@ calculate_minimum_distances_between_cell_types3D <- function(spe,
   return(result)
 }
 
+
 summarise_distances_between_cell_types3D <- function(distances_df) {
   
   pair <- distance <- NULL
@@ -305,11 +327,11 @@ summarise_distances_between_cell_types3D <- function(distances_df) {
   # summarise the results
   distances_df_summarised <- distances_df %>% 
     dplyr::group_by(pair) %>%
-    dplyr::summarise(mean(distance, na.rm = TRUE), 
-                     min(distance, na.rm = TRUE), 
-                     max(distance, na.rm = TRUE),
-                     stats::median(distance, na.rm = TRUE), 
-                     stats::sd(distance, na.rm = TRUE))
+    dplyr::summarise(mean(distance), 
+                     min(distance), 
+                     max(distance),
+                     stats::median(distance), 
+                     stats::sd(distance))
   
   distances_df_summarised <- data.frame(distances_df_summarised)
   
@@ -330,6 +352,7 @@ summarise_distances_between_cell_types3D <- function(distances_df) {
   
   return(distances_df_summarised)
 }
+
 
 
 ## For scales parameter, use "free_x" or "free". "free_y" looks silly
@@ -365,14 +388,14 @@ calculate_mixing_scores3D <- function(spe,
   ## For reference_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(reference_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
+    warning(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
   }
   
   ## For target_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
+    warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
   }
   
@@ -399,15 +422,13 @@ calculate_mixing_scores3D <- function(spe,
       if (reference_cell_type == target_cell_type) {
         next
       }
-      
-      # Can't get mixing scores if there are no reference cells
-      if (nrow(reference_cell_type_coords) == 0) {
-        methods::show(paste("There are no unique reference cells of specified cell type ", reference_cell_type, "for target cell", target_cell_type))
+      # Can't get mixing scores if there are 0 or 1 reference cells
+      if (sum(spe[[feature_colname]] == reference_cell_type) == 0 || sum(spe[[feature_colname]] == reference_cell_type) == 1) {
         result <-  rbind(result, 
                          c(reference_cell_type, 
                            target_cell_type, 
-                           0, 
-                           nrow(target_cells), 
+                           sum(spe[[feature_colname]] == reference_cell_type), 
+                           sum(spe[[feature_colname]] == target_cell_type), 
                            0, 
                            0, 
                            NA, 
@@ -415,9 +436,7 @@ calculate_mixing_scores3D <- function(spe,
       }
       
       # Can't get mixing scores if there are no target cells
-      else if (nrow(target_cell_type_coords) == 0) {
-        methods::show(paste("There are no unique target cells of specified cell type", target_cell_type, "for reference cell", reference_cell_type))
-        
+      else if (length(target_cell_type_coords) == 0) {
         ref_ref_result <- dbscan::frNN(reference_cell_type_coords, 
                                        eps = radius, 
                                        query = NULL,
@@ -429,7 +448,7 @@ calculate_mixing_scores3D <- function(spe,
         result <-  rbind(result, 
                          c(reference_cell_type, 
                            target_cell_type, 
-                           nrow(reference_cells), 
+                           sum(spe[[feature_colname]] == reference_cell_type), 
                            0, 
                            0, 
                            n_ref_ref_interactions, 
@@ -516,14 +535,15 @@ calculate_cells_in_neighbourhood3D <- function(spe,
   
   ## For reference_cell_type, check it is found in the spe object
   if (!(reference_cell_type %in% spe[[feature_colname]])) {
-    stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    warning(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    return(NULL)
   }
   
   ## For target_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
-               paste(unknown_cell_types, collapse = ", ")))
+    warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
   }
   
   # Check if radius is numeric
@@ -541,6 +561,11 @@ calculate_cells_in_neighbourhood3D <- function(spe,
   
   for (target_cell_type in target_cell_types) {
     
+    if (sum(spe[[feature_colname]] == target_cell_type) == 0) {
+      result[[target_cell_type]] <- NA
+      next
+    }
+    
     ## Get target_cell_type coords
     target_cell_type_coords <- spe_coords[spe[[feature_colname]] == target_cell_type, ]
     
@@ -551,6 +576,10 @@ calculate_cells_in_neighbourhood3D <- function(spe,
                                    sort = FALSE)
     
     n_targets <- rapply(ref_tar_result$id, length)
+    
+    
+    # Don't want to include the reference cell as one of the target cells
+    if (reference_cell_type == target_cell_type) n_targets <- n_targets - 1
     
     ## Add to data frame
     result[[target_cell_type]] <- n_targets
@@ -572,6 +601,7 @@ calculate_cells_in_neighbourhood3D <- function(spe,
   
   return(result)
 }
+
 
 summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_df) {
   
@@ -636,6 +666,8 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
                                                                   FALSE,
                                                                   FALSE)
   
+  if (is.null(cells_in_neighbourhood_df)) return(NULL)
+  
   ## Get total number of target cells for each row (first column is the reference cell id column, so we exclude it)
   cells_in_neighbourhood_df$total <- apply(cells_in_neighbourhood_df[ , c(-1)], 1, sum)
   
@@ -644,12 +676,12 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
   return(cells_in_neighbourhood_df)
 }
 
+
 calculate_entropy3D <- function(spe,
                                 reference_cell_type,
                                 target_cell_types,
                                 radius,
-                                feature_colname = "Cell.Type",
-                                plot_image = TRUE) {
+                                feature_colname = "Cell.Type") {
   
   # Check
   if (length(target_cell_types) < 2) stop("Need at least two target cell types")
@@ -661,6 +693,7 @@ calculate_entropy3D <- function(spe,
                                                                                          radius,
                                                                                          feature_colname)
   
+  if (is.null(cells_in_neighbourhood_proportion_df)) return(NULL)
   
   ## Get entropy for each row
   cells_in_neighbourhood_proportion_df$entropy <- apply(cells_in_neighbourhood_proportion_df[ , paste(target_cell_types, "_prop", sep = "")],
@@ -672,6 +705,7 @@ calculate_entropy3D <- function(spe,
   
   return(cells_in_neighbourhood_proportion_df)
 }
+
 
 calculate_cross_K3D <- function(spe, 
                                 reference_cell_type, 
@@ -686,14 +720,26 @@ calculate_cross_K3D <- function(spe,
     spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
   }  
   
+  
+  ## Get expected cross K-function
+  expected_cross_K <- (4/3) * pi * radius^3
+  
   ## For reference_cell_type, check it is found in the spe object
   if (!(reference_cell_type %in% spe[[feature_colname]])) {
-    stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    warning(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    result <- data.frame(observed_cross_K = NA,
+                         expected_cross_K = expected_cross_K,
+                         cross_K_ratio = NA)
+    return(result)
   }
   
   ## For target_cell_type, check it is found in the spe object
   if (!(target_cell_type %in% spe[[feature_colname]])) {
-    stop(paste("The target_cell_type", target_cell_type,"is not found in the spe object"))
+    warning(paste("The target_cell_type", target_cell_type,"is not found in the spe object"))
+    result <- data.frame(observed_cross_K = NA,
+                         expected_cross_K = expected_cross_K,
+                         cross_K_ratio = NA)
+    return(result)
   }
   
   cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
@@ -721,15 +767,13 @@ calculate_cross_K3D <- function(spe,
   ## Get observed cross K-function
   observed_cross_K <- (volume * n_ref_tar_interactions) / (n_ref_cells * n_tar_cells)
   
-  ## Get expected cross K-function
-  expected_cross_K <- (4/3) * pi * radius^3
-  
   result <- data.frame(observed_cross_K = observed_cross_K,
                        expected_cross_K = expected_cross_K,
                        cross_K_ratio = observed_cross_K / expected_cross_K)
   
   return(result)
 }
+
 
 calculate_mixing_scores_gradient3D <- function(spe, 
                                                reference_cell_type, 
@@ -823,6 +867,7 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
                                                                     feature_colname,
                                                                     FALSE,
                                                                     FALSE)
+    if (is.null(cells_in_neighbourhood_df)) return(NULL)
     
     cells_in_neighbourhood_df$ref_cell_id <- NULL
     result[i, ] <- apply(cells_in_neighbourhood_df, 2, mean)
@@ -874,6 +919,8 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
                                                                                                     target_cell_types,
                                                                                                     radii[i],
                                                                                                     feature_colname)
+    
+    if (is.null(cell_proportions_neighbourhood_proportions_df)) return(NULL)
     
     result[i, ] <- apply(cell_proportions_neighbourhood_proportions_df[ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
   }
@@ -1004,8 +1051,9 @@ calculate_entropy_gradient3D <- function(spe,
                                       reference_cell_type,
                                       target_cell_types,
                                       radii[i],
-                                      feature_colname,
-                                      FALSE)
+                                      feature_colname)
+
+    if (is.null(entropy_df)) return(NULL)
     
     result[i, "entropy"] <- mean(entropy_df$entropy)
   }
@@ -1053,6 +1101,9 @@ plot_entropy_gradient3D <- function(entropy_gradient_df, expected_entropy = NULL
 }
 
 
+### Calculate all single radius cell-colocalisation metrics
+# If a function only requires one target cell type, iterate through each cell type in target_cell_types, else use all target_cell_types
+
 calculate_all_single_radius_cc_metrics3D <- function(spe, 
                                                      reference_cell_type, 
                                                      target_cell_types, 
@@ -1063,14 +1114,15 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
   
   ## For reference_cell_type, check it is found in the spe object
   if (!(reference_cell_type %in% spe[[feature_colname]])) {
-    stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    warning(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    return(NULL)
   }
   
   ## For target_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
-               paste(unknown_cell_types, collapse = ", ")))
+    warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
   }
   
   # Check if radius is numeric
@@ -1114,8 +1166,7 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
                                     reference_cell_type, 
                                     target_cell_types, 
                                     radius, 
-                                    feature_colname, 
-                                    plot_image = F)  
+                                    feature_colname)  
   
   ## Cells in neighbourhood ----------
   result[["cells_in_neighbourhood"]] <- entropy_df[ , c("ref_cell_id", target_cell_types)]
@@ -1334,14 +1385,16 @@ calculate_cell_proportion_grid_metrics3D <- function(spe,
   ## Check reference_cell_types are found in the spe object
   unknown_cell_types <- setdiff(reference_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
+    warning(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
+    return(NULL)
   }
   ## Check target_cell_types are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
+    warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
+    return(NULL)
   }
   # Check if there is intersection between reference_cell_types and target_cell_types
   if (length(intersect(reference_cell_types, target_cell_types)) > 0) {
@@ -1399,8 +1452,9 @@ calculate_entropy_grid_metrics3D <- function(spe,
   ## If cell types have been chosen, check they are found in the spe object
   unknown_cell_types <- setdiff(cell_types_of_interest, unique(spe[[feature_colname]]))
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
+    warning(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
+    return(NULL)
   }
   
   # Add grid metrics to spe

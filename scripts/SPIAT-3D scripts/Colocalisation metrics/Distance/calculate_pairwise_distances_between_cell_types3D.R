@@ -20,7 +20,7 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
     ## If cell types have been chosen, check they are found in the spe object
     unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
     if (length(unknown_cell_types) != 0) {
-      stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
+      warning(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                  paste(unknown_cell_types, collapse = ", ")))
     }
     
@@ -55,9 +55,19 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
       cell_type1_ids <- cell_type_ids[[cell_type1]]
       cell_type2_ids <- cell_type_ids[[cell_type2]]
       
-      ## Same cell type, only one cell
-      if (cell_type1 == cell_type2 && length(cell_type1_ids) == 1) next
-      
+      ## Don't have a cell type, or the same cell type with only one cell
+      if (length(cell_type1_ids) == 0 || length(cell_type2_ids) == 0) {
+        result <- rbind(result, data.frame(Var1 = NA, Var2 = NA, value = NA, cell_type1 = cell_type1, cell_type2 = cell_type2, pair = paste(cell_type1, cell_type2, sep="/")))
+        next
+      }
+  
+      ## Same cell type only one cell
+      if (cell_type1 == cell_type2 && length(cell_type1_ids) == 1) {
+        warning("There is only 1 '", cell_type1, "' cell in your data. It has no pair of the same cell type.", sep = "")
+        result <- rbind(result, data.frame(Var1 = NA, Var2 = NA, value = NA, cell_type1 = cell_type1, cell_type2 = cell_type2, pair = paste(cell_type1, cell_type2, sep="/")))
+        next
+      }
+
       # Subset distance_matrix for current cell types
       distance_matrix_subset <- distance_matrix[rownames(distance_matrix) %in% cell_type1_ids, 
                                                 colnames(distance_matrix) %in% cell_type2_ids]
@@ -90,7 +100,7 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
       result <- rbind(result, df)
     }
   }
-  
+
   # Rearrange columns 
   colnames(result)[c(1, 2, 3)] <- c("cell_type1_id", "cell_type2_id", "distance")
   result <- result[ , c("cell_type1_id", "cell_type1", "cell_type2_id", "cell_type2", "distance", "pair")]

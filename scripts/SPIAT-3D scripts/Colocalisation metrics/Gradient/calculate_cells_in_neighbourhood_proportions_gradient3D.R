@@ -17,6 +17,8 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
                                                                                                     radii[i],
                                                                                                     feature_colname)
     
+    if (is.null(cell_proportions_neighbourhood_proportions_df)) return(NULL)
+    
     result[i, ] <- apply(cell_proportions_neighbourhood_proportions_df[ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
   }
   

@@ -13,7 +13,8 @@ calculate_entropy3D <- function(spe,
                                                                                          target_cell_types,
                                                                                          radius,
                                                                                          feature_colname)
-  
+
+  if (is.null(cells_in_neighbourhood_proportion_df)) return(NULL)
 
   ## Get entropy for each row
   cells_in_neighbourhood_proportion_df$entropy <- apply(cells_in_neighbourhood_proportion_df[ , paste(target_cell_types, "_prop", sep = "")],

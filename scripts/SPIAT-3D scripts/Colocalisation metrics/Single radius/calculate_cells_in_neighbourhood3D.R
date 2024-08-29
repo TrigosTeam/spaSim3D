@@ -15,13 +15,14 @@ calculate_cells_in_neighbourhood3D <- function(spe,
   
   ## For reference_cell_type, check it is found in the spe object
   if (!(reference_cell_type %in% spe[[feature_colname]])) {
-    stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    warning(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    return(NULL)
   }
   
   ## For target_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
+    warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
   }
   
@@ -40,6 +41,11 @@ calculate_cells_in_neighbourhood3D <- function(spe,
   
   for (target_cell_type in target_cell_types) {
     
+    if (sum(spe[[feature_colname]] == target_cell_type) == 0) {
+      result[[target_cell_type]] <- NA
+      next
+    }
+    
     ## Get target_cell_type coords
     target_cell_type_coords <- spe_coords[spe[[feature_colname]] == target_cell_type, ]
     
@@ -50,6 +56,10 @@ calculate_cells_in_neighbourhood3D <- function(spe,
                                    sort = FALSE)
     
     n_targets <- rapply(ref_tar_result$id, length)
+    
+    
+    # Don't want to include the reference cell as one of the target cells
+    if (reference_cell_type == target_cell_type) n_targets <- n_targets - 1
     
     ## Add to data frame
     result[[target_cell_type]] <- n_targets

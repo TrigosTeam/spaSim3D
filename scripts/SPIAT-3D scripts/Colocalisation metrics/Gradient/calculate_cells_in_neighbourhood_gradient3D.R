@@ -19,6 +19,8 @@ calculate_cells_in_neighbourhood_gradient3D <- function(spe,
                                                                     FALSE,
                                                                     FALSE)
     
+    if (is.null(cells_in_neighbourhood_df)) return(NULL)
+    
     cells_in_neighbourhood_df$ref_cell_id <- NULL
     result[i, ] <- apply(cells_in_neighbourhood_df, 2, mean)
   }

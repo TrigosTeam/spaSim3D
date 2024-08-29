@@ -13,6 +13,8 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
                                                FALSE,
                                                FALSE)
   
+  if (is.null(cells_in_neighbourhood_df)) return(NULL)
+  
   ## Get total number of target cells for each row (first column is the reference cell id column, so we exclude it)
   cells_in_neighbourhood_df$total <- apply(cells_in_neighbourhood_df[ , c(-1)], 1, sum)
   

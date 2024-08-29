@@ -13,8 +13,9 @@ calculate_entropy_gradient3D <- function(spe,
                                       reference_cell_type,
                                       target_cell_types,
                                       radii[i],
-                                      feature_colname,
-                                      FALSE)
+                                      feature_colname)
+    
+    if (is.null(entropy_df)) return(NULL)
     
     result[i, "entropy"] <- mean(entropy_df$entropy)
   }

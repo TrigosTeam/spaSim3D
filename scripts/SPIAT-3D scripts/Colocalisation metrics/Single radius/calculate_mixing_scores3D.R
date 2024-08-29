@@ -10,15 +10,15 @@ calculate_mixing_scores3D <- function(spe,
   ## For reference_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(reference_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
-               paste(unknown_cell_types, collapse = ", ")))
+    warning(paste("The following cell types in reference_cell_types are not found in the spe object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
   }
   
   ## For target_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
-    stop(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
-               paste(unknown_cell_types, collapse = ", ")))
+    warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
   }
   
   # Check if radius is numeric
@@ -44,15 +44,13 @@ calculate_mixing_scores3D <- function(spe,
       if (reference_cell_type == target_cell_type) {
         next
       }
-      
-      # Can't get mixing scores if there are no reference cells
-      if (nrow(reference_cell_type_coords) == 0) {
-        methods::show(paste("There are no unique reference cells of specified cell type ", reference_cell_type, "for target cell", target_cell_type))
+      # Can't get mixing scores if there are 0 or 1 reference cells
+      if (sum(spe[[feature_colname]] == reference_cell_type) == 0 || sum(spe[[feature_colname]] == reference_cell_type) == 1) {
         result <-  rbind(result, 
                          c(reference_cell_type, 
                            target_cell_type, 
-                           0, 
-                           nrow(target_cells), 
+                           sum(spe[[feature_colname]] == reference_cell_type), 
+                           sum(spe[[feature_colname]] == target_cell_type), 
                            0, 
                            0, 
                            NA, 
@@ -60,9 +58,7 @@ calculate_mixing_scores3D <- function(spe,
       }
       
       # Can't get mixing scores if there are no target cells
-      else if (nrow(target_cell_type_coords) == 0) {
-        methods::show(paste("There are no unique target cells of specified cell type", target_cell_type, "for reference cell", reference_cell_type))
-        
+      else if (length(target_cell_type_coords) == 0) {
         ref_ref_result <- dbscan::frNN(reference_cell_type_coords, 
                                        eps = radius, 
                                        query = NULL,
@@ -74,7 +70,7 @@ calculate_mixing_scores3D <- function(spe,
         result <-  rbind(result, 
                          c(reference_cell_type, 
                            target_cell_type, 
-                           nrow(reference_cells), 
+                           sum(spe[[feature_colname]] == reference_cell_type), 
                            0, 
                            0, 
                            n_ref_ref_interactions, 

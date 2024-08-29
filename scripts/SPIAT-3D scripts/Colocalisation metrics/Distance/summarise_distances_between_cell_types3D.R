@@ -5,11 +5,11 @@ summarise_distances_between_cell_types3D <- function(distances_df) {
   # summarise the results
   distances_df_summarised <- distances_df %>% 
     dplyr::group_by(pair) %>%
-    dplyr::summarise(mean(distance, na.rm = TRUE), 
-                     min(distance, na.rm = TRUE), 
-                     max(distance, na.rm = TRUE),
-                     stats::median(distance, na.rm = TRUE), 
-                     stats::sd(distance, na.rm = TRUE))
+    dplyr::summarise(mean(distance), 
+                     min(distance), 
+                     max(distance),
+                     stats::median(distance), 
+                     stats::sd(distance))
   
   distances_df_summarised <- data.frame(distances_df_summarised)
   

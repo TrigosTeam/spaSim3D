@@ -11,14 +11,26 @@ calculate_cross_K3D <- function(spe,
     spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
   }  
   
+  
+  ## Get expected cross K-function
+  expected_cross_K <- (4/3) * pi * radius^3
+  
   ## For reference_cell_type, check it is found in the spe object
   if (!(reference_cell_type %in% spe[[feature_colname]])) {
-    stop(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    warning(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
+    result <- data.frame(observed_cross_K = NA,
+                         expected_cross_K = expected_cross_K,
+                         cross_K_ratio = NA)
+    return(result)
   }
   
   ## For target_cell_type, check it is found in the spe object
   if (!(target_cell_type %in% spe[[feature_colname]])) {
-    stop(paste("The target_cell_type", target_cell_type,"is not found in the spe object"))
+    warning(paste("The target_cell_type", target_cell_type,"is not found in the spe object"))
+    result <- data.frame(observed_cross_K = NA,
+                         expected_cross_K = expected_cross_K,
+                         cross_K_ratio = NA)
+    return(result)
   }
   
   cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
@@ -45,9 +57,6 @@ calculate_cross_K3D <- function(spe,
   
   ## Get observed cross K-function
   observed_cross_K <- (volume * n_ref_tar_interactions) / (n_ref_cells * n_tar_cells)
-  
-  ## Get expected cross K-function
-  expected_cross_K <- (4/3) * pi * radius^3
   
   result <- data.frame(observed_cross_K = observed_cross_K,
                        expected_cross_K = expected_cross_K,
