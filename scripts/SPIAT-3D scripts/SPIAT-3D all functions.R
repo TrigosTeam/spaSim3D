@@ -1262,6 +1262,9 @@ calculate_all_gradient_cc_metrics3D <- function(spe,
                                                    target_cell_types,
                                                    radii[i],
                                                    feature_colname)
+  
+    if (is.null(df)) return(NULL)
+    
     df[["cells_in_neighbourhood"]]$ref_cell_id <- NULL
     
     result[["cells_in_neighbourhood"]][i, ] <- apply(df[["cells_in_neighbourhood"]], 2, mean)
