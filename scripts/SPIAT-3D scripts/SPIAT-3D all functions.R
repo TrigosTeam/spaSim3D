@@ -1573,7 +1573,7 @@ calculate_prevalence_gradient_AUC3D <- function(prevalence_gradient_df) {
 
 calculate_spatial_autocorrelation3D <- function(grid_metrics,
                                                 metric_colname,
-                                                weight_method = "binary") {
+                                                weight_method = "rook") {
   
   
   ## Get number of grid prisms
@@ -1597,9 +1597,9 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
   if (weight_method == "IDW") {
     weight_matrix <- 1 / weight_matrix
   }
-  ## Use binary method: adjacent points get a weight of 1, otherwise, weight of 0
+  ## Use Rook method: adjacent points get a weight of 1, otherwise, weight of 0
   ## Adjacent points are within sqrt(3) units apart. e.g. (0, 0, 0) vs (1, 1, 1)
-  else if (weight_method == "binary") {
+  else if (weight_method == "rook") {
     weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
   }
   else {
