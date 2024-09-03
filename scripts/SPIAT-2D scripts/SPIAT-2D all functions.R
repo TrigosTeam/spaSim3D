@@ -1178,7 +1178,7 @@ calculate_all_single_radius_cc_metrics2D <- function(spe,
   result[["entropy"]] <- entropy_df
   
   
-  ## These metrics focus on a particular cell type 
+  ## These metrics focus on a particular cell type (MS and CKR)  --------------
   for (target_cell_type in target_cell_types) {
     mixing_score_df <- data.frame(matrix(nrow = 1, ncol = length(mixing_score_df_colnames)))
     colnames(mixing_score_df) <- mixing_score_df_colnames
@@ -1197,7 +1197,9 @@ calculate_all_single_radius_cc_metrics2D <- function(spe,
       mixing_score_df$n_ref_tar_interactions <- sum(entropy_df[[target_cell_type]])
       mixing_score_df$n_ref_ref_interactions <- sum(entropy_df[[reference_cell_type]])
       mixing_score_df$mixing_score <- mixing_score_df$n_ref_tar_interactions / mixing_score_df$n_ref_ref_interactions
-      mixing_score_df$normalised_mixing_score <- 0.5 * mixing_score_df$mixing_score * (mixing_score_df$n_ref_cells - 1) / mixing_score_df$n_tar_cell
+      mixing_score_df$normalised_mixing_score <- 0.5 * mixing_score_df$mixing_score * mixing_score_df$n_ref_cells / mixing_score_df$n_tar_cell
+      if (is.infinite(mixing_score_df$mixing_score)) mixing_score_df$mixing_score <- NA
+      if (is.infinite(mixing_score_df$normalised_mixing_score)) mixing_score_df$mixing_score <- NA
       result[["mixing_score"]][[target_cell_type]] <- mixing_score_df
     }
     
@@ -1578,7 +1580,7 @@ calculate_prevalence_gradient_AUC2D <- function(prevalence_gradient_df) {
 
 calculate_spatial_autocorrelation2D <- function(grid_metrics,
                                                 metric_colname,
-                                                weight_method = "rook") {
+                                                weight_method = "quuen") {
   
   
   ## Get number of grid prisms
@@ -1605,6 +1607,9 @@ calculate_spatial_autocorrelation2D <- function(grid_metrics,
   ## Adjacent points are within 1 unit apart.
   else if (weight_method == "rook") {
     weight_matrix <- ifelse(weight_matrix > 1, 0, 1)  
+  }
+  else if (weight_method == "queen") {
+    weight_matrix <- ifelse(weight_matrix > sqrt(2), 0, 1)  
   }
   else {
     stop(paste(weight_method, " weight_method is not an appropriate method"))

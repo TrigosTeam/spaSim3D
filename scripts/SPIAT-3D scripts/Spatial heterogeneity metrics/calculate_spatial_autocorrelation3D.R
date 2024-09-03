@@ -1,6 +1,6 @@
 calculate_spatial_autocorrelation3D <- function(grid_metrics,
                                                 metric_colname,
-                                                weight_method = "rook") {
+                                                weight_method = "queen") {
   
   
   ## Get number of grid prisms
@@ -25,8 +25,13 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
     weight_matrix <- 1 / weight_matrix
   }
   ## Use rook method: adjacent points get a weight of 1, otherwise, weight of 0
-  ## Adjacent points are within sqrt(3) units apart. e.g. (0, 0, 0) vs (1, 1, 1)
+  ## Adjacent points are within 1 unit apart. e.g. (0, 0, 0) vs (0, 0, 1)
   else if (weight_method == "rook") {
+    weight_matrix <- ifelse(weight_matrix > 1, 0, 1)  
+  }
+  ## Use queen method: adjacent points get a weight of 1, otherwise, weight of 0
+  ## Adjacent points are within sqrt(3) unit apart. e.g. (0, 0, 0) vs (0, 0, 1)
+  else if (weight_method == "queen") {
     weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
   }
   else {
@@ -39,7 +44,7 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
   n <- nrow(grid_metrics)
   
   # Center the data
-  data_centered <- grid_metrics[, metric_colname] - mean(grid_metrics[, metric_colname])
+  data_centered <- data_scaled - mean(data_scaled)
   
   # Calculate numerator using matrix multiplication
   numerator <- sum(data_centered * (weight_matrix %*% data_centered))

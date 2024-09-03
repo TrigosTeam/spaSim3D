@@ -103,7 +103,7 @@ calculate_mixing_scores3D <- function(spe,
         
         if (n_ref_ref_interactions != 0) {
           mixing_score <- n_ref_tar_interactions / n_ref_ref_interactions
-          normalised_mixing_score <- 0.5 * mixing_score * (nrow(reference_cell_type_coords) - 1) / nrow(target_cell_type_coords)
+          normalised_mixing_score <- 0.5 * mixing_score * nrow(reference_cell_type_coords) / nrow(target_cell_type_coords)
         }
         else {
           mixing_score <- 0

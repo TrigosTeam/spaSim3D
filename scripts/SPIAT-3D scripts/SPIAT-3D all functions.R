@@ -481,7 +481,7 @@ calculate_mixing_scores3D <- function(spe,
         
         if (n_ref_ref_interactions != 0) {
           mixing_score <- n_ref_tar_interactions / n_ref_ref_interactions
-          normalised_mixing_score <- 0.5 * mixing_score * (nrow(reference_cell_type_coords) - 1) / nrow(target_cell_type_coords)
+          normalised_mixing_score <- 0.5 * mixing_score * nrow(reference_cell_type_coords) / nrow(target_cell_type_coords)
         }
         else {
           mixing_score <- 0
@@ -1178,7 +1178,7 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
   result[["entropy"]] <- entropy_df
   
   
-  ## These metrics focus on a particular cell type 
+  ## These metrics focus on a particular cell type ------------------
   for (target_cell_type in target_cell_types) {
     mixing_score_df <- data.frame(matrix(nrow = 1, ncol = length(mixing_score_df_colnames)))
     colnames(mixing_score_df) <- mixing_score_df_colnames
@@ -1197,8 +1197,11 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
       mixing_score_df$n_ref_tar_interactions <- sum(entropy_df[[target_cell_type]])
       mixing_score_df$n_ref_ref_interactions <- sum(entropy_df[[reference_cell_type]])
       mixing_score_df$mixing_score <- mixing_score_df$n_ref_tar_interactions / mixing_score_df$n_ref_ref_interactions
-      mixing_score_df$normalised_mixing_score <- 0.5 * mixing_score_df$mixing_score * (mixing_score_df$n_ref_cells - 1) / mixing_score_df$n_tar_cell
+      mixing_score_df$normalised_mixing_score <- 0.5 * mixing_score_df$mixing_score * mixing_score_df$n_ref_cells / mixing_score_df$n_tar_cell
+      if (is.infinite(mixing_score_df$mixing_score)) mixing_score_df$mixing_score <- NA
+      if (is.infinite(mixing_score_df$normalised_mixing_score)) mixing_score_df$mixing_score <- NA
       result[["mixing_score"]][[target_cell_type]] <- mixing_score_df
+      
     }
     
     ## Cross_K ---------------------
@@ -1268,8 +1271,8 @@ calculate_all_gradient_cc_metrics3D <- function(spe,
     df[["cells_in_neighbourhood"]]$ref_cell_id <- NULL
     
     result[["cells_in_neighbourhood"]][i, ] <- apply(df[["cells_in_neighbourhood"]], 2, mean)
-    result[["cells_in_neighbourhood_proportion"]][i, ] <- apply(df[["cells_in_neighbourhood_proportion"]][ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
-    result[["entropy"]][i, "entropy"] <- mean(df[["entropy"]]$entropy)
+    result[["cells_in_neighbourhood_proportion"]][i, ] <- apply(df[["cells_in_neighbourhood_proportion"]][ , paste(target_cell_types, "_prop", sep = "")], 2, mean, na.rm = T)
+    result[["entropy"]][i, "entropy"] <- mean(df[["entropy"]]$entropy, na.rm = T)
     
     for (target_cell_type in names(df[["mixing_score"]])) {
       result[["mixing_score"]][[target_cell_type]][i, ] <- df[["mixing_score"]][[target_cell_type]]
@@ -1630,7 +1633,7 @@ calculate_prevalence_gradient_AUC3D <- function(prevalence_gradient_df) {
 
 calculate_spatial_autocorrelation3D <- function(grid_metrics,
                                                 metric_colname,
-                                                weight_method = "rook") {
+                                                weight_method = "queen") {
   
   
   ## Get number of grid prisms
@@ -1654,9 +1657,14 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
   if (weight_method == "IDW") {
     weight_matrix <- 1 / weight_matrix
   }
-  ## Use Rook method: adjacent points get a weight of 1, otherwise, weight of 0
-  ## Adjacent points are within sqrt(3) units apart. e.g. (0, 0, 0) vs (1, 1, 1)
+  ## Use rook method: adjacent points get a weight of 1, otherwise, weight of 0
+  ## Adjacent points are within 1 unit apart. e.g. (0, 0, 0) vs (0, 0, 1)
   else if (weight_method == "rook") {
+    weight_matrix <- ifelse(weight_matrix > 1, 0, 1)  
+  }
+  ## Use queen method: adjacent points get a weight of 1, otherwise, weight of 0
+  ## Adjacent points are within sqrt(3) unit apart. e.g. (0, 0, 0) vs (0, 0, 1)
+  else if (weight_method == "queen") {
     weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
   }
   else {
@@ -1669,7 +1677,7 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
   n <- nrow(grid_metrics)
   
   # Center the data
-  data_centered <- grid_metrics[, metric_colname] - mean(grid_metrics[, metric_colname])
+  data_centered <- data_scaled - mean(data_scaled)
   
   # Calculate numerator using matrix multiplication
   numerator <- sum(data_centered * (weight_matrix %*% data_centered))
@@ -1683,6 +1691,7 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
   return(I)
   
 }
+
 
 
 
