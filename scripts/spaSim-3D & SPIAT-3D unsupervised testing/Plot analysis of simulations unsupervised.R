@@ -125,8 +125,8 @@ plot_gradient_metrics_type1 <- function(spes_table, gradient_metric_df, metric, 
   
   # Constants
   cell_types <- c("A", "B") # Use A as reference, and B as target, and vice versa
-  radii <- 50
-  radii_colnames <- paste("r", seq(radii), sep = "")
+  radii <- seq(20, 100, 10)
+  radii_colnames <- paste("r", radii, sep = "")
   
   
   # Put all plots into an organised list
@@ -1262,5 +1262,94 @@ mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_tabl
 
 setwd("~/Objects/mixed_spes/analysis_3D/plots")
 # saveRDS(mixed_prevalence_plot, "mixed_prevalence_plot.rds")
+
+
+
+### 3.2. ringed spes AMD ------------------------------------------------------
+
+# Read ringed_spes_table
+setwd("~/Objects/unsupervised/spes_table")
+ringed_spes_table <- read.table("ringed_spes_table_unsupervised.csv")
+
+# Read ringed_AMD_df
+setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+ringed_AMD_df <- read.table("ringed_AMD_df.csv")
+
+ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, "cluster_prop_B")
+
+### 3.3. ringed spes MS, NMS, ACINP, AE -----------------------------------
+
+# Read ringed_spes_table
+setwd("~/Objects/unsupervised/spes_table")
+ringed_spes_table <- read.table("ringed_spes_table_unsupervised.csv")
+
+# Read ringed MS, NMS, ACINP, AE dfs
+setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+ringed_MS_df <- read.table("ringed_MS_df.csv")
+ringed_NMS_df <- read.table("ringed_NMS_df.csv")
+ringed_ACINP_df <- read.table("ringed_ACINP_df.csv")
+ringed_AE_df <- read.table("ringed_AE_df.csv")
+
+ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, "MS", "cluster_prop_B")
+ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, "NMS", "cluster_prop_B")
+ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, "ACINP", "cluster_prop_B")
+ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, "AE", "cluster_prop_B")
+
+setwd("~/Objects/ringed_spes/analysis_3D/plots")
+# saveRDS()
+
+### 3.4. ringed spes ACIN, CKR ------------------------------------------------
+
+# Read ringed_spes_table
+setwd("~/Objects/unsupervised/spes_table")
+ringed_spes_table <- read.table("ringed_spes_table_unsupervised.csv")
+
+# Read ringed ACIN, CKR
+setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+ringed_ACIN_df <- read.table("ringed_ACIN_df.csv")
+ringed_CKR_df <- read.table("ringed_CKR_df.csv")
+
+# Get plots
+ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, "ACIN", "cluster_prop_B", 0, 50)
+
+ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, "CKR", "cluster_prop_B", 15, 50)
+
+
+### 3.5. ringed spes SAC ------------------------------------------------------
+
+# Read ringed_spes_table
+setwd("~/Objects/unsupervised/spes_table")
+ringed_spes_table <- read.table("ringed_spes_table_unsupervised.csv")
+
+# Read ringed_SAC_df
+setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+ringed_prop_SAC_df <- read.table("ringed_prop_SAC_df.csv")
+ringed_entropy_SAC_df <- read.table("ringed_entropy_SAC_df.csv")
+
+ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, "cluster_prop_B")
+ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, "cluster_prop_B")
+
+# setwd("~/Objects/ringed_spes/analysis_3D/plots")
+# saveRDS(ringed_SAC_plot, "ringed_SAC_plot.rds")
+
+### 3.6. ringed spes prevalence ------------------------------------------------
+
+# Read ringed_spes_table
+setwd("~/Objects/unsupervised/spes_table")
+ringed_spes_table <- read.table("ringed_spes_table_unsupervised.csv")
+
+# Read ringed prevalence dfs
+setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+ringed_prop_prevalence_df <- read.table("ringed_prop_prevalence_df.csv")
+ringed_entropy_prevalence_df <- read.table("ringed_entropy_prevalence_df.csv")
+
+ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, "cluster_prop_B")
+ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, "cluster_prop_B")
+
+ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, "cluster_prop_B")
+ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, "cluster_prop_B")
+
+setwd("~/Objects/ringed_spes/analysis_3D/plots")
+# saveRDS(ringed_prevalence_plot, "ringed_prevalence_plot.rds")
 
 

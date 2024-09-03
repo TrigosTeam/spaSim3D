@@ -42,7 +42,7 @@ colnames(mixed_AMD_df) <- c("spe", "reference", "target", "AMD")
 
 
 # Define MS, NMS, ACIN, ACINP, CKR, AE data frames as well as constants
-radii <- seq(10, 100, 10)
+radii <- seq(20, 100, 10)
 radii_colnames <- paste("r", radii, sep = "")
 
 mixed_MS_df <- data.frame(matrix(nrow = n_mixed_spes * length(cell_types), ncol = 3 + length(radii)))
@@ -119,7 +119,7 @@ mixed_slices_AMD_df <- data.frame(matrix(nrow = n_mixed_spes * length(AMD_pairs)
 colnames(mixed_slices_AMD_df) <- mixed_slices_AMD_df_colnames
 
 # Define MS, NMS, ACIN, ACINP, CKR, AE data frames as well as constants
-radii <- seq(10, 100, 10)
+radii <- seq(20, 100, 10)
 radii_colnames <- paste("r", radii, sep = "")
 
 mixed_slices_MS_df_colnames <- c("spe", "slice", "reference", "target", radii_colnames)
@@ -271,7 +271,7 @@ for (i in seq_len(n_mixed_spes)) {
     
     proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                           "proportion",
-                                                          "rook")
+                                                          "queen")
     
     proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
@@ -295,7 +295,7 @@ for (i in seq_len(n_mixed_spes)) {
     
     entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                        "entropy",
-                                                       "rook")
+                                                       "queen")
     
     entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                              "entropy",
@@ -413,7 +413,7 @@ for (i in seq_len(n_mixed_spes)) {
       if (!is.null(proportion_grid_metrics)) {
         proportion_SAC <- calculate_spatial_autocorrelation2D(proportion_grid_metrics, 
                                                               "proportion",
-                                                              "rook")
+                                                              "queen")
         
         proportion_prevalence_df <- calculate_prevalence_gradient2D(proportion_grid_metrics,
                                                                     "proportion",
@@ -446,7 +446,7 @@ for (i in seq_len(n_mixed_spes)) {
       if (!is.null(entropy_grid_metrics)) {
         entropy_SAC <- calculate_spatial_autocorrelation2D(entropy_grid_metrics, 
                                                            "entropy",
-                                                           "rook")
+                                                           "queen")
         
         entropy_prevalence_df <- calculate_prevalence_gradient2D(entropy_grid_metrics,
                                                                  "entropy",
@@ -527,7 +527,7 @@ colnames(ringed_AMD_df) <- c("spe", "reference", "target", "AMD")
 
 
 # Define MS, NMS, ACIN, ACINP, CKR, AE data frames as well as constants
-radii <- seq(10, 100, 10)
+radii <- seq(20, 100, 10)
 radii_colnames <- paste("r", radii, sep = "")
 
 ringed_MS_df <- data.frame(matrix(nrow = n_ringed_spes * length(cell_types), ncol = 3 + length(radii)))
@@ -604,7 +604,7 @@ ringed_slices_AMD_df <- data.frame(matrix(nrow = n_ringed_spes * length(AMD_pair
 colnames(ringed_slices_AMD_df) <- ringed_slices_AMD_df_colnames
 
 # Define MS, NMS, ACIN, ACINP, CKR, AE data frames as well as constants
-radii <- seq(10, 100, 10)
+radii <- seq(20, 100, 10)
 radii_colnames <- paste("r", radii, sep = "")
 
 ringed_slices_MS_df_colnames <- c("spe", "slice", "reference", "target", radii_colnames)
@@ -756,7 +756,7 @@ for (i in seq_len(n_ringed_spes)) {
     
     proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                           "proportion",
-                                                          "rook")
+                                                          "queen")
     
     proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
@@ -780,7 +780,7 @@ for (i in seq_len(n_ringed_spes)) {
     
     entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                        "entropy",
-                                                       "rook")
+                                                       "queen")
     
     entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                              "entropy",
@@ -898,7 +898,7 @@ for (i in seq_len(n_ringed_spes)) {
       if (!is.null(proportion_grid_metrics)) {
         proportion_SAC <- calculate_spatial_autocorrelation2D(proportion_grid_metrics, 
                                                               "proportion",
-                                                              "rook")
+                                                              "queen")
         
         proportion_prevalence_df <- calculate_prevalence_gradient2D(proportion_grid_metrics,
                                                                     "proportion",
@@ -931,7 +931,7 @@ for (i in seq_len(n_ringed_spes)) {
       if (!is.null(entropy_grid_metrics)) {
         entropy_SAC <- calculate_spatial_autocorrelation2D(entropy_grid_metrics, 
                                                            "entropy",
-                                                           "rook")
+                                                           "queen")
         
         entropy_prevalence_df <- calculate_prevalence_gradient2D(entropy_grid_metrics,
                                                                  "entropy",
@@ -1012,7 +1012,7 @@ colnames(separated_AMD_df) <- c("spe", "reference", "target", "AMD")
 
 
 # Define MS, NMS, ACIN, ACINP, CKR, AE data frames as well as constants
-radii <- seq(10, 100, 10)
+radii <- seq(20, 100, 10)
 radii_colnames <- paste("r", radii, sep = "")
 
 separated_MS_df <- data.frame(matrix(nrow = n_separated_spes * length(cell_types), ncol = 3 + length(radii)))
@@ -1089,7 +1089,7 @@ separated_slices_AMD_df <- data.frame(matrix(nrow = n_separated_spes * length(AM
 colnames(separated_slices_AMD_df) <- separated_slices_AMD_df_colnames
 
 # Define MS, NMS, ACIN, ACINP, CKR, AE data frames as well as constants
-radii <- seq(10, 100, 10)
+radii <- seq(20, 100, 10)
 radii_colnames <- paste("r", radii, sep = "")
 
 separated_slices_MS_df_colnames <- c("spe", "slice", "reference", "target", radii_colnames)
@@ -1241,7 +1241,7 @@ for (i in seq_len(n_separated_spes)) {
     
     proportion_SAC <- calculate_spatial_autocorrelation3D(proportion_grid_metrics, 
                                                           "proportion",
-                                                          "rook")
+                                                          "queen")
     
     proportion_prevalence_df <- calculate_prevalence_gradient3D(proportion_grid_metrics,
                                                                 "proportion",
@@ -1265,7 +1265,7 @@ for (i in seq_len(n_separated_spes)) {
     
     entropy_SAC <- calculate_spatial_autocorrelation3D(entropy_grid_metrics, 
                                                        "entropy",
-                                                       "rook")
+                                                       "queen")
     
     entropy_prevalence_df <- calculate_prevalence_gradient3D(entropy_grid_metrics,
                                                              "entropy",
@@ -1383,7 +1383,7 @@ for (i in seq_len(n_separated_spes)) {
       if (!is.null(proportion_grid_metrics)) {
         proportion_SAC <- calculate_spatial_autocorrelation2D(proportion_grid_metrics, 
                                                               "proportion",
-                                                              "rook")
+                                                              "queen")
         
         proportion_prevalence_df <- calculate_prevalence_gradient2D(proportion_grid_metrics,
                                                                     "proportion",
@@ -1416,7 +1416,7 @@ for (i in seq_len(n_separated_spes)) {
       if (!is.null(entropy_grid_metrics)) {
         entropy_SAC <- calculate_spatial_autocorrelation2D(entropy_grid_metrics, 
                                                            "entropy",
-                                                           "rook")
+                                                           "queen")
         
         entropy_prevalence_df <- calculate_prevalence_gradient2D(entropy_grid_metrics,
                                                                  "entropy",
