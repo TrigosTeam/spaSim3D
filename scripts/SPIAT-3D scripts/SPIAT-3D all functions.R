@@ -1633,7 +1633,7 @@ calculate_prevalence_gradient_AUC3D <- function(prevalence_gradient_df) {
 
 calculate_spatial_autocorrelation3D <- function(grid_metrics,
                                                 metric_colname,
-                                                weight_method = "queen") {
+                                                weight_method = 0.1) {
   
   
   ## Get number of grid prisms
@@ -1667,6 +1667,12 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
   else if (weight_method == "queen") {
     weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
   }
+  ## If a number (x) between 0 and 1 is supplied, set a threshold to be x * max(weight_matrix)
+  ## Grid prisms within this specified threshold have a weight of 1, otherwise, weight of 0
+  else if (as.numeric(weight_method) && 0 < weight_method && weight_method < 1) {
+    threshold <- weight_method * max(weight_matrix)
+    weight_matrix <- ifelse(weight_matrix > threshold, 0, 1)
+  }
   else {
     stop(paste(weight_method, " weight_method is not an appropriate method"))
   }
@@ -1689,10 +1695,7 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
   I <- (n * numerator) / denominator
   
   return(I)
-  
 }
-
-
 
 
 
