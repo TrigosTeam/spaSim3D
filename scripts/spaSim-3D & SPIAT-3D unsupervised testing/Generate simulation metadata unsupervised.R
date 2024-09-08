@@ -2,9 +2,9 @@
 
 ## Background
 bg_prop_A_range <- c("min" = 0, "max" = 0.10)   # bg_prop_A ranges from 0 to 0.1
-bg_prop_A_equals_zero_prob <- 1/3               # Give higher probability of bg_prop_A equals 0
+bg_prop_A_equals_zero_prob <- 1/2               # Give higher probability of bg_prop_A equals 0
 bg_prop_B_range <- c("min" = 0, "max" = 0.10)   # bg_prop_B ranges from 0 to 0.1
-bg_prop_B_equals_zero_prob <- 1/3               # Give higher probability of bg_prop_B equals 0
+bg_prop_B_equals_zero_prob <- 1/2               # Give higher probability of bg_prop_B equals 0
 
 # Function to get bg props using bg_prop_range and probability prop equals 0
 get_bg_props <- function(n_simulations, bg_prop_range, bg_prop_equals_zero_prob) {
@@ -37,7 +37,7 @@ centre_x_coord_A_range <- c("min" = 150, "max" = 300)   # centre_x_coord_B_range
 
 
 ### 1.1. Generate mixed_spes_table----------------------------------------------
-n_mixed_simulations <- 5000
+n_mixed_simulations <- 2000
 mixed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "radius_x_E", "radius_y_E", "radius_z_E", "width_N", "cluster_prop_A", "cluster_prop_B")
 mixed_spes_table <- data.frame(matrix(nrow = n_mixed_simulations, ncol = length(mixed_spes_table_colnames))) 
 colnames(mixed_spes_table) <- mixed_spes_table_colnames
@@ -56,7 +56,7 @@ mixed_spes_table$cluster_prop_B <- 1 - mixed_spes_table$cluster_prop_A
 
 
 ### 1.2. Generate ringed_spes_table  -------------------------------------
-n_ringed_simulations <- 5000
+n_ringed_simulations <- 2000
 ringed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "radius_x_E", "radius_y_E", "radius_z_E", "width_N", "width_ring")
 ringed_spes_table <- data.frame(matrix(nrow = n_ringed_simulations, ncol = length(ringed_spes_table_colnames))) 
 colnames(ringed_spes_table) <- ringed_spes_table_colnames
@@ -70,13 +70,13 @@ ringed_spes_table$radius_y_E <- ifelse(ringed_spes_table$shape == "Ellipsoid", r
 ringed_spes_table$radius_z_E <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, radius_z_E_range["min"], radius_z_E_range["max"]), NA)
 ringed_spes_table$width_N <- ifelse(ringed_spes_table$shape == "Network", runif(n_ringed_simulations, width_N_range["min"], width_N_range["max"]), NA)
 
-radius_width_colnames <- c("radius_x_E", "radius_y_E", "radius_z_E", "width_N") # Ignore radius_N as this refers to the radius spanned by the cluster, not the width of a branch 
-ringed_spes_table$width_ring <- runif(n_ringed_simulations, 
-                                      width_ring_range_factor["min"], width_ring_range_factor["max"]) * apply(ringed_spes_table[, radius_width_colnames], 1, mean, na.rm = T)
+radius_width_colnames <- c("radius_x_E", "radius_y_E", "radius_z_E", "width_N") # Ignore radius_N as this refers to the radius spanned by the cluster, not the width of a branch
+ringed_spes_table$width_ring_factor <- runif(n_ringed_simulations, width_ring_range_factor["min"], width_ring_range_factor["max"])
+ringed_spes_table$width_ring <- ringed_spes_table$width_ring_factor * apply(ringed_spes_table[, radius_width_colnames], 1, mean, na.rm = T)
 
 
 ### 1.3. Generate separated_spes_table --------------------------------------
-n_separated_simulations <- 5000
+n_separated_simulations <- 2000
 separated_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", 
                                    "shape_A", "radius_x_E_A", "radius_y_E_A", "radius_z_E_A", "width_N_A", "centre_x_coord_A",
                                    "shape_B", "radius_x_E_B", "radius_y_E_B", "radius_z_E_B", "width_N_B", "centre_x_coord_B")

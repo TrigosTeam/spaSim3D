@@ -143,9 +143,9 @@ print(entropy_spatial_autocorrelation)
 
 ### calculate cell proportion grid metrics
 cell_proportion_grid_metrics <- calculate_cell_proportion_grid_metrics3D(spe1,
-                                                                         n_splits = 8,
-                                                                         reference_cell_types = c("Tumour"),
-                                                                         target_cell_types = c("Immune"),
+                                                                         n_splits = 10,
+                                                                         reference_cell_types = c("Others"),
+                                                                         target_cell_types = c("Tumour"),
                                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(cell_proportion_grid_metrics, "proportion")
 
@@ -162,7 +162,7 @@ cell_proportion_prevalence_gradient <- calculate_prevalence_gradient3D(cell_prop
 ## calculate spatial autocorrelation for cell proportions
 cell_proportion_spatial_autocorrelation <- calculate_spatial_autocorrelation3D(cell_proportion_grid_metrics,
                                                                                metric_colname = "proportion",
-                                                                               weight_method = "binary")
+                                                                               weight_method = 0.10)
 print(cell_proportion_spatial_autocorrelation)
 
 
