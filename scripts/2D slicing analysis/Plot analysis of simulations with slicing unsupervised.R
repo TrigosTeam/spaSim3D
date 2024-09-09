@@ -98,12 +98,11 @@ plot_AMD_metric <- function(spes_table, AMD_df, slices_AMD_df, arrangement_colna
     
     all_plots_list[[AMD_pairs[i, "pair"]]] <- list(slice = fig_slice + theme(legend.position="none"),
                                                    bg_prop_A = fig_bg_prop_A + theme(legend.position="none"),
-                                                   bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
+                                                   bg_prop_B = fig_bg_prop_B + theme(legend.position="none"))
                                                    # shape = fig_shape + theme(legend.position="none")
                                                    # variation_E = fig_variation_E + theme(legend.position="none"),
                                                    # volume_E = fig_volume_E + theme(legend.position="none"),
                                                    # width_N = fig_width_N + theme(legend.position="none")
-                                                   )
   }
   
   # Get legends
@@ -262,12 +261,12 @@ plot_gradient_metrics_type1 <- function(spes_table, gradient_metric_df, slices_g
     all_plots_list[[cell_types[i]]] <- list(slice = fig_slice + theme(legend.position = "none"),
                                             arrangement = fig_arrangement + theme(legend.position = "none"), 
                                             bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
-                                            bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"),
+                                            bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"))
                                             # shape = fig_shape + theme(legend.position = "none")
                                             # variation_E = fig_variation_E + theme(legend.position = "none"),
                                             # volume_E = fig_volume_E + theme(legend.position = "none"),
                                             # width_N = fig_width_N + theme(legend.position = "none")
-                                            )
+                                            
     
   }
   
@@ -520,7 +519,7 @@ plot_gradient_metrics_type2 <- function(spes_table, gradient_metric_df, slices_g
     all_plots_list[[pairs[i, "pair"]]] <- list(slice = fig_slice + theme(legend.position = "none"),
                                                arrangement = fig_arrangement + theme(legend.position = "none"),
                                                bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
-                                               bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"),
+                                               bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"))
                                                # shape = fig_shape + theme(legend.position = "none"))
                                                # variation_E = fig_variation_E + theme(legend.position = "none"),
                                                # volume_E = fig_volume_E + theme(legend.position = "none"),
@@ -892,7 +891,7 @@ plot_entropy_SAC <- function(spes_table, SAC_df, slices_SAC_df, arrangement_coln
     
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(slice = fig_slice + theme(legend.position="none"),
                                                                bg_prop_A = fig_bg_prop_A + theme(legend.position="none"), 
-                                                               bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
+                                                               bg_prop_B = fig_bg_prop_B + theme(legend.position="none"))
                                                                # shape = fig_shape + theme(legend.position="none"))
                                                                # variation_E = fig_variation_E + theme(legend.position="none"),
                                                                # volume_E = fig_volume_E + theme(legend.position="none"),
@@ -1056,7 +1055,7 @@ plot_proportion_prevalence <- function(spes_table, prevalence_df, slices_prevale
     all_plots_list[[prop_cell_types$pair[i]]] <- list(slice = fig_slice + theme(legend.position = "none"),
                                                       arrangement = fig_arrangement + theme(legend.position = "none"), 
                                                       bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
-                                                      bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"),
+                                                      bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"))
                                                       # shape = fig_shape + theme(legend.position = "none"))
                                                       # variation_E = fig_variation_E + theme(legend.position = "none"),
                                                       # volume_E = fig_volume_E + theme(legend.position = "none"),
@@ -1310,7 +1309,7 @@ plot_entropy_prevalence <- function(spes_table, prevalence_df, slices_prevalence
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(slice = fig_slice + theme(legend.position = "none"),
                                                                arrangement = fig_arrangement + theme(legend.position = "none"), 
                                                                bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
-                                                               bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"),
+                                                               bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"))
                                                                # shape = fig_shape + theme(legend.position = "none"))
                                                                # variation_E = fig_variation_E + theme(legend.position = "none"),
                                                                # volume_E = fig_volume_E + theme(legend.position = "none"),
@@ -1555,7 +1554,7 @@ plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, slices_pre
     
     all_plots_list[[prop_cell_types$pair[i]]] <- list(slice = fig_slice + theme(legend.position="none"), 
                                                       bg_prop_A = fig_bg_prop_A + theme(legend.position="none"), 
-                                                      bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
+                                                      bg_prop_B = fig_bg_prop_B + theme(legend.position="none"))
                                                       # shape = fig_shape + theme(legend.position="none"))
                                                       # variation_E = fig_variation_E + theme(legend.position="none"),
                                                       # volume_E = fig_volume_E + theme(legend.position="none"),
@@ -1707,7 +1706,7 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, slices_preval
     
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(slice = fig_slice + theme(legend.position="none"),
                                                                bg_prop_A = fig_bg_prop_A + theme(legend.position="none"), 
-                                                               bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
+                                                               bg_prop_B = fig_bg_prop_B + theme(legend.position="none"))
                                                                # shape = fig_shape + theme(legend.position="none"))
                                                                # variation_E = fig_variation_E + theme(legend.position="none"),
                                                                # volume_E = fig_volume_E + theme(legend.position="none"),

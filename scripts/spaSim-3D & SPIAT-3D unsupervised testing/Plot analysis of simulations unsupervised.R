@@ -1370,8 +1370,8 @@ separated_A_AMD_plot <- plot_AMD_metric(separated_A_spes_table, separated_AMD_df
 separated_B_AMD_plot <- plot_AMD_metric(separated_B_spes_table, separated_AMD_df, "distance")
 
 setwd("~/Objects/unsupervised/plots/original")
-saveRDS(separated_A_AMD_plot, "separated_AMD_A_plot.RDS")
-saveRDS(separated_B_AMD_plot, "separated_AMD_B_plot.RDS")
+saveRDS(separated_A_AMD_plot, "separated_A_AMD_plot.RDS")
+saveRDS(separated_B_AMD_plot, "separated_B_AMD_plot.RDS")
 
 ### 4.3. separated spes MS, NMS, ACINP, AE -----------------------------------
 
