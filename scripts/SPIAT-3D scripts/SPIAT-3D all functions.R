@@ -2032,18 +2032,18 @@ grid_based_clustering3D <- function(spe,
                                                                                                          feature_colname,
                                                                                                          data.frame()))
     
-    
-    
     if (is.array(curr_result))  {
       curr_result <- data.frame(t(unlist(curr_result)))
       colnames(curr_result) <- c("x", "y", "z", "l", "w", "h")
       result[[n_clusters]] <- curr_result
+      n_clusters <- n_clusters + 1
+    }
+    else if (isEmpty(curr_result)) {
     }
     else {
       result[[n_clusters]] <- rbindlist(curr_result)
+      n_clusters <- n_clusters + 1
     }
-    
-    n_clusters <- n_clusters + 1
     
     # Remove grid prisms which have just been examined
     grid_prism_cell_proportions <- grid_prism_cell_proportions[setdiff((names(grid_prism_cell_proportions)), 
@@ -2087,6 +2087,7 @@ grid_based_clustering3D <- function(spe,
   
   return(spe)
 }
+
 
 
 
