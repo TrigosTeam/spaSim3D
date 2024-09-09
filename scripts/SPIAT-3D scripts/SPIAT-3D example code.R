@@ -144,8 +144,8 @@ print(entropy_spatial_autocorrelation)
 ### calculate cell proportion grid metrics
 cell_proportion_grid_metrics <- calculate_cell_proportion_grid_metrics3D(spe1,
                                                                          n_splits = 10,
-                                                                         reference_cell_types = c("Others"),
-                                                                         target_cell_types = c("Tumour"),
+                                                                         reference_cell_types = c("Tumour"),
+                                                                         target_cell_types = c("Immune"),
                                                                          plot_image = TRUE)
 plot_grid_metrics_discrete3D(cell_proportion_grid_metrics, "proportion")
 

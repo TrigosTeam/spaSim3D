@@ -1611,10 +1611,10 @@ calculate_spatial_autocorrelation2D <- function(grid_metrics,
   else if (weight_method == "queen") {
     weight_matrix <- ifelse(weight_matrix > sqrt(2), 0, 1)  
   }
-  ## If a number (x) between 0 and 1 is supplied, set a threshold to be x * max(weight_matrix)
+  ## If a number (x) between 0 and 1 is supplied, set a threshold to be x quantile value of c(weight_matrix)
   ## Grid prisms within this specified threshold have a weight of 1, otherwise, weight of 0
   else if (as.numeric(weight_method) && 0 < weight_method && weight_method < 1) {
-    threshold <- weight_method * max(weight_matrix)
+    threshold <- quantile(c(weight_matrix), weight_method)
     weight_matrix <- ifelse(weight_matrix > threshold, 0, 1)
   }
   else {
