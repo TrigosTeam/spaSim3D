@@ -141,6 +141,109 @@ plot_AMD_metric <- function(spes_table, AMD_df, arrangement_colname) {
   return(AMD_plot)
 }
 
+plot_AMD_metric1 <- function(spes_table, AMD_df, arrangement_colname) {
+  
+  # AMD pairs are A/A, A/B, B/A, B/B
+  AMD_pairs <- data.frame(cell1 = c("A", "A", "B", "B"),
+                          cell2 = c("A", "B", "A", "B"))
+  AMD_pairs$pair <- paste(AMD_pairs$cell1, AMD_pairs$cell2, sep = "/")
+  
+  
+  # Put all plots into an organised list
+  all_plots_list <- list()
+  
+  for (i in seq(nrow(AMD_pairs))) {
+    
+    # Subset AMD_df for chosen pair
+    plot_df <- AMD_df[AMD_df$reference == AMD_pairs[i, "cell1"] & AMD_df$target == AMD_pairs[i, "cell2"], ]
+    
+    # Combine spes_table and AMD_df
+    plot_df <- cbind(spes_table, plot_df)
+    
+    # Remove spheres
+    plot_df <- plot_df[plot_df$shape != "Sphere", ]
+    
+    # Factor
+    plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    
+    fig_arrangement <- ggplot(plot_df, aes(!!sym(arrangement_colname), AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    fig_bg_prop_A <- ggplot(plot_df, aes(bg_prop_A, AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    fig_bg_prop_B <- ggplot(plot_df, aes(bg_prop_B, AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    fig_shape <- ggplot(plot_df, aes(shape, AMD)) +
+      geom_violin() +
+      theme_bw()
+    
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+    
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variation_E, AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(volume_E, AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(width_N, AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    all_plots_list[[AMD_pairs[i, "pair"]]] <- list(arrangement = fig_arrangement,
+                                                   bg_prop_A = fig_bg_prop_A, 
+                                                   bg_prop_B = fig_bg_prop_B,
+                                                   shape = fig_shape,
+                                                   variation_E = fig_variation_E,
+                                                   volume_E = fig_volume_E,
+                                                   width_N = fig_width_N)
+  }
+  
+  # Combine the plots together by pairs
+  plots_pair_list <- list()
+  
+  for (i in seq(nrow(AMD_pairs))) {
+    pair <- AMD_pairs[i, "pair"]
+    
+    plots <- plot_grid(all_plots_list[[pair]]$arrangement,
+                       all_plots_list[[pair]]$bg_prop_A,
+                       all_plots_list[[pair]]$bg_prop_B,
+                       all_plots_list[[pair]]$shape, 
+                       all_plots_list[[pair]]$variation_E,
+                       all_plots_list[[pair]]$volume_E,
+                       all_plots_list[[pair]]$width_N, 
+                       nrow = 1, ncol = length(all_plots_list[[pair]]))
+    
+    title <- ggdraw() + 
+      draw_label(paste("Reference:", AMD_pairs[i, "cell1"], "Target:", AMD_pairs[i, "cell2"]), 
+                 fontface='bold')
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    
+    plots_pair_list[[pair]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  AMD_plot <- plot_grid(plots_pair_list$`A/A`, 
+                        plots_pair_list$`A/B`, 
+                        plots_pair_list$`B/A`, 
+                        plots_pair_list$`B/B`,
+                        nrow = 4, ncol = 1, 
+                        rel_heights = c(1, 1, 1, 1))
+  
+  methods::show(AMD_plot)
+  
+  return(AMD_plot)
+}
+
 
 ### 1.2.1. Function to get plot for MS, NMS, ACINP, AE gradient metrics ------------
 plot_gradient_metrics_type1 <- function(spes_table, gradient_metric_df, metric, arrangement_colname) {
@@ -1586,6 +1689,96 @@ plot_AMD_metric <- function(spes_table, AMD_df, arrangement_colname) {
                         legends,
                         nrow = 5, ncol = 1, 
                         rel_heights = c(1, 1, 1, 1, 0.5))
+  
+  methods::show(AMD_plot)
+  
+  return(AMD_plot)
+}
+plot_AMD_metric1 <- function(spes_table, AMD_df, arrangement_colname) {
+  
+  # AMD pairs are A/A, A/B, B/A, B/B
+  AMD_pairs <- data.frame(cell1 = c("A", "A", "B", "B"),
+                          cell2 = c("A", "B", "A", "B"))
+  AMD_pairs$pair <- paste(AMD_pairs$cell1, AMD_pairs$cell2, sep = "/")
+  
+  
+  # Put all plots into an organised list
+  all_plots_list <- list()
+  
+  for (i in seq(nrow(AMD_pairs))) {
+    
+    # Subset AMD_df for chosen pair
+    plot_df <- AMD_df[AMD_df$reference == AMD_pairs[i, "cell1"] & AMD_df$target == AMD_pairs[i, "cell2"], ]
+    
+    # Combine spes_table and AMD_df
+    plot_df <- cbind(spes_table, plot_df)
+    
+    # Remove spheres
+    plot_df <- plot_df[plot_df$shape != "Sphere", ]
+    
+    # Factor
+    plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    
+    fig_arrangement <- ggplot(plot_df, aes(!!sym(arrangement_colname), AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    fig_shape <- ggplot(plot_df, aes(shape, AMD)) +
+      geom_violin() +
+      theme_bw()
+    
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+    
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variation_E, AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(volume_E, AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(width_N, AMD)) +
+      geom_point() +
+      theme_bw()
+    
+    all_plots_list[[AMD_pairs[i, "pair"]]] <- list(arrangement = fig_arrangement,
+                                                   shape = fig_shape,
+                                                   variation_E = fig_variation_E,
+                                                   volume_E = fig_volume_E,
+                                                   width_N = fig_width_N)
+  }
+  
+  # Combine the plots together by pairs
+  plots_pair_list <- list()
+  
+  for (i in seq(nrow(AMD_pairs))) {
+    pair <- AMD_pairs[i, "pair"]
+    
+    plots <- plot_grid(all_plots_list[[pair]]$arrangement,
+                       all_plots_list[[pair]]$shape, 
+                       all_plots_list[[pair]]$variation_E,
+                       all_plots_list[[pair]]$volume_E,
+                       all_plots_list[[pair]]$width_N, 
+                       nrow = 1, ncol = length(all_plots_list[[pair]]))
+    
+    title <- ggdraw() + 
+      draw_label(paste("Reference:", AMD_pairs[i, "cell1"], "Target:", AMD_pairs[i, "cell2"]), 
+                 fontface='bold')
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    
+    plots_pair_list[[pair]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  AMD_plot <- plot_grid(plots_pair_list$`A/A`, 
+                        plots_pair_list$`A/B`, 
+                        plots_pair_list$`B/A`, 
+                        plots_pair_list$`B/B`,
+                        nrow = 4, ncol = 1, 
+                        rel_heights = c(1, 1, 1, 1))
   
   methods::show(AMD_plot)
   

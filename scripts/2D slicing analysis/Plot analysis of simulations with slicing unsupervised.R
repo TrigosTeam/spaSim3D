@@ -2003,10 +2003,6 @@ saveRDS(ringed_AMD_plot, "ringed_AMD_plot_slicing.RDS")
 
 ### 3.3. ringed spes MS, NMS, ACINP, AE -----------------------------------
 
-# Read ringed_spes_table
-setwd("~/Objects/unsupervised/spes_table")
-ringed_spes_table <- read.table("ringed_spes_table_unsupervised.csv")
-
 # Read ringed MS, NMS, ACINP, AE dfs
 setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
 ringed_MS_df <- read.table("ringed_MS_df.csv")
@@ -3058,29 +3054,29 @@ plot_proportion_SAC <- function(spes_table, SAC_df, slices_SAC_df, arrangement_c
       theme_bw()
     
     all_plots_list[[prop_cell_types[i, "pair"]]] <- list(slice = fig_slice + theme(legend.position="none"),
-                                                         bg_prop_A = fig_bg_prop_A + theme(legend.position="none"),
-                                                         bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
-    shape = fig_shape + theme(legend.position="none"),
-    variation_E = fig_variation_E + theme(legend.position="none"),
-    volume_E = fig_volume_E + theme(legend.position="none"),
-    width_N = fig_width_N + theme(legend.position="none"))
+                                                         # bg_prop_A = fig_bg_prop_A + theme(legend.position="none"),
+                                                         # bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
+                                                         shape = fig_shape + theme(legend.position="none"),
+                                                         variation_E = fig_variation_E + theme(legend.position="none"),
+                                                         volume_E = fig_volume_E + theme(legend.position="none"),
+                                                         width_N = fig_width_N + theme(legend.position="none"))
   }
   # Get legends
   legend_slice <- get_legend(fig_slice + theme(legend.direction = "horizontal"))
-  legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
-  legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
-  # legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
-  # legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
-  # legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
-  # legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
+  legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
+  legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
+  legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
+  legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
   
   legends <- plot_grid(legend_slice,
-                       legend_bg_prop_a, 
-                       legend_bg_prop_B,
-                       # legend_shape,
-                       # legend_variation_E,
-                       # legend_volume_E,
-                       # legend_width_N,
+                       # legend_bg_prop_a, 
+                       # legend_bg_prop_B,
+                       legend_shape,
+                       legend_variation_E,
+                       legend_volume_E,
+                       legend_width_N,
                        nrow = 1)
   
   # Combine the plots together by pairs
@@ -3091,12 +3087,12 @@ plot_proportion_SAC <- function(spes_table, SAC_df, slices_SAC_df, arrangement_c
     pair <- prop_cell_types[i, "pair"]
     
     plots <- plot_grid(all_plots_list[[pair]]$slice,
-                       all_plots_list[[pair]]$bg_prop_A,
-                       all_plots_list[[pair]]$bg_prop_B,
-                       # all_plots_list[[pair]]$shape, 
-                       # all_plots_list[[pair]]$variation_E,
-                       # all_plots_list[[pair]]$volume_E,
-                       # all_plots_list[[pair]]$width_N, 
+                       # all_plots_list[[pair]]$bg_prop_A,
+                       # all_plots_list[[pair]]$bg_prop_B,
+                       all_plots_list[[pair]]$shape,
+                       all_plots_list[[pair]]$variation_E,
+                       all_plots_list[[pair]]$volume_E,
+                       all_plots_list[[pair]]$width_N,
                        nrow = 1, ncol = length(all_plots_list[[pair]]))
     
     title <- ggdraw() + 
@@ -3160,62 +3156,62 @@ plot_entropy_SAC <- function(spes_table, SAC_df, slices_SAC_df, arrangement_coln
       theme_bw() +
       scale_color_manual(values = viridis::viridis(5))
     
-    fig_bg_prop_A <- ggplot(plot_df, aes(!!sym(arrangement_colname), entropy, col = bg_prop_A)) +
-      geom_point() +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    fig_bg_prop_B <- ggplot(plot_df, aes(!!sym(arrangement_colname), entropy, col = bg_prop_B)) +
-      geom_point() +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    # fig_shape <- ggplot(plot_df, aes(!!sym(arrangement_colname), entropy, col = shape)) +
-    #   geom_point() +
-    #   theme_bw()
-    # 
-    # radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
-    # plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
-    # plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
-    # 
-    # fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), entropy, col = variation_E)) +
-    #   geom_point() +
-    #   theme_bw()
-    # 
-    # fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), entropy, col = volume_E)) +
+    # fig_bg_prop_A <- ggplot(plot_df, aes(!!sym(arrangement_colname), entropy, col = bg_prop_A)) +
     #   geom_point() +
     #   theme_bw() +
-    #   scale_color_continuous(n.breaks = 4)
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
     # 
-    # fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(!!sym(arrangement_colname), entropy, col = width_N)) +
+    # fig_bg_prop_B <- ggplot(plot_df, aes(!!sym(arrangement_colname), entropy, col = bg_prop_B)) +
     #   geom_point() +
-    #   theme_bw()
+    #   theme_bw() +
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
+    
+    fig_shape <- ggplot(plot_df, aes(!!sym(arrangement_colname), entropy, col = shape)) +
+      geom_point() +
+      theme_bw()
+
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), entropy, col = variation_E)) +
+      geom_point() +
+      theme_bw()
+
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), entropy, col = volume_E)) +
+      geom_point() +
+      theme_bw() +
+      scale_color_continuous(n.breaks = 4)
+
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(!!sym(arrangement_colname), entropy, col = width_N)) +
+      geom_point() +
+      theme_bw()
     
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(slice = fig_slice + theme(legend.position="none"),
-                                                               bg_prop_A = fig_bg_prop_A + theme(legend.position="none"), 
-                                                               bg_prop_B = fig_bg_prop_B + theme(legend.position="none"))
-    # shape = fig_shape + theme(legend.position="none"))
-    # variation_E = fig_variation_E + theme(legend.position="none"),
-    # volume_E = fig_volume_E + theme(legend.position="none"),
-    # width_N = fig_width_N + theme(legend.position="none"))
+                                                               # bg_prop_A = fig_bg_prop_A + theme(legend.position="none"), 
+                                                               # bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
+                                                               shape = fig_shape + theme(legend.position="none"),
+                                                               variation_E = fig_variation_E + theme(legend.position="none"),
+                                                               volume_E = fig_volume_E + theme(legend.position="none"),
+                                                               width_N = fig_width_N + theme(legend.position="none"))
   }
   
   # Get legends
   legend_slice <- get_legend(fig_slice + theme(legend.direction = "horizontal"))
-  legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
-  legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
-  # legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
-  # legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
-  # legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
-  # legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
+  legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
+  legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
+  legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
+  legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
   
   legends <- plot_grid(legend_slice,
-                       legend_bg_prop_a, 
-                       legend_bg_prop_B,
-                       # legend_shape,
-                       # legend_variation_E,
-                       # legend_volume_E,
-                       # legend_width_N,
+                       # legend_bg_prop_a, 
+                       # legend_bg_prop_B,
+                       legend_shape,
+                       legend_variation_E,
+                       legend_volume_E,
+                       legend_width_N,
                        nrow = 1)
   
   # Combine the plots together by cell types of interest
@@ -3226,12 +3222,12 @@ plot_entropy_SAC <- function(spes_table, SAC_df, slices_SAC_df, arrangement_coln
     cell_types <- entropy_cell_types$cell_types[i]
     
     plots <- plot_grid(all_plots_list[[cell_types]]$slice,
-                       all_plots_list[[cell_types]]$bg_prop_A,
-                       all_plots_list[[cell_types]]$bg_prop_B,
-                       # all_plots_list[[cell_types]]$shape, 
-                       # all_plots_list[[cell_types]]$variation_E,
-                       # all_plots_list[[cell_types]]$volume_E,
-                       # all_plots_list[[cell_types]]$width_N, 
+                       # all_plots_list[[cell_types]]$bg_prop_A,
+                       # all_plots_list[[cell_types]]$bg_prop_B,
+                       all_plots_list[[cell_types]]$shape,
+                       all_plots_list[[cell_types]]$variation_E,
+                       all_plots_list[[cell_types]]$volume_E,
+                       all_plots_list[[cell_types]]$width_N,
                        nrow = 1, ncol = length(all_plots_list[[cell_types]]))
     
     title <- ggdraw() + 
@@ -3317,72 +3313,72 @@ plot_proportion_prevalence <- function(spes_table, prevalence_df, slices_prevale
       theme_bw() +
       scale_color_manual(values = viridis::viridis(5))
     
-    fig_bg_prop_A <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_A)) +
-      geom_line() +
-      labs(x = "threshold", y = "prevalence") +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    fig_bg_prop_B <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_B)) +
-      geom_line() +
-      labs(x = "threshold", y = "prevalence") +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    # fig_shape <- ggplot(plot_df, aes(variable, value, group = key, col = shape)) +
-    #   labs(x = "threshold", y = "prevalence") +
-    #   geom_line() +
-    #   theme_bw()
-    # 
-    # radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
-    # plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
-    # plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
-    # 
-    # fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = spe, col = variation_E)) +
-    #   geom_line() +
-    #   labs(x = "threshold", y = "prevalence") +
-    #   theme_bw()
-    # 
-    # fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = spe, col = volume_E)) +
+    # fig_bg_prop_A <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_A)) +
     #   geom_line() +
     #   labs(x = "threshold", y = "prevalence") +
     #   theme_bw() +
-    #   scale_color_continuous(n.breaks = 4)
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
     # 
-    # fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(variable, value, group = spe, col = width_N)) +
+    # fig_bg_prop_B <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_B)) +
     #   geom_line() +
     #   labs(x = "threshold", y = "prevalence") +
-    #   theme_bw()
+    #   theme_bw() +
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
+    
+    fig_shape <- ggplot(plot_df, aes(variable, value, group = key, col = shape)) +
+      labs(x = "threshold", y = "prevalence") +
+      geom_line() +
+      theme_bw()
+
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = key, col = variation_E)) +
+      geom_line() +
+      labs(x = "threshold", y = "prevalence") +
+      theme_bw()
+
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = key, col = volume_E)) +
+      geom_line() +
+      labs(x = "threshold", y = "prevalence") +
+      theme_bw() +
+      scale_color_continuous(n.breaks = 4)
+
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(variable, value, group = key, col = width_N)) +
+      geom_line() +
+      labs(x = "threshold", y = "prevalence") +
+      theme_bw()
     
     all_plots_list[[prop_cell_types$pair[i]]] <- list(slice = fig_slice + theme(legend.position = "none"),
                                                       arrangement = fig_arrangement + theme(legend.position = "none"), 
-                                                      bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
-                                                      bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"))
-    # shape = fig_shape + theme(legend.position = "none"))
-    # variation_E = fig_variation_E + theme(legend.position = "none"),
-    # volume_E = fig_volume_E + theme(legend.position = "none"),
-    # width_N = fig_width_N + theme(legend.position = "none"))
+                                                      # bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
+                                                      # bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"),
+                                                      shape = fig_shape + theme(legend.position = "none"),
+                                                      variation_E = fig_variation_E + theme(legend.position = "none"),
+                                                      volume_E = fig_volume_E + theme(legend.position = "none"),
+                                                      width_N = fig_width_N + theme(legend.position = "none"))
     
   }
   
   # Get legends
   legend_slice <- get_legend(fig_slice + theme(legend.direction = "horizontal"))
   legend_arrangement <- get_legend(fig_arrangement + theme(legend.direction = "horizontal"))
-  legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
-  legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
-  # legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
-  # legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
-  # legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
-  # legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
+  legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
+  legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
+  legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
+  legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
   
   legends <- plot_grid(legend_slice,
                        legend_arrangement,
-                       legend_bg_prop_a,
-                       legend_bg_prop_B,
-                       # legend_shape,
-                       # legend_variation_E,
-                       # legend_volume_E,
-                       # legend_width_N,
+                       # legend_bg_prop_a,
+                       # legend_bg_prop_B,
+                       legend_shape,
+                       legend_variation_E,
+                       legend_volume_E,
+                       legend_width_N,
                        nrow = 1)
   
   
@@ -3394,12 +3390,12 @@ plot_proportion_prevalence <- function(spes_table, prevalence_df, slices_prevale
     
     plots <- plot_grid(all_plots_list[[pair]]$slice,
                        all_plots_list[[pair]]$arrangement,
-                       all_plots_list[[pair]]$bg_prop_A,
-                       all_plots_list[[pair]]$bg_prop_B,
-                       # all_plots_list[[pair]]$shape,
-                       # all_plots_list[[pair]]$variation_E,
-                       # all_plots_list[[pair]]$volume_E,
-                       # all_plots_list[[pair]]$width_N, 
+                       # all_plots_list[[pair]]$bg_prop_A,
+                       # all_plots_list[[pair]]$bg_prop_B,
+                       all_plots_list[[pair]]$shape,
+                       all_plots_list[[pair]]$variation_E,
+                       all_plots_list[[pair]]$volume_E,
+                       all_plots_list[[pair]]$width_N,
                        nrow = 1, ncol = length(all_plots_list[[pair]]))
     
     title <- ggdraw() + 
@@ -3570,72 +3566,72 @@ plot_entropy_prevalence <- function(spes_table, prevalence_df, slices_prevalence
       theme_bw() +
       scale_color_manual(values = viridis::viridis(5))
     
-    fig_bg_prop_A <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_A)) +
-      geom_line() +
-      labs(x = "threshold", y = "prevalence") +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    fig_bg_prop_B <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_B)) +
-      geom_line() +
-      labs(x = "threshold", y = "prevalence") +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    # fig_shape <- ggplot(plot_df, aes(variable, value, group = key, col = shape)) +
-    #   labs(x = "threshold", y = "prevalence") +
-    #   geom_line() +
-    #   theme_bw()
-    #
-    # radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
-    # plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
-    # plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
-    # 
-    # fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = spe, col = variation_E)) +
-    #   geom_line() +
-    #   labs(x = "threshold", y = "prevalence") +
-    #   theme_bw()
-    # 
-    # fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = spe, col = volume_E)) +
+    # fig_bg_prop_A <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_A)) +
     #   geom_line() +
     #   labs(x = "threshold", y = "prevalence") +
     #   theme_bw() +
-    #   scale_color_continuous(n.breaks = 4)
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
     # 
-    # fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(variable, value, group = spe, col = width_N)) +
+    # fig_bg_prop_B <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_B)) +
     #   geom_line() +
     #   labs(x = "threshold", y = "prevalence") +
-    #   theme_bw()
+    #   theme_bw() +
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
+
+    fig_shape <- ggplot(plot_df, aes(variable, value, group = key, col = shape)) +
+      labs(x = "threshold", y = "prevalence") +
+      geom_line() +
+      theme_bw()
+
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = key, col = variation_E)) +
+      geom_line() +
+      labs(x = "threshold", y = "prevalence") +
+      theme_bw()
+
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = key, col = volume_E)) +
+      geom_line() +
+      labs(x = "threshold", y = "prevalence") +
+      theme_bw() +
+      scale_color_continuous(n.breaks = 4)
+
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(variable, value, group = key, col = width_N)) +
+      geom_line() +
+      labs(x = "threshold", y = "prevalence") +
+      theme_bw()
     
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(slice = fig_slice + theme(legend.position = "none"),
                                                                arrangement = fig_arrangement + theme(legend.position = "none"), 
-                                                               bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
-                                                               bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"))
-    # shape = fig_shape + theme(legend.position = "none"))
-    # variation_E = fig_variation_E + theme(legend.position = "none"),
-    # volume_E = fig_volume_E + theme(legend.position = "none"),
-    # width_N = fig_width_N + theme(legend.position = "none"))
+                                                               # bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
+                                                               # bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"),
+                                                               shape = fig_shape + theme(legend.position = "none"),
+                                                               variation_E = fig_variation_E + theme(legend.position = "none"),
+                                                               volume_E = fig_volume_E + theme(legend.position = "none"),
+                                                               width_N = fig_width_N + theme(legend.position = "none"))
     
   }
   
   # Get legends
   legend_slice <- get_legend(fig_slice + theme(legend.direction = "horizontal"))
   legend_arrangement <- get_legend(fig_arrangement + theme(legend.direction = "horizontal"))
-  legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
-  legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
-  # legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
-  # legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
-  # legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
-  # legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
+  legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
+  legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
+  legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
+  legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
   
   legends <- plot_grid(legend_slice,
                        legend_arrangement,
-                       legend_bg_prop_a,
-                       legend_bg_prop_B,
-                       # legend_shape,
-                       # legend_variation_E,
-                       # legend_volume_E,
-                       # legend_width_N,
+                       # legend_bg_prop_a,
+                       # legend_bg_prop_B,
+                       legend_shape,
+                       legend_variation_E,
+                       legend_volume_E,
+                       legend_width_N,
                        nrow = 1)
   
   
@@ -3647,12 +3643,12 @@ plot_entropy_prevalence <- function(spes_table, prevalence_df, slices_prevalence
     
     plots <- plot_grid(all_plots_list[[cell_types]]$slice,
                        all_plots_list[[cell_types]]$arrangement,
-                       all_plots_list[[cell_types]]$bg_prop_A,
-                       all_plots_list[[cell_types]]$bg_prop_B,
-                       # all_plots_list[[cell_types]]$shape,
-                       # all_plots_list[[cell_types]]$variation_E,
-                       # all_plots_list[[cell_types]]$volume_E,
-                       # all_plots_list[[cell_types]]$width_N, 
+                       # all_plots_list[[cell_types]]$bg_prop_A,
+                       # all_plots_list[[cell_types]]$bg_prop_B,
+                       all_plots_list[[cell_types]]$shape,
+                       all_plots_list[[cell_types]]$variation_E,
+                       all_plots_list[[cell_types]]$volume_E,
+                       all_plots_list[[cell_types]]$width_N,
                        nrow = 1, ncol = length(all_plots_list[[cell_types]]))
     
     title <- ggdraw() + 
@@ -3814,68 +3810,68 @@ plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, slices_pre
       theme_bw() +
       scale_color_manual(values = viridis::viridis(5))
     
-    fig_bg_prop_A <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = bg_prop_A)) +
-      geom_point() +
-      ylab("AUC") +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    fig_bg_prop_B <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = bg_prop_B)) +
-      geom_point() +
-      ylab("AUC") +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    # fig_shape <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = shape)) +
-    #   geom_point() +
-    #   ylab("AUC") +
-    #   theme_bw()
-    #
-    # radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
-    # plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
-    # plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
-    # 
-    # fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AUC, col = variation_E)) +
-    #   geom_point() +
-    #   ylab("AUC") +
-    #   theme_bw()
-    # 
-    # fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AUC, col = volume_E)) +
+    # fig_bg_prop_A <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = bg_prop_A)) +
     #   geom_point() +
     #   ylab("AUC") +
     #   theme_bw() +
-    #   scale_color_continuous(n.breaks = 4)
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
     # 
-    # fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(!!sym(arrangement_colname), AUC, col = width_N)) +
+    # fig_bg_prop_B <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = bg_prop_B)) +
     #   geom_point() +
     #   ylab("AUC") +
-    #   theme_bw()
+    #   theme_bw() +
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
+    
+    fig_shape <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = shape)) +
+      geom_point() +
+      ylab("AUC") +
+      theme_bw()
+
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AUC, col = variation_E)) +
+      geom_point() +
+      ylab("AUC") +
+      theme_bw()
+
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AUC, col = volume_E)) +
+      geom_point() +
+      ylab("AUC") +
+      theme_bw() +
+      scale_color_continuous(n.breaks = 4)
+
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(!!sym(arrangement_colname), AUC, col = width_N)) +
+      geom_point() +
+      ylab("AUC") +
+      theme_bw()
     
     all_plots_list[[prop_cell_types$pair[i]]] <- list(slice = fig_slice + theme(legend.position="none"), 
-                                                      bg_prop_A = fig_bg_prop_A + theme(legend.position="none"), 
-                                                      bg_prop_B = fig_bg_prop_B + theme(legend.position="none"))
-    # shape = fig_shape + theme(legend.position="none"))
-    # variation_E = fig_variation_E + theme(legend.position="none"),
-    # volume_E = fig_volume_E + theme(legend.position="none"),
-    # width_N = fig_width_N + theme(legend.position="none"))
+                                                      # bg_prop_A = fig_bg_prop_A + theme(legend.position="none"), 
+                                                      # bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
+                                                      shape = fig_shape + theme(legend.position="none"),
+                                                      variation_E = fig_variation_E + theme(legend.position="none"),
+                                                      volume_E = fig_volume_E + theme(legend.position="none"),
+                                                      width_N = fig_width_N + theme(legend.position="none"))
   }
   
   # Get legends
   legend_slice <-  get_legend(fig_slice + theme(legend.direction = "horizontal"))
-  legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
-  legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
-  # legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
-  # legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
-  # legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
-  # legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
+  legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
+  legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
+  legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
+  legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
   
   legends <- plot_grid(legend_slice,
-                       legend_bg_prop_a, 
-                       legend_bg_prop_B,
-                       # legend_shape,
-                       # legend_variation_E,
-                       # legend_volume_E,
-                       # legend_width_N,
+                       # legend_bg_prop_a, 
+                       # legend_bg_prop_B,
+                       legend_shape,
+                       legend_variation_E,
+                       legend_volume_E,
+                       legend_width_N,
                        nrow = 1)
   
   # Combine the plots together by reference target pairs
@@ -3885,12 +3881,12 @@ plot_proportion_prevalence_AUC <- function(spes_table, prevalence_df, slices_pre
     pair <- prop_cell_types$pair[i]
     
     plots <- plot_grid(all_plots_list[[pair]]$slice,
-                       all_plots_list[[pair]]$bg_prop_A,
-                       all_plots_list[[pair]]$bg_prop_B,
-                       # all_plots_list[[pair]]$shape, 
-                       # all_plots_list[[pair]]$variation_E,
-                       # all_plots_list[[pair]]$volume_E,
-                       # all_plots_list[[pair]]$width_N, 
+                       # all_plots_list[[pair]]$bg_prop_A,
+                       # all_plots_list[[pair]]$bg_prop_B,
+                       all_plots_list[[pair]]$shape,
+                       all_plots_list[[pair]]$variation_E,
+                       all_plots_list[[pair]]$volume_E,
+                       all_plots_list[[pair]]$width_N,
                        nrow = 1, ncol = length(all_plots_list[[pair]]))
     
     title <- ggdraw() + 
@@ -3965,68 +3961,68 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, slices_preval
       theme_bw() +
       scale_color_manual(values = viridis::viridis(5))
     
-    fig_bg_prop_A <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = bg_prop_A)) +
-      geom_point() +
-      ylab("AUC") +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    fig_bg_prop_B <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = bg_prop_B)) +
-      geom_point() +
-      ylab("AUC") +
-      theme_bw() +
-      scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    # fig_shape <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = shape)) +
-    #   geom_point() +
-    #   ylab("AUC") +
-    #   theme_bw()
-    # 
-    # radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
-    # plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
-    # plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
-    # 
-    # fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AUC, col = variation_E)) +
-    #   geom_point() +
-    #   ylab("AUC") +
-    #   theme_bw()
-    # 
-    # fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AUC, col = volume_E)) +
+    # fig_bg_prop_A <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = bg_prop_A)) +
     #   geom_point() +
     #   ylab("AUC") +
     #   theme_bw() +
-    #   scale_color_continuous(n.breaks = 4)
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
     # 
-    # fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(!!sym(arrangement_colname), AUC, col = width_N)) +
+    # fig_bg_prop_B <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = bg_prop_B)) +
     #   geom_point() +
     #   ylab("AUC") +
-    #   theme_bw()
+    #   theme_bw() +
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
+    
+    fig_shape <- ggplot(plot_df, aes(!!sym(arrangement_colname), AUC, col = shape)) +
+      geom_point() +
+      ylab("AUC") +
+      theme_bw()
+
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AUC, col = variation_E)) +
+      geom_point() +
+      ylab("AUC") +
+      theme_bw()
+
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AUC, col = volume_E)) +
+      geom_point() +
+      ylab("AUC") +
+      theme_bw() +
+      scale_color_continuous(n.breaks = 4)
+
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(!!sym(arrangement_colname), AUC, col = width_N)) +
+      geom_point() +
+      ylab("AUC") +
+      theme_bw()
     
     all_plots_list[[entropy_cell_types$cell_types[i]]] <- list(slice = fig_slice + theme(legend.position="none"),
-                                                               bg_prop_A = fig_bg_prop_A + theme(legend.position="none"), 
-                                                               bg_prop_B = fig_bg_prop_B + theme(legend.position="none"))
-    # shape = fig_shape + theme(legend.position="none"))
-    # variation_E = fig_variation_E + theme(legend.position="none"),
-    # volume_E = fig_volume_E + theme(legend.position="none"),
-    # width_N = fig_width_N + theme(legend.position="none"))
+                                                               # bg_prop_A = fig_bg_prop_A + theme(legend.position="none"), 
+                                                               # bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
+                                                               shape = fig_shape + theme(legend.position="none"),
+                                                               variation_E = fig_variation_E + theme(legend.position="none"),
+                                                               volume_E = fig_volume_E + theme(legend.position="none"),
+                                                               width_N = fig_width_N + theme(legend.position="none"))
   }
   
   # Get legends
   legend_slice <- get_legend(fig_slice + theme(legend.direction = "horizontal"))
-  legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
-  legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
-  # legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
-  # legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
-  # legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
-  # legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
+  legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
+  legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
+  legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
+  legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
   
   legends <- plot_grid(legend_slice, 
-                       legend_bg_prop_a, 
-                       legend_bg_prop_B,
-                       # legend_shape,
-                       # legend_variation_E,
-                       # legend_volume_E,
-                       # legend_width_N,
+                       # legend_bg_prop_a, 
+                       # legend_bg_prop_B,
+                       legend_shape,
+                       legend_variation_E,
+                       legend_volume_E,
+                       legend_width_N,
                        nrow = 1)
   
   # Combine the plots together by reference target pairs
@@ -4036,12 +4032,12 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, slices_preval
     cell_types <- entropy_cell_types$cell_types[i]
     
     plots <- plot_grid(all_plots_list[[cell_types]]$slice,
-                       all_plots_list[[cell_types]]$bg_prop_A,
-                       all_plots_list[[cell_types]]$bg_prop_B,
-                       # all_plots_list[[cell_types]]$shape, 
-                       # all_plots_list[[cell_types]]$variation_E,
-                       # all_plots_list[[cell_types]]$volume_E,
-                       # all_plots_list[[cell_types]]$width_N, 
+                       # all_plots_list[[cell_types]]$bg_prop_A,
+                       # all_plots_list[[cell_types]]$bg_prop_B,
+                       all_plots_list[[cell_types]]$shape,
+                       all_plots_list[[cell_types]]$variation_E,
+                       all_plots_list[[cell_types]]$volume_E,
+                       all_plots_list[[cell_types]]$width_N,
                        nrow = 1, ncol = length(all_plots_list[[cell_types]]))
     
     title <- ggdraw() + 
@@ -4091,6 +4087,7 @@ saveRDS(mixed_AMD_plot, "mixed_AMD_plot_slicing_no_background_noise.RDS")
 
 
 
+
 # Read mixed MS, NMS, ACINP, AE dfs
 setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
 mixed_MS_df <- read.table("mixed_MS_df.csv")
@@ -4103,10 +4100,30 @@ mixed_NMS_df <- mixed_NMS_df[mixed_NMS_df$spe %in% paste("mixed_spe_", rownames(
 mixed_ACINP_df <- mixed_ACINP_df[mixed_ACINP_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 mixed_AE_df <- mixed_AE_df[mixed_AE_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
-mixed_MS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_MS_df, "MS", "cluster_prop_B")
-mixed_NMS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_NMS_df, "NMS", "cluster_prop_B")
-mixed_ACINP_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_ACINP_df, "ACINP", "cluster_prop_B")
-mixed_AE_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_AE_df, "AE", "cluster_prop_B")
+# Read mixed MS, NMS, ACINP, AE dfs (slices)
+setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+mixed_slices_MS_df <- read.table("mixed_slices_MS_df.csv")
+mixed_slices_NMS_df <- read.table("mixed_slices_NMS_df.csv")
+mixed_slices_ACINP_df <- read.table("mixed_slices_ACINP_df.csv")
+mixed_slices_AE_df <- read.table("mixed_slices_AE_df.csv")
+
+mixed_slices_MS_df <- mixed_slices_MS_df[mixed_slices_MS_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+mixed_slices_NMS_df <- mixed_slices_NMS_df[mixed_slices_NMS_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+mixed_slices_ACINP_df <- mixed_slices_ACINP_df[mixed_slices_ACINP_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+mixed_slices_AE_df <- mixed_slices_AE_df[mixed_slices_AE_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+
+# Lines
+mixed_MS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_MS_df, mixed_slices_MS_df, "MS", "cluster_prop_B")
+mixed_NMS_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_NMS_df, mixed_slices_NMS_df, "NMS", "cluster_prop_B")
+mixed_ACINP_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_ACINP_df, mixed_slices_ACINP_df, "ACINP", "cluster_prop_B")
+mixed_AE_plot <- plot_gradient_metrics_type1(mixed_spes_table, mixed_AE_df, mixed_slices_AE_df, "AE", "cluster_prop_B")
+
+# Boxplots
+mixed_MS_box_plot <- plot_gradient_metrics_type1_boxplot(mixed_spes_table, mixed_MS_df, mixed_slices_MS_df, "MS", "cluster_prop_B")
+mixed_NMS_box_plot <- plot_gradient_metrics_type1_boxplot(mixed_spes_table, mixed_NMS_df, mixed_slices_NMS_df, "NMS", "cluster_prop_B")
+mixed_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(mixed_spes_table, mixed_ACINP_df, mixed_slices_ACINP_df, "ACINP", "cluster_prop_B")
+mixed_AE_box_plot <- plot_gradient_metrics_type1_boxplot(mixed_spes_table, mixed_AE_df, mixed_slices_AE_df, "AE", "cluster_prop_B")
+
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(mixed_MS_plot, "mixed_MS_plot_slicing_no_background_noise.RDS")
@@ -4114,6 +4131,10 @@ saveRDS(mixed_NMS_plot, "mixed_NMS_plot_slicing_no_background_noise.RDS")
 saveRDS(mixed_ACINP_plot, "mixed_ACINP_plot_slicing_no_background_noise.RDS")
 saveRDS(mixed_AE_plot, "mixed_AE_plot_slicing_no_background_noise.RDS")
 
+saveRDS(mixed_MS_box_plot, "mixed_MS_box_plot_slicing_no_background_noise.RDS")
+saveRDS(mixed_NMS_box_plot, "mixed_NMS_box_plot_slicing_no_background_noise.RDS")
+saveRDS(mixed_ACINP_box_plot, "mixed_ACINP_box_plot_slicing_no_background_noise.RDS")
+saveRDS(mixed_AE_box_plot, "mixed_AE_box_plot_slicing_no_background_noise.RDS")
 
 
 # Read mixed ACIN, CKR
@@ -4124,14 +4145,28 @@ mixed_CKR_df <- read.table("mixed_CKR_df.csv")
 mixed_ACIN_df <- mixed_ACIN_df[mixed_ACIN_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 mixed_CKR_df <- mixed_CKR_df[mixed_CKR_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
-# Get plots
-mixed_ACIN_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_ACIN_df, "ACIN", "cluster_prop_B", 20, 100)
-mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, "CKR", "cluster_prop_B", 20, 100)
+# Read mixed ACIN, CKR (slices)
+setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+mixed_slices_ACIN_df <- read.table("mixed_slices_ACIN_df.csv")
+mixed_slices_CKR_df <- read.table("mixed_slices_CKR_df.csv")
+
+mixed_slices_ACIN_df <- mixed_slices_ACIN_df[mixed_slices_ACIN_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+mixed_slices_CKR_df <- mixed_slices_CKR_df[mixed_slices_CKR_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+
+# Lines
+mixed_ACIN_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_ACIN_df, mixed_slices_ACIN_df, "ACIN", "cluster_prop_B", 20, 100)
+mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, mixed_slices_CKR_df, "CKR", "cluster_prop_B", 20, 100)
+
+# Box plots
+mixed_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(mixed_spes_table, mixed_ACIN_df, mixed_slices_ACIN_df, "ACIN", "cluster_prop_B", 20, 100)
+mixed_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(mixed_spes_table, mixed_CKR_df, mixed_slices_CKR_df, "CKR", "cluster_prop_B", 20, 100)
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(mixed_ACIN_plot, "mixed_ACIN_plot_slicing_no_background_noise.RDS")
 saveRDS(mixed_CKR_plot, "mixed_CKR_plot_slicing_no_background_noise.RDS")
 
+saveRDS(mixed_ACIN_box_plot, "mixed_ACIN_box_plot_slicing_no_background_noise.RDS")
+saveRDS(mixed_CKR_box_plot, "mixed_CKR_box_plot_slicing_no_background_noise.RDS")
 
 
 # Read mixed_SAC_df
@@ -4142,13 +4177,20 @@ mixed_entropy_SAC_df <- read.table("mixed_entropy_SAC_df.csv")
 mixed_prop_SAC_df <- mixed_prop_SAC_df[mixed_prop_SAC_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 mixed_entropy_SAC_df <- mixed_entropy_SAC_df[mixed_entropy_SAC_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
-mixed_prop_SAC_plot <- plot_proportion_SAC(mixed_spes_table, mixed_prop_SAC_df, "cluster_prop_B")
-mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_df, "cluster_prop_B")
+# Read mixed_SAC_df (slices)
+setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+mixed_slices_prop_SAC_df <- read.table("mixed_slices_prop_SAC_df.csv")
+mixed_slices_entropy_SAC_df <- read.table("mixed_slices_entropy_SAC_df.csv")
+
+mixed_slices_prop_SAC_df <- mixed_slices_prop_SAC_df[mixed_slices_prop_SAC_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+mixed_slices_entropy_SAC_df <- mixed_slices_entropy_SAC_df[mixed_slices_entropy_SAC_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+
+mixed_prop_SAC_plot <- plot_proportion_SAC(mixed_spes_table, mixed_prop_SAC_df, mixed_slices_prop_SAC_df, "cluster_prop_B")
+mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_df, mixed_slices_entropy_SAC_df, "cluster_prop_B")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(mixed_prop_SAC_plot, "mixed_prop_SAC_plot_slicing_no_background_noise.RDS")
 saveRDS(mixed_entropy_SAC_plot, "mixed_entropy_SAC_plot_slicing_no_background_noise.RDS")
-
 
 
 # Read mixed prevalence dfs
@@ -4159,18 +4201,35 @@ mixed_entropy_prevalence_df <- read.table("mixed_entropy_prevalence_df.csv")
 mixed_prop_prevalence_df <- mixed_prop_prevalence_df[mixed_prop_prevalence_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 mixed_entropy_prevalence_df <- mixed_entropy_prevalence_df[mixed_entropy_prevalence_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
-mixed_prop_prevalence_plot <- plot_proportion_prevalence(mixed_spes_table, mixed_prop_prevalence_df, "cluster_prop_B")
-mixed_entropy_prevalence_plot <- plot_entropy_prevalence(mixed_spes_table, mixed_entropy_prevalence_df, "cluster_prop_B")
-mixed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(mixed_spes_table, mixed_prop_prevalence_df, "cluster_prop_B")
-mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_table, mixed_entropy_prevalence_df, "cluster_prop_B")
+# Read mixed prevalence dfs (slices)
+setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+mixed_slices_prop_prevalence_df <- read.table("mixed_slices_prop_prevalence_df.csv")
+mixed_slices_entropy_prevalence_df <- read.table("mixed_slices_entropy_prevalence_df.csv")
+
+mixed_slices_prop_prevalence_df <- mixed_slices_prop_prevalence_df[mixed_slices_prop_prevalence_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+mixed_slices_entropy_prevalence_df <- mixed_slices_entropy_prevalence_df[mixed_slices_entropy_prevalence_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
+
+# Lines
+mixed_prop_prevalence_plot <- plot_proportion_prevalence(mixed_spes_table, mixed_prop_prevalence_df, mixed_slices_prop_prevalence_df, "cluster_prop_B")
+mixed_entropy_prevalence_plot <- plot_entropy_prevalence(mixed_spes_table, mixed_entropy_prevalence_df, mixed_slices_entropy_prevalence_df, "cluster_prop_B")
+
+# Boxplots
+mixed_prop_prevalence_box_plot <- plot_proportion_prevalence_boxplot(mixed_spes_table, mixed_prop_prevalence_df, mixed_slices_prop_prevalence_df, "cluster_prop_B")
+mixed_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(mixed_spes_table, mixed_entropy_prevalence_df, mixed_slices_entropy_prevalence_df, "cluster_prop_B")
+
+# AUC
+mixed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(mixed_spes_table, mixed_prop_prevalence_df, mixed_slices_prop_prevalence_df, "cluster_prop_B")
+mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_table, mixed_entropy_prevalence_df, mixed_slices_entropy_prevalence_df, "cluster_prop_B")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(mixed_prop_prevalence_plot, "mixed_prop_prevalence_plot_slicing_no_background_noise.RDS")
 saveRDS(mixed_entropy_prevalence_plot, "mixed_entropy_prevalence_plot_slicing_no_background_noise.RDS")
+
+saveRDS(mixed_prop_prevalence_box_plot, "mixed_prop_prevalence_box_plot_slicing_no_background_noise.RDS")
+saveRDS(mixed_entropy_prevalence_box_plot, "mixed_entropy_prevalence_box_plot_slicing_no_background_noise.RDS")
+
 saveRDS(mixed_prop_prevalence_AUC_plot, "mixed_prop_prevalence_AUC_plot_slicing_no_background_noise.RDS")
 saveRDS(mixed_entropy_prevalence_AUC_plot, "mixed_entropy_prevalence_AUC_plot_slicing_no_background_noise.RDS")
-
-
 
 
 
@@ -4179,7 +4238,12 @@ setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
 ringed_AMD_df <- read.table("ringed_AMD_df.csv")
 ringed_AMD_df <- ringed_AMD_df[ringed_AMD_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
-ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, "width_ring_factor")
+# Read ringed_slices_AMD_df
+setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+ringed_slices_AMD_df <- read.table("ringed_slices_AMD_df.csv")
+ringed_slices_AMD_df <- ringed_slices_AMD_df[ringed_slices_AMD_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+
+ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, ringed_slices_AMD_df, "width_ring_factor")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(ringed_AMD_plot, "ringed_AMD_plot_slicing_no_background_noise.RDS")
@@ -4198,16 +4262,40 @@ ringed_NMS_df <- ringed_NMS_df[ringed_NMS_df$spe %in% paste("ringed_spe_", rowna
 ringed_ACINP_df <- ringed_ACINP_df[ringed_ACINP_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 ringed_AE_df <- ringed_AE_df[ringed_AE_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
-ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, "MS", "width_ring_factor")
-ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, "NMS", "width_ring_factor")
-ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, "ACINP", "width_ring_factor")
-ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, "AE", "width_ring_factor")
+# Read ringed MS, NMS, ACINP, AE dfs (slices)
+setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+ringed_slices_MS_df <- read.table("ringed_slices_MS_df.csv")
+ringed_slices_NMS_df <- read.table("ringed_slices_NMS_df.csv")
+ringed_slices_ACINP_df <- read.table("ringed_slices_ACINP_df.csv")
+ringed_slices_AE_df <- read.table("ringed_slices_AE_df.csv")
+
+ringed_slices_MS_df <- ringed_slices_MS_df[ringed_slices_MS_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+ringed_slices_NMS_df <- ringed_slices_NMS_df[ringed_slices_NMS_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+ringed_slices_ACINP_df <- ringed_slices_ACINP_df[ringed_slices_ACINP_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+ringed_slices_AE_df <- ringed_slices_AE_df[ringed_slices_AE_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+
+# Lines
+ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "width_ring_factor")
+ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "width_ring_factor")
+ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "width_ring_factor")
+ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "width_ring_factor")
+
+# Boxplots
+ringed_MS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "width_ring_factor")
+ringed_NMS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "width_ring_factor")
+ringed_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "width_ring_factor")
+ringed_AE_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "width_ring_factor")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(ringed_MS_plot, "ringed_MS_plot_slicing_no_background_noise.RDS")
 saveRDS(ringed_NMS_plot, "ringed_NMS_plot_slicing_no_background_noise.RDS")
 saveRDS(ringed_ACINP_plot, "ringed_ACINP_plot_slicing_no_background_noise.RDS")
 saveRDS(ringed_AE_plot, "ringed_AE_plot_slicing_no_background_noise.RDS")
+
+saveRDS(ringed_MS_box_plot, "ringed_MS_box_plot_slicing_no_background_noise.RDS")
+saveRDS(ringed_NMS_box_plot, "ringed_NMS_box_plot_slicing_no_background_noise.RDS")
+saveRDS(ringed_ACINP_box_plot, "ringed_ACINP_box_plot_slicing_no_background_noise.RDS")
+saveRDS(ringed_AE_box_plot, "ringed_AE_box_plot_slicing_no_background_noise.RDS")
 
 
 # Read ringed ACIN, CKR
@@ -4218,14 +4306,28 @@ ringed_CKR_df <- read.table("ringed_CKR_df.csv")
 ringed_ACIN_df <- ringed_ACIN_df[ringed_ACIN_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 ringed_CKR_df <- ringed_CKR_df[ringed_CKR_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
-# Get plots
-ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, "ACIN", "width_ring_factor", 20, 100)
-ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, "CKR", "width_ring_factor", 20, 100)
+# Read ringed ACIN, CKR (slices)
+setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+ringed_slices_ACIN_df <- read.table("ringed_slices_ACIN_df.csv")
+ringed_slices_CKR_df <- read.table("ringed_slices_CKR_df.csv")
+
+ringed_slices_ACIN_df <- ringed_slices_ACIN_df[ringed_slices_ACIN_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+ringed_slices_CKR_df <- ringed_slices_CKR_df[ringed_slices_CKR_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+
+# Lines
+ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "width_ring_factor", 20, 100)
+ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "width_ring_factor", 20, 100)
+
+# Box plots
+ringed_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "width_ring_factor", 20, 100)
+ringed_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "width_ring_factor", 20, 100)
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(ringed_ACIN_plot, "ringed_ACIN_plot_slicing_no_background_noise.RDS")
 saveRDS(ringed_CKR_plot, "ringed_CKR_plot_slicing_no_background_noise.RDS")
 
+saveRDS(ringed_ACIN_box_plot, "ringed_ACIN_box_plot_slicing_no_background_noise.RDS")
+saveRDS(ringed_CKR_box_plot, "ringed_CKR_box_plot_slicing_no_background_noise.RDS")
 
 
 # Read ringed_SAC_df
@@ -4236,12 +4338,21 @@ ringed_entropy_SAC_df <- read.table("ringed_entropy_SAC_df.csv")
 ringed_prop_SAC_df <- ringed_prop_SAC_df[ringed_prop_SAC_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 ringed_entropy_SAC_df <- ringed_entropy_SAC_df[ringed_entropy_SAC_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
-ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, "width_ring_factor")
-ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, "width_ring_factor")
+# Read ringed_SAC_df (slices)
+setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+ringed_slices_prop_SAC_df <- read.table("ringed_slices_prop_SAC_df.csv")
+ringed_slices_entropy_SAC_df <- read.table("ringed_slices_entropy_SAC_df.csv")
+
+ringed_slices_prop_SAC_df <- ringed_slices_prop_SAC_df[ringed_slices_prop_SAC_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+ringed_slices_entropy_SAC_df <- ringed_slices_entropy_SAC_df[ringed_slices_entropy_SAC_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+
+ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, ringed_slices_prop_SAC_df, "width_ring_factor")
+ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, ringed_slices_entropy_SAC_df, "width_ring_factor")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(ringed_prop_SAC_plot, "ringed_prop_SAC_plot_slicing_no_background_noise.RDS")
 saveRDS(ringed_entropy_SAC_plot, "ringed_entropy_SAC_plot_slicing_no_background_noise.RDS")
+
 
 
 # Read ringed prevalence dfs
@@ -4252,17 +4363,33 @@ ringed_entropy_prevalence_df <- read.table("ringed_entropy_prevalence_df.csv")
 ringed_prop_prevalence_df <- ringed_prop_prevalence_df[ringed_prop_prevalence_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 ringed_entropy_prevalence_df <- ringed_entropy_prevalence_df[ringed_entropy_prevalence_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
-ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, "width_ring_factor")
-ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, "width_ring_factor")
-ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, "width_ring_factor")
-ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, "width_ring_factor")
+# Read ringed prevalence dfs (slices)
+setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+ringed_slices_prop_prevalence_df <- read.table("ringed_slices_prop_prevalence_df.csv")
+ringed_slices_entropy_prevalence_df <- read.table("ringed_slices_entropy_prevalence_df.csv")
+
+ringed_slices_prop_prevalence_df <- ringed_slices_prop_prevalence_df[ringed_slices_prop_prevalence_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+ringed_slices_entropy_prevalence_df <- ringed_slices_entropy_prevalence_df[ringed_slices_entropy_prevalence_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
+
+# Lines
+ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "width_ring_factor")
+ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "width_ring_factor")
+
+# Boxplots
+ringed_prop_prevalence_box_plot <- plot_proportion_prevalence_boxplot(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "width_ring_factor")
+ringed_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "width_ring_factor")
+
+# AUC
+ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "width_ring_factor")
+ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "width_ring_factor")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(ringed_prop_prevalence_plot, "ringed_prop_prevalence_plot_slicing_no_background_noise.RDS")
 saveRDS(ringed_entropy_prevalence_plot, "ringed_entropy_prevalence_plot_slicing_no_background_noise.RDS")
+saveRDS(ringed_prop_prevalence_box_plot, "ringed_prop_prevalence_box_plot_slicing_no_background_noise.RDS")
+saveRDS(ringed_entropy_prevalence_box_plot, "ringed_entropy_prevalence_box_plot_slicing_no_background_noise.RDS")
 saveRDS(ringed_prop_prevalence_AUC_plot, "ringed_prop_prevalence_AUC_plot_slicing_no_background_noise.RDS")
 saveRDS(ringed_entropy_prevalence_AUC_plot, "ringed_entropy_prevalence_AUC_plot_slicing_no_background_noise.RDS")
-
 
 
 
@@ -4271,12 +4398,19 @@ setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
 separated_AMD_df <- read.table("separated_AMD_df.csv")
 separated_AMD_df <- separated_AMD_df[separated_AMD_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
+# Read separated_slices_AMD_df
+setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+separated_slices_AMD_df <- read.table("separated_slices_AMD_df.csv")
+separated_slices_AMD_df <- separated_slices_AMD_df[separated_slices_AMD_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
-separated_A_AMD_plot <- plot_AMD_metric(separated_A_spes_table, separated_AMD_df, "distance")
-separated_B_AMD_plot <- plot_AMD_metric(separated_B_spes_table, separated_AMD_df, "distance")
+# Plots
+separated_A_AMD_plot <- plot_AMD_metric(separated_A_spes_table, separated_AMD_df, separated_slices_AMD_df, "distance")
+
+separated_B_AMD_plot <- plot_AMD_metric(separated_B_spes_table, separated_AMD_df, separated_slices_AMD_df, "distance")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(separated_A_AMD_plot, "separated_A_AMD_plot_slicing_no_background_noise.RDS")
+
 saveRDS(separated_B_AMD_plot, "separated_B_AMD_plot_slicing_no_background_noise.RDS")
 
 
@@ -4292,17 +4426,38 @@ separated_NMS_df <- separated_NMS_df[separated_NMS_df$spe %in% paste("separated_
 separated_ACINP_df <- separated_ACINP_df[separated_ACINP_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 separated_AE_df <- separated_AE_df[separated_AE_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
-# Start with cluster_A
-separated_A_MS_plot <- plot_gradient_metrics_type1(separated_A_spes_table, separated_MS_df, "MS", "distance")
-separated_A_NMS_plot <- plot_gradient_metrics_type1(separated_A_spes_table, separated_NMS_df, "NMS", "distance")
-separated_A_ACINP_plot <- plot_gradient_metrics_type1(separated_A_spes_table, separated_ACINP_df, "ACINP", "distance")
-separated_A_AE_plot <- plot_gradient_metrics_type1(separated_A_spes_table, separated_AE_df, "AE", "distance")
+# Read separated MS, NMS, ACINP, AE dfs (slices)
+setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+separated_slices_MS_df <- read.table("separated_slices_MS_df.csv")
+separated_slices_NMS_df <- read.table("separated_slices_NMS_df.csv")
+separated_slices_ACINP_df <- read.table("separated_slices_ACINP_df.csv")
+separated_slices_AE_df <- read.table("separated_slices_AE_df.csv")
 
-# Then do cluster_B
-separated_B_MS_plot <- plot_gradient_metrics_type1(separated_B_spes_table, separated_MS_df, "MS", "distance")
-separated_B_NMS_plot <- plot_gradient_metrics_type1(separated_B_spes_table, separated_NMS_df, "NMS", "distance")
-separated_B_ACINP_plot <- plot_gradient_metrics_type1(separated_B_spes_table, separated_ACINP_df, "ACINP", "distance")
-separated_B_AE_plot <- plot_gradient_metrics_type1(separated_B_spes_table, separated_AE_df, "AE", "distance")
+separated_slices_MS_df <- separated_slices_MS_df[separated_slices_MS_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+separated_slices_NMS_df <- separated_slices_NMS_df[separated_slices_NMS_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+separated_slices_ACINP_df <- separated_slices_ACINP_df[separated_slices_ACINP_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+separated_slices_AE_df <- separated_slices_AE_df[separated_slices_AE_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+
+# Plots
+separated_A_MS_plot <- plot_gradient_metrics_type1(separated_A_spes_table, separated_MS_df, separated_slices_MS_df, "MS", "distance")
+separated_A_NMS_plot <- plot_gradient_metrics_type1(separated_A_spes_table, separated_NMS_df, separated_slices_NMS_df, "NMS", "distance")
+separated_A_ACINP_plot <- plot_gradient_metrics_type1(separated_A_spes_table, separated_ACINP_df, separated_slices_ACINP_df, "ACINP", "distance")
+separated_A_AE_plot <- plot_gradient_metrics_type1(separated_A_spes_table, separated_AE_df, separated_slices_AE_df, "AE", "distance")
+
+separated_A_MS_box_plot <- plot_gradient_metrics_type1_boxplot(separated_A_spes_table, separated_MS_df, separated_slices_MS_df, "MS", "distance")
+separated_A_NMS_box_plot <- plot_gradient_metrics_type1_boxplot(separated_A_spes_table, separated_NMS_df, separated_slices_NMS_df, "NMS", "distance")
+separated_A_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(separated_A_spes_table, separated_ACINP_df, separated_slices_ACINP_df, "ACINP", "distance")
+separated_A_AE_box_plot <- plot_gradient_metrics_type1_boxplot(separated_A_spes_table, separated_AE_df, separated_slices_AE_df, "AE", "distance")
+
+separated_B_MS_plot <- plot_gradient_metrics_type1(separated_B_spes_table, separated_MS_df, separated_slices_MS_df, "MS", "distance")
+separated_B_NMS_plot <- plot_gradient_metrics_type1(separated_B_spes_table, separated_NMS_df, separated_slices_NMS_df, "NMS", "distance")
+separated_B_ACINP_plot <- plot_gradient_metrics_type1(separated_B_spes_table, separated_ACINP_df, separated_slices_ACINP_df, "ACINP", "distance")
+separated_B_AE_plot <- plot_gradient_metrics_type1(separated_B_spes_table, separated_AE_df, separated_slices_AE_df, "AE", "distance")
+
+separated_B_MS_box_plot <- plot_gradient_metrics_type1_boxplot(separated_B_spes_table, separated_MS_df, separated_slices_MS_df, "MS", "distance")
+separated_B_NMS_box_plot <- plot_gradient_metrics_type1_boxplot(separated_B_spes_table, separated_NMS_df, separated_slices_NMS_df, "NMS", "distance")
+separated_B_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(separated_B_spes_table, separated_ACINP_df, separated_slices_ACINP_df, "ACINP", "distance")
+separated_B_AE_box_plot <- plot_gradient_metrics_type1_boxplot(separated_B_spes_table, separated_AE_df, separated_slices_AE_df, "AE", "distance")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(separated_A_MS_plot, "separated_A_MS_plot_slicing_no_background_noise.RDS")
@@ -4310,10 +4465,20 @@ saveRDS(separated_A_NMS_plot, "separated_A_NMS_plot_slicing_no_background_noise.
 saveRDS(separated_A_ACINP_plot, "separated_A_ACINP_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_A_AE_plot, "separated_A_AE_plot_slicing_no_background_noise.RDS")
 
+saveRDS(separated_A_MS_box_plot, "separated_A_MS_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_A_NMS_box_plot, "separated_A_NMS_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_A_ACINP_box_plot, "separated_A_ACINP_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_A_AE_box_plot, "separated_A_AE_box_plot_slicing_no_background_noise.RDS")
+
 saveRDS(separated_B_MS_plot, "separated_B_MS_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_B_NMS_plot, "separated_B_NMS_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_B_ACINP_plot, "separated_B_ACINP_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_B_AE_plot, "separated_B_AE_plot_slicing_no_background_noise.RDS")
+
+saveRDS(separated_B_MS_box_plot, "separated_B_MS_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_NMS_box_plot, "separated_B_NMS_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_ACINP_box_plot, "separated_B_ACINP_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_AE_box_plot, "separated_B_AE_box_plot_slicing_no_background_noise.RDS")
 
 
 # Read separated ACIN, CKR
@@ -4324,20 +4489,39 @@ separated_CKR_df <- read.table("separated_CKR_df.csv")
 separated_ACIN_df <- separated_ACIN_df[separated_ACIN_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 separated_CKR_df <- separated_CKR_df[separated_CKR_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
-# Start with cluster_A
-separated_A_ACIN_plot <- plot_gradient_metrics_type2(separated_A_spes_table, separated_ACIN_df, "ACIN", "distance", 20, 100)
-separated_A_CKR_plot <- plot_gradient_metrics_type2(separated_A_spes_table, separated_CKR_df, "CKR", "distance", 20, 100)
+# Read separated ACIN, CKR (slices)
+setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+separated_slices_ACIN_df <- read.table("separated_slices_ACIN_df.csv")
+separated_slices_CKR_df <- read.table("separated_slices_CKR_df.csv")
 
-# Then do cluster_B
-separated_B_ACIN_plot <- plot_gradient_metrics_type2(separated_B_spes_table, separated_ACIN_df, "ACIN", "distance", 20, 100)
-separated_B_CKR_plot <- plot_gradient_metrics_type2(separated_B_spes_table, separated_CKR_df, "CKR", "distance", 20, 100)
+separated_slices_ACIN_df <- separated_slices_ACIN_df[separated_slices_ACIN_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+separated_slices_CKR_df <- separated_slices_CKR_df[separated_slices_CKR_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+
+# Plots
+separated_A_ACIN_plot <- plot_gradient_metrics_type2(separated_A_spes_table, separated_ACIN_df, separated_slices_ACIN_df, "ACIN", "distance", 20, 100)
+separated_A_CKR_plot <- plot_gradient_metrics_type2(separated_A_spes_table, separated_CKR_df, separated_slices_CKR_df, "CKR", "distance", 20, 100)
+
+separated_A_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(separated_A_spes_table, separated_ACIN_df, separated_slices_ACIN_df, "ACIN", "distance", 20, 100)
+separated_A_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(separated_A_spes_table, separated_CKR_df, separated_slices_CKR_df, "CKR", "distance", 20, 100)
+
+separated_B_ACIN_plot <- plot_gradient_metrics_type2(separated_B_spes_table, separated_ACIN_df, separated_slices_ACIN_df, "ACIN", "distance", 20, 100)
+separated_B_CKR_plot <- plot_gradient_metrics_type2(separated_B_spes_table, separated_CKR_df, separated_slices_CKR_df, "CKR", "distance", 20, 100)
+
+separated_B_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(separated_B_spes_table, separated_ACIN_df, separated_slices_ACIN_df, "ACIN", "distance", 20, 100)
+separated_B_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(separated_B_spes_table, separated_CKR_df, separated_slices_CKR_df, "CKR", "distance", 20, 100)
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(separated_A_ACIN_plot, "separated_A_ACIN_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_A_CKR_plot, "separated_A_CKR_plot_slicing_no_background_noise.RDS")
 
+saveRDS(separated_A_ACIN_box_plot, "separated_A_ACIN_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_A_CKR_box_plot, "separated_A_CKR_box_plot_slicing_no_background_noise.RDS")
+
 saveRDS(separated_B_ACIN_plot, "separated_B_ACIN_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_B_CKR_plot, "separated_B_CKR_plot_slicing_no_background_noise.RDS")
+
+saveRDS(separated_B_ACIN_box_plot, "separated_B_ACIN_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_CKR_box_plot, "separated_B_CKR_plot_slicing_no_background_noise.RDS")
 
 
 # Read separated_SAC_df
@@ -4348,13 +4532,20 @@ separated_entropy_SAC_df <- read.table("separated_entropy_SAC_df.csv")
 separated_prop_SAC_df <- separated_prop_SAC_df[separated_prop_SAC_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 separated_entropy_SAC_df <- separated_entropy_SAC_df[separated_entropy_SAC_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
-# Start with cluster_A
-separated_A_prop_SAC_plot <- plot_proportion_SAC(separated_A_spes_table, separated_prop_SAC_df, "distance")
-separated_A_entropy_SAC_plot <- plot_entropy_SAC(separated_A_spes_table, separated_entropy_SAC_df, "distance")
+# Read separated_SAC_df (slices)
+setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+separated_slices_prop_SAC_df <- read.table("separated_slices_prop_SAC_df.csv")
+separated_slices_entropy_SAC_df <- read.table("separated_slices_entropy_SAC_df.csv")
 
-# Then do cluster_B
-separated_B_prop_SAC_plot <- plot_proportion_SAC(separated_B_spes_table, separated_prop_SAC_df, "distance")
-separated_B_entropy_SAC_plot <- plot_entropy_SAC(separated_B_spes_table, separated_entropy_SAC_df, "distance")
+separated_slices_prop_SAC_df <- separated_slices_prop_SAC_df[separated_slices_prop_SAC_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+separated_slices_entropy_SAC_df <- separated_slices_entropy_SAC_df[separated_slices_entropy_SAC_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+
+# Plots
+separated_A_prop_SAC_plot <- plot_proportion_SAC(separated_A_spes_table, separated_prop_SAC_df, separated_slices_prop_SAC_df, "distance")
+separated_A_entropy_SAC_plot <- plot_entropy_SAC(separated_A_spes_table, separated_entropy_SAC_df, separated_slices_entropy_SAC_df, "distance")
+
+separated_B_prop_SAC_plot <- plot_proportion_SAC(separated_B_spes_table, separated_prop_SAC_df, separated_slices_prop_SAC_df, "distance")
+separated_B_entropy_SAC_plot <- plot_entropy_SAC(separated_B_spes_table, separated_entropy_SAC_df, separated_slices_entropy_SAC_df, "distance")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(separated_A_prop_SAC_plot, "separated_A_prop_SAC_plot_slicing_no_background_noise.RDS")
@@ -4372,42 +4563,64 @@ separated_entropy_prevalence_df <- read.table("separated_entropy_prevalence_df.c
 separated_prop_prevalence_df <- separated_prop_prevalence_df[separated_prop_prevalence_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 separated_entropy_prevalence_df <- separated_entropy_prevalence_df[separated_entropy_prevalence_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
-# Start with cluster_A
-separated_A_prop_prevalence_plot <- plot_proportion_prevalence(separated_A_spes_table, separated_prop_prevalence_df, "distance")
-separated_A_entropy_prevalence_plot <- plot_entropy_prevalence(separated_A_spes_table, separated_entropy_prevalence_df, "distance")
-separated_A_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(separated_A_spes_table, separated_prop_prevalence_df, "distance")
-separated_A_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(separated_A_spes_table, separated_entropy_prevalence_df, "distance")
+# Read separated prevalence dfs (slices)
+setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+separated_slices_prop_prevalence_df <- read.table("separated_slices_prop_prevalence_df.csv")
+separated_slices_entropy_prevalence_df <- read.table("separated_slices_entropy_prevalence_df.csv")
 
-# Then do cluster_B
-separated_B_prop_prevalence_plot <- plot_proportion_prevalence(separated_B_spes_table, separated_prop_prevalence_df, "distance")
-separated_B_entropy_prevalence_plot <- plot_entropy_prevalence(separated_B_spes_table, separated_entropy_prevalence_df, "distance")
-separated_B_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(separated_B_spes_table, separated_prop_prevalence_df, "distance")
-separated_B_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(separated_B_spes_table, separated_entropy_prevalence_df, "distance")
+separated_slices_prop_prevalence_df <- separated_slices_prop_prevalence_df[separated_slices_prop_prevalence_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+separated_slices_entropy_prevalence_df <- separated_slices_entropy_prevalence_df[separated_slices_entropy_prevalence_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
+
+# Plots
+separated_A_prop_prevalence_plot <- plot_proportion_prevalence(separated_A_spes_table, separated_prop_prevalence_df, separated_slices_prop_prevalence_df, "distance")
+separated_A_entropy_prevalence_plot <- plot_entropy_prevalence(separated_A_spes_table, separated_entropy_prevalence_df, separated_slices_entropy_prevalence_df, "distance")
+
+separated_A_prop_prevalence_box_plot <- plot_proportion_prevalence_boxplot(separated_A_spes_table, separated_prop_prevalence_df, separated_slices_prop_prevalence_df, "distance")
+separated_A_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(separated_A_spes_table, separated_entropy_prevalence_df, separated_slices_entropy_prevalence_df, "distance")
+
+separated_A_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(separated_A_spes_table, separated_prop_prevalence_df, separated_slices_prop_prevalence_df, "distance")
+separated_A_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(separated_A_spes_table, separated_entropy_prevalence_df, separated_slices_entropy_prevalence_df, "distance")
+
+separated_B_prop_prevalence_plot <- plot_proportion_prevalence(separated_B_spes_table, separated_prop_prevalence_df, separated_slices_prop_prevalence_df, "distance")
+separated_B_entropy_prevalence_plot <- plot_entropy_prevalence(separated_B_spes_table, separated_entropy_prevalence_df, separated_slices_entropy_prevalence_df, "distance")
+
+separated_B_prop_prevalence_box_plot <- plot_proportion_prevalence_boxplot(separated_B_spes_table, separated_prop_prevalence_df, separated_slices_prop_prevalence_df, "distance")
+separated_B_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(separated_B_spes_table, separated_entropy_prevalence_df, separated_slices_entropy_prevalence_df, "distance")
+
+separated_B_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(separated_B_spes_table, separated_prop_prevalence_df, separated_slices_prop_prevalence_df, "distance")
+separated_B_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(separated_B_spes_table, separated_entropy_prevalence_df, separated_slices_entropy_prevalence_df, "distance")
 
 setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
 saveRDS(separated_A_prop_prevalence_plot, "separated_A_prop_prevalence_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_A_entropy_prevalence_plot, "separated_A_entropy_prevalence_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_A_prop_prevalence_box_plot, "separated_A_prop_prevalence_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_A_entropy_prevalence_box_plot, "separated_A_entropy_prevalence_box_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_A_prop_prevalence_AUC_plot, "separated_A_prop_prevalence_AUC_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_A_entropy_prevalence_AUC_plot, "separated_A_entropy_prevalence_AUC_plot_slicing_no_background_noise.RDS")
 
 saveRDS(separated_B_prop_prevalence_plot, "separated_B_prop_prevalence_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_B_entropy_prevalence_plot, "separated_B_entropy_prevalence_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_prop_prevalence_box_plot, "separated_B_prop_prevalence_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_entropy_prevalence_box_plot, "separated_B_entropy_prevalence_box_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_B_prop_prevalence_AUC_plot, "separated_B_prop_prevalence_AUC_plot_slicing_no_background_noise.RDS")
 saveRDS(separated_B_entropy_prevalence_AUC_plot, "separated_B_entropy_prevalence_AUC_plot_slicing_no_background_noise.RDS")
 
 
 
-
 ### Without background noise pdf with all plots -------------------------
-setwd("~/Objects/unsupervised/plots/original_no_background_noise")
-metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_prevalence_AUC", "entropy_SAC", "entropy_prevalence", "entropy_prevalence_AUC")
+setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
+metrics <- c("AMD", 
+             "MS", "MS_box", "NMS", "NMS_box", "ACINP", "ACINP_box", "AE", "AE_box", 
+             "ACIN", "ACIN_box", "CKR", "CKR_box", 
+             "prop_SAC", "prop_prevalence", "prop_prevalence_box", "prop_prevalence_AUC", 
+             "entropy_SAC", "entropy_prevalence", "entropy_prevalence_box","entropy_prevalence_AUC")
 arrangements <- c("mixed", "ringed", "separated_A", "separated_B")
 
-pdf("plots_no_background_noise.pdf", width = 15, height = 10)
+pdf("plots.pdf", width = 15, height = 10)
 
 for (metric in metrics) {
   for (arrangement in arrangements) {
-    plot_file_name <- paste(arrangement, "_", metric, "_plot_no_background_noise.RDS", sep = "")
+    plot_file_name <- paste(arrangement, "_", metric, "_plot_slicing_no_background_noise.RDS", sep = "")
     print(readRDS(plot_file_name))
   }
 }
