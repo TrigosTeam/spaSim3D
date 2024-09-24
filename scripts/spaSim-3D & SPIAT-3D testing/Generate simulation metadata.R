@@ -102,10 +102,10 @@ separated_spes_table$centre_x_coord_A <- runif(n_separated_simulations, centre_x
 separated_spes_table$centre_x_coord_B <- 600 - separated_spes_table$centre_x_coord_A # Where 600 is the 'length' of the separated window
 
 ### 1.4. Save tables -------------------------------------------------
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
-write.table(mixed_spes_table, "mixed_spes_table_unsupervised.csv")
-write.table(ringed_spes_table, "ringed_spes_table_unsupervised.csv")
-write.table(separated_spes_table, "separated_spes_table_unsupervised.csv")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
+write.table(mixed_spes_table, "mixed_spes_table.csv")
+write.table(ringed_spes_table, "ringed_spes_table.csv")
+write.table(separated_spes_table, "separated_spes_table.csv")
 
 
 ### 2.0. Set up all parameters for metadata -----------------------------
@@ -145,8 +145,8 @@ separated_cluster_B_cell_prop <- 1
 
 ### 2.1. Generate mixed_spes_metadata -----------------------------------
 # Get table for mixed simulations
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
-mixed_spes_table <- read.table("mixed_spes_table_unsupervised.csv")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
 
 # Set up metadata list
 mixed_spes_metadata <- list()
@@ -190,8 +190,8 @@ for (i in seq(nrow(mixed_spes_table))) {
 
 ### 2.2. Generate ringed_spes_metadata ----------------------------------
 # Get table for ringed simulations
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
-ringed_spes_table <- read.table("ringed_spes_table_unsupervised.csv")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
 
 # Set up metadata list
 ringed_spes_metadata <- list()
@@ -234,8 +234,8 @@ for (i in seq(nrow(ringed_spes_table))) {
 
 ### 2.3. Generate separated_spes_metadata -------------------------------
 # Get table for separated simulations
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
-separated_spes_table <- read.table("separated_spes_table_unsupervised.csv")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
+separated_spes_table <- read.table("separated_spes_table.csv")
 
 # Set up metadata list
 separated_spes_metadata <- list()
@@ -295,7 +295,7 @@ for (i in seq(nrow(separated_spes_table))) {
 }
 
 ### 2.4. Save metadatas -------------------------------------------------
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
-saveRDS(mixed_spes_metadata, "mixed_spes_metadata_unsupervised.rds")
-saveRDS(ringed_spes_metadata, "ringed_spes_metadata_unsupervised.rds")
-saveRDS(separated_spes_metadata, "separated_spes_metadata_unsupervised.rds")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_metadata")
+saveRDS(mixed_spes_metadata, "mixed_spes_metadata.rds")
+saveRDS(ringed_spes_metadata, "ringed_spes_metadata.rds")
+saveRDS(separated_spes_metadata, "separated_spes_metadata.rds")
