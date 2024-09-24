@@ -50,13 +50,12 @@ plot_cells3D <- function(spe,
                  colors = plot_colours,
                  marker = list(size = 2))
   
-  fig <- fig %>% layout(scene = list(xaxis = list(title = 'x'),
-                                     yaxis = list(title = 'y'),
-                                     zaxis = list(title = 'z')))
-  
-  fig <- fig %>% layout(scene = list(xaxis = list(title = '', showgrid = T, showaxeslabels = F, showticklabels = F),
-                                     yaxis = list(title = '', showgrid = T, showaxeslabels = F, showticklabels = F),
-                                     zaxis = list(title = '', showgrid = T, showaxeslabels = F, showticklabels = F)))
+  fig <- fig %>% layout(scene = list(xaxis = list(title = 'x', showgrid = T, showaxeslabels = F, showticklabels = T, gridwidth = 5, 
+                                                  titlefont = list(size = 20), tickfont = list(size = 15)),
+                                     yaxis = list(title = 'y', showgrid = T, showaxeslabels = F, showticklabels = T, gridwidth = 5,
+                                                  titlefont = list(size = 20), tickfont = list(size = 15)),
+                                     zaxis = list(title = 'z', showgrid = T, showaxeslabels = F, showticklabels = T, gridwidth = 5,
+                                                  titlefont = list(size = 20), tickfont = list(size = 15))))
   
   
   return (fig)
