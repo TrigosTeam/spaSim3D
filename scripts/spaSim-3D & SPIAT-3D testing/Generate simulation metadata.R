@@ -29,7 +29,7 @@ cluster_prop_A_range <- c("min" = 0.5, "max" = 0.9)   # Proportion of A cells in
 
 
 ## Ringed clusters
-width_ring_range_factor <- c("min" = 0.1, "max" = 0.2)  # The width of the ring is proportional to the size (radius/width) of the cluster, for an ellipsoid, use the average of the three radii
+ring_width_range_factor <- c("min" = 0.1, "max" = 0.2)  # The width of the ring is proportional to the size (radius/width) of the cluster, for an ellipsoid, use the average of the three radii
 
 
 ## Separated clusters
@@ -57,7 +57,7 @@ mixed_spes_table$cluster_prop_B <- 1 - mixed_spes_table$cluster_prop_A
 
 ### 1.2. Generate ringed_spes_table  -------------------------------------
 n_ringed_simulations <- 2000
-ringed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "radius_x_E", "radius_y_E", "radius_z_E", "width_N", "width_ring")
+ringed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "radius_x_E", "radius_y_E", "radius_z_E", "width_N", "ring_width")
 ringed_spes_table <- data.frame(matrix(nrow = n_ringed_simulations, ncol = length(ringed_spes_table_colnames))) 
 colnames(ringed_spes_table) <- ringed_spes_table_colnames
 
@@ -71,8 +71,8 @@ ringed_spes_table$radius_z_E <- ifelse(ringed_spes_table$shape == "Ellipsoid", r
 ringed_spes_table$width_N <- ifelse(ringed_spes_table$shape == "Network", runif(n_ringed_simulations, width_N_range["min"], width_N_range["max"]), NA)
 
 radius_width_colnames <- c("radius_x_E", "radius_y_E", "radius_z_E", "width_N") # Ignore radius_N as this refers to the radius spanned by the cluster, not the width of a branch
-ringed_spes_table$width_ring_factor <- runif(n_ringed_simulations, width_ring_range_factor["min"], width_ring_range_factor["max"])
-ringed_spes_table$width_ring <- ringed_spes_table$width_ring_factor * apply(ringed_spes_table[, radius_width_colnames], 1, mean, na.rm = T)
+ringed_spes_table$ring_width_factor <- runif(n_ringed_simulations, ring_width_range_factor["min"], ring_width_range_factor["max"])
+ringed_spes_table$ring_width <- ringed_spes_table$ring_width_factor * apply(ringed_spes_table[, radius_width_colnames], 1, mean, na.rm = T)
 
 
 ### 1.3. Generate separated_spes_table --------------------------------------
@@ -211,7 +211,7 @@ for (i in seq(nrow(ringed_spes_table))) {
   curr_metadata$cluster_1$centre_loc <- ringed_cluster_centre_loc
   curr_metadata$cluster_1$ring_cell_types <- ringed_ring_cell_type
   curr_metadata$cluster_1$ring_cell_proportions <- ringed_ring_cell_prop
-  curr_metadata$cluster_1$ring_width <- ringed_spes_table$width_ring[i]
+  curr_metadata$cluster_1$ring_width <- ringed_spes_table$ring_width[i]
   
   # Specify metadata for each shape and size
   if (shape == "Ellipsoid") {
