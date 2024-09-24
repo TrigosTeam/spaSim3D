@@ -83,7 +83,7 @@ print(cross_K)
 cross_K_gradient <- calculate_cross_K_gradient3D(spe1,
                                                  reference_cell_type = "Tumour",
                                                  target_cell_type = "Immune",
-                                                 radii = seq(0, 50, 5))
+                                                 radii = seq(1, 50))
 
 
 ### Calculate entropy
