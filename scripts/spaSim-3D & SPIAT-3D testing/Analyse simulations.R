@@ -22,7 +22,7 @@ get_spe_slices_list <- function(spe) {
 
 ### Mixed spes 3D setup --------------------------------------------
 
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_metadata")
 mixed_spes_metadata <- readRDS("mixed_spes_metadata_unsupervised.rds")
 
 # Get number of mixed spes
@@ -470,7 +470,7 @@ for (i in seq_len(n_mixed_spes)) {
 }
 
 
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 write.table(mixed_APD_df, file = "mixed_APD_df.csv")
 write.table(mixed_AMD_df, file = "mixed_AMD_df.csv")
 
@@ -487,7 +487,7 @@ write.table(mixed_entropy_SAC_df, file = "mixed_entropy_SAC_df.csv")
 write.table(mixed_entropy_prevalence_df, file = "mixed_entropy_prevalence_df.csv")
 
 
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 write.table(mixed_slices_APD_df, file = "mixed_slices_APD_df.csv")
 write.table(mixed_slices_AMD_df, file = "mixed_slices_AMD_df.csv")
 
@@ -507,7 +507,7 @@ write.table(mixed_slices_entropy_prevalence_df, file = "mixed_slices_entropy_pre
 
 ### ringed spes 3D setup --------------------------------------------
 
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_metadata")
 ringed_spes_metadata <- readRDS("ringed_spes_metadata_unsupervised.rds")
 
 # Get number of ringed spes
@@ -955,7 +955,7 @@ for (i in seq_len(n_ringed_spes)) {
 }
 
 
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 write.table(ringed_APD_df, file = "ringed_APD_df.csv")
 write.table(ringed_AMD_df, file = "ringed_AMD_df.csv")
 
@@ -972,7 +972,7 @@ write.table(ringed_entropy_SAC_df, file = "ringed_entropy_SAC_df.csv")
 write.table(ringed_entropy_prevalence_df, file = "ringed_entropy_prevalence_df.csv")
 
 
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 write.table(ringed_slices_APD_df, file = "ringed_slices_APD_df.csv")
 write.table(ringed_slices_AMD_df, file = "ringed_slices_AMD_df.csv")
 
@@ -992,7 +992,7 @@ write.table(ringed_slices_entropy_prevalence_df, file = "ringed_slices_entropy_p
 
 ### separated spes 3D setup --------------------------------------------
 
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_metadata")
 separated_spes_metadata <- readRDS("separated_spes_metadata_unsupervised.rds")
 
 # Get number of separated spes
@@ -1440,7 +1440,7 @@ for (i in seq_len(n_separated_spes)) {
 }
 
 
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 write.table(separated_APD_df, file = "separated_APD_df.csv")
 write.table(separated_AMD_df, file = "separated_AMD_df.csv")
 
@@ -1457,7 +1457,7 @@ write.table(separated_entropy_SAC_df, file = "separated_entropy_SAC_df.csv")
 write.table(separated_entropy_prevalence_df, file = "separated_entropy_prevalence_df.csv")
 
 
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 write.table(separated_slices_APD_df, file = "separated_slices_APD_df.csv")
 write.table(separated_slices_AMD_df, file = "separated_slices_AMD_df.csv")
 
