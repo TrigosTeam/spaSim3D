@@ -23,7 +23,7 @@ get_spe_slices_list <- function(spe) {
 ### Mixed spes 3D setup --------------------------------------------
 
 setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_metadata")
-mixed_spes_metadata <- readRDS("mixed_spes_metadata_unsupervised.rds")
+mixed_spes_metadata <- readRDS("mixed_spes_metadata.rds")
 
 # Get number of mixed spes
 n_mixed_spes <- length(mixed_spes_metadata)
@@ -508,7 +508,7 @@ write.table(mixed_slices_entropy_prevalence_df, file = "mixed_slices_entropy_pre
 ### ringed spes 3D setup --------------------------------------------
 
 setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_metadata")
-ringed_spes_metadata <- readRDS("ringed_spes_metadata_unsupervised.rds")
+ringed_spes_metadata <- readRDS("ringed_spes_metadata.rds")
 
 # Get number of ringed spes
 n_ringed_spes <- length(ringed_spes_metadata)
@@ -993,7 +993,7 @@ write.table(ringed_slices_entropy_prevalence_df, file = "ringed_slices_entropy_p
 ### separated spes 3D setup --------------------------------------------
 
 setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_metadata")
-separated_spes_metadata <- readRDS("separated_spes_metadata_unsupervised.rds")
+separated_spes_metadata <- readRDS("separated_spes_metadata.rds")
 
 # Get number of separated spes
 n_separated_spes <- length(separated_spes_metadata)
