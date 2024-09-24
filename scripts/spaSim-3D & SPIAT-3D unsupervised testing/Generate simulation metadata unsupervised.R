@@ -17,11 +17,11 @@ get_bg_props <- function(n_simulations, bg_prop_range, bg_prop_equals_zero_prob)
 ## Shapes
 shapes <- c("Ellipsoid", "Network")
 
-radius_x_E_range <- c("min" = 120, "max" = 240)
-radius_y_E_range <- c("min" = 120, "max" = 240)
-radius_z_E_range <- c("min" = 120, "max" = 240)
+radius_x_E_range <- c("min" = 75, "max" = 125)
+radius_y_E_range <- c("min" = 75, "max" = 125)
+radius_z_E_range <- c("min" = 75, "max" = 125)
 
-width_N_range <- c("min" = 30, "max" = 60)
+width_N_range <- c("min" = 30, "max" = 45)
 
 
 ## Mixed clusters
@@ -33,7 +33,7 @@ width_ring_range_factor <- c("min" = 0.1, "max" = 0.2)  # The width of the ring 
 
 
 ## Separated clusters
-centre_x_coord_A_range <- c("min" = 150, "max" = 300)   # centre_x_coord_B_range = 900 - centre_x_coord_A_range
+centre_x_coord_A_range <- c("min" = 125, "max" = 175)   # centre_x_coord_B_range = 600 - centre_x_coord_A_range
 
 
 ### 1.1. Generate mixed_spes_table----------------------------------------------
@@ -99,10 +99,10 @@ separated_spes_table$radius_z_E_B <- ifelse(separated_spes_table$shape_B == "Ell
 separated_spes_table$width_N_B <- ifelse(separated_spes_table$shape_B == "Network", runif(n_separated_simulations, width_N_range["min"], width_N_range["max"]), NA)
 
 separated_spes_table$centre_x_coord_A <- runif(n_separated_simulations, centre_x_coord_A_range["min"], centre_x_coord_A_range["max"])
-separated_spes_table$centre_x_coord_B <- 900 - separated_spes_table$centre_x_coord_A # Where 150 is the 'length' of the separated window
+separated_spes_table$centre_x_coord_B <- 600 - separated_spes_table$centre_x_coord_A # Where 600 is the 'length' of the separated window
 
 ### 1.4. Save tables -------------------------------------------------
-setwd("~/Objects/unsupervised/spes_table")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
 write.table(mixed_spes_table, "mixed_spes_table_unsupervised.csv")
 write.table(ringed_spes_table, "ringed_spes_table_unsupervised.csv")
 write.table(separated_spes_table, "separated_spes_table_unsupervised.csv")
@@ -110,27 +110,19 @@ write.table(separated_spes_table, "separated_spes_table_unsupervised.csv")
 
 ### 2.0. Set up all parameters for metadata -----------------------------
 
-# bg metadata for mixed or ringed simulations
-bg_mixed_ringed_metadata <- spe_metadata_background_template("random")
-bg_mixed_ringed_metadata$background$n_cells <- 20000
-bg_mixed_ringed_metadata$background$length <- 600
-bg_mixed_ringed_metadata$background$width <- 600
-bg_mixed_ringed_metadata$background$height <- 600
-bg_mixed_ringed_metadata$background$minimum_distance_between_cells <- 10
-bg_mixed_ringed_metadata$background$cell_types <- c("A", "B", "O") # Cell proportions will change later
+# bg metadata for simulations
+bg_metadata <- spe_metadata_background_template("random")
+bg_metadata$background$n_cells <- 20000
+bg_metadata$background$length <- 600
+bg_metadata$background$width <- 600
+bg_metadata$background$height <- 600
+bg_metadata$background$minimum_distance_between_cells <- 10
+bg_metadata$background$cell_types <- c("A", "B", "O") # Cell proportions will change later
 
-# bg metadata for separated simulations
-bg_separated_metadata <- spe_metadata_background_template("random")
-bg_separated_metadata$background$n_cells <- 30000
-bg_separated_metadata$background$length <- 900
-bg_separated_metadata$background$width <- 600
-bg_separated_metadata$background$height <- 600
-bg_separated_metadata$background$minimum_distance_between_cells <- 10
-bg_separated_metadata$background$cell_types <- c("A", "B", "O") # Cell proportions will change later
 
 # Network
-radius_N <- 240
-n_edges_N <- 15
+radius_N <- 125
+n_edges_N <- 20
 
 # Mixed clusters
 mixed_cluster_cell_types <- c("A", "B")
@@ -148,12 +140,12 @@ separated_cluster_A_cell_type <- "A"
 separated_cluster_A_cell_prop <- 1
 separated_cluster_B_cell_type <- "B"
 separated_cluster_B_cell_prop <- 1
-# Get centre coords later
+# Get centre coords for separated clusters later
 
 
 ### 2.1. Generate mixed_spes_metadata -----------------------------------
 # Get table for mixed simulations
-setwd("~/Objects/unsupervised/spes_table")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
 mixed_spes_table <- read.table("mixed_spes_table_unsupervised.csv")
 
 # Set up metadata list
@@ -163,7 +155,7 @@ for (i in seq(nrow(mixed_spes_table))) {
   
   # Get metadata template for current simulation parameters
   shape <- mixed_spes_table$shape[i]
-  curr_metadata <- spe_metadata_cluster_template("regular", shape, bg_mixed_ringed_metadata)
+  curr_metadata <- spe_metadata_cluster_template("regular", shape, bg_metadata)
   
   curr_metadata$background$cell_proportions <- c(mixed_spes_table$bg_prop_A[i], 
                                                  mixed_spes_table$bg_prop_B[i],
@@ -198,7 +190,7 @@ for (i in seq(nrow(mixed_spes_table))) {
 
 ### 2.2. Generate ringed_spes_metadata ----------------------------------
 # Get table for ringed simulations
-setwd("~/Objects/unsupervised/spes_table")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
 ringed_spes_table <- read.table("ringed_spes_table_unsupervised.csv")
 
 # Set up metadata list
@@ -208,7 +200,7 @@ for (i in seq(nrow(ringed_spes_table))) {
   
   # Get metadata template for current simulation parameters
   shape <- ringed_spes_table$shape[i]
-  curr_metadata <- spe_metadata_cluster_template("ring", shape, bg_mixed_ringed_metadata)
+  curr_metadata <- spe_metadata_cluster_template("ring", shape, bg_metadata)
   
   curr_metadata$background$cell_proportions <- c(ringed_spes_table$bg_prop_A[i], 
                                                  ringed_spes_table$bg_prop_B[i],
@@ -242,7 +234,7 @@ for (i in seq(nrow(ringed_spes_table))) {
 
 ### 2.3. Generate separated_spes_metadata -------------------------------
 # Get table for separated simulations
-setwd("~/Objects/unsupervised/spes_table")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
 separated_spes_table <- read.table("separated_spes_table_unsupervised.csv")
 
 # Set up metadata list
@@ -252,7 +244,7 @@ for (i in seq(nrow(separated_spes_table))) {
   
   # Get metadata template for current simulation parameters
   shape_A <- separated_spes_table$shape_A[i]
-  curr_metadata <- spe_metadata_cluster_template("regular", shape_A, bg_separated_metadata)
+  curr_metadata <- spe_metadata_cluster_template("regular", shape_A, bg_metadata)
   curr_metadata$cluster_1$cluster_cell_types <- separated_cluster_A_cell_type
   curr_metadata$cluster_1$cluster_cell_proportions <- separated_cluster_A_cell_prop
   curr_metadata$cluster_1$centre_loc <- c(separated_spes_table$centre_x_coord_A[i], 300, 300)
@@ -303,7 +295,7 @@ for (i in seq(nrow(separated_spes_table))) {
 }
 
 ### 2.4. Save metadatas -------------------------------------------------
-setwd("~/Objects/unsupervised/spes_metadata")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D unsupervised testing")
 saveRDS(mixed_spes_metadata, "mixed_spes_metadata_unsupervised.rds")
 saveRDS(ringed_spes_metadata, "ringed_spes_metadata_unsupervised.rds")
 saveRDS(separated_spes_metadata, "separated_spes_metadata_unsupervised.rds")
