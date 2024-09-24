@@ -933,7 +933,7 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
     
     if (is.null(cell_proportions_neighbourhood_proportions_df)) return(NULL)
     
-    result[i, ] <- apply(cell_proportions_neighbourhood_proportions_df[ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
+    result[i, ] <- apply(cell_proportions_neighbourhood_proportions_df[ , paste(target_cell_types, "_prop", sep = "")], 2, mean, na.rm = T)
   }
   
   # Add a radius column to the result
@@ -1066,7 +1066,7 @@ calculate_entropy_gradient3D <- function(spe,
 
     if (is.null(entropy_df)) return(NULL)
     
-    result[i, "entropy"] <- mean(entropy_df$entropy)
+    result[i, "entropy"] <- mean(entropy_df$entropy, na.rm = T)
   }
   
   # Add a radius column to the result

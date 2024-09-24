@@ -17,7 +17,7 @@ calculate_entropy_gradient3D <- function(spe,
     
     if (is.null(entropy_df)) return(NULL)
     
-    result[i, "entropy"] <- mean(entropy_df$entropy)
+    result[i, "entropy"] <- mean(entropy_df$entropy, na.rm = T)
   }
   
   # Add a radius column to the result
