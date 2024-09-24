@@ -1,3 +1,14 @@
+library(SpatialExperiment)
+library(dbscan)
+library(alphashape3d)
+library(apcluster)
+library(plotly)
+library(dplyr)
+library(reshape2)
+library(gtools)
+library(cowplot)
+library(Hmisc)
+
 ### Basic metrics -------------------------------------------------------------
 
 calculate_cell_proportions3D <- function(spe,
@@ -1702,8 +1713,6 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
 
 
 ### Clustering algorithms ----------------------------------------------------
-library(alphashape3d)
-
 alpha_hull_clustering3D <- function(spe, 
                                     cell_types_of_interest, 
                                     alpha, 
@@ -1875,7 +1884,6 @@ plot_alpha_hull_clusters3D <- function(spe_with_alpha_hull,
 
 
 
-library(dbscan)
 
 dbscan_clustering3D <- function(spe,
                                 cell_types_of_interest,
