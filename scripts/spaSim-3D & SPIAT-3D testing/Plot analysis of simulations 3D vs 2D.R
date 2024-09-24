@@ -1,18 +1,17 @@
 library(cowplot)
-library(ggplot2)
 
 ### Read tables --------------------------------------------------------------
 # Read mixed_spes_table
-setwd("~/Objects/unsupervised/spes_table")
-mixed_spes_table <- read.table("mixed_spes_table_unsupervised.csv")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
 
 # Read ringed_spes_table
-setwd("~/Objects/unsupervised/spes_table")
-ringed_spes_table <- read.table("ringed_spes_table_unsupervised.csv")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
+ringed_spes_table <- read.table("ringed_spes_table.csv")
 
 # Read separated_spes_table
-setwd("~/Objects/unsupervised/spes_table")
-separated_spes_table <- read.table("separated_spes_table_unsupervised.csv")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
+separated_spes_table <- read.table("separated_spes_table.csv")
 separated_spes_table$distance <- separated_spes_table$centre_x_coord_B - separated_spes_table$centre_x_coord_A
 
 # Start with cluster_A
@@ -1849,31 +1848,31 @@ plot_entropy_prevalence_AUC <- function(spes_table, prevalence_df, slices_preval
 ### 2.2. mixed spes AMD ------------------------------------------------------
 
 # Read mixed_AMD_df
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_AMD_df <- read.table("mixed_AMD_df.csv")
 
 # Read mixed_slices_AMD_df
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_AMD_df <- read.table("mixed_slices_AMD_df.csv")
 
 mixed_AMD_plot <- plot_AMD_metric(mixed_spes_table, mixed_AMD_df, mixed_slices_AMD_df, "cluster_prop_B")
 
 mixed_AMD_density_plot <- plot_AMD_density_metric(mixed_spes_table, mixed_AMD_df, mixed_slices_AMD_df, "cluster_prop_B")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(mixed_AMD_plot, "mixed_AMD_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(mixed_AMD_plot, "mixed_AMD_plot3D_vs_2D.RDS")
 
 ### 2.3. mixed spes MS, NMS, ACINP, AE -----------------------------------
 
 # Read mixed MS, NMS, ACINP, AE dfs
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_MS_df <- read.table("mixed_MS_df.csv")
 mixed_NMS_df <- read.table("mixed_NMS_df.csv")
 mixed_ACINP_df <- read.table("mixed_ACINP_df.csv")
 mixed_AE_df <- read.table("mixed_AE_df.csv")
 
 # Read mixed MS, NMS, ACINP, AE dfs (slices)
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_MS_df <- read.table("mixed_slices_MS_df.csv")
 mixed_slices_NMS_df <- read.table("mixed_slices_NMS_df.csv")
 mixed_slices_ACINP_df <- read.table("mixed_slices_ACINP_df.csv")
@@ -1892,26 +1891,26 @@ mixed_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(mixed_spes_table, mi
 mixed_AE_box_plot <- plot_gradient_metrics_type1_boxplot(mixed_spes_table, mixed_AE_df, mixed_slices_AE_df, "AE", "cluster_prop_B")
 
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(mixed_MS_plot, "mixed_MS_plot_slicing.RDS")
-saveRDS(mixed_NMS_plot, "mixed_NMS_plot_slicing.RDS")
-saveRDS(mixed_ACINP_plot, "mixed_ACINP_plot_slicing.RDS")
-saveRDS(mixed_AE_plot, "mixed_AE_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(mixed_MS_plot, "mixed_MS_plot3D_vs_2D.RDS")
+saveRDS(mixed_NMS_plot, "mixed_NMS_plot3D_vs_2D.RDS")
+saveRDS(mixed_ACINP_plot, "mixed_ACINP_plot3D_vs_2D.RDS")
+saveRDS(mixed_AE_plot, "mixed_AE_plot3D_vs_2D.RDS")
 
-saveRDS(mixed_MS_box_plot, "mixed_MS_box_plot_slicing.RDS")
-saveRDS(mixed_NMS_box_plot, "mixed_NMS_box_plot_slicing.RDS")
-saveRDS(mixed_ACINP_box_plot, "mixed_ACINP_box_plot_slicing.RDS")
-saveRDS(mixed_AE_box_plot, "mixed_AE_box_plot_slicing.RDS")
+saveRDS(mixed_MS_box_plot, "mixed_MS_box_plot3D_vs_2D.RDS")
+saveRDS(mixed_NMS_box_plot, "mixed_NMS_box_plot3D_vs_2D.RDS")
+saveRDS(mixed_ACINP_box_plot, "mixed_ACINP_box_plot3D_vs_2D.RDS")
+saveRDS(mixed_AE_box_plot, "mixed_AE_box_plot3D_vs_2D.RDS")
 
 ### 2.4. mixed spes ACIN, CKR ------------------------------------------------
 
 # Read mixed ACIN, CKR
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_ACIN_df <- read.table("mixed_ACIN_df.csv")
 mixed_CKR_df <- read.table("mixed_CKR_df.csv")
 
 # Read mixed ACIN, CKR (slices)
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_ACIN_df <- read.table("mixed_slices_ACIN_df.csv")
 mixed_slices_CKR_df <- read.table("mixed_slices_CKR_df.csv")
 
@@ -1923,43 +1922,43 @@ mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, mi
 mixed_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(mixed_spes_table, mixed_ACIN_df, mixed_slices_ACIN_df, "ACIN", "cluster_prop_B", 20, 100)
 mixed_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(mixed_spes_table, mixed_CKR_df, mixed_slices_CKR_df, "CKR", "cluster_prop_B", 20, 100)
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(mixed_ACIN_plot, "mixed_ACIN_plot_slicing.RDS")
-saveRDS(mixed_CKR_plot, "mixed_CKR_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(mixed_ACIN_plot, "mixed_ACIN_plot3D_vs_2D.RDS")
+saveRDS(mixed_CKR_plot, "mixed_CKR_plot3D_vs_2D.RDS")
 
-saveRDS(mixed_ACIN_box_plot, "mixed_ACIN_box_plot_slicing.RDS")
-saveRDS(mixed_CKR_box_plot, "mixed_CKR_box_plot_slicing.RDS")
+saveRDS(mixed_ACIN_box_plot, "mixed_ACIN_box_plot3D_vs_2D.RDS")
+saveRDS(mixed_CKR_box_plot, "mixed_CKR_box_plot3D_vs_2D.RDS")
 
 ### 2.5. mixed spes SAC ------------------------------------------------------
 
 # Read mixed_SAC_df
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_prop_SAC_df <- read.table("mixed_prop_SAC_df.csv")
 mixed_entropy_SAC_df <- read.table("mixed_entropy_SAC_df.csv")
 
 # Read mixed_SAC_df (slices)
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_prop_SAC_df <- read.table("mixed_slices_prop_SAC_df.csv")
 mixed_slices_entropy_SAC_df <- read.table("mixed_slices_entropy_SAC_df.csv")
 
 mixed_prop_SAC_plot <- plot_proportion_SAC(mixed_spes_table, mixed_prop_SAC_df, mixed_slices_prop_SAC_df, "cluster_prop_B")
 mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_df, mixed_slices_entropy_SAC_df, "cluster_prop_B")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(mixed_prop_SAC_plot, "mixed_prop_SAC_plot_slicing.RDS")
-saveRDS(mixed_entropy_SAC_plot, "mixed_entropy_SAC_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(mixed_prop_SAC_plot, "mixed_prop_SAC_plot3D_vs_2D.RDS")
+saveRDS(mixed_entropy_SAC_plot, "mixed_entropy_SAC_plot3D_vs_2D.RDS")
 
 
 
 ### 2.6. mixed spes prevalence ------------------------------------------------
 
 # Read mixed prevalence dfs
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_prop_prevalence_df <- read.table("mixed_prop_prevalence_df.csv")
 mixed_entropy_prevalence_df <- read.table("mixed_entropy_prevalence_df.csv")
 
 # Read mixed prevalence dfs (slices)
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_prop_prevalence_df <- read.table("mixed_slices_prop_prevalence_df.csv")
 mixed_slices_entropy_prevalence_df <- read.table("mixed_slices_entropy_prevalence_df.csv")
 
@@ -1975,161 +1974,161 @@ mixed_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(mixed_spes_
 mixed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(mixed_spes_table, mixed_prop_prevalence_df, mixed_slices_prop_prevalence_df, "cluster_prop_B")
 mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_table, mixed_entropy_prevalence_df, mixed_slices_entropy_prevalence_df, "cluster_prop_B")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(mixed_prop_prevalence_plot, "mixed_prop_prevalence_plot_slicing.RDS")
-saveRDS(mixed_entropy_prevalence_plot, "mixed_entropy_prevalence_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(mixed_prop_prevalence_plot, "mixed_prop_prevalence_plot3D_vs_2D.RDS")
+saveRDS(mixed_entropy_prevalence_plot, "mixed_entropy_prevalence_plot3D_vs_2D.RDS")
 
-saveRDS(mixed_prop_prevalence_box_plot, "mixed_prop_prevalence_box_plot_slicing.RDS")
-saveRDS(mixed_entropy_prevalence_box_plot, "mixed_entropy_prevalence_box_plot_slicing.RDS")
+saveRDS(mixed_prop_prevalence_box_plot, "mixed_prop_prevalence_box_plot3D_vs_2D.RDS")
+saveRDS(mixed_entropy_prevalence_box_plot, "mixed_entropy_prevalence_box_plot3D_vs_2D.RDS")
 
-saveRDS(mixed_prop_prevalence_AUC_plot, "mixed_prop_prevalence_AUC_plot_slicing.RDS")
-saveRDS(mixed_entropy_prevalence_AUC_plot, "mixed_entropy_prevalence_AUC_plot_slicing.RDS")
+saveRDS(mixed_prop_prevalence_AUC_plot, "mixed_prop_prevalence_AUC_plot3D_vs_2D.RDS")
+saveRDS(mixed_entropy_prevalence_AUC_plot, "mixed_entropy_prevalence_AUC_plot3D_vs_2D.RDS")
 
 
 ### 3.2. ringed spes AMD ------------------------------------------------------
 
 # Read ringed_AMD_df
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_AMD_df <- read.table("ringed_AMD_df.csv")
 
 # Read ringed_slices_AMD_df
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_AMD_df <- read.table("ringed_slices_AMD_df.csv")
 
-ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, ringed_slices_AMD_df, "width_ring_factor")
+ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, ringed_slices_AMD_df, "ring_width_factor")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(ringed_AMD_plot, "ringed_AMD_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(ringed_AMD_plot, "ringed_AMD_plot3D_vs_2D.RDS")
 
 ### 3.3. ringed spes MS, NMS, ACINP, AE -----------------------------------
 
 # Read ringed MS, NMS, ACINP, AE dfs
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_MS_df <- read.table("ringed_MS_df.csv")
 ringed_NMS_df <- read.table("ringed_NMS_df.csv")
 ringed_ACINP_df <- read.table("ringed_ACINP_df.csv")
 ringed_AE_df <- read.table("ringed_AE_df.csv")
 
 # Read ringed MS, NMS, ACINP, AE dfs (slices)
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_MS_df <- read.table("ringed_slices_MS_df.csv")
 ringed_slices_NMS_df <- read.table("ringed_slices_NMS_df.csv")
 ringed_slices_ACINP_df <- read.table("ringed_slices_ACINP_df.csv")
 ringed_slices_AE_df <- read.table("ringed_slices_AE_df.csv")
 
 # Lines
-ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "width_ring_factor")
-ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "width_ring_factor")
-ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "width_ring_factor")
-ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "width_ring_factor")
+ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "ring_width_factor")
+ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "ring_width_factor")
+ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "ring_width_factor")
+ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "ring_width_factor")
 
 # Boxplots
-ringed_MS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "width_ring_factor")
-ringed_NMS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "width_ring_factor")
-ringed_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "width_ring_factor")
-ringed_AE_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "width_ring_factor")
+ringed_MS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "ring_width_factor")
+ringed_NMS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "ring_width_factor")
+ringed_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "ring_width_factor")
+ringed_AE_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "ring_width_factor")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(ringed_MS_plot, "ringed_MS_plot_slicing.RDS")
-saveRDS(ringed_NMS_plot, "ringed_NMS_plot_slicing.RDS")
-saveRDS(ringed_ACINP_plot, "ringed_ACINP_plot_slicing.RDS")
-saveRDS(ringed_AE_plot, "ringed_AE_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(ringed_MS_plot, "ringed_MS_plot3D_vs_2D.RDS")
+saveRDS(ringed_NMS_plot, "ringed_NMS_plot3D_vs_2D.RDS")
+saveRDS(ringed_ACINP_plot, "ringed_ACINP_plot3D_vs_2D.RDS")
+saveRDS(ringed_AE_plot, "ringed_AE_plot3D_vs_2D.RDS")
 
-saveRDS(ringed_MS_box_plot, "ringed_MS_box_plot_slicing.RDS")
-saveRDS(ringed_NMS_box_plot, "ringed_NMS_box_plot_slicing.RDS")
-saveRDS(ringed_ACINP_box_plot, "ringed_ACINP_box_plot_slicing.RDS")
-saveRDS(ringed_AE_box_plot, "ringed_AE_box_plot_slicing.RDS")
+saveRDS(ringed_MS_box_plot, "ringed_MS_box_plot3D_vs_2D.RDS")
+saveRDS(ringed_NMS_box_plot, "ringed_NMS_box_plot3D_vs_2D.RDS")
+saveRDS(ringed_ACINP_box_plot, "ringed_ACINP_box_plot3D_vs_2D.RDS")
+saveRDS(ringed_AE_box_plot, "ringed_AE_box_plot3D_vs_2D.RDS")
 
 ### 3.4. ringed spes ACIN, CKR ------------------------------------------------
 
 # Read ringed ACIN, CKR
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_ACIN_df <- read.table("ringed_ACIN_df.csv")
 ringed_CKR_df <- read.table("ringed_CKR_df.csv")
 
 # Read ringed ACIN, CKR (slices)
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_ACIN_df <- read.table("ringed_slices_ACIN_df.csv")
 ringed_slices_CKR_df <- read.table("ringed_slices_CKR_df.csv")
 
 # Lines
-ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "width_ring_factor", 20, 100)
-ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "width_ring_factor", 20, 100)
+ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "ring_width_factor", 20, 100)
+ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "ring_width_factor", 20, 100)
 
 # Box plots
-ringed_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "width_ring_factor", 20, 100)
-ringed_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "width_ring_factor", 20, 100)
+ringed_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "ring_width_factor", 20, 100)
+ringed_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "ring_width_factor", 20, 100)
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(ringed_ACIN_plot, "ringed_ACIN_plot_slicing.RDS")
-saveRDS(ringed_CKR_plot, "ringed_CKR_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(ringed_ACIN_plot, "ringed_ACIN_plot3D_vs_2D.RDS")
+saveRDS(ringed_CKR_plot, "ringed_CKR_plot3D_vs_2D.RDS")
 
-saveRDS(ringed_ACIN_box_plot, "ringed_ACIN_box_plot_slicing.RDS")
-saveRDS(ringed_CKR_box_plot, "ringed_CKR_box_plot_slicing.RDS")
+saveRDS(ringed_ACIN_box_plot, "ringed_ACIN_box_plot3D_vs_2D.RDS")
+saveRDS(ringed_CKR_box_plot, "ringed_CKR_box_plot3D_vs_2D.RDS")
 
 ### 3.5. ringed spes SAC ------------------------------------------------------
 
 # Read ringed_SAC_df
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_prop_SAC_df <- read.table("ringed_prop_SAC_df.csv")
 ringed_entropy_SAC_df <- read.table("ringed_entropy_SAC_df.csv")
 
 # Read ringed_SAC_df (slices)
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_prop_SAC_df <- read.table("ringed_slices_prop_SAC_df.csv")
 ringed_slices_entropy_SAC_df <- read.table("ringed_slices_entropy_SAC_df.csv")
 
-ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, ringed_slices_prop_SAC_df, "width_ring_factor")
-ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, ringed_slices_entropy_SAC_df, "width_ring_factor")
+ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, ringed_slices_prop_SAC_df, "ring_width_factor")
+ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, ringed_slices_entropy_SAC_df, "ring_width_factor")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(ringed_prop_SAC_plot, "ringed_prop_SAC_plot_slicing.RDS")
-saveRDS(ringed_entropy_SAC_plot, "ringed_entropy_SAC_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(ringed_prop_SAC_plot, "ringed_prop_SAC_plot3D_vs_2D.RDS")
+saveRDS(ringed_entropy_SAC_plot, "ringed_entropy_SAC_plot3D_vs_2D.RDS")
 
 
 
 ### 3.6. ringed spes prevalence ------------------------------------------------
 
 # Read ringed prevalence dfs
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_prop_prevalence_df <- read.table("ringed_prop_prevalence_df.csv")
 ringed_entropy_prevalence_df <- read.table("ringed_entropy_prevalence_df.csv")
 
 # Read ringed prevalence dfs (slices)
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_prop_prevalence_df <- read.table("ringed_slices_prop_prevalence_df.csv")
 ringed_slices_entropy_prevalence_df <- read.table("ringed_slices_entropy_prevalence_df.csv")
 
 # Lines
-ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "width_ring_factor")
-ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "width_ring_factor")
+ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "ring_width_factor")
+ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "ring_width_factor")
 
 # Boxplots
-ringed_prop_prevalence_box_plot <- plot_proportion_prevalence_boxplot(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "width_ring_factor")
-ringed_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "width_ring_factor")
+ringed_prop_prevalence_box_plot <- plot_proportion_prevalence_boxplot(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "ring_width_factor")
+ringed_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "ring_width_factor")
 
 # AUC
-ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "width_ring_factor")
-ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "width_ring_factor")
+ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "ring_width_factor")
+ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "ring_width_factor")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(ringed_prop_prevalence_plot, "ringed_prop_prevalence_plot_slicing.RDS")
-saveRDS(ringed_entropy_prevalence_plot, "ringed_entropy_prevalence_plot_slicing.RDS")
-saveRDS(ringed_prop_prevalence_box_plot, "ringed_prop_prevalence_box_plot_slicing.RDS")
-saveRDS(ringed_entropy_prevalence_box_plot, "ringed_entropy_prevalence_box_plot_slicing.RDS")
-saveRDS(ringed_prop_prevalence_AUC_plot, "ringed_prop_prevalence_AUC_plot_slicing.RDS")
-saveRDS(ringed_entropy_prevalence_AUC_plot, "ringed_entropy_prevalence_AUC_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(ringed_prop_prevalence_plot, "ringed_prop_prevalence_plot3D_vs_2D.RDS")
+saveRDS(ringed_entropy_prevalence_plot, "ringed_entropy_prevalence_plot3D_vs_2D.RDS")
+saveRDS(ringed_prop_prevalence_box_plot, "ringed_prop_prevalence_box_plot3D_vs_2D.RDS")
+saveRDS(ringed_entropy_prevalence_box_plot, "ringed_entropy_prevalence_box_plot3D_vs_2D.RDS")
+saveRDS(ringed_prop_prevalence_AUC_plot, "ringed_prop_prevalence_AUC_plot3D_vs_2D.RDS")
+saveRDS(ringed_entropy_prevalence_AUC_plot, "ringed_entropy_prevalence_AUC_plot3D_vs_2D.RDS")
 
 
 
 ### 4.2. separated spes AMD ------------------------------------------------------
 
 # Read separated_AMD_df
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_AMD_df <- read.table("separated_AMD_df.csv")
 
 # Read separated_slices_AMD_df
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_AMD_df <- read.table("separated_slices_AMD_df.csv")
 
 # Plots
@@ -2137,22 +2136,22 @@ separated_A_AMD_plot <- plot_AMD_metric(separated_A_spes_table, separated_AMD_df
 
 # separated_B_AMD_plot <- plot_AMD_metric(separated_B_spes_table, separated_AMD_df, separated_slices_AMD_df, "distance")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(separated_A_AMD_plot, "separated_A_AMD_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(separated_A_AMD_plot, "separated_A_AMD_plot3D_vs_2D.RDS")
 
-# saveRDS(separated_B_AMD_plot, "separated_B_AMD_plot_slicing.RDS")
+# saveRDS(separated_B_AMD_plot, "separated_B_AMD_plot3D_vs_2D.RDS")
 
 ### 4.3. separated spes MS, NMS, ACINP, AE -----------------------------------
 
 # Read separated MS, NMS, ACINP, AE dfs
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_MS_df <- read.table("separated_MS_df.csv")
 separated_NMS_df <- read.table("separated_NMS_df.csv")
 separated_ACINP_df <- read.table("separated_ACINP_df.csv")
 separated_AE_df <- read.table("separated_AE_df.csv")
 
 # Read separated MS, NMS, ACINP, AE dfs (slices)
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_MS_df <- read.table("separated_slices_MS_df.csv")
 separated_slices_NMS_df <- read.table("separated_slices_NMS_df.csv")
 separated_slices_ACINP_df <- read.table("separated_slices_ACINP_df.csv")
@@ -2179,36 +2178,36 @@ separated_A_AE_box_plot <- plot_gradient_metrics_type1_boxplot(separated_A_spes_
 # separated_B_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(separated_B_spes_table, separated_ACINP_df, separated_slices_ACINP_df, "ACINP", "distance")
 # separated_B_AE_box_plot <- plot_gradient_metrics_type1_boxplot(separated_B_spes_table, separated_AE_df, separated_slices_AE_df, "AE", "distance")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(separated_A_MS_plot, "separated_A_MS_plot_slicing.RDS")
-saveRDS(separated_A_NMS_plot, "separated_A_NMS_plot_slicing.RDS")
-saveRDS(separated_A_ACINP_plot, "separated_A_ACINP_plot_slicing.RDS")
-saveRDS(separated_A_AE_plot, "separated_A_AE_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(separated_A_MS_plot, "separated_A_MS_plot3D_vs_2D.RDS")
+saveRDS(separated_A_NMS_plot, "separated_A_NMS_plot3D_vs_2D.RDS")
+saveRDS(separated_A_ACINP_plot, "separated_A_ACINP_plot3D_vs_2D.RDS")
+saveRDS(separated_A_AE_plot, "separated_A_AE_plot3D_vs_2D.RDS")
 
-saveRDS(separated_A_MS_box_plot, "separated_A_MS_box_plot_slicing.RDS")
-saveRDS(separated_A_NMS_box_plot, "separated_A_NMS_box_plot_slicing.RDS")
-saveRDS(separated_A_ACINP_box_plot, "separated_A_ACINP_box_plot_slicing.RDS")
-saveRDS(separated_A_AE_box_plot, "separated_A_AE_box_plot_slicing.RDS")
+saveRDS(separated_A_MS_box_plot, "separated_A_MS_box_plot3D_vs_2D.RDS")
+saveRDS(separated_A_NMS_box_plot, "separated_A_NMS_box_plot3D_vs_2D.RDS")
+saveRDS(separated_A_ACINP_box_plot, "separated_A_ACINP_box_plot3D_vs_2D.RDS")
+saveRDS(separated_A_AE_box_plot, "separated_A_AE_box_plot3D_vs_2D.RDS")
 
-# saveRDS(separated_B_MS_plot, "separated_B_MS_plot_slicing.RDS")
-# saveRDS(separated_B_NMS_plot, "separated_B_NMS_plot_slicing.RDS")
-# saveRDS(separated_B_ACINP_plot, "separated_B_ACINP_plot_slicing.RDS")
-# saveRDS(separated_B_AE_plot, "separated_B_AE_plot_slicing.RDS")
+# saveRDS(separated_B_MS_plot, "separated_B_MS_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_NMS_plot, "separated_B_NMS_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_ACINP_plot, "separated_B_ACINP_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_AE_plot, "separated_B_AE_plot3D_vs_2D.RDS")
 # 
-# saveRDS(separated_B_MS_box_plot, "separated_B_MS_box_plot_slicing.RDS")
-# saveRDS(separated_B_NMS_box_plot, "separated_B_NMS_box_plot_slicing.RDS")
-# saveRDS(separated_B_ACINP_box_plot, "separated_B_ACINP_box_plot_slicing.RDS")
-# saveRDS(separated_B_AE_box_plot, "separated_B_AE_box_plot_slicing.RDS")
+# saveRDS(separated_B_MS_box_plot, "separated_B_MS_box_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_NMS_box_plot, "separated_B_NMS_box_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_ACINP_box_plot, "separated_B_ACINP_box_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_AE_box_plot, "separated_B_AE_box_plot3D_vs_2D.RDS")
 
 ### 4.4. separated spes ACIN, CKR ------------------------------------------------
 
 # Read separated ACIN, CKR
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_ACIN_df <- read.table("separated_ACIN_df.csv")
 separated_CKR_df <- read.table("separated_CKR_df.csv")
 
 # Read separated ACIN, CKR (slices)
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_ACIN_df <- read.table("separated_slices_ACIN_df.csv")
 separated_slices_CKR_df <- read.table("separated_slices_CKR_df.csv")
 
@@ -2225,28 +2224,28 @@ separated_A_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(separated_A_spes
 # separated_B_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(separated_B_spes_table, separated_ACIN_df, separated_slices_ACIN_df, "ACIN", "distance", 20, 100)
 # separated_B_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(separated_B_spes_table, separated_CKR_df, separated_slices_CKR_df, "CKR", "distance", 20, 100)
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(separated_A_ACIN_plot, "separated_A_ACIN_plot_slicing.RDS")
-saveRDS(separated_A_CKR_plot, "separated_A_CKR_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(separated_A_ACIN_plot, "separated_A_ACIN_plot3D_vs_2D.RDS")
+saveRDS(separated_A_CKR_plot, "separated_A_CKR_plot3D_vs_2D.RDS")
 
-saveRDS(separated_A_ACIN_box_plot, "separated_A_ACIN_box_plot_slicing.RDS")
-saveRDS(separated_A_CKR_box_plot, "separated_A_CKR_box_plot_slicing.RDS")
+saveRDS(separated_A_ACIN_box_plot, "separated_A_ACIN_box_plot3D_vs_2D.RDS")
+saveRDS(separated_A_CKR_box_plot, "separated_A_CKR_box_plot3D_vs_2D.RDS")
 
-# saveRDS(separated_B_ACIN_plot, "separated_B_ACIN_plot_slicing.RDS")
-# saveRDS(separated_B_CKR_plot, "separated_B_CKR_plot_slicing.RDS")
+# saveRDS(separated_B_ACIN_plot, "separated_B_ACIN_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_CKR_plot, "separated_B_CKR_plot3D_vs_2D.RDS")
 # 
-# saveRDS(separated_B_ACIN_box_plot, "separated_B_ACIN_plot_slicing.RDS")
-# saveRDS(separated_B_CKR_box_plot, "separated_B_CKR_plot_slicing.RDS")
+# saveRDS(separated_B_ACIN_box_plot, "separated_B_ACIN_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_CKR_box_plot, "separated_B_CKR_plot3D_vs_2D.RDS")
 
 ### 4.5. separated spes SAC ------------------------------------------------------
 
 # Read separated_SAC_df
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_prop_SAC_df <- read.table("separated_prop_SAC_df.csv")
 separated_entropy_SAC_df <- read.table("separated_entropy_SAC_df.csv")
 
 # Read separated_SAC_df (slices)
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_prop_SAC_df <- read.table("separated_slices_prop_SAC_df.csv")
 separated_slices_entropy_SAC_df <- read.table("separated_slices_entropy_SAC_df.csv")
 
@@ -2257,22 +2256,22 @@ separated_A_entropy_SAC_plot <- plot_entropy_SAC(separated_A_spes_table, separat
 # separated_B_prop_SAC_plot <- plot_proportion_SAC(separated_B_spes_table, separated_prop_SAC_df, separated_slices_prop_SAC_df, "distance")
 # separated_B_entropy_SAC_plot <- plot_entropy_SAC(separated_B_spes_table, separated_entropy_SAC_df, separated_slices_entropy_SAC_df, "distance")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(separated_A_prop_SAC_plot, "separated_A_prop_SAC_plot_slicing.RDS")
-saveRDS(separated_A_entropy_SAC_plot, "separated_A_entropy_SAC_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(separated_A_prop_SAC_plot, "separated_A_prop_SAC_plot3D_vs_2D.RDS")
+saveRDS(separated_A_entropy_SAC_plot, "separated_A_entropy_SAC_plot3D_vs_2D.RDS")
 
-# saveRDS(separated_B_prop_SAC_plot, "separated_B_prop_SAC_plot_slicing.RDS")
-# saveRDS(separated_B_entropy_SAC_plot, "separated_B_entropy_SAC_plot_slicing.RDS")
+# saveRDS(separated_B_prop_SAC_plot, "separated_B_prop_SAC_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_entropy_SAC_plot, "separated_B_entropy_SAC_plot3D_vs_2D.RDS")
 
 ### 4.6. separated spes prevalence ------------------------------------------------
 
 # Read separated prevalence dfs
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_prop_prevalence_df <- read.table("separated_prop_prevalence_df.csv")
 separated_entropy_prevalence_df <- read.table("separated_entropy_prevalence_df.csv")
 
 # Read separated prevalence dfs (slices)
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_prop_prevalence_df <- read.table("separated_slices_prop_prevalence_df.csv")
 separated_slices_entropy_prevalence_df <- read.table("separated_slices_entropy_prevalence_df.csv")
 
@@ -2295,23 +2294,23 @@ separated_A_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(separated
 # separated_B_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(separated_B_spes_table, separated_prop_prevalence_df, separated_slices_prop_prevalence_df, "distance")
 # separated_B_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(separated_B_spes_table, separated_entropy_prevalence_df, separated_slices_entropy_prevalence_df, "distance")
 
-setwd("~/Objects/unsupervised/plots/slicing")
-saveRDS(separated_A_prop_prevalence_plot, "separated_A_prop_prevalence_plot_slicing.RDS")
-saveRDS(separated_A_entropy_prevalence_plot, "separated_A_entropy_prevalence_plot_slicing.RDS")
-saveRDS(separated_A_prop_prevalence_box_plot, "separated_A_prop_prevalence_box_plot_slicing.RDS")
-saveRDS(separated_A_entropy_prevalence_box_plot, "separated_A_entropy_prevalence_box_plot_slicing.RDS")
-saveRDS(separated_A_prop_prevalence_AUC_plot, "separated_A_prop_prevalence_AUC_plot_slicing.RDS")
-saveRDS(separated_A_entropy_prevalence_AUC_plot, "separated_A_entropy_prevalence_AUC_plot_slicing.RDS")
+setwd("~/R/plots/3D_vs_2D")
+saveRDS(separated_A_prop_prevalence_plot, "separated_A_prop_prevalence_plot3D_vs_2D.RDS")
+saveRDS(separated_A_entropy_prevalence_plot, "separated_A_entropy_prevalence_plot3D_vs_2D.RDS")
+saveRDS(separated_A_prop_prevalence_box_plot, "separated_A_prop_prevalence_box_plot3D_vs_2D.RDS")
+saveRDS(separated_A_entropy_prevalence_box_plot, "separated_A_entropy_prevalence_box_plot3D_vs_2D.RDS")
+saveRDS(separated_A_prop_prevalence_AUC_plot, "separated_A_prop_prevalence_AUC_plot3D_vs_2D.RDS")
+saveRDS(separated_A_entropy_prevalence_AUC_plot, "separated_A_entropy_prevalence_AUC_plot3D_vs_2D.RDS")
 
-# saveRDS(separated_B_prop_prevalence_plot, "separated_B_prop_prevalence_plot_slicing.RDS")
-# saveRDS(separated_B_entropy_prevalence_plot, "separated_B_entropy_prevalence_plot_slicing.RDS")
-# saveRDS(separated_B_prop_prevalence_box_plot, "separated_B_prop_prevalence_box_plot_slicing.RDS")
-# saveRDS(separated_B_entropy_prevalence_box_plot, "separated_B_entropy_prevalence_box_plot_slicing.RDS")
-# saveRDS(separated_B_prop_prevalence_AUC_plot, "separated_B_prop_prevalence_AUC_plot_slicing.RDS")
-# saveRDS(separated_B_entropy_prevalence_AUC_plot, "separated_B_entropy_prevalence_AUC_plot_slicing.RDS")
+# saveRDS(separated_B_prop_prevalence_plot, "separated_B_prop_prevalence_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_entropy_prevalence_plot, "separated_B_entropy_prevalence_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_prop_prevalence_box_plot, "separated_B_prop_prevalence_box_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_entropy_prevalence_box_plot, "separated_B_entropy_prevalence_box_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_prop_prevalence_AUC_plot, "separated_B_prop_prevalence_AUC_plot3D_vs_2D.RDS")
+# saveRDS(separated_B_entropy_prevalence_AUC_plot, "separated_B_entropy_prevalence_AUC_plot3D_vs_2D.RDS")
 
 ### 5.0. pdf with all plots -----------------------------
-setwd("~/Objects/unsupervised/plots/slicing")
+setwd("~/R/plots/3D_vs_2D")
 metrics <- c("AMD", 
              "MS", "MS_box", "NMS", "NMS_box", "ACINP", "ACINP_box", "AE", "AE_box", 
              "ACIN", "ACIN_box", "CKR", "CKR_box", 
@@ -2323,7 +2322,7 @@ pdf("plots.pdf", width = 15, height = 10)
 
 for (metric in metrics) {
   for (arrangement in arrangements) {
-    plot_file_name <- paste(arrangement, "_", metric, "_plot_slicing.RDS", sep = "")
+    plot_file_name <- paste(arrangement, "_", metric, "_plot3D_vs_2D.RDS", sep = "")
     print(readRDS(plot_file_name))
   }
 }
@@ -4071,25 +4070,25 @@ separated_B_spes_table <- separated_B_spes_table[separated_B_spes_table$bg_prop_
 ### Without background noise cells analysis ---------------------------------------------
 
 # Read mixed_AMD_df
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_AMD_df <- read.table("mixed_AMD_df.csv")
 mixed_AMD_df <- mixed_AMD_df[mixed_AMD_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
 # Read mixed_slices_AMD_df
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_AMD_df <- read.table("mixed_slices_AMD_df.csv")
 mixed_slices_AMD_df <- mixed_slices_AMD_df[mixed_slices_AMD_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
 mixed_AMD_plot <- plot_AMD_metric(mixed_spes_table, mixed_AMD_df, mixed_slices_AMD_df, "cluster_prop_B")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(mixed_AMD_plot, "mixed_AMD_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(mixed_AMD_plot, "mixed_AMD_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 
 
 # Read mixed MS, NMS, ACINP, AE dfs
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_MS_df <- read.table("mixed_MS_df.csv")
 mixed_NMS_df <- read.table("mixed_NMS_df.csv")
 mixed_ACINP_df <- read.table("mixed_ACINP_df.csv")
@@ -4101,7 +4100,7 @@ mixed_ACINP_df <- mixed_ACINP_df[mixed_ACINP_df$spe %in% paste("mixed_spe_", row
 mixed_AE_df <- mixed_AE_df[mixed_AE_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
 # Read mixed MS, NMS, ACINP, AE dfs (slices)
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_MS_df <- read.table("mixed_slices_MS_df.csv")
 mixed_slices_NMS_df <- read.table("mixed_slices_NMS_df.csv")
 mixed_slices_ACINP_df <- read.table("mixed_slices_ACINP_df.csv")
@@ -4125,20 +4124,20 @@ mixed_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(mixed_spes_table, mi
 mixed_AE_box_plot <- plot_gradient_metrics_type1_boxplot(mixed_spes_table, mixed_AE_df, mixed_slices_AE_df, "AE", "cluster_prop_B")
 
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(mixed_MS_plot, "mixed_MS_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_NMS_plot, "mixed_NMS_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_ACINP_plot, "mixed_ACINP_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_AE_plot, "mixed_AE_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(mixed_MS_plot, "mixed_MS_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_NMS_plot, "mixed_NMS_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_ACINP_plot, "mixed_ACINP_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_AE_plot, "mixed_AE_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(mixed_MS_box_plot, "mixed_MS_box_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_NMS_box_plot, "mixed_NMS_box_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_ACINP_box_plot, "mixed_ACINP_box_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_AE_box_plot, "mixed_AE_box_plot_slicing_no_background_noise.RDS")
+saveRDS(mixed_MS_box_plot, "mixed_MS_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_NMS_box_plot, "mixed_NMS_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_ACINP_box_plot, "mixed_ACINP_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_AE_box_plot, "mixed_AE_box_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 # Read mixed ACIN, CKR
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_ACIN_df <- read.table("mixed_ACIN_df.csv")
 mixed_CKR_df <- read.table("mixed_CKR_df.csv")
 
@@ -4146,7 +4145,7 @@ mixed_ACIN_df <- mixed_ACIN_df[mixed_ACIN_df$spe %in% paste("mixed_spe_", rownam
 mixed_CKR_df <- mixed_CKR_df[mixed_CKR_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
 # Read mixed ACIN, CKR (slices)
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_ACIN_df <- read.table("mixed_slices_ACIN_df.csv")
 mixed_slices_CKR_df <- read.table("mixed_slices_CKR_df.csv")
 
@@ -4161,16 +4160,16 @@ mixed_CKR_plot <- plot_gradient_metrics_type2(mixed_spes_table, mixed_CKR_df, mi
 mixed_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(mixed_spes_table, mixed_ACIN_df, mixed_slices_ACIN_df, "ACIN", "cluster_prop_B", 20, 100)
 mixed_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(mixed_spes_table, mixed_CKR_df, mixed_slices_CKR_df, "CKR", "cluster_prop_B", 20, 100)
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(mixed_ACIN_plot, "mixed_ACIN_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_CKR_plot, "mixed_CKR_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(mixed_ACIN_plot, "mixed_ACIN_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_CKR_plot, "mixed_CKR_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(mixed_ACIN_box_plot, "mixed_ACIN_box_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_CKR_box_plot, "mixed_CKR_box_plot_slicing_no_background_noise.RDS")
+saveRDS(mixed_ACIN_box_plot, "mixed_ACIN_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_CKR_box_plot, "mixed_CKR_box_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 # Read mixed_SAC_df
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_prop_SAC_df <- read.table("mixed_prop_SAC_df.csv")
 mixed_entropy_SAC_df <- read.table("mixed_entropy_SAC_df.csv")
 
@@ -4178,7 +4177,7 @@ mixed_prop_SAC_df <- mixed_prop_SAC_df[mixed_prop_SAC_df$spe %in% paste("mixed_s
 mixed_entropy_SAC_df <- mixed_entropy_SAC_df[mixed_entropy_SAC_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
 # Read mixed_SAC_df (slices)
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_prop_SAC_df <- read.table("mixed_slices_prop_SAC_df.csv")
 mixed_slices_entropy_SAC_df <- read.table("mixed_slices_entropy_SAC_df.csv")
 
@@ -4188,13 +4187,13 @@ mixed_slices_entropy_SAC_df <- mixed_slices_entropy_SAC_df[mixed_slices_entropy_
 mixed_prop_SAC_plot <- plot_proportion_SAC(mixed_spes_table, mixed_prop_SAC_df, mixed_slices_prop_SAC_df, "cluster_prop_B")
 mixed_entropy_SAC_plot <- plot_entropy_SAC(mixed_spes_table, mixed_entropy_SAC_df, mixed_slices_entropy_SAC_df, "cluster_prop_B")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(mixed_prop_SAC_plot, "mixed_prop_SAC_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_entropy_SAC_plot, "mixed_entropy_SAC_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(mixed_prop_SAC_plot, "mixed_prop_SAC_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_entropy_SAC_plot, "mixed_entropy_SAC_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 # Read mixed prevalence dfs
-setwd("~/Objects/unsupervised/mixed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_prop_prevalence_df <- read.table("mixed_prop_prevalence_df.csv")
 mixed_entropy_prevalence_df <- read.table("mixed_entropy_prevalence_df.csv")
 
@@ -4202,7 +4201,7 @@ mixed_prop_prevalence_df <- mixed_prop_prevalence_df[mixed_prop_prevalence_df$sp
 mixed_entropy_prevalence_df <- mixed_entropy_prevalence_df[mixed_entropy_prevalence_df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
 
 # Read mixed prevalence dfs (slices)
-setwd("~/Objects/unsupervised/mixed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/mixed")
 mixed_slices_prop_prevalence_df <- read.table("mixed_slices_prop_prevalence_df.csv")
 mixed_slices_entropy_prevalence_df <- read.table("mixed_slices_entropy_prevalence_df.csv")
 
@@ -4221,37 +4220,37 @@ mixed_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(mixed_spes_
 mixed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(mixed_spes_table, mixed_prop_prevalence_df, mixed_slices_prop_prevalence_df, "cluster_prop_B")
 mixed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(mixed_spes_table, mixed_entropy_prevalence_df, mixed_slices_entropy_prevalence_df, "cluster_prop_B")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(mixed_prop_prevalence_plot, "mixed_prop_prevalence_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_entropy_prevalence_plot, "mixed_entropy_prevalence_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(mixed_prop_prevalence_plot, "mixed_prop_prevalence_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_entropy_prevalence_plot, "mixed_entropy_prevalence_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(mixed_prop_prevalence_box_plot, "mixed_prop_prevalence_box_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_entropy_prevalence_box_plot, "mixed_entropy_prevalence_box_plot_slicing_no_background_noise.RDS")
+saveRDS(mixed_prop_prevalence_box_plot, "mixed_prop_prevalence_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_entropy_prevalence_box_plot, "mixed_entropy_prevalence_box_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(mixed_prop_prevalence_AUC_plot, "mixed_prop_prevalence_AUC_plot_slicing_no_background_noise.RDS")
-saveRDS(mixed_entropy_prevalence_AUC_plot, "mixed_entropy_prevalence_AUC_plot_slicing_no_background_noise.RDS")
+saveRDS(mixed_prop_prevalence_AUC_plot, "mixed_prop_prevalence_AUC_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(mixed_entropy_prevalence_AUC_plot, "mixed_entropy_prevalence_AUC_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 
 # Read ringed_AMD_df
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_AMD_df <- read.table("ringed_AMD_df.csv")
 ringed_AMD_df <- ringed_AMD_df[ringed_AMD_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
 # Read ringed_slices_AMD_df
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_AMD_df <- read.table("ringed_slices_AMD_df.csv")
 ringed_slices_AMD_df <- ringed_slices_AMD_df[ringed_slices_AMD_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
-ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, ringed_slices_AMD_df, "width_ring_factor")
+ringed_AMD_plot <- plot_AMD_metric(ringed_spes_table, ringed_AMD_df, ringed_slices_AMD_df, "ring_width_factor")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(ringed_AMD_plot, "ringed_AMD_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(ringed_AMD_plot, "ringed_AMD_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 
 # Read ringed MS, NMS, ACINP, AE dfs
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_MS_df <- read.table("ringed_MS_df.csv")
 ringed_NMS_df <- read.table("ringed_NMS_df.csv")
 ringed_ACINP_df <- read.table("ringed_ACINP_df.csv")
@@ -4263,7 +4262,7 @@ ringed_ACINP_df <- ringed_ACINP_df[ringed_ACINP_df$spe %in% paste("ringed_spe_",
 ringed_AE_df <- ringed_AE_df[ringed_AE_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
 # Read ringed MS, NMS, ACINP, AE dfs (slices)
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_MS_df <- read.table("ringed_slices_MS_df.csv")
 ringed_slices_NMS_df <- read.table("ringed_slices_NMS_df.csv")
 ringed_slices_ACINP_df <- read.table("ringed_slices_ACINP_df.csv")
@@ -4275,31 +4274,31 @@ ringed_slices_ACINP_df <- ringed_slices_ACINP_df[ringed_slices_ACINP_df$spe %in%
 ringed_slices_AE_df <- ringed_slices_AE_df[ringed_slices_AE_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
 # Lines
-ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "width_ring_factor")
-ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "width_ring_factor")
-ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "width_ring_factor")
-ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "width_ring_factor")
+ringed_MS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "ring_width_factor")
+ringed_NMS_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "ring_width_factor")
+ringed_ACINP_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "ring_width_factor")
+ringed_AE_plot <- plot_gradient_metrics_type1(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "ring_width_factor")
 
 # Boxplots
-ringed_MS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "width_ring_factor")
-ringed_NMS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "width_ring_factor")
-ringed_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "width_ring_factor")
-ringed_AE_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "width_ring_factor")
+ringed_MS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_MS_df, ringed_slices_MS_df, "MS", "ring_width_factor")
+ringed_NMS_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_NMS_df, ringed_slices_NMS_df, "NMS", "ring_width_factor")
+ringed_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_ACINP_df, ringed_slices_ACINP_df, "ACINP", "ring_width_factor")
+ringed_AE_box_plot <- plot_gradient_metrics_type1_boxplot(ringed_spes_table, ringed_AE_df, ringed_slices_AE_df, "AE", "ring_width_factor")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(ringed_MS_plot, "ringed_MS_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_NMS_plot, "ringed_NMS_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_ACINP_plot, "ringed_ACINP_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_AE_plot, "ringed_AE_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(ringed_MS_plot, "ringed_MS_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_NMS_plot, "ringed_NMS_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_ACINP_plot, "ringed_ACINP_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_AE_plot, "ringed_AE_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(ringed_MS_box_plot, "ringed_MS_box_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_NMS_box_plot, "ringed_NMS_box_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_ACINP_box_plot, "ringed_ACINP_box_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_AE_box_plot, "ringed_AE_box_plot_slicing_no_background_noise.RDS")
+saveRDS(ringed_MS_box_plot, "ringed_MS_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_NMS_box_plot, "ringed_NMS_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_ACINP_box_plot, "ringed_ACINP_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_AE_box_plot, "ringed_AE_box_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 # Read ringed ACIN, CKR
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_ACIN_df <- read.table("ringed_ACIN_df.csv")
 ringed_CKR_df <- read.table("ringed_CKR_df.csv")
 
@@ -4307,7 +4306,7 @@ ringed_ACIN_df <- ringed_ACIN_df[ringed_ACIN_df$spe %in% paste("ringed_spe_", ro
 ringed_CKR_df <- ringed_CKR_df[ringed_CKR_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
 # Read ringed ACIN, CKR (slices)
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_ACIN_df <- read.table("ringed_slices_ACIN_df.csv")
 ringed_slices_CKR_df <- read.table("ringed_slices_CKR_df.csv")
 
@@ -4315,23 +4314,23 @@ ringed_slices_ACIN_df <- ringed_slices_ACIN_df[ringed_slices_ACIN_df$spe %in% pa
 ringed_slices_CKR_df <- ringed_slices_CKR_df[ringed_slices_CKR_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
 # Lines
-ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "width_ring_factor", 20, 100)
-ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "width_ring_factor", 20, 100)
+ringed_ACIN_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "ring_width_factor", 20, 100)
+ringed_CKR_plot <- plot_gradient_metrics_type2(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "ring_width_factor", 20, 100)
 
 # Box plots
-ringed_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "width_ring_factor", 20, 100)
-ringed_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "width_ring_factor", 20, 100)
+ringed_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_ACIN_df, ringed_slices_ACIN_df, "ACIN", "ring_width_factor", 20, 100)
+ringed_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(ringed_spes_table, ringed_CKR_df, ringed_slices_CKR_df, "CKR", "ring_width_factor", 20, 100)
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(ringed_ACIN_plot, "ringed_ACIN_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_CKR_plot, "ringed_CKR_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(ringed_ACIN_plot, "ringed_ACIN_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_CKR_plot, "ringed_CKR_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(ringed_ACIN_box_plot, "ringed_ACIN_box_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_CKR_box_plot, "ringed_CKR_box_plot_slicing_no_background_noise.RDS")
+saveRDS(ringed_ACIN_box_plot, "ringed_ACIN_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_CKR_box_plot, "ringed_CKR_box_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 # Read ringed_SAC_df
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_prop_SAC_df <- read.table("ringed_prop_SAC_df.csv")
 ringed_entropy_SAC_df <- read.table("ringed_entropy_SAC_df.csv")
 
@@ -4339,24 +4338,24 @@ ringed_prop_SAC_df <- ringed_prop_SAC_df[ringed_prop_SAC_df$spe %in% paste("ring
 ringed_entropy_SAC_df <- ringed_entropy_SAC_df[ringed_entropy_SAC_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
 # Read ringed_SAC_df (slices)
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_prop_SAC_df <- read.table("ringed_slices_prop_SAC_df.csv")
 ringed_slices_entropy_SAC_df <- read.table("ringed_slices_entropy_SAC_df.csv")
 
 ringed_slices_prop_SAC_df <- ringed_slices_prop_SAC_df[ringed_slices_prop_SAC_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 ringed_slices_entropy_SAC_df <- ringed_slices_entropy_SAC_df[ringed_slices_entropy_SAC_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
-ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, ringed_slices_prop_SAC_df, "width_ring_factor")
-ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, ringed_slices_entropy_SAC_df, "width_ring_factor")
+ringed_prop_SAC_plot <- plot_proportion_SAC(ringed_spes_table, ringed_prop_SAC_df, ringed_slices_prop_SAC_df, "ring_width_factor")
+ringed_entropy_SAC_plot <- plot_entropy_SAC(ringed_spes_table, ringed_entropy_SAC_df, ringed_slices_entropy_SAC_df, "ring_width_factor")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(ringed_prop_SAC_plot, "ringed_prop_SAC_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_entropy_SAC_plot, "ringed_entropy_SAC_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(ringed_prop_SAC_plot, "ringed_prop_SAC_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_entropy_SAC_plot, "ringed_entropy_SAC_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 
 # Read ringed prevalence dfs
-setwd("~/Objects/unsupervised/ringed_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 ringed_prop_prevalence_df <- read.table("ringed_prop_prevalence_df.csv")
 ringed_entropy_prevalence_df <- read.table("ringed_entropy_prevalence_df.csv")
 
@@ -4364,7 +4363,7 @@ ringed_prop_prevalence_df <- ringed_prop_prevalence_df[ringed_prop_prevalence_df
 ringed_entropy_prevalence_df <- ringed_entropy_prevalence_df[ringed_entropy_prevalence_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
 # Read ringed prevalence dfs (slices)
-setwd("~/Objects/unsupervised/ringed_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/ringed")
 ringed_slices_prop_prevalence_df <- read.table("ringed_slices_prop_prevalence_df.csv")
 ringed_slices_entropy_prevalence_df <- read.table("ringed_slices_entropy_prevalence_df.csv")
 
@@ -4372,34 +4371,34 @@ ringed_slices_prop_prevalence_df <- ringed_slices_prop_prevalence_df[ringed_slic
 ringed_slices_entropy_prevalence_df <- ringed_slices_entropy_prevalence_df[ringed_slices_entropy_prevalence_df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
 
 # Lines
-ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "width_ring_factor")
-ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "width_ring_factor")
+ringed_prop_prevalence_plot <- plot_proportion_prevalence(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "ring_width_factor")
+ringed_entropy_prevalence_plot <- plot_entropy_prevalence(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "ring_width_factor")
 
 # Boxplots
-ringed_prop_prevalence_box_plot <- plot_proportion_prevalence_boxplot(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "width_ring_factor")
-ringed_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "width_ring_factor")
+ringed_prop_prevalence_box_plot <- plot_proportion_prevalence_boxplot(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "ring_width_factor")
+ringed_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "ring_width_factor")
 
 # AUC
-ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "width_ring_factor")
-ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "width_ring_factor")
+ringed_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(ringed_spes_table, ringed_prop_prevalence_df, ringed_slices_prop_prevalence_df, "ring_width_factor")
+ringed_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(ringed_spes_table, ringed_entropy_prevalence_df, ringed_slices_entropy_prevalence_df, "ring_width_factor")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(ringed_prop_prevalence_plot, "ringed_prop_prevalence_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_entropy_prevalence_plot, "ringed_entropy_prevalence_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_prop_prevalence_box_plot, "ringed_prop_prevalence_box_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_entropy_prevalence_box_plot, "ringed_entropy_prevalence_box_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_prop_prevalence_AUC_plot, "ringed_prop_prevalence_AUC_plot_slicing_no_background_noise.RDS")
-saveRDS(ringed_entropy_prevalence_AUC_plot, "ringed_entropy_prevalence_AUC_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(ringed_prop_prevalence_plot, "ringed_prop_prevalence_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_entropy_prevalence_plot, "ringed_entropy_prevalence_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_prop_prevalence_box_plot, "ringed_prop_prevalence_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_entropy_prevalence_box_plot, "ringed_entropy_prevalence_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_prop_prevalence_AUC_plot, "ringed_prop_prevalence_AUC_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(ringed_entropy_prevalence_AUC_plot, "ringed_entropy_prevalence_AUC_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 
 # Read separated_AMD_df
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_AMD_df <- read.table("separated_AMD_df.csv")
 separated_AMD_df <- separated_AMD_df[separated_AMD_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
 # Read separated_slices_AMD_df
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_AMD_df <- read.table("separated_slices_AMD_df.csv")
 separated_slices_AMD_df <- separated_slices_AMD_df[separated_slices_AMD_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
@@ -4408,14 +4407,14 @@ separated_A_AMD_plot <- plot_AMD_metric(separated_A_spes_table, separated_AMD_df
 
 separated_B_AMD_plot <- plot_AMD_metric(separated_B_spes_table, separated_AMD_df, separated_slices_AMD_df, "distance")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(separated_A_AMD_plot, "separated_A_AMD_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(separated_A_AMD_plot, "separated_A_AMD_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(separated_B_AMD_plot, "separated_B_AMD_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_AMD_plot, "separated_B_AMD_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 # Read separated MS, NMS, ACINP, AE dfs
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_MS_df <- read.table("separated_MS_df.csv")
 separated_NMS_df <- read.table("separated_NMS_df.csv")
 separated_ACINP_df <- read.table("separated_ACINP_df.csv")
@@ -4427,7 +4426,7 @@ separated_ACINP_df <- separated_ACINP_df[separated_ACINP_df$spe %in% paste("sepa
 separated_AE_df <- separated_AE_df[separated_AE_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
 # Read separated MS, NMS, ACINP, AE dfs (slices)
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_MS_df <- read.table("separated_slices_MS_df.csv")
 separated_slices_NMS_df <- read.table("separated_slices_NMS_df.csv")
 separated_slices_ACINP_df <- read.table("separated_slices_ACINP_df.csv")
@@ -4459,30 +4458,30 @@ separated_B_NMS_box_plot <- plot_gradient_metrics_type1_boxplot(separated_B_spes
 separated_B_ACINP_box_plot <- plot_gradient_metrics_type1_boxplot(separated_B_spes_table, separated_ACINP_df, separated_slices_ACINP_df, "ACINP", "distance")
 separated_B_AE_box_plot <- plot_gradient_metrics_type1_boxplot(separated_B_spes_table, separated_AE_df, separated_slices_AE_df, "AE", "distance")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(separated_A_MS_plot, "separated_A_MS_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_NMS_plot, "separated_A_NMS_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_ACINP_plot, "separated_A_ACINP_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_AE_plot, "separated_A_AE_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(separated_A_MS_plot, "separated_A_MS_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_NMS_plot, "separated_A_NMS_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_ACINP_plot, "separated_A_ACINP_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_AE_plot, "separated_A_AE_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(separated_A_MS_box_plot, "separated_A_MS_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_NMS_box_plot, "separated_A_NMS_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_ACINP_box_plot, "separated_A_ACINP_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_AE_box_plot, "separated_A_AE_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_A_MS_box_plot, "separated_A_MS_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_NMS_box_plot, "separated_A_NMS_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_ACINP_box_plot, "separated_A_ACINP_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_AE_box_plot, "separated_A_AE_box_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(separated_B_MS_plot, "separated_B_MS_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_NMS_plot, "separated_B_NMS_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_ACINP_plot, "separated_B_ACINP_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_AE_plot, "separated_B_AE_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_MS_plot, "separated_B_MS_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_NMS_plot, "separated_B_NMS_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_ACINP_plot, "separated_B_ACINP_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_AE_plot, "separated_B_AE_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(separated_B_MS_box_plot, "separated_B_MS_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_NMS_box_plot, "separated_B_NMS_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_ACINP_box_plot, "separated_B_ACINP_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_AE_box_plot, "separated_B_AE_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_MS_box_plot, "separated_B_MS_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_NMS_box_plot, "separated_B_NMS_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_ACINP_box_plot, "separated_B_ACINP_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_AE_box_plot, "separated_B_AE_box_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 # Read separated ACIN, CKR
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_ACIN_df <- read.table("separated_ACIN_df.csv")
 separated_CKR_df <- read.table("separated_CKR_df.csv")
 
@@ -4490,7 +4489,7 @@ separated_ACIN_df <- separated_ACIN_df[separated_ACIN_df$spe %in% paste("separat
 separated_CKR_df <- separated_CKR_df[separated_CKR_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
 # Read separated ACIN, CKR (slices)
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_ACIN_df <- read.table("separated_slices_ACIN_df.csv")
 separated_slices_CKR_df <- read.table("separated_slices_CKR_df.csv")
 
@@ -4510,22 +4509,22 @@ separated_B_CKR_plot <- plot_gradient_metrics_type2(separated_B_spes_table, sepa
 separated_B_ACIN_box_plot <- plot_gradient_metrics_type2_boxplot(separated_B_spes_table, separated_ACIN_df, separated_slices_ACIN_df, "ACIN", "distance", 20, 100)
 separated_B_CKR_box_plot <- plot_gradient_metrics_type2_boxplot(separated_B_spes_table, separated_CKR_df, separated_slices_CKR_df, "CKR", "distance", 20, 100)
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(separated_A_ACIN_plot, "separated_A_ACIN_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_CKR_plot, "separated_A_CKR_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(separated_A_ACIN_plot, "separated_A_ACIN_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_CKR_plot, "separated_A_CKR_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(separated_A_ACIN_box_plot, "separated_A_ACIN_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_CKR_box_plot, "separated_A_CKR_box_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_A_ACIN_box_plot, "separated_A_ACIN_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_CKR_box_plot, "separated_A_CKR_box_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(separated_B_ACIN_plot, "separated_B_ACIN_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_CKR_plot, "separated_B_CKR_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_ACIN_plot, "separated_B_ACIN_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_CKR_plot, "separated_B_CKR_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(separated_B_ACIN_box_plot, "separated_B_ACIN_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_CKR_box_plot, "separated_B_CKR_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_ACIN_box_plot, "separated_B_ACIN_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_CKR_box_plot, "separated_B_CKR_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 # Read separated_SAC_df
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_prop_SAC_df <- read.table("separated_prop_SAC_df.csv")
 separated_entropy_SAC_df <- read.table("separated_entropy_SAC_df.csv")
 
@@ -4533,7 +4532,7 @@ separated_prop_SAC_df <- separated_prop_SAC_df[separated_prop_SAC_df$spe %in% pa
 separated_entropy_SAC_df <- separated_entropy_SAC_df[separated_entropy_SAC_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
 # Read separated_SAC_df (slices)
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_prop_SAC_df <- read.table("separated_slices_prop_SAC_df.csv")
 separated_slices_entropy_SAC_df <- read.table("separated_slices_entropy_SAC_df.csv")
 
@@ -4547,16 +4546,16 @@ separated_A_entropy_SAC_plot <- plot_entropy_SAC(separated_A_spes_table, separat
 separated_B_prop_SAC_plot <- plot_proportion_SAC(separated_B_spes_table, separated_prop_SAC_df, separated_slices_prop_SAC_df, "distance")
 separated_B_entropy_SAC_plot <- plot_entropy_SAC(separated_B_spes_table, separated_entropy_SAC_df, separated_slices_entropy_SAC_df, "distance")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(separated_A_prop_SAC_plot, "separated_A_prop_SAC_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_entropy_SAC_plot, "separated_A_entropy_SAC_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(separated_A_prop_SAC_plot, "separated_A_prop_SAC_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_entropy_SAC_plot, "separated_A_entropy_SAC_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(separated_B_prop_SAC_plot, "separated_B_prop_SAC_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_entropy_SAC_plot, "separated_B_entropy_SAC_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_prop_SAC_plot, "separated_B_prop_SAC_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_entropy_SAC_plot, "separated_B_entropy_SAC_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 # Read separated prevalence dfs
-setwd("~/Objects/unsupervised/separated_spes/analysis_3D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
 separated_prop_prevalence_df <- read.table("separated_prop_prevalence_df.csv")
 separated_entropy_prevalence_df <- read.table("separated_entropy_prevalence_df.csv")
 
@@ -4564,7 +4563,7 @@ separated_prop_prevalence_df <- separated_prop_prevalence_df[separated_prop_prev
 separated_entropy_prevalence_df <- separated_entropy_prevalence_df[separated_entropy_prevalence_df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
 
 # Read separated prevalence dfs (slices)
-setwd("~/Objects/unsupervised/separated_spes/analysis_2D")
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis2D_tables/separated")
 separated_slices_prop_prevalence_df <- read.table("separated_slices_prop_prevalence_df.csv")
 separated_slices_entropy_prevalence_df <- read.table("separated_slices_entropy_prevalence_df.csv")
 
@@ -4590,25 +4589,25 @@ separated_B_entropy_prevalence_box_plot <- plot_entropy_prevalence_boxplot(separ
 separated_B_prop_prevalence_AUC_plot <- plot_proportion_prevalence_AUC(separated_B_spes_table, separated_prop_prevalence_df, separated_slices_prop_prevalence_df, "distance")
 separated_B_entropy_prevalence_AUC_plot <- plot_entropy_prevalence_AUC(separated_B_spes_table, separated_entropy_prevalence_df, separated_slices_entropy_prevalence_df, "distance")
 
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
-saveRDS(separated_A_prop_prevalence_plot, "separated_A_prop_prevalence_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_entropy_prevalence_plot, "separated_A_entropy_prevalence_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_prop_prevalence_box_plot, "separated_A_prop_prevalence_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_entropy_prevalence_box_plot, "separated_A_entropy_prevalence_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_prop_prevalence_AUC_plot, "separated_A_prop_prevalence_AUC_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_A_entropy_prevalence_AUC_plot, "separated_A_entropy_prevalence_AUC_plot_slicing_no_background_noise.RDS")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
+saveRDS(separated_A_prop_prevalence_plot, "separated_A_prop_prevalence_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_entropy_prevalence_plot, "separated_A_entropy_prevalence_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_prop_prevalence_box_plot, "separated_A_prop_prevalence_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_entropy_prevalence_box_plot, "separated_A_entropy_prevalence_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_prop_prevalence_AUC_plot, "separated_A_prop_prevalence_AUC_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_A_entropy_prevalence_AUC_plot, "separated_A_entropy_prevalence_AUC_plot3D_vs_2D_no_bg_noise.RDS")
 
-saveRDS(separated_B_prop_prevalence_plot, "separated_B_prop_prevalence_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_entropy_prevalence_plot, "separated_B_entropy_prevalence_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_prop_prevalence_box_plot, "separated_B_prop_prevalence_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_entropy_prevalence_box_plot, "separated_B_entropy_prevalence_box_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_prop_prevalence_AUC_plot, "separated_B_prop_prevalence_AUC_plot_slicing_no_background_noise.RDS")
-saveRDS(separated_B_entropy_prevalence_AUC_plot, "separated_B_entropy_prevalence_AUC_plot_slicing_no_background_noise.RDS")
+saveRDS(separated_B_prop_prevalence_plot, "separated_B_prop_prevalence_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_entropy_prevalence_plot, "separated_B_entropy_prevalence_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_prop_prevalence_box_plot, "separated_B_prop_prevalence_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_entropy_prevalence_box_plot, "separated_B_entropy_prevalence_box_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_prop_prevalence_AUC_plot, "separated_B_prop_prevalence_AUC_plot3D_vs_2D_no_bg_noise.RDS")
+saveRDS(separated_B_entropy_prevalence_AUC_plot, "separated_B_entropy_prevalence_AUC_plot3D_vs_2D_no_bg_noise.RDS")
 
 
 
 ### Without background noise pdf with all plots -------------------------
-setwd("~/Objects/unsupervised/plots/slicing_no_background_noise")
+setwd("~/R/plots/3D_vs_2D_no_bg_noise")
 metrics <- c("AMD", 
              "MS", "MS_box", "NMS", "NMS_box", "ACINP", "ACINP_box", "AE", "AE_box", 
              "ACIN", "ACIN_box", "CKR", "CKR_box", 
@@ -4620,7 +4619,7 @@ pdf("plots.pdf", width = 15, height = 10)
 
 for (metric in metrics) {
   for (arrangement in arrangements) {
-    plot_file_name <- paste(arrangement, "_", metric, "_plot_slicing_no_background_noise.RDS", sep = "")
+    plot_file_name <- paste(arrangement, "_", metric, "_plot3D_vs_2D_no_bg_noise.RDS", sep = "")
     print(readRDS(plot_file_name))
   }
 }
