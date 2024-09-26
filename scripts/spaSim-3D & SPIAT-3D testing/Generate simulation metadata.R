@@ -17,11 +17,11 @@ get_bg_props <- function(n_simulations, bg_prop_range, bg_prop_equals_zero_prob)
 ## Shapes
 shapes <- c("Ellipsoid", "Network")
 
-radius_x_E_range <- c("min" = 75, "max" = 125)
-radius_y_E_range <- c("min" = 75, "max" = 125)
-radius_z_E_range <- c("min" = 75, "max" = 125)
+E_radius_x_range <- c("min" = 75, "max" = 125)
+E_radius_y_range <- c("min" = 75, "max" = 125)
+E_radius_z_range <- c("min" = 75, "max" = 125)
 
-width_N_range <- c("min" = 30, "max" = 45)
+N_width_range <- c("min" = 30, "max" = 45)
 
 
 ## Mixed clusters
@@ -29,16 +29,16 @@ cluster_prop_A_range <- c("min" = 0.5, "max" = 0.9)   # Proportion of A cells in
 
 
 ## Ringed clusters
-ring_width_range_factor <- c("min" = 0.1, "max" = 0.2)  # The width of the ring is proportional to the size (radius/width) of the cluster, for an ellipsoid, use the average of the three radii
+ring_width_factor_range <- c("min" = 0.1, "max" = 0.2)  # The width of the ring is proportional to the size (radius/width) of the cluster, for an ellipsoid, use the average of the three radii
 
 
 ## Separated clusters
-centre_x_coord_range <- c("min" = 125, "max" = 175)
+cluster_x_coord_range <- c("min" = 125, "max" = 175)
 
 
 ### 1.1. Generate mixed_spes_table----------------------------------------------
 n_mixed_simulations <- 2000
-mixed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "radius_x_E", "radius_y_E", "radius_z_E", "width_N", "cluster_prop_A", "cluster_prop_B")
+mixed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "E_radius_x", "E_radius_y", "E_radius_z", "N_width", "cluster_prop_A", "cluster_prop_B")
 mixed_spes_table <- data.frame(matrix(nrow = n_mixed_simulations, ncol = length(mixed_spes_table_colnames))) 
 colnames(mixed_spes_table) <- mixed_spes_table_colnames
 
@@ -46,10 +46,10 @@ mixed_spes_table$bg_prop_A <- get_bg_props(n_mixed_simulations, bg_prop_A_range,
 mixed_spes_table$bg_prop_B <- get_bg_props(n_mixed_simulations, bg_prop_B_range, bg_prop_B_equals_zero_prob)
 
 mixed_spes_table$shape <- sample(shapes, n_mixed_simulations, replace = T)
-mixed_spes_table$radius_x_E <- ifelse(mixed_spes_table$shape == "Ellipsoid", runif(n_mixed_simulations, radius_x_E_range["min"], radius_x_E_range["max"]), NA)
-mixed_spes_table$radius_y_E <- ifelse(mixed_spes_table$shape == "Ellipsoid", runif(n_mixed_simulations, radius_y_E_range["min"], radius_y_E_range["max"]), NA)
-mixed_spes_table$radius_z_E <- ifelse(mixed_spes_table$shape == "Ellipsoid", runif(n_mixed_simulations, radius_z_E_range["min"], radius_z_E_range["max"]), NA)
-mixed_spes_table$width_N <- ifelse(mixed_spes_table$shape == "Network", runif(n_mixed_simulations, width_N_range["min"], width_N_range["max"]), NA)
+mixed_spes_table$E_radius_x <- ifelse(mixed_spes_table$shape == "Ellipsoid", runif(n_mixed_simulations, E_radius_x_range["min"], E_radius_x_range["max"]), NA)
+mixed_spes_table$E_radius_y <- ifelse(mixed_spes_table$shape == "Ellipsoid", runif(n_mixed_simulations, E_radius_y_range["min"], E_radius_y_range["max"]), NA)
+mixed_spes_table$E_radius_z <- ifelse(mixed_spes_table$shape == "Ellipsoid", runif(n_mixed_simulations, E_radius_z_range["min"], E_radius_z_range["max"]), NA)
+mixed_spes_table$N_width <- ifelse(mixed_spes_table$shape == "Network", runif(n_mixed_simulations, N_width_range["min"], N_width_range["max"]), NA)
 
 mixed_spes_table$cluster_prop_A <- round(runif(n_mixed_simulations, cluster_prop_A_range["min"], cluster_prop_A_range["max"]), 3)
 mixed_spes_table$cluster_prop_B <- 1 - mixed_spes_table$cluster_prop_A
@@ -57,7 +57,7 @@ mixed_spes_table$cluster_prop_B <- 1 - mixed_spes_table$cluster_prop_A
 
 ### 1.2. Generate ringed_spes_table  -------------------------------------
 n_ringed_simulations <- 2000
-ringed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "radius_x_E", "radius_y_E", "radius_z_E", "width_N", "ring_width")
+ringed_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", "shape", "E_radius_x", "E_radius_y", "E_radius_z", "N_width", "ring_width")
 ringed_spes_table <- data.frame(matrix(nrow = n_ringed_simulations, ncol = length(ringed_spes_table_colnames))) 
 colnames(ringed_spes_table) <- ringed_spes_table_colnames
 
@@ -65,20 +65,20 @@ ringed_spes_table$bg_prop_A <- get_bg_props(n_ringed_simulations, bg_prop_A_rang
 ringed_spes_table$bg_prop_B <- get_bg_props(n_ringed_simulations, bg_prop_B_range, bg_prop_B_equals_zero_prob)
 
 ringed_spes_table$shape <- sample(shapes, n_ringed_simulations, replace = T)
-ringed_spes_table$radius_x_E <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, radius_x_E_range["min"], radius_x_E_range["max"]), NA)
-ringed_spes_table$radius_y_E <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, radius_y_E_range["min"], radius_y_E_range["max"]), NA)
-ringed_spes_table$radius_z_E <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, radius_z_E_range["min"], radius_z_E_range["max"]), NA)
-ringed_spes_table$width_N <- ifelse(ringed_spes_table$shape == "Network", runif(n_ringed_simulations, width_N_range["min"], width_N_range["max"]), NA)
+ringed_spes_table$E_radius_x <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, E_radius_x_range["min"], E_radius_x_range["max"]), NA)
+ringed_spes_table$E_radius_y <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, E_radius_y_range["min"], E_radius_y_range["max"]), NA)
+ringed_spes_table$E_radius_z <- ifelse(ringed_spes_table$shape == "Ellipsoid", runif(n_ringed_simulations, E_radius_z_range["min"], E_radius_z_range["max"]), NA)
+ringed_spes_table$N_width <- ifelse(ringed_spes_table$shape == "Network", runif(n_ringed_simulations, N_width_range["min"], N_width_range["max"]), NA)
 
-radius_width_colnames <- c("radius_x_E", "radius_y_E", "radius_z_E", "width_N") # Ignore radius_N as this refers to the radius spanned by the cluster, not the width of a branch
-ringed_spes_table$ring_width_factor <- runif(n_ringed_simulations, ring_width_range_factor["min"], ring_width_range_factor["max"])
+radius_width_colnames <- c("E_radius_x", "E_radius_y", "E_radius_z", "N_width") # Ignore N_radius as this refers to the radius spanned by the cluster, not the width of a branch
+ringed_spes_table$ring_width_factor <- runif(n_ringed_simulations, ring_width_factor_range["min"], ring_width_factor_range["max"])
 ringed_spes_table$ring_width <- ringed_spes_table$ring_width_factor * apply(ringed_spes_table[, radius_width_colnames], 1, mean, na.rm = T)
 
 
 ### 1.3. Generate separated_spes_table --------------------------------------
 n_separated_simulations <- 2000
 separated_spes_table_colnames <- c("bg_prop_A", "bg_prop_B", 
-                                   "shape", "radius_x_E", "radius_y_E", "radius_z_E", "width_N", "centre_x_coord", "distance")
+                                   "shape", "E_radius_x", "E_radius_y", "E_radius_z", "N_width", "cluster_x_coord", "distance")
 separated_spes_table <- data.frame(matrix(nrow = n_separated_simulations, ncol = length(separated_spes_table_colnames))) 
 colnames(separated_spes_table) <- separated_spes_table_colnames
 
@@ -86,13 +86,13 @@ separated_spes_table$bg_prop_A <- get_bg_props(n_separated_simulations, bg_prop_
 separated_spes_table$bg_prop_B <- get_bg_props(n_separated_simulations, bg_prop_B_range, bg_prop_B_equals_zero_prob)
 
 separated_spes_table$shape <- sample(shapes, n_separated_simulations, replace = T)
-separated_spes_table$radius_x_E <- ifelse(separated_spes_table$shape == "Ellipsoid", runif(n_separated_simulations, radius_x_E_range["min"], radius_x_E_range["max"]), NA)
-separated_spes_table$radius_y_E <- ifelse(separated_spes_table$shape == "Ellipsoid", runif(n_separated_simulations, radius_y_E_range["min"], radius_y_E_range["max"]), NA)
-separated_spes_table$radius_z_E <- ifelse(separated_spes_table$shape == "Ellipsoid", runif(n_separated_simulations, radius_z_E_range["min"], radius_z_E_range["max"]), NA)
-separated_spes_table$width_N <- ifelse(separated_spes_table$shape == "Network", runif(n_separated_simulations, width_N_range["min"], width_N_range["max"]), NA)
+separated_spes_table$E_radius_x <- ifelse(separated_spes_table$shape == "Ellipsoid", runif(n_separated_simulations, E_radius_x_range["min"], E_radius_x_range["max"]), NA)
+separated_spes_table$E_radius_y <- ifelse(separated_spes_table$shape == "Ellipsoid", runif(n_separated_simulations, E_radius_y_range["min"], E_radius_y_range["max"]), NA)
+separated_spes_table$E_radius_z <- ifelse(separated_spes_table$shape == "Ellipsoid", runif(n_separated_simulations, E_radius_z_range["min"], E_radius_z_range["max"]), NA)
+separated_spes_table$N_width <- ifelse(separated_spes_table$shape == "Network", runif(n_separated_simulations, N_width_range["min"], N_width_range["max"]), NA)
 
-separated_spes_table$centre_x_coord <- runif(n_separated_simulations, centre_x_coord_range["min"], centre_x_coord_range["max"])
-separated_spes_table$distance <- 450 - separated_spes_table$centre_x_coord # Where 450 is the x-coord of the second cluster
+separated_spes_table$cluster_x_coord <- runif(n_separated_simulations, cluster_x_coord_range["min"], cluster_x_coord_range["max"])
+separated_spes_table$distance <- 450 - separated_spes_table$cluster_x_coord # Where 450 is the x-coord of the second cluster
 
 ### 1.4. Save tables -------------------------------------------------
 setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
@@ -114,8 +114,8 @@ bg_metadata$background$cell_types <- c("A", "B", "O") # Cell proportions will ch
 
 
 # Network
-radius_N <- 125
-n_edges_N <- 20
+N_radius <- 125
+N_n_edges <- 20
 
 # Mixed clusters
 mixed_cluster_cell_types <- c("A", "B")
@@ -157,18 +157,18 @@ for (i in seq(nrow(mixed_spes_table))) {
   
   # Specify metadata for each shape and size
   if (shape == "Ellipsoid") {
-    curr_metadata$cluster_1$x_radius <- mixed_spes_table$radius_x_E[i]
-    curr_metadata$cluster_1$y_radius <- mixed_spes_table$radius_y_E[i]
-    curr_metadata$cluster_1$z_radius <- mixed_spes_table$radius_z_E[i]
+    curr_metadata$cluster_1$x_radius <- mixed_spes_table$E_radius_x[i]
+    curr_metadata$cluster_1$y_radius <- mixed_spes_table$E_radius_y[i]
+    curr_metadata$cluster_1$z_radius <- mixed_spes_table$E_radius_z[i]
     curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 180)
     curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 180)
     curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 180)
     
   }
   else if (shape == "Network") {
-    curr_metadata$cluster_1$n_edges <- n_edges_N
-    curr_metadata$cluster_1$width <- mixed_spes_table$width_N[i]
-    curr_metadata$cluster_1$radius <- radius_N
+    curr_metadata$cluster_1$n_edges <- N_n_edges
+    curr_metadata$cluster_1$width <- mixed_spes_table$N_width[i]
+    curr_metadata$cluster_1$radius <- N_radius
   }
   mixed_spes_metadata[[i]] <- curr_metadata
 }
@@ -205,18 +205,18 @@ for (i in seq(nrow(ringed_spes_table))) {
   
   # Specify metadata for each shape and size
   if (shape == "Ellipsoid") {
-    curr_metadata$cluster_1$x_radius <- ringed_spes_table$radius_x_E[i]
-    curr_metadata$cluster_1$y_radius <- ringed_spes_table$radius_y_E[i]
-    curr_metadata$cluster_1$z_radius <- ringed_spes_table$radius_z_E[i]
+    curr_metadata$cluster_1$x_radius <- ringed_spes_table$E_radius_x[i]
+    curr_metadata$cluster_1$y_radius <- ringed_spes_table$E_radius_y[i]
+    curr_metadata$cluster_1$z_radius <- ringed_spes_table$E_radius_z[i]
     curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 180)
     curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 180)
     curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 180)
     
   }
   else if (shape == "Network") {
-    curr_metadata$cluster_1$n_edges <- n_edges_N
-    curr_metadata$cluster_1$width <- ringed_spes_table$width_N[i]
-    curr_metadata$cluster_1$radius <- radius_N
+    curr_metadata$cluster_1$n_edges <- N_n_edges
+    curr_metadata$cluster_1$width <- ringed_spes_table$N_width[i]
+    curr_metadata$cluster_1$radius <- N_radius
   }
   ringed_spes_metadata[[i]] <- curr_metadata
 }
@@ -237,7 +237,7 @@ for (i in seq(nrow(separated_spes_table))) {
   curr_metadata <- spe_metadata_cluster_template("regular", shape, bg_metadata)
   curr_metadata$cluster_1$cluster_cell_types <- separated_cluster_cell_type
   curr_metadata$cluster_1$cluster_cell_proportions <- separated_cluster_cell_prop
-  curr_metadata$cluster_1$centre_loc <- c(separated_spes_table$centre_x_coord[i], 300, 300)
+  curr_metadata$cluster_1$centre_loc <- c(separated_spes_table$cluster_x_coord[i], 300, 300)
   
   curr_metadata <- spe_metadata_cluster_template("regular", "Sphere", curr_metadata)
   curr_metadata$cluster_2$cluster_cell_types <- "B"
@@ -251,18 +251,18 @@ for (i in seq(nrow(separated_spes_table))) {
   
   # Specify metadata for each shape and size for cluster_A
   if (shape == "Ellipsoid") {
-    curr_metadata$cluster_1$x_radius <- separated_spes_table$radius_x_E[i]
-    curr_metadata$cluster_1$y_radius <- separated_spes_table$radius_y_E[i]
-    curr_metadata$cluster_1$z_radius <- separated_spes_table$radius_z_E[i]
+    curr_metadata$cluster_1$x_radius <- separated_spes_table$E_radius_x[i]
+    curr_metadata$cluster_1$y_radius <- separated_spes_table$E_radius_y[i]
+    curr_metadata$cluster_1$z_radius <- separated_spes_table$E_radius_z[i]
     curr_metadata$cluster_1$x_y_rotation <- runif(1, 0, 180)
     curr_metadata$cluster_1$x_z_rotation <- runif(1, 0, 180)
     curr_metadata$cluster_1$y_z_rotation <- runif(1, 0, 180)
     
   }
   else if (shape == "Network") {
-    curr_metadata$cluster_1$n_edges <- n_edges_N
-    curr_metadata$cluster_1$width <- separated_spes_table$width_N[i]
-    curr_metadata$cluster_1$radius <- radius_N
+    curr_metadata$cluster_1$n_edges <- N_n_edges
+    curr_metadata$cluster_1$width <- separated_spes_table$N_width[i]
+    curr_metadata$cluster_1$radius <- N_radius
   }
   
 

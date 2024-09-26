@@ -1,4 +1,4 @@
-"bg_prop_A" "bg_prop_B" "shape" "radius_x_E" "radius_y_E" "radius_z_E" "width_N" "ring_width" "ring_width_factor"
+"bg_prop_A" "bg_prop_B" "shape" "E_radius_x" "E_radius_y" "E_radius_z" "N_width" "ring_width" "ring_width_factor"
 "1" 0 0.087 "Network" NA NA NA 34.984004428843 4.76636760359415 0.136244197352789
 "2" 0 0 "Network" NA NA NA 35.7453239522874 4.11840919817925 0.115215327288024
 "3" 0.034 0.029 "Network" NA NA NA 40.4982987453695 7.01056655780132 0.173107680445537

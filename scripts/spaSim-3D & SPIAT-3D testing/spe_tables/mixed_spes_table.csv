@@ -1,4 +1,4 @@
-"bg_prop_A" "bg_prop_B" "shape" "radius_x_E" "radius_y_E" "radius_z_E" "width_N" "cluster_prop_A" "cluster_prop_B"
+"bg_prop_A" "bg_prop_B" "shape" "E_radius_x" "E_radius_y" "E_radius_z" "N_width" "cluster_prop_A" "cluster_prop_B"
 "1" 0.081 0.065 "Network" NA NA NA 36.4794575585984 0.545 0.455
 "2" 0 0 "Ellipsoid" 98.2746111927554 78.0957682058215 88.4767303708941 NA 0.89 0.11
 "3" 0.096 0.058 "Ellipsoid" 113.317522103898 110.67907201359 110.539164731745 NA 0.897 0.103

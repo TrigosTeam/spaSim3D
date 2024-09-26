@@ -1,6 +1,7 @@
 library(cowplot)
 library(ggplot2)
 library(S4Vectors)
+library(stringr)
 
 ### Function for non-gradient output ------------------------------------------
 plot_non_gradient_metric <- function(spes_table, 
@@ -35,6 +36,13 @@ plot_non_gradient_metric <- function(spes_table,
   
   
   # Define plotting function
+  formatCustomSci <- function(x) {
+    x_sci <- str_split_fixed(formatC(x, format = "e"), "e", 2)
+    alpha <- as.numeric(x_sci[ , 1])
+    power <- as.integer(x_sci[ , 2])
+    paste(alpha * 10, power - 1L, sep = "e")
+  }
+  
   create_plot <- function(data, x_aes, y_aes, title = "") {
     data <- data[!is.na(data[[x_aes]]), ]
     
@@ -46,16 +54,20 @@ plot_non_gradient_metric <- function(spes_table,
       plot <- plot + geom_point()
     }
     # Factored character is an integer
-    else if (typeof(data[[x_aes]]) == "integer") {
+    else if (typeof(data[[x_aes]]) %in% c("integer", "character")) {
       plot <- plot + geom_violin()
+    }
+    # Use scientific notation for ellipsoid volume
+    if (x_aes == "E_volume") {
+      plot <- plot + scale_x_continuous(labels = formatCustomSci)
     }
     return(plot)
   }
   
   # Add Ellipsoid variation and volume to spes_table
-  radii_E_df <- spes_table[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
-  spes_table$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * radii_E_df$radius_z_E
-  spes_table$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+  radii_E_df <- spes_table[ , c("E_radius_x", "E_radius_y", "E_radius_z")]
+  spes_table$E_volume <- radii_E_df$E_radius_x * radii_E_df$E_radius_y * radii_E_df$E_radius_z
+  spes_table$E_radii_CV <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
   
   # Put plots into an organised list
   plots_list <- list()
@@ -75,6 +87,9 @@ plot_non_gradient_metric <- function(spes_table,
     
     # Factor
     plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    if (!is.null(plot_df$slice)) {
+      plot_df$slice <- as.character(plot_df$slice)
+    }
     
     # Generate plots based on plots_metadata, use final column of metric_cell_types
     plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]] <- lapply(plots_metadata, function(plot_def) {
@@ -173,21 +188,33 @@ plot_gradient_metric <- function(spes_table,
   
   
   # Define plotting function
-  create_plot <- function(data, x_aes, y_aes, color_aes, title = "") {
+  formatCustomSci <- function(x) {
+    x_sci <- str_split_fixed(formatC(x, format = "e"), "e", 2)
+    alpha <- as.numeric(x_sci[ , 1])
+    power <- as.integer(x_sci[ , 2])
+    paste(alpha * 10, power - 1L, sep = "e")
+  }
+  create_plot <- function(data, x_aes, y_aes, color_aes, group_aes, title = "") {
     
     data <- data[!is.na(data[[color_aes]]), ]
     
-    plot <- ggplot(data, aes_string(x = x_aes, y = y_aes, group = "spe", color = color_aes)) +
+    plot <- ggplot(data, aes_string(x = x_aes, y = y_aes, group = group_aes, color = color_aes)) +
       labs(title = title, x = x_aes, y = y_aes) +
       theme_bw() +
       geom_line()
+    
+    # Use scientific notation for ellipsoid volume
+    if (color_aes == "E_volume") {
+      plot <- plot + scale_x_continuous(labels = formatCustomSci)
+    }
+    
     return(plot)
   }
   
   # Add Ellipsoid variation and volume to spes_table
-  radii_E_df <- spes_table[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
-  spes_table$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * radii_E_df$radius_z_E
-  spes_table$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+  radii_E_df <- spes_table[ , c("E_radius_x", "E_radius_y", "E_radius_z")]
+  spes_table$E_volume <- radii_E_df$E_radius_x * radii_E_df$E_radius_y * radii_E_df$E_radius_z
+  spes_table$E_radii_CV <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
   
   # Put plots into an organised list
   plots_list <- list()
@@ -222,6 +249,14 @@ plot_gradient_metric <- function(spes_table,
     
     # Factor
     plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    if (!is.null(plot_df$slice)) {
+      plot_df$slice <- as.character(plot_df$slice)
+      plot_df$key <- paste(plot_df$spe, plot_df$slice, sep = "_")
+      group_aes = "key"
+    }
+    else {
+      group_aes = "spe"
+    }
     
     # Generate plots based on plots_metadata, use final column of metric_cell_types
     plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]] <- lapply(plots_metadata, function(plot_def) {
@@ -229,7 +264,7 @@ plot_gradient_metric <- function(spes_table,
       y_aes <- plot_def$y_aes
       color_aes <- plot_def$color_aes
       title <- plot_def$title
-      plot <- create_plot(data = plot_df, x_aes = x_aes, y_aes = y_aes, color_aes = color_aes, title = title)
+      plot <- create_plot(data = plot_df, x_aes = x_aes, y_aes = y_aes, group_aes = group_aes, color_aes = color_aes, title = title)
       return(plot)
     })
   }
@@ -294,9 +329,9 @@ non_gradient_plots_metadata <- list(
   bg_prop_A = list(x_aes = "bg_prop_A", y_aes = "metric"),
   bg_prop_B = list(x_aes = "bg_prop_B", y_aes = "metric"),
   shape = list(x_aes = "shape", y_aes = "metric"),
-  variation_E = list(x_aes = "variation_E", y_aes = "metric"),
-  volume_E = list(x_aes = "volume_E", y_aes = "metric"),
-  width_N = list(x_aes = "width_N", y_aes = "metric")
+  E_radii_CV = list(x_aes = "E_radii_CV", y_aes = "metric"),
+  E_volume = list(x_aes = "E_volume", y_aes = "metric"),
+  N_width = list(x_aes = "N_width", y_aes = "metric")
 )
 
 # Read mixed_spes_table
@@ -370,9 +405,9 @@ gradient_plots_metadata <- list(
   bg_prop_A = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_A"),
   bg_prop_B = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_B"),
   shape = list(x_aes = "gradient", y_aes = "metric", color_aes = "shape"),
-  variation_E = list(x_aes = "gradient", y_aes = "metric", color_aes = "variation_E"),
-  volume_E = list(x_aes = "gradient", y_aes = "metric", color_aes = "volume_E"),
-  width_N = list(x_aes = "gradient", y_aes = "metric", color_aes = "width_N")
+  E_radii_CV = list(x_aes = "gradient", y_aes = "metric", color_aes = "E_radii_CV"),
+  E_volume = list(x_aes = "gradient", y_aes = "metric", color_aes = "E_volume"),
+  N_width = list(x_aes = "gradient", y_aes = "metric", color_aes = "N_width")
 )
 
 # Read mixed_spes_table

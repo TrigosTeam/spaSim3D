@@ -6,10 +6,13 @@ setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
 separated_spes_table <- read.table("separated_spes_table.csv")
-separated_spes_table$distance <- separated_spes_table$centre_x_coord_B - separated_spes_table$centre_x_coord_A
+separated_spes_table$distance <- 450 - separated_spes_table$cluster_x_coord
 
-### Set up plot lists --------------------------------------------------------
+arrangement_tables <- list(mixed = mixed_spes_table,
+                           ringed = ringed_spes_table,
+                           separated = separated_spes_table)
 
+### Set up plots metadata --------------------------------------------------------
 non_gradient_plots_metadata <- list(
   arrangement = list(x_aes = "temp_arrangement", y_aes = "metric"),
   bg_prop_A = list(x_aes = "bg_prop_A", y_aes = "metric"),
@@ -33,184 +36,105 @@ gradient_plots_metadata <- list(
 
 
 
-### Mixed spes --------------
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
-
+### Utility functions -------------------------
+get_gradient <- function(metric) {
+  if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR")) return("radius")
+  return("threshold")
+}
+### Put plots into list--------------
 thresholds <- seq(0.01, 1, 0.01)
 threshold_colnames <- paste("t", thresholds, sep = "")
 metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
-mixed_dfs <- list()
+arrangements <- c("mixed", "ringed", "separated")
+arrangement_parameters <- list(mixed = "cluster_prop_B", ringed = "ring_width_factor", separated = "distance")
 
-for (metric in metrics) {
-  if (metric == "prop_AUC") {
-    mixed_prop_prevalence_df <- mixed_dfs[["prop_prevalence"]]
-    mixed_prop_prevalence_df$prop_AUC <- apply(mixed_prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    mixed_prop_AUC_df <- mixed_prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
-  }
-  else if (metric == "entropy_AUC") {
-    mixed_entropy_prevalence_df <- mixed_dfs[["entropy_prevalence"]]
-    mixed_entropy_prevalence_df$entropy_AUC <- apply(mixed_entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    mixed_entropy_AUC_df <- mixed_entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
-  }
-  else {
-    mixed_dfs[[metric]] <- read.table(paste("mixed_", metric, "_df.csv", sep = "")) 
+metric_dfs <- list(mixed = list(),
+                   ringed = list(),
+                   separated = list())
+
+for (arrangement in arrangements) {
+  setwd(paste("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/", arrangement,  sep = ""))
+  for (metric in metrics) {
+    if (metric == "prop_AUC") {
+      prop_prevalence_df <- metric_dfs[[arrangement]][["prop_prevalence"]]
+      prop_prevalence_df$prop_AUC <- apply(prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
+      prop_AUC_df <- prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
+      metric_dfs[[arrangement]][[metric]] <- prop_AUC_df
+    }
+    else if (metric == "entropy_AUC") {
+      entropy_prevalence_df <- metric_dfs[[arrangement]][["entropy_prevalence"]]
+      entropy_prevalence_df$entropy_AUC <- apply(entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
+      entropy_AUC_df <- entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
+      metric_dfs[[arrangement]][[metric]] <- entropy_AUC_df
+    }
+    else {
+      metric_dfs[[arrangement]][[metric]] <- read.table(paste(arrangement, metric, "df.csv", sep = "_")) 
+    }
   }
 }
 
-mixed_plots <- list()
 
-for (metric in metrics) {
-  if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
-    mixed_plots[[metric]] <- plot_non_gradient_metric(mixed_spes_table, 
-                                                      metric, 
-                                                      mixed_dfs[[metric]], 
-                                                      "cluster_prop_B", 
-                                                      non_gradient_plots_metadata)
-  }
-  else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "entropy_SAC", "prop_prevalence", "entropy_prevalence")) {
-    mixed_plots[[metric]] <- plot_gradient_metric(mixed_spes_table, 
-                                                  metric,
-                                                  mixed_dfs[[metric]], 
-                                                  "cluster_prop_B", 
-                                                  "radius",
-                                                  gradient_plots_metadata)
+metric_plots <- list(mixed = list(),
+                     ringed = list(),
+                     separated = list())
+
+for (arrangement in arrangements) {
+  for (metric in metrics) {
+    if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
+      metric_plots[[arrangement]][[metric]] <- plot_non_gradient_metric(arrangement_tables[[arrangement]], 
+                                                                        metric, 
+                                                                        metric_dfs[[arrangement]][[metric]], 
+                                                                        arrangement_parameters[[arrangement]], 
+                                                                        non_gradient_plots_metadata)
+    }
+    else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_prevalence", "entropy_prevalence")) {
+      metric_plots[[arrangement]][[metric]] <- plot_gradient_metric(arrangement_tables[[arrangement]], 
+                                                                    metric,
+                                                                    metric_dfs[[arrangement]][[metric]], 
+                                                                    arrangement_parameters[[arrangement]], 
+                                                                    get_gradient(metric),
+                                                                    gradient_plots_metadata)
+    }
   }
 }
 
 setwd("~/R/plots/3D")
-saveRDS(mixed_plots, "mixed_plots_3D.RDS")
+saveRDS(metric_plots, "metric_plots_3D.RDS")
 
-### Ringed spes --------------
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
 
-thresholds <- seq(0.01, 1, 0.01)
-threshold_colnames <- paste("t", thresholds, sep = "")
-metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
-ringed_dfs <- list()
-
-for (metric in metrics) {
-  if (metric == "prop_AUC") {
-    ringed_prop_prevalence_df <- ringed_dfs[["prop_prevalence"]]
-    ringed_prop_prevalence_df$prop_AUC <- apply(ringed_prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    ringed_prop_AUC_df <- ringed_prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
-  }
-  else if (metric == "entropy_AUC") {
-    ringed_entropy_prevalence_df <- ringed_dfs[["entropy_prevalence"]]
-    ringed_entropy_prevalence_df$entropy_AUC <- apply(ringed_entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    ringed_entropy_AUC_df <- ringed_entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
-  }
-  else {
-    ringed_dfs[[metric]] <- read.table(paste("ringed_", metric, "_df.csv", sep = "")) 
-  }
-}
-
-ringed_plots <- list()
-
-for (metric in metrics) {
-  if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
-    ringed_plots[[metric]] <- plot_non_gradient_metric(ringed_spes_table, 
-                                                      metric, 
-                                                      ringed_dfs[[metric]], 
-                                                      "ring_width_factor", 
-                                                      non_gradient_plots_metadata)
-  }
-  else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "entropy_SAC", "prop_prevalence", "entropy_prevalence")) {
-    ringed_plots[[metric]] <- plot_gradient_metric(ringed_spes_table, 
-                                                  metric,
-                                                  ringed_dfs[[metric]], 
-                                                  "ring_width_factor", 
-                                                  "radius",
-                                                  gradient_plots_metadata)
-  }
-}
-
-setwd("~/R/plots/3D")
-saveRDS(ringed_plots, "ringed_plots_3D.RDS")
-
-### Separated spes --------------
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
-
-thresholds <- seq(0.01, 1, 0.01)
-threshold_colnames <- paste("t", thresholds, sep = "")
-metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
-separated_dfs <- list()
-
-for (metric in metrics) {
-  if (metric == "prop_AUC") {
-    separated_prop_prevalence_df <- separated_dfs[["prop_prevalence"]]
-    separated_prop_prevalence_df$prop_AUC <- apply(separated_prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    separated_prop_AUC_df <- separated_prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
-  }
-  else if (metric == "entropy_AUC") {
-    separated_entropy_prevalence_df <- separated_dfs[["entropy_prevalence"]]
-    separated_entropy_prevalence_df$entropy_AUC <- apply(separated_entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    separated_entropy_AUC_df <- separated_entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
-  }
-  else {
-    separated_dfs[[metric]] <- read.table(paste("separated_", metric, "_df.csv", sep = "")) 
-  }
-}
-
-separated_plots <- list()
-
-for (metric in metrics) {
-  if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
-    separated_plots[[metric]] <- plot_non_gradient_metric(separated_spes_table, 
-                                                      metric, 
-                                                      separated_dfs[[metric]], 
-                                                      "distance", 
-                                                      non_gradient_plots_metadata)
-  }
-  else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "entropy_SAC", "prop_prevalence", "entropy_prevalence")) {
-    separated_plots[[metric]] <- plot_gradient_metric(separated_spes_table, 
-                                                  metric,
-                                                  separated_dfs[[metric]], 
-                                                  "distance", 
-                                                  "radius",
-                                                  gradient_plots_metadata)
-  }
-}
-
-setwd("~/R/plots/3D")
-saveRDS(separated_plots, "separated_plots_3D.RDS")
 
 ### Get pdf plot ------------------------------------------------------
 
 setwd("~/R/plots/3D")
 metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
 arrangements <- c("mixed", "ringed", "separated")
+metric_plots <- readRDS("metric_plots_3D.RDS")
 
-mixed_plots <- readRDS("mixed_plots_3D.RDS")
-ringed_plots <- readRDS("ringed_plots_3D.RDS")
-separated_plots <- readRDS("separated_plots_3D.RDS")
-
-pdf("plots.pdf", width = 15, height = 10)
+pdf("plots.pdf", width = 20, height = 12)
 
 for (metric in metrics) {
   for (arrangement in arrangements) {
-    if (arrangement == "mixed") {
-      print(mixed_plots[[metric]])
-    }
-    else if (arrangement == "ringed") {
-      print(ringed_plots[[metric]])
-    }
-    else if (arrangement == "separated") {
-      print(separated_plots[[metric]])
-    }
+    print(metric_plots[[arrangement]][[metric]])
   }
 }
 dev.off()
 
 ### Without background noise -------------------------------------------------
+# Read tables
 setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
 ringed_spes_table <- read.table("ringed_spes_table.csv")
 separated_spes_table <- read.table("separated_spes_table.csv")
-separated_spes_table$distance <- 450 - separated_spes_table$centre_x_coord
+separated_spes_table$distance <- 450 - separated_spes_table$cluster_x_coord
 mixed_spes_table <- mixed_spes_table[mixed_spes_table$bg_prop_A == 0 & mixed_spes_table$bg_prop_B == 0, ]
 ringed_spes_table <- ringed_spes_table[ringed_spes_table$bg_prop_A == 0 & ringed_spes_table$bg_prop_B == 0, ]
 separated_spes_table <- separated_spes_table[separated_spes_table$bg_prop_A == 0 & separated_spes_table$bg_prop_B == 0, ]
 
+arrangement_tables <- list(mixed = mixed_spes_table,
+                           ringed = ringed_spes_table,
+                           separated = separated_spes_table)
+
+# Set up plots metadata
 non_gradient_plots_metadata <- list(
   arrangement = list(x_aes = "temp_arrangement", y_aes = "metric"),
   # bg_prop_A = list(x_aes = "bg_prop_A", y_aes = "metric"),
@@ -232,179 +156,91 @@ gradient_plots_metadata <- list(
 )
 
 
-### Mixed spes
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
+# Utility functions
+get_gradient <- function(metric) {
+  if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR")) return("radius")
+  return("threshold")
+}
 
+
+
+# Put plots into list
 thresholds <- seq(0.01, 1, 0.01)
 threshold_colnames <- paste("t", thresholds, sep = "")
 metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
-mixed_dfs <- list()
+arrangements <- c("mixed", "ringed", "separated")
+arrangement_parameters <- list(mixed = "cluster_prop_B", ringed = "ring_width_factor", separated = "distance")
 
-for (metric in metrics) {
-  if (metric == "prop_AUC") {
-    mixed_prop_prevalence_df <- mixed_dfs[["prop_prevalence"]]
-    mixed_prop_prevalence_df$prop_AUC <- apply(mixed_prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    mixed_prop_AUC_df <- mixed_prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
-  }
-  else if (metric == "entropy_AUC") {
-    mixed_entropy_prevalence_df <- mixed_dfs[["entropy_prevalence"]]
-    mixed_entropy_prevalence_df$entropy_AUC <- apply(mixed_entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    mixed_entropy_AUC_df <- mixed_entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
-  }
-  else {
-    df <- read.table(paste("mixed_", metric, "_df.csv", sep = "")) 
-    df <- df[df$spe %in% paste("mixed_spe_", rownames(mixed_spes_table), sep = ""), ]
-    mixed_dfs[[metric]] <- df
+metric_dfs <- list(mixed = list(),
+                   ringed = list(),
+                   separated = list())
+
+for (arrangement in arrangements) {
+  setwd(paste("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/", arrangement,  sep = ""))
+  for (metric in metrics) {
+    if (metric == "prop_AUC") {
+      prop_prevalence_df <- metric_dfs[[arrangement]][["prop_prevalence"]]
+      prop_prevalence_df$prop_AUC <- apply(prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
+      prop_AUC_df <- prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
+      metric_dfs[[arrangement]][[metric]] <- prop_AUC_df
+    }
+    else if (metric == "entropy_AUC") {
+      entropy_prevalence_df <- metric_dfs[[arrangement]][["entropy_prevalence"]]
+      entropy_prevalence_df$entropy_AUC <- apply(entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
+      entropy_AUC_df <- entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
+      metric_dfs[[arrangement]][[metric]] <- entropy_AUC_df
+    }
+    else {
+      df <- read.table(paste(arrangement, metric, "df.csv", sep = "_")) 
+      df <- df[df$spe %in% paste(arrangement, "_spe_", rownames(arrangement_tables[[arrangement]]), sep = ""), ]
+      metric_dfs[[arrangement]][[metric]] <- df
+    }
   }
 }
 
-mixed_plots <- list()
 
-for (metric in metrics) {
-  if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
-    mixed_plots[[metric]] <- plot_non_gradient_metric(mixed_spes_table, 
-                                                      metric, 
-                                                      mixed_dfs[[metric]], 
-                                                      "cluster_prop_B", 
-                                                      non_gradient_plots_metadata)
-  }
-  else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "entropy_SAC", "prop_prevalence", "entropy_prevalence")) {
-    mixed_plots[[metric]] <- plot_gradient_metric(mixed_spes_table, 
-                                                  metric,
-                                                  mixed_dfs[[metric]], 
-                                                  "cluster_prop_B", 
-                                                  "radius",
-                                                  gradient_plots_metadata)
+metric_plots <- list(mixed = list(),
+                     ringed = list(),
+                     separated = list())
+
+for (arrangement in arrangements) {
+  for (metric in metrics) {
+    if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
+      metric_plots[[arrangement]][[metric]] <- plot_non_gradient_metric(arrangement_tables[[arrangement]], 
+                                                                        metric, 
+                                                                        metric_dfs[[arrangement]][[metric]], 
+                                                                        arrangement_parameters[[arrangement]], 
+                                                                        non_gradient_plots_metadata)
+    }
+    else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_prevalence", "entropy_prevalence")) {
+      metric_plots[[arrangement]][[metric]] <- plot_gradient_metric(arrangement_tables[[arrangement]], 
+                                                                    metric,
+                                                                    metric_dfs[[arrangement]][[metric]], 
+                                                                    arrangement_parameters[[arrangement]], 
+                                                                    get_gradient(metric),
+                                                                    gradient_plots_metadata)
+    }
   }
 }
-
 setwd("~/R/plots/3D_no_bg_noise")
-saveRDS(mixed_plots, "mixed_plots_3D_no_bg_noise.RDS")
-
-### Ringed spes
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/ringed")
-
-thresholds <- seq(0.01, 1, 0.01)
-threshold_colnames <- paste("t", thresholds, sep = "")
-metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
-ringed_dfs <- list()
-
-for (metric in metrics) {
-  if (metric == "prop_AUC") {
-    ringed_prop_prevalence_df <- ringed_dfs[["prop_prevalence"]]
-    ringed_prop_prevalence_df$prop_AUC <- apply(ringed_prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    ringed_prop_AUC_df <- ringed_prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
-  }
-  else if (metric == "entropy_AUC") {
-    ringed_entropy_prevalence_df <- ringed_dfs[["entropy_prevalence"]]
-    ringed_entropy_prevalence_df$entropy_AUC <- apply(ringed_entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    ringed_entropy_AUC_df <- ringed_entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
-  }
-  else {
-    df <- read.table(paste("ringed_", metric, "_df.csv", sep = "")) 
-    df <- df[df$spe %in% paste("ringed_spe_", rownames(ringed_spes_table), sep = ""), ]
-    ringed_dfs[[metric]] <- df
-  }
-}
-
-ringed_plots <- list()
-
-for (metric in metrics) {
-  if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
-    ringed_plots[[metric]] <- plot_non_gradient_metric(ringed_spes_table, 
-                                                       metric, 
-                                                       ringed_dfs[[metric]], 
-                                                       "ring_width_factor", 
-                                                       non_gradient_plots_metadata)
-  }
-  else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "entropy_SAC", "prop_prevalence", "entropy_prevalence")) {
-    ringed_plots[[metric]] <- plot_gradient_metric(ringed_spes_table, 
-                                                   metric,
-                                                   ringed_dfs[[metric]], 
-                                                   "ring_width_factor", 
-                                                   "radius",
-                                                   gradient_plots_metadata)
-  }
-}
-
-setwd("~/R/plots/3D_no_bg_noise")
-saveRDS(ringed_plots, "ringed_plots_3D_no_bg_noise.RDS")
-
-### Separated spes
-setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/separated")
-
-thresholds <- seq(0.01, 1, 0.01)
-threshold_colnames <- paste("t", thresholds, sep = "")
-metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
-separated_dfs <- list()
-
-for (metric in metrics) {
-  if (metric == "prop_AUC") {
-    separated_prop_prevalence_df <- separated_dfs[["prop_prevalence"]]
-    separated_prop_prevalence_df$prop_AUC <- apply(separated_prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    separated_prop_AUC_df <- separated_prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
-  }
-  else if (metric == "entropy_AUC") {
-    separated_entropy_prevalence_df <- separated_dfs[["entropy_prevalence"]]
-    separated_entropy_prevalence_df$entropy_AUC <- apply(separated_entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    separated_entropy_AUC_df <- separated_entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
-  }
-  else {
-    df <- read.table(paste("separated_", metric, "_df.csv", sep = "")) 
-    df <- df[df$spe %in% paste("separated_spe_", rownames(separated_spes_table), sep = ""), ]
-    separated_dfs[[metric]] <- df 
-  }
-}
-
-separated_plots <- list()
-
-for (metric in metrics) {
-  if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
-    separated_plots[[metric]] <- plot_non_gradient_metric(separated_spes_table, 
-                                                          metric, 
-                                                          separated_dfs[[metric]], 
-                                                          "distance", 
-                                                          non_gradient_plots_metadata)
-  }
-  else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "entropy_SAC", "prop_prevalence", "entropy_prevalence")) {
-    separated_plots[[metric]] <- plot_gradient_metric(separated_spes_table, 
-                                                      metric,
-                                                      separated_dfs[[metric]], 
-                                                      "distance", 
-                                                      "radius",
-                                                      gradient_plots_metadata)
-  }
-}
-
-setwd("~/R/plots/3D_no_bg_noise")
-saveRDS(separated_plots, "separated_plots_3D_no_bg_noise.RDS")
+saveRDS(metric_plots, "metric_plots_3D_no_bg_noise.RDS")
 
 
+
+# Get pdf plot
 setwd("~/R/plots/3D_no_bg_noise")
 metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
 arrangements <- c("mixed", "ringed", "separated")
 
-mixed_plots <- readRDS("mixed_plots_3D_no_bg_noise.RDS")
-ringed_plots <- readRDS("ringed_plots_3D_no_bg_noise.RDS")
-separated_plots <- readRDS("separated_plots_3D_no_bg_noise.RDS")
+metric_plots <- readRDS("metric_plots_3D_no_bg_noise.RDS")
 
-pdf("plots.pdf", width = 15, height = 10)
+pdf("plots.pdf", width = 15, height = 12)
 
 for (metric in metrics) {
   for (arrangement in arrangements) {
-    if (arrangement == "mixed") {
-      print(mixed_plots[[metric]])
-    }
-    else if (arrangement == "ringed") {
-      print(ringed_plots[[metric]])
-    }
-    else if (arrangement == "separated") {
-      print(separated_plots[[metric]])
-    }
+    print(metric_plots[[arrangement]][[metric]])
   }
 }
 dev.off()
-
-
 
 

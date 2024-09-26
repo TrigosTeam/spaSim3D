@@ -1,4 +1,4 @@
-"bg_prop_A" "bg_prop_B" "shape" "radius_x_E" "radius_y_E" "radius_z_E" "width_N" "centre_x_coord" "distance"
+"bg_prop_A" "bg_prop_B" "shape" "E_radius_x" "E_radius_y" "E_radius_z" "N_width" "cluster_x_coord" "distance"
 "1" 0 0 "Network" NA NA NA 34.0024747874122 131.063180649653 318.936819350347
 "2" 0 0 "Ellipsoid" 89.0957066905685 76.7326068948023 96.6803806484677 NA 155.820344993845 294.179655006155
 "3" 0 0 "Network" NA NA NA 30.1195683027618 152.317139226943 297.682860773057
