@@ -73,7 +73,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     display_parameters(parameter_values)
     
     # Generate sphere cluster simulation using these parameters
-    cluster_properties <- list(list(shape = "Sphere",
+    cluster_properties <- list(list(shape = "sphere",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     radius = parameter_values[["radius"]],
@@ -103,7 +103,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       display_parameters(parameter_values)
       
       # Generate sphere cluster simulation using updated parameters
-      cluster_properties <- list(list(shape = "Sphere",
+      cluster_properties <- list(list(shape = "sphere",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       radius = parameter_values[["radius"]],
@@ -137,7 +137,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     display_parameters(parameter_values)
     
     # Generate ellipsoid cluster simulation using these parameters
-    cluster_properties <- list(list(shape = "Ellipsoid",
+    cluster_properties <- list(list(shape = "ellipsoid",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     x_radius = parameter_values[["x radius"]],
@@ -178,7 +178,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       display_parameters(parameter_values)
       
       # Generate ellipsoid cluster simulation using updated parameters
-      cluster_properties <- list(list(shape = "Ellipsoid",
+      cluster_properties <- list(list(shape = "ellipsoid",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       x_radius = parameter_values[["x radius"]],
@@ -216,7 +216,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     display_parameters(parameter_values)
     
     # Generate cylinder cluster simulation using these parameters
-    cluster_properties <- list(list(shape = "Cylinder",
+    cluster_properties <- list(list(shape = "cylinder",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     radius = parameter_values[["radius"]],
@@ -252,7 +252,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       display_parameters(parameter_values)
       
       # Generate cylinder cluster simulation using updated parameters
-      cluster_properties <- list(list(shape = "Cylinder",
+      cluster_properties <- list(list(shape = "cylinder",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       radius = parameter_values[["radius"]],
@@ -286,7 +286,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     display_parameters(parameter_values)
     
     # Generate network cluster simulation using these parameters
-    cluster_properties <- list(list(shape = "Network",
+    cluster_properties <- list(list(shape = "network",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     n_edges = parameter_values[["number of branches"]],
@@ -320,7 +320,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       display_parameters(parameter_values)
       
       # Generate sphere cluster simulation using updated parameters
-      cluster_properties <- list(list(shape = "Network",
+      cluster_properties <- list(list(shape = "network",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       n_edges = parameter_values[["number of branches"]],

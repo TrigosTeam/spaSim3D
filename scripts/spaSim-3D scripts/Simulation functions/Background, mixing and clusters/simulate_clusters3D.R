@@ -11,22 +11,22 @@ simulate_clusters3D <- function(bg_spe,
     shape <- cluster_properties[[k]]$shape
     
     ### Sphere shape
-    if (shape == "Sphere") {
+    if (shape == "sphere") {
       bg_spe <- simulate_sphere_cluster(bg_spe, cluster_properties[[k]])
     } 
     
     ### Ellipsoid shape
-    if (shape == "Ellipsoid") {
+    if (shape == "ellipsoid") {
       bg_spe <- simulate_ellipsoid_cluster(bg_spe, cluster_properties[[k]])
     }
     
     ### Cylinder shape
-    if (shape == "Cylinder") {
+    if (shape == "cylinder") {
       bg_spe <- simulate_cylinder_cluster(bg_spe, cluster_properties[[k]])
     }
     
     ### Network shape
-    if (shape == "Network") {
+    if (shape == "network") {
       bg_spe <- simulate_network_cluster(bg_spe, cluster_properties[[k]])
     }
   }

@@ -10,22 +10,22 @@ simulate_double_rings3D <- function(bg_spe,
     shape <- dr_properties[[k]]$shape
     
     ### Sphere double ring shape
-    if (shape == "Sphere") {
+    if (shape == "sphere") {
       bg_spe <- simulate_sphere_dr(bg_spe, dr_properties[[k]])
     } 
     
     ### Ellipsoid double ring shape
-    if (shape == "Ellipsoid") {
+    if (shape == "ellipsoid") {
       bg_spe <- simulate_ellipsoid_dr(bg_spe, dr_properties[[k]])
     }
     
     ### Cylinder double ring shape
-    if (shape == "Cylinder") {
+    if (shape == "cylinder") {
       bg_spe <- simulate_cylinder_dr(bg_spe, dr_properties[[k]])
     }
     
     ### Network double ring shape
-    if (shape == "Network") {
+    if (shape == "network") {
       bg_spe <- simulate_network_dr(bg_spe, dr_properties[[k]])
     }
   }

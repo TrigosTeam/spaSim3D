@@ -88,7 +88,7 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
       width <- 0
     }
     
-    network_dr_properties[[i]] <- list(shape = "Cylinder",
+    network_dr_properties[[i]] <- list(shape = "cylinder",
                                        cluster_cell_types = cluster_cell_types,
                                        cluster_cell_proportions = cluster_cell_proportions,
                                        radius = curr_width,

@@ -10,22 +10,22 @@ simulate_rings3D <- function(bg_spe,
     shape <- ring_properties[[k]]$shape
     
     ### Sphere shape +  ring
-    if (shape == "Sphere") {
+    if (shape == "sphere") {
       bg_spe <- simulate_sphere_ring(bg_spe, ring_properties[[k]])
     } 
     
     ### Ellipsoid shape + ring
-    else if (shape == "Ellipsoid") {
+    else if (shape == "ellipsoid") {
       bg_spe <- simulate_ellipsoid_ring(bg_spe, ring_properties[[k]])
     }
     
     ### Cylinder shape + ring
-    else if (shape == "Cylinder") {
+    else if (shape == "cylinder") {
       bg_spe <- simulate_cylinder_ring(bg_spe, ring_properties[[k]])
     }
     
     ### Network shape + ring
-    else if (shape == "Network") {
+    else if (shape == "network") {
       bg_spe <- simulate_network_ring(bg_spe, ring_properties[[k]])
     }
     

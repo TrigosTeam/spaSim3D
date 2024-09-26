@@ -60,7 +60,7 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
     # Very unlikely case when width is negative, just ignore these cylinders
     if (curr_width < 0) curr_width <- 0
     
-    network_cluster_properties[[i]] <- list(shape = "Cylinder",
+    network_cluster_properties[[i]] <- list(shape = "cylinder",
                                             cluster_cell_types = cluster_cell_types,
                                             cluster_cell_proportions = cluster_cell_proportions,
                                             radius = curr_width,

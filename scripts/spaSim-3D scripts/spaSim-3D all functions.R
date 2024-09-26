@@ -461,22 +461,22 @@ simulate_clusters3D <- function(bg_spe,
     shape <- cluster_properties[[k]]$shape
 
     ### Sphere shape
-    if (shape == "Sphere") {
+    if (shape == "sphere") {
       bg_spe <- simulate_sphere_cluster(bg_spe, cluster_properties[[k]])
     }
 
     ### Ellipsoid shape
-    if (shape == "Ellipsoid") {
+    if (shape == "ellipsoid") {
       bg_spe <- simulate_ellipsoid_cluster(bg_spe, cluster_properties[[k]])
     }
 
     ### Cylinder shape
-    if (shape == "Cylinder") {
+    if (shape == "cylinder") {
       bg_spe <- simulate_cylinder_cluster(bg_spe, cluster_properties[[k]])
     }
 
     ### Network shape
-    if (shape == "Network") {
+    if (shape == "network") {
       bg_spe <- simulate_network_cluster(bg_spe, cluster_properties[[k]])
     }
   }
@@ -504,22 +504,22 @@ simulate_rings3D <- function(bg_spe,
     shape <- ring_properties[[k]]$shape
 
     ### Sphere shape +  ring
-    if (shape == "Sphere") {
+    if (shape == "sphere") {
       bg_spe <- simulate_sphere_ring(bg_spe, ring_properties[[k]])
     }
 
     ### Ellipsoid shape + ring
-    else if (shape == "Ellipsoid") {
+    else if (shape == "ellipsoid") {
       bg_spe <- simulate_ellipsoid_ring(bg_spe, ring_properties[[k]])
     }
 
     ### Cylinder shape + ring
-    else if (shape == "Cylinder") {
+    else if (shape == "cylinder") {
       bg_spe <- simulate_cylinder_ring(bg_spe, ring_properties[[k]])
     }
 
     ### Network shape + ring
-    else if (shape == "Network") {
+    else if (shape == "network") {
       bg_spe <- simulate_network_ring(bg_spe, ring_properties[[k]])
     }
 
@@ -551,22 +551,22 @@ simulate_double_rings3D <- function(bg_spe,
     shape <- dr_properties[[k]]$shape
 
     ### Sphere double ring shape
-    if (shape == "Sphere") {
+    if (shape == "sphere") {
       bg_spe <- simulate_sphere_dr(bg_spe, dr_properties[[k]])
     }
 
     ### Ellipsoid double ring shape
-    if (shape == "Ellipsoid") {
+    if (shape == "ellipsoid") {
       bg_spe <- simulate_ellipsoid_dr(bg_spe, dr_properties[[k]])
     }
 
     ### Cylinder double ring shape
-    if (shape == "Cylinder") {
+    if (shape == "cylinder") {
       bg_spe <- simulate_cylinder_dr(bg_spe, dr_properties[[k]])
     }
 
     ### Network double ring shape
-    if (shape == "Network") {
+    if (shape == "network") {
       bg_spe <- simulate_network_dr(bg_spe, dr_properties[[k]])
     }
   }
@@ -1272,7 +1272,7 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
     # Very unlikely case when width is negative, just ignore these cylinders
     if (curr_width < 0) curr_width <- 0
 
-    network_cluster_properties[[i]] <- list(shape = "Cylinder",
+    network_cluster_properties[[i]] <- list(shape = "cylinder",
                                             cluster_cell_types = cluster_cell_types,
                                             cluster_cell_proportions = cluster_cell_proportions,
                                             radius = curr_width,
@@ -1372,7 +1372,7 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
       width <- 0
     }
 
-    network_ring_properties[[i]] <- list(shape = "Cylinder",
+    network_ring_properties[[i]] <- list(shape = "cylinder",
                                          cluster_cell_types = cluster_cell_types,
                                          cluster_cell_proportions = cluster_cell_proportions,
                                          radius = curr_width,
@@ -1489,7 +1489,7 @@ simulate_network_dr <- function(bg_spe, dr_properties) {
       width <- 0
     }
 
-    network_dr_properties[[i]] <- list(shape = "Cylinder",
+    network_dr_properties[[i]] <- list(shape = "cylinder",
                                        cluster_cell_types = cluster_cell_types,
                                        cluster_cell_proportions = cluster_cell_proportions,
                                        radius = curr_width,
@@ -1725,7 +1725,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     display_parameters(parameter_values)
 
     # Generate sphere cluster simulation using these parameters
-    cluster_properties <- list(list(shape = "Sphere",
+    cluster_properties <- list(list(shape = "sphere",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     radius = parameter_values[["radius"]],
@@ -1755,7 +1755,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       display_parameters(parameter_values)
 
       # Generate sphere cluster simulation using updated parameters
-      cluster_properties <- list(list(shape = "Sphere",
+      cluster_properties <- list(list(shape = "sphere",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       radius = parameter_values[["radius"]],
@@ -1789,7 +1789,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     display_parameters(parameter_values)
 
     # Generate ellipsoid cluster simulation using these parameters
-    cluster_properties <- list(list(shape = "Ellipsoid",
+    cluster_properties <- list(list(shape = "ellipsoid",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     x_radius = parameter_values[["x radius"]],
@@ -1830,7 +1830,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       display_parameters(parameter_values)
 
       # Generate ellipsoid cluster simulation using updated parameters
-      cluster_properties <- list(list(shape = "Ellipsoid",
+      cluster_properties <- list(list(shape = "ellipsoid",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       x_radius = parameter_values[["x radius"]],
@@ -1868,7 +1868,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     display_parameters(parameter_values)
 
     # Generate cylinder cluster simulation using these parameters
-    cluster_properties <- list(list(shape = "Cylinder",
+    cluster_properties <- list(list(shape = "cylinder",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     radius = parameter_values[["radius"]],
@@ -1904,7 +1904,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       display_parameters(parameter_values)
 
       # Generate cylinder cluster simulation using updated parameters
-      cluster_properties <- list(list(shape = "Cylinder",
+      cluster_properties <- list(list(shape = "cylinder",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       radius = parameter_values[["radius"]],
@@ -1938,7 +1938,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     display_parameters(parameter_values)
 
     # Generate network cluster simulation using these parameters
-    cluster_properties <- list(list(shape = "Network",
+    cluster_properties <- list(list(shape = "network",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
                                     n_edges = parameter_values[["number of branches"]],
@@ -1972,7 +1972,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       display_parameters(parameter_values)
 
       # Generate sphere cluster simulation using updated parameters
-      cluster_properties <- list(list(shape = "Network",
+      cluster_properties <- list(list(shape = "network",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
                                       n_edges = parameter_values[["number of branches"]],
@@ -2604,15 +2604,15 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
 
 
   ### Get template for different shapes
-  if (shape == "Sphere") {
-    cluster_metadata <- list(shape = "Sphere",
+  if (shape == "sphere") {
+    cluster_metadata <- list(shape = "sphere",
                              cluster_cell_types = c("Tumour", "Immune", "Others"),
                              cluster_cell_proportions = c(0.8, 0.15, 0.05),
                              radius = 25,
                              centre_loc = c(40, 40, 40))
   }
-  else if (shape == "Ellipsoid") {
-    cluster_metadata <- list(shape = "Ellipsoid",
+  else if (shape == "ellipsoid") {
+    cluster_metadata <- list(shape = "ellipsoid",
                              cluster_cell_types = c("Tumour", "Immune", "Others"),
                              cluster_cell_proportions = c(0.8, 0.15, 0.05),
                              x_radius = 15,
@@ -2623,16 +2623,16 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
                              x_z_rotation = 45,
                              y_z_rotation = 0)
   }
-  else if (shape == "Cylinder") {
-    cluster_metadata <- list(shape = "Cylinder",
+  else if (shape == "cylinder") {
+    cluster_metadata <- list(shape = "cylinder",
                              cluster_cell_types = c("Endothelial", "Others"),
                              cluster_cell_proportions = c(0.95, 0.05),
                              radius = 10,
                              start_loc = c(0, 0, 0),
                              end_loc   = c(20, 20, 100))
   }
-  else if (shape == "Network") {
-    cluster_metadata <- list(shape = "Network",
+  else if (shape == "network") {
+    cluster_metadata <- list(shape = "network",
                              cluster_cell_types = c("Tumour", "Others"),
                              cluster_cell_proportions = c(0.95, 0.05),
                              n_edges = 18,

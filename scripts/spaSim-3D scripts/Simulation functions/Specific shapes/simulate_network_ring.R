@@ -75,7 +75,7 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
       width <- 0
     }
     
-    network_ring_properties[[i]] <- list(shape = "Cylinder",
+    network_ring_properties[[i]] <- list(shape = "cylinder",
                                          cluster_cell_types = cluster_cell_types,
                                          cluster_cell_proportions = cluster_cell_proportions,
                                          radius = curr_width,
