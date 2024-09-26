@@ -1,4 +1,4 @@
-"spe" "reference" "target" "proportion"
+"spe" "reference" "target" "prop_SAC"
 "1" "mixed_spe_1" "A" "B" -0.0125872842657721
 "2" "mixed_spe_1" "O" "A,B" 0.133949875248448
 "3" "mixed_spe_2" "A" "B" -0.0217432395394591

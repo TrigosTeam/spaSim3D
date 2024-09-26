@@ -1,4 +1,4 @@
-"spe" "cell_types" "entropy"
+"spe" "cell_types" "entropy_SAC"
 "1" "mixed_spe_1" "A,B" 0.0216659357731481
 "2" "mixed_spe_1" "A,B,O" 0.0669555101565149
 "3" "mixed_spe_2" "A,B" -0.0672897791426995
