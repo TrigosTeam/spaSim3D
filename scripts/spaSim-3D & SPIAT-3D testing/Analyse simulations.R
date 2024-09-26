@@ -77,7 +77,7 @@ thresholds_colnames <- paste("t", thresholds, sep = "")
 
 prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
 
-mixed_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion")
+mixed_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion_SAC")
 mixed_prop_SAC_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(prop_cell_types), ncol = length(mixed_prop_SAC_df_colnames)))
 colnames(mixed_prop_SAC_df) <- mixed_prop_SAC_df_colnames
 
@@ -88,7 +88,7 @@ colnames(mixed_prop_prevalence_df) <- mixed_prop_prevalence_df_colnames
 
 entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
 
-mixed_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy")
+mixed_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy_SAC")
 mixed_entropy_SAC_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(entropy_cell_types), ncol = length(mixed_entropy_SAC_df_colnames)))
 colnames(mixed_entropy_SAC_df) <- mixed_entropy_SAC_df_colnames
 
@@ -159,7 +159,7 @@ thresholds_colnames <- paste("t", thresholds, sep = "")
 
 prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
 
-mixed_slices_prop_SAC_df_colnames <- c("spe", "slice", "reference", "target", "proportion")
+mixed_slices_prop_SAC_df_colnames <- c("spe", "slice", "reference", "target", "proportion_SAC")
 mixed_slices_prop_SAC_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(prop_cell_types) * n_slices, ncol = length(mixed_slices_prop_SAC_df_colnames)))
 colnames(mixed_slices_prop_SAC_df) <- mixed_slices_prop_SAC_df_colnames
 
@@ -170,7 +170,7 @@ colnames(mixed_slices_prop_prevalence_df) <- mixed_slices_prop_prevalence_df_col
 
 entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
 
-mixed_slices_entropy_SAC_df_colnames <- c("spe", "slice", "cell_types", "entropy")
+mixed_slices_entropy_SAC_df_colnames <- c("spe", "slice", "cell_types", "entropy_SAC")
 mixed_slices_entropy_SAC_df <- data.frame(matrix(nrow = n_mixed_spes * nrow(entropy_cell_types) * n_slices, ncol = length(mixed_slices_entropy_SAC_df_colnames)))
 colnames(mixed_slices_entropy_SAC_df) <- mixed_slices_entropy_SAC_df_colnames
 
@@ -280,7 +280,7 @@ for (i in seq_len(n_mixed_spes)) {
     
     index <- nrow(prop_cell_types) * (i - 1) + j
     mixed_prop_SAC_df[index, c("spe", "reference", "target")] <- c(mixed_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
-    mixed_prop_SAC_df[index, "proportion"] <- proportion_SAC
+    mixed_prop_SAC_df[index, "proportion_SAC"] <- proportion_SAC
     
     mixed_prop_prevalence_df[index, c("spe", "reference", "target")] <- c(mixed_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
     mixed_prop_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_df$prevalence
@@ -304,7 +304,7 @@ for (i in seq_len(n_mixed_spes)) {
     
     index <- nrow(entropy_cell_types) * (i - 1) + j
     mixed_entropy_SAC_df[index, c("spe", "cell_types")] <- c(mixed_spe_name, entropy_cell_types$cell_types[j])
-    mixed_entropy_SAC_df[index, "entropy"] <- entropy_SAC
+    mixed_entropy_SAC_df[index, "entropy_SAC"] <- entropy_SAC
     
     mixed_entropy_prevalence_df[index, c("spe", "cell_types")] <- c(mixed_spe_name, entropy_cell_types$cell_types[j])
     mixed_entropy_prevalence_df[index, thresholds_colnames] <- entropy_prevalence_df$prevalence
@@ -430,7 +430,7 @@ for (i in seq_len(n_mixed_spes)) {
       index <- n_slices * nrow(prop_cell_types) * (i - 1) + nrow(prop_cell_types) * (slice_index - 1) + j
       
       mixed_slices_prop_SAC_df[index, c("spe", "slice", "reference", "target")] <- c(mixed_spe_name, slice_index, prop_cell_types$ref[j], prop_cell_types$tar[j])
-      mixed_slices_prop_SAC_df[index, "proportion"] <- proportion_SAC
+      mixed_slices_prop_SAC_df[index, "proportion_SAC"] <- proportion_SAC
       
       mixed_slices_prop_prevalence_df[index, c("spe", "slice", "reference", "target")] <- c(mixed_spe_name, slice_index, prop_cell_types$ref[j], prop_cell_types$tar[j])
       mixed_slices_prop_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_df$prevalence
@@ -461,7 +461,7 @@ for (i in seq_len(n_mixed_spes)) {
       index <- n_slices * nrow(entropy_cell_types) * (i - 1) + nrow(entropy_cell_types) * (slice_index - 1) + j
       
       mixed_slices_entropy_SAC_df[index, c("spe", "slice", "cell_types")] <- c(mixed_spe_name, slice_index, entropy_cell_types$cell_types[j])
-      mixed_slices_entropy_SAC_df[index, "entropy"] <- entropy_SAC
+      mixed_slices_entropy_SAC_df[index, "entropy_SAC"] <- entropy_SAC
       
       mixed_slices_entropy_prevalence_df[index, c("spe", "slice", "cell_types")] <- c(mixed_spe_name, slice_index, entropy_cell_types$cell_types[j])
       mixed_slices_entropy_prevalence_df[index, thresholds_colnames] <- entropy_prevalence_df$prevalence
@@ -562,7 +562,7 @@ thresholds_colnames <- paste("t", thresholds, sep = "")
 
 prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
 
-ringed_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion")
+ringed_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion_SAC")
 ringed_prop_SAC_df <- data.frame(matrix(nrow = n_ringed_spes * nrow(prop_cell_types), ncol = length(ringed_prop_SAC_df_colnames)))
 colnames(ringed_prop_SAC_df) <- ringed_prop_SAC_df_colnames
 
@@ -573,7 +573,7 @@ colnames(ringed_prop_prevalence_df) <- ringed_prop_prevalence_df_colnames
 
 entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
 
-ringed_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy")
+ringed_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy_SAC")
 ringed_entropy_SAC_df <- data.frame(matrix(nrow = n_ringed_spes * nrow(entropy_cell_types), ncol = length(ringed_entropy_SAC_df_colnames)))
 colnames(ringed_entropy_SAC_df) <- ringed_entropy_SAC_df_colnames
 
@@ -644,7 +644,7 @@ thresholds_colnames <- paste("t", thresholds, sep = "")
 
 prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
 
-ringed_slices_prop_SAC_df_colnames <- c("spe", "slice", "reference", "target", "proportion")
+ringed_slices_prop_SAC_df_colnames <- c("spe", "slice", "reference", "target", "proportion_SAC")
 ringed_slices_prop_SAC_df <- data.frame(matrix(nrow = n_ringed_spes * nrow(prop_cell_types) * n_slices, ncol = length(ringed_slices_prop_SAC_df_colnames)))
 colnames(ringed_slices_prop_SAC_df) <- ringed_slices_prop_SAC_df_colnames
 
@@ -655,7 +655,7 @@ colnames(ringed_slices_prop_prevalence_df) <- ringed_slices_prop_prevalence_df_c
 
 entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
 
-ringed_slices_entropy_SAC_df_colnames <- c("spe", "slice", "cell_types", "entropy")
+ringed_slices_entropy_SAC_df_colnames <- c("spe", "slice", "cell_types", "entropy_SAC")
 ringed_slices_entropy_SAC_df <- data.frame(matrix(nrow = n_ringed_spes * nrow(entropy_cell_types) * n_slices, ncol = length(ringed_slices_entropy_SAC_df_colnames)))
 colnames(ringed_slices_entropy_SAC_df) <- ringed_slices_entropy_SAC_df_colnames
 
@@ -765,7 +765,7 @@ for (i in seq_len(n_ringed_spes)) {
     
     index <- nrow(prop_cell_types) * (i - 1) + j
     ringed_prop_SAC_df[index, c("spe", "reference", "target")] <- c(ringed_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
-    ringed_prop_SAC_df[index, "proportion"] <- proportion_SAC
+    ringed_prop_SAC_df[index, "proportion_SAC"] <- proportion_SAC
     
     ringed_prop_prevalence_df[index, c("spe", "reference", "target")] <- c(ringed_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
     ringed_prop_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_df$prevalence
@@ -789,7 +789,7 @@ for (i in seq_len(n_ringed_spes)) {
     
     index <- nrow(entropy_cell_types) * (i - 1) + j
     ringed_entropy_SAC_df[index, c("spe", "cell_types")] <- c(ringed_spe_name, entropy_cell_types$cell_types[j])
-    ringed_entropy_SAC_df[index, "entropy"] <- entropy_SAC
+    ringed_entropy_SAC_df[index, "entropy_SAC"] <- entropy_SAC
     
     ringed_entropy_prevalence_df[index, c("spe", "cell_types")] <- c(ringed_spe_name, entropy_cell_types$cell_types[j])
     ringed_entropy_prevalence_df[index, thresholds_colnames] <- entropy_prevalence_df$prevalence
@@ -915,7 +915,7 @@ for (i in seq_len(n_ringed_spes)) {
       index <- n_slices * nrow(prop_cell_types) * (i - 1) + nrow(prop_cell_types) * (slice_index - 1) + j
       
       ringed_slices_prop_SAC_df[index, c("spe", "slice", "reference", "target")] <- c(ringed_spe_name, slice_index, prop_cell_types$ref[j], prop_cell_types$tar[j])
-      ringed_slices_prop_SAC_df[index, "proportion"] <- proportion_SAC
+      ringed_slices_prop_SAC_df[index, "proportion_SAC"] <- proportion_SAC
       
       ringed_slices_prop_prevalence_df[index, c("spe", "slice", "reference", "target")] <- c(ringed_spe_name, slice_index, prop_cell_types$ref[j], prop_cell_types$tar[j])
       ringed_slices_prop_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_df$prevalence
@@ -946,7 +946,7 @@ for (i in seq_len(n_ringed_spes)) {
       index <- n_slices * nrow(entropy_cell_types) * (i - 1) + nrow(entropy_cell_types) * (slice_index - 1) + j
       
       ringed_slices_entropy_SAC_df[index, c("spe", "slice", "cell_types")] <- c(ringed_spe_name, slice_index, entropy_cell_types$cell_types[j])
-      ringed_slices_entropy_SAC_df[index, "entropy"] <- entropy_SAC
+      ringed_slices_entropy_SAC_df[index, "entropy_SAC"] <- entropy_SAC
       
       ringed_slices_entropy_prevalence_df[index, c("spe", "slice", "cell_types")] <- c(ringed_spe_name, slice_index, entropy_cell_types$cell_types[j])
       ringed_slices_entropy_prevalence_df[index, thresholds_colnames] <- entropy_prevalence_df$prevalence
@@ -1047,7 +1047,7 @@ thresholds_colnames <- paste("t", thresholds, sep = "")
 
 prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
 
-separated_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion")
+separated_prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion_SAC")
 separated_prop_SAC_df <- data.frame(matrix(nrow = n_separated_spes * nrow(prop_cell_types), ncol = length(separated_prop_SAC_df_colnames)))
 colnames(separated_prop_SAC_df) <- separated_prop_SAC_df_colnames
 
@@ -1058,7 +1058,7 @@ colnames(separated_prop_prevalence_df) <- separated_prop_prevalence_df_colnames
 
 entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
 
-separated_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy")
+separated_entropy_SAC_df_colnames <- c("spe", "cell_types", "entropy_SAC")
 separated_entropy_SAC_df <- data.frame(matrix(nrow = n_separated_spes * nrow(entropy_cell_types), ncol = length(separated_entropy_SAC_df_colnames)))
 colnames(separated_entropy_SAC_df) <- separated_entropy_SAC_df_colnames
 
@@ -1129,7 +1129,7 @@ thresholds_colnames <- paste("t", thresholds, sep = "")
 
 prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
 
-separated_slices_prop_SAC_df_colnames <- c("spe", "slice", "reference", "target", "proportion")
+separated_slices_prop_SAC_df_colnames <- c("spe", "slice", "reference", "target", "proportion_SAC")
 separated_slices_prop_SAC_df <- data.frame(matrix(nrow = n_separated_spes * nrow(prop_cell_types) * n_slices, ncol = length(separated_slices_prop_SAC_df_colnames)))
 colnames(separated_slices_prop_SAC_df) <- separated_slices_prop_SAC_df_colnames
 
@@ -1140,7 +1140,7 @@ colnames(separated_slices_prop_prevalence_df) <- separated_slices_prop_prevalenc
 
 entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
 
-separated_slices_entropy_SAC_df_colnames <- c("spe", "slice", "cell_types", "entropy")
+separated_slices_entropy_SAC_df_colnames <- c("spe", "slice", "cell_types", "entropy_SAC")
 separated_slices_entropy_SAC_df <- data.frame(matrix(nrow = n_separated_spes * nrow(entropy_cell_types) * n_slices, ncol = length(separated_slices_entropy_SAC_df_colnames)))
 colnames(separated_slices_entropy_SAC_df) <- separated_slices_entropy_SAC_df_colnames
 
@@ -1250,7 +1250,7 @@ for (i in seq_len(n_separated_spes)) {
     
     index <- nrow(prop_cell_types) * (i - 1) + j
     separated_prop_SAC_df[index, c("spe", "reference", "target")] <- c(separated_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
-    separated_prop_SAC_df[index, "proportion"] <- proportion_SAC
+    separated_prop_SAC_df[index, "proportion_SAC"] <- proportion_SAC
     
     separated_prop_prevalence_df[index, c("spe", "reference", "target")] <- c(separated_spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
     separated_prop_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_df$prevalence
@@ -1274,7 +1274,7 @@ for (i in seq_len(n_separated_spes)) {
     
     index <- nrow(entropy_cell_types) * (i - 1) + j
     separated_entropy_SAC_df[index, c("spe", "cell_types")] <- c(separated_spe_name, entropy_cell_types$cell_types[j])
-    separated_entropy_SAC_df[index, "entropy"] <- entropy_SAC
+    separated_entropy_SAC_df[index, "entropy_SAC"] <- entropy_SAC
     
     separated_entropy_prevalence_df[index, c("spe", "cell_types")] <- c(separated_spe_name, entropy_cell_types$cell_types[j])
     separated_entropy_prevalence_df[index, thresholds_colnames] <- entropy_prevalence_df$prevalence
@@ -1400,7 +1400,7 @@ for (i in seq_len(n_separated_spes)) {
       index <- n_slices * nrow(prop_cell_types) * (i - 1) + nrow(prop_cell_types) * (slice_index - 1) + j
       
       separated_slices_prop_SAC_df[index, c("spe", "slice", "reference", "target")] <- c(separated_spe_name, slice_index, prop_cell_types$ref[j], prop_cell_types$tar[j])
-      separated_slices_prop_SAC_df[index, "proportion"] <- proportion_SAC
+      separated_slices_prop_SAC_df[index, "proportion_SAC"] <- proportion_SAC
       
       separated_slices_prop_prevalence_df[index, c("spe", "slice", "reference", "target")] <- c(separated_spe_name, slice_index, prop_cell_types$ref[j], prop_cell_types$tar[j])
       separated_slices_prop_prevalence_df[index, thresholds_colnames] <- proportion_prevalence_df$prevalence
@@ -1431,7 +1431,7 @@ for (i in seq_len(n_separated_spes)) {
       index <- n_slices * nrow(entropy_cell_types) * (i - 1) + nrow(entropy_cell_types) * (slice_index - 1) + j
       
       separated_slices_entropy_SAC_df[index, c("spe", "slice", "cell_types")] <- c(separated_spe_name, slice_index, entropy_cell_types$cell_types[j])
-      separated_slices_entropy_SAC_df[index, "entropy"] <- entropy_SAC
+      separated_slices_entropy_SAC_df[index, "entropy_SAC"] <- entropy_SAC
       
       separated_slices_entropy_prevalence_df[index, c("spe", "slice", "cell_types")] <- c(separated_spe_name, slice_index, entropy_cell_types$cell_types[j])
       separated_slices_entropy_prevalence_df[index, thresholds_colnames] <- entropy_prevalence_df$prevalence
