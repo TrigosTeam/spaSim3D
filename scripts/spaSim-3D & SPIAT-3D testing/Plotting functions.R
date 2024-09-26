@@ -1,22 +1,39 @@
+library(cowplot)
+library(ggplot2)
+library(S4Vectors)
+
 ### Function for non-gradient output ------------------------------------------
 plot_non_gradient_metric <- function(spes_table, 
                                      metric, 
-                                     metric_cell_types, 
                                      metric_df, 
                                      arrangement, 
-                                     plot_list) {
+                                     plots_metadata) {
   
-  ### Modify plot_list
-  # Change plot_list arrangement to inputted arrangement
-  plot_list$arrangement$x_aes <- arrangement
+  ### Modify plots_metadata
+  # Change plots_metadata arrangement to inputted arrangement
+  plots_metadata$arrangement$x_aes <- arrangement
   
-  # Change plot_list y_aes to inputted metric
-  for (i in seq_along(plot_list)) {
+  # Change plots_metadata y_aes to inputted metric
+  for (i in seq_along(plots_metadata)) {
     # Modify the y_aes element
-    plot_list[[i]]$y_aes <- metric
+    plots_metadata[[i]]$y_aes <- metric
   }
   
 
+  # Get metric_cell_types
+  if (metric == "AMD") {
+    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("prop_SAC", "prop_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
+    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+  }
+  
+  
   # Define plotting function
   create_plot <- function(data, x_aes, y_aes, title = "") {
     data <- data[!is.na(data[[x_aes]]), ]
@@ -59,8 +76,8 @@ plot_non_gradient_metric <- function(spes_table,
     # Factor
     plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
     
-    # Generate plots based on plot_list, use final column of metric_cell_types
-    plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]] <- lapply(plot_list, function(plot_def) {
+    # Generate plots based on plots_metadata, use final column of metric_cell_types
+    plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]] <- lapply(plots_metadata, function(plot_def) {
       x_aes <- plot_def$x_aes
       y_aes <- plot_def$y_aes
       title <- plot_def$title
@@ -102,31 +119,189 @@ plot_non_gradient_metric <- function(spes_table,
   return(non_gradient_metric_plot)
 }
 
+### Function for gradient output ----------------------------------------------
 plot_gradient_metric <- function(spes_table, 
                                  metric, 
-                                 metric_cell_types, 
                                  metric_df, 
-                                 arrangement_colname, 
-                                 plot_list) {
+                                 arrangement, 
+                                 gradient_type,
+                                 plots_metadata) {
+  ### Modify plots_metadata
+  # Change plots_metadata arrangement to inputted arrangement
+  plots_metadata$arrangement$color_aes <- arrangement
   
+  # Change plots_metadata x_aes to gradient_type and y_aes to inputted metric
+  for (i in seq_along(plots_metadata)) {
+    plots_metadata[[i]]$x_aes <- gradient_type
+    plots_metadata[[i]]$y_aes <- metric
+  }
+  
+  # Get gradient/threshold values
+  if (gradient_type == "radius") {
+    gradient <- seq(20, 100, 10)
+    gradient_colnames <- paste("r", gradient, sep = "")    
+  }
+  else if (gradient_type == "threshold") {
+    gradient <- seq(0.01, 1, 0.01)
+    gradient_colnames <- paste("t", gradient, sep = "")
+  }
+  
+  # Get metric_cell_types
+  if (metric %in% c("MS", "NMS")) {
+    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  if (metric %in% c("ACINP")) {
+    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  if (metric %in% c("AE")) {
+    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("ACIN", "CKR")) {
+    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("prop_prevalence")) {
+    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("entropy_prevalence")) {
+    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+  }
+  
+  
+  # Define plotting function
+  create_plot <- function(data, x_aes, y_aes, color_aes, title = "") {
+    
+    data <- data[!is.na(data[[color_aes]]), ]
+    
+    plot <- ggplot(data, aes_string(x = x_aes, y = y_aes, group = "spe", color = color_aes)) +
+      labs(title = title, x = x_aes, y = y_aes) +
+      theme_bw() +
+      geom_line()
+    return(plot)
+  }
+  
+  # Add Ellipsoid variation and volume to spes_table
+  radii_E_df <- spes_table[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+  spes_table$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * radii_E_df$radius_z_E
+  spes_table$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+  
+  # Put plots into an organised list
+  plots_list <- list()
+  
+  for (i in seq(nrow(metric_cell_types))) {
+    
+    # Subset metric_df for chosen pair/cell types
+    if (metric %in% c("MS", "NMS", "ACIN", "CKR", "prop_prevalence")) {
+      plot_df <- metric_df[metric_df$reference == metric_cell_types[i, "ref"] & metric_df$target == metric_cell_types[i, "tar"], ] 
+    }
+    else if (metric %in% c("ACINP", "AE")) {
+      plot_df <- metric_df[metric_df$reference == metric_cell_types[i, "ref"], ]
+    }
+    else if (metric %in% c("entropy_prevalence")) {
+      plot_df <- metric_df[metric_df$cell_types == metric_cell_types[i, "cell_types"], ]
+    }
+    else {
+      stop("Invalid metric")
+    }
+    # Combine spes_table and metric_df
+    plot_df <- cbind(spes_table, plot_df)
+    
+    # Melt
+    plot_df <- reshape2::melt(plot_df, , gradient_colnames)
+    
+    # Change last 2 column names
+    colnames(plot_df)[c(ncol(plot_df) - 1, ncol(plot_df))] <- c(gradient_type, metric)
+
+    # Extract radius value from radius strings (r1 -> 1, r2 -> 2...)
+    plot_df[[gradient_type]] <- unfactor(plot_df[[gradient_type]])
+    plot_df[[gradient_type]] <- as.numeric(substr(plot_df[[gradient_type]], 2, nchar(plot_df[[gradient_type]])))
+    
+    # Factor
+    plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    
+    # Generate plots based on plots_metadata, use final column of metric_cell_types
+    plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]] <- lapply(plots_metadata, function(plot_def) {
+      x_aes <- plot_def$x_aes
+      y_aes <- plot_def$y_aes
+      color_aes <- plot_def$color_aes
+      title <- plot_def$title
+      plot <- create_plot(data = plot_df, x_aes = x_aes, y_aes = y_aes, color_aes = color_aes, title = title)
+      return(plot)
+    })
+  }
+  
+  # Extract legends from first set of plots
+  legends_list <- lapply(plots_list[[1]], function(plot) {
+    plot_legend <- get_legend(plot + theme(legend.direction = "horizontal"))
+    return(plot_legend)
+  })
+  legends <- plot_grid(plotlist = legends_list, nrow = 1)
+  
+  # Combine the plots together using metric_cell_types
+  combined_plots_list <- list()
+  for (i in seq(nrow(metric_cell_types))) {
+    
+    # Remove legend from base plots
+    for (j in seq(length(plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]]))) {
+      plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]][[j]] <- 
+        plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]][[j]] + theme(legend.position = "none")
+    }
+    
+    # Get final column
+    cells <- metric_cell_types[i, ncol(metric_cell_types)]
+    
+    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
+    
+    if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_prevalence")) {
+      title <- ggdraw() +
+        draw_label(paste("Reference:", metric_cell_types[i, "ref"], "Target:", metric_cell_types[i, "tar"]),
+                   fontface = 'bold')
+    }
+    else if (metric %in% c("entropy_prevalence")) {
+      title <- ggdraw() + 
+        draw_label(paste("Cell types of interest:", cells), 
+                   fontface='bold')
+    }
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    combined_plots_list[[cells]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  gradient_metric_plot <- plot_grid(plotlist = combined_plots_list,
+                                    nrow = length(combined_plots_list), ncol = 1)
+  
+  # Add legends
+  gradient_metric_with_legends_plot <- plot_grid(gradient_metric_plot, legends,
+                                                 nrow = 2, ncol = 1,
+                                                 rel_heights = c(1, 0.1))
+  
+  methods::show(gradient_metric_with_legends_plot)
+  
+  return(gradient_metric_with_legends_plot)
 }
 
 
 ### Test for non-gradient metrics  ----------------------------------------------------------------------
+
+### Set up plot lists
+non_gradient_plots_metadata <- list(
+  arrangement = list(x_aes = "temp_arrangement", y_aes = "metric"),
+  bg_prop_A = list(x_aes = "bg_prop_A", y_aes = "metric"),
+  bg_prop_B = list(x_aes = "bg_prop_B", y_aes = "metric"),
+  shape = list(x_aes = "shape", y_aes = "metric"),
+  variation_E = list(x_aes = "variation_E", y_aes = "metric"),
+  volume_E = list(x_aes = "volume_E", y_aes = "metric"),
+  width_N = list(x_aes = "width_N", y_aes = "metric")
+)
+
 # Read mixed_spes_table
 setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
 mixed_spes_table <- read.table("mixed_spes_table.csv")
-
-### Set up plot lists
-non_gradient_plot_list <- list(
-  arrangement = list(x_aes = "temp", y_aes = "temp"),
-  bg_prop_A = list(x_aes = "bg_prop_A", y_aes = "temp"),
-  bg_prop_B = list(x_aes = "bg_prop_B", y_aes = "temp"),
-  shape = list(x_aes = "shape", y_aes = "temp"),
-  variation_E = list(x_aes = "variation_E", y_aes = "temp"),
-  volume_E = list(x_aes = "volume_E", y_aes = "temp"),
-  width_N = list(x_aes = "width_N", y_aes = "temp")
-)
 
 
 
@@ -136,40 +311,28 @@ non_gradient_plot_list <- list(
 setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_AMD_df <- read.table("mixed_AMD_df.csv")
 
-# AMD pairs are A/A, A/B, B/A, B/B
-AMD_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
-AMD_cell_types$pair <- paste(AMD_cell_types$ref, AMD_cell_types$tar, sep = "/")
-
 mixed_AMD_plot <- plot_non_gradient_metric(mixed_spes_table, 
                                            "AMD", 
-                                           AMD_cell_types,
                                            mixed_AMD_df, 
                                            "cluster_prop_B", 
-                                           non_gradient_plot_list)
+                                           non_gradient_plots_metadata)
 
 
 setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
 mixed_prop_SAC_df <- read.table("mixed_prop_SAC_df.csv")
 mixed_entropy_SAC_df <- read.table("mixed_entropy_SAC_df.csv")
 
-prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
-prop_cell_types$pair <- paste(prop_cell_types$ref, prop_cell_types$tar, sep = "/")
-
-entropy_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
-
 mixed_prop_SAC_plot <- plot_non_gradient_metric(mixed_spes_table, 
                                                 "prop_SAC", 
-                                                prop_cell_types,
                                                 mixed_prop_SAC_df, 
                                                 "cluster_prop_B", 
-                                                non_gradient_plot_list)
+                                                non_gradient_plots_metadata)
 
 mixed_entropy_SAC_plot <- plot_non_gradient_metric(mixed_spes_table, 
                                                    "entropy_SAC", 
-                                                   entropy_cell_types,
                                                    mixed_entropy_SAC_df, 
                                                    "cluster_prop_B", 
-                                                   non_gradient_plot_list)
+                                                   non_gradient_plots_metadata)
 
 # Read mixed prevalence dfs
 setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
@@ -180,22 +343,84 @@ thresholds <- seq(0.01, 1, 0.01)
 threshold_colnames <- paste("t", thresholds, sep = "")
 
 mixed_prop_prevalence_df$prop_AUC <- apply(mixed_prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-mixed_prop_prevalence_df <- mixed_prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
+mixed_prop_AUC_df <- mixed_prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
 
 mixed_entropy_prevalence_df$entropy_AUC <- apply(mixed_entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-mixed_entropy_prevalence_df <- mixed_entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
+mixed_entropy_AUC_df <- mixed_entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
 
 mixed_prop_prevalence_AUC_plot <- plot_non_gradient_metric(mixed_spes_table, 
                                                            "prop_AUC", 
-                                                           prop_cell_types,
-                                                           mixed_prop_prevalence_df, 
+                                                           mixed_prop_AUC_df, 
                                                            "cluster_prop_B", 
-                                                           non_gradient_plot_list)
+                                                           non_gradient_plots_metadata)
 
 mixed_entropy_prevaelnce_AUC_plot <- plot_non_gradient_metric(mixed_spes_table, 
                                                               "entropy_AUC", 
-                                                              entropy_cell_types,
-                                                              mixed_entropy_prevalence_df, 
+                                                              mixed_entropy_AUC_df, 
                                                               "cluster_prop_B", 
-                                                              non_gradient_plot_list)
+                                                              non_gradient_plots_metadata)
+
+
+
+### Test for gradient metrics  ----------------------------------------------------------------------
+
+### Set up plot lists
+gradient_plots_metadata <- list(
+  arrangement = list(x_aes = "gradient", y_aes = "metric", color_aes = "temp_arrangement"),
+  bg_prop_A = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_A"),
+  bg_prop_B = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_B"),
+  shape = list(x_aes = "gradient", y_aes = "metric", color_aes = "shape"),
+  variation_E = list(x_aes = "gradient", y_aes = "metric", color_aes = "variation_E"),
+  volume_E = list(x_aes = "gradient", y_aes = "metric", color_aes = "volume_E"),
+  width_N = list(x_aes = "gradient", y_aes = "metric", color_aes = "width_N")
+)
+
+# Read mixed_spes_table
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/spe_tables")
+mixed_spes_table <- read.table("mixed_spes_table.csv")
+
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
+mixed_MS_df <- read.table("mixed_MS_df.csv")
+
+mixed_MS_plot <- plot_gradient_metric(mixed_spes_table, 
+                                      "MS",
+                                      mixed_MS_df, 
+                                      "cluster_prop_B", 
+                                      "radius",
+                                      gradient_plots_metadata)
+
+
+# Read mixed ACIN, CKR
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
+mixed_ACIN_df <- read.table("mixed_ACIN_df.csv")
+mixed_CKR_df <- read.table("mixed_CKR_df.csv")
+
+mixed_ACIN_plot <- plot_gradient_metric(mixed_spes_table, 
+                                        "ACIN",
+                                        mixed_ACIN_df, 
+                                        "cluster_prop_B", 
+                                        "radius",
+                                        gradient_plots_metadata)
+
+# Read mixed prevalence dfs
+setwd("~/R/spaSim-3D/scripts/spaSim-3D & SPIAT-3D testing/analysis3D_tables/mixed")
+mixed_prop_prevalence_df <- read.table("mixed_prop_prevalence_df.csv")
+mixed_entropy_prevalence_df <- read.table("mixed_entropy_prevalence_df.csv")
+
+
+mixed_prop_prevalence_plot <- plot_gradient_metric(mixed_spes_table, 
+                                                   "prop_prevalence",
+                                                   mixed_prop_prevalence_df, 
+                                                   "cluster_prop_B",
+                                                   "threshold",
+                                                   gradient_plots_metadata)
+
+mixed_entropy_prevalence_plot <- plot_gradient_metric(mixed_spes_table, 
+                                                      "entropy_prevalence",
+                                                      mixed_entropy_prevalence_df, 
+                                                      "cluster_prop_B",
+                                                      "threshold",
+                                                      gradient_plots_metadata)
+
+
 
