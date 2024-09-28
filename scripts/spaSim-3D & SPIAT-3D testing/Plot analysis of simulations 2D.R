@@ -29,9 +29,9 @@ non_gradient_plots_metadata <- list(
   bg_prop_A = list(x_aes = "bg_prop_A", y_aes = "metric"),
   bg_prop_B = list(x_aes = "bg_prop_B", y_aes = "metric"),
   shape = list(x_aes = "shape", y_aes = "metric"),
-  variation_E = list(x_aes = "variation_E", y_aes = "metric"),
-  volume_E = list(x_aes = "volume_E", y_aes = "metric"),
-  width_N = list(x_aes = "width_N", y_aes = "metric")
+  E_radii_CV = list(x_aes = "E_radii_CV", y_aes = "metric"),
+  E_volume = list(x_aes = "E_volume", y_aes = "metric"),
+  N_width = list(x_aes = "N_width", y_aes = "metric")
 )
 
 gradient_plots_metadata <- list(
@@ -40,9 +40,9 @@ gradient_plots_metadata <- list(
   bg_prop_A = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_A"),
   bg_prop_B = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_B"),
   shape = list(x_aes = "gradient", y_aes = "metric", color_aes = "shape"),
-  variation_E = list(x_aes = "gradient", y_aes = "metric", color_aes = "variation_E"),
-  volume_E = list(x_aes = "gradient", y_aes = "metric", color_aes = "volume_E"),
-  width_N = list(x_aes = "gradient", y_aes = "metric", color_aes = "width_N")
+  E_radii_CV = list(x_aes = "gradient", y_aes = "metric", color_aes = "E_radii_CV"),
+  E_volume = list(x_aes = "gradient", y_aes = "metric", color_aes = "E_volume"),
+  N_width = list(x_aes = "gradient", y_aes = "metric", color_aes = "N_width")
 )
 
 
@@ -110,18 +110,12 @@ for (arrangement in arrangements) {
   }
 }
 
-setwd("~/R/plots/2D")
-saveRDS(metric_plots, "metric_plots_2D.RDS")
-
 
 
 ### Get pdf plot ------------------------------------------------------
-
 setwd("~/R/plots/2D")
 metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
 arrangements <- c("mixed", "ringed", "separated")
-metric_plots <- readRDS("metric_plots_2D.RDS")
-
 pdf("plots.pdf", width = 25, height = 12)
 
 for (metric in metrics) {
@@ -160,9 +154,9 @@ non_gradient_plots_metadata <- list(
   # bg_prop_A = list(x_aes = "bg_prop_A", y_aes = "metric"),
   # bg_prop_B = list(x_aes = "bg_prop_B", y_aes = "metric"),
   shape = list(x_aes = "shape", y_aes = "metric"),
-  variation_E = list(x_aes = "variation_E", y_aes = "metric"),
-  volume_E = list(x_aes = "volume_E", y_aes = "metric"),
-  width_N = list(x_aes = "width_N", y_aes = "metric")
+  E_radii_CV = list(x_aes = "E_radii_CV", y_aes = "metric"),
+  E_volume = list(x_aes = "E_volume", y_aes = "metric"),
+  N_width = list(x_aes = "N_width", y_aes = "metric")
 )
 
 gradient_plots_metadata <- list(
@@ -171,9 +165,9 @@ gradient_plots_metadata <- list(
   # bg_prop_A = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_A"),
   # bg_prop_B = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_B"),
   shape = list(x_aes = "gradient", y_aes = "metric", color_aes = "shape"),
-  variation_E = list(x_aes = "gradient", y_aes = "metric", color_aes = "variation_E"),
-  volume_E = list(x_aes = "gradient", y_aes = "metric", color_aes = "volume_E"),
-  width_N = list(x_aes = "gradient", y_aes = "metric", color_aes = "width_N")
+  E_radii_CV = list(x_aes = "gradient", y_aes = "metric", color_aes = "E_radii_CV"),
+  E_volume = list(x_aes = "gradient", y_aes = "metric", color_aes = "E_volume"),
+  N_width = list(x_aes = "gradient", y_aes = "metric", color_aes = "N_width")
 )
 
 
