@@ -65,9 +65,11 @@ plot_non_gradient_metric <- function(spes_table,
   }
   
   # Add Ellipsoid variation and volume to spes_table
-  radii_E_df <- spes_table[ , c("E_radius_x", "E_radius_y", "E_radius_z")]
-  spes_table$E_volume <- radii_E_df$E_radius_x * radii_E_df$E_radius_y * radii_E_df$E_radius_z
-  spes_table$E_radii_CV <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+  if (!is.null(spes_table$E_radius_x)) {
+    radii_E_df <- spes_table[ , c("E_radius_x", "E_radius_y", "E_radius_z")]
+    spes_table$E_volume <- radii_E_df$E_radius_x * radii_E_df$E_radius_y * radii_E_df$E_radius_z
+    spes_table$E_radii_CV <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100  
+  }
   
   # Put plots into an organised list
   plots_list <- list()
@@ -212,9 +214,11 @@ plot_gradient_metric <- function(spes_table,
   }
   
   # Add Ellipsoid variation and volume to spes_table
-  radii_E_df <- spes_table[ , c("E_radius_x", "E_radius_y", "E_radius_z")]
-  spes_table$E_volume <- radii_E_df$E_radius_x * radii_E_df$E_radius_y * radii_E_df$E_radius_z
-  spes_table$E_radii_CV <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+  if (!is.null(spes_table$E_radius_x)) {
+    radii_E_df <- spes_table[ , c("E_radius_x", "E_radius_y", "E_radius_z")]
+    spes_table$E_volume <- radii_E_df$E_radius_x * radii_E_df$E_radius_y * radii_E_df$E_radius_z
+    spes_table$E_radii_CV <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100  
+  }
   
   # Put plots into an organised list
   plots_list <- list()
