@@ -163,7 +163,8 @@ for (arrangement in arrangements) {
                                      c(background_parameters, arrangement_parameters[[arrangement]], shape_parameters[[shape]])]
     
     for (i in seq(nrow(spes_table_subset))) {
-      curr_metadata <- spe_metadata_cluster_template("regular", shape, bg_metadata)
+      if (arrangement %in% c("mixed", "separated")) curr_metadata <- spe_metadata_cluster_template("regular", shape, bg_metadata)
+      if (arrangement == "ringed") curr_metadata <- spe_metadata_cluster_template("ring", shape, bg_metadata)
       
       curr_metadata$background$cell_proportions <- c(spes_table_subset$bg_prop_A[i], 
                                                      spes_table_subset$bg_prop_B[i],
