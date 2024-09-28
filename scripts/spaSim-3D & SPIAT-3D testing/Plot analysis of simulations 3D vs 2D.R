@@ -2357,7 +2357,7 @@ plot_AMD_metric <- function(spes_table, AMD_df, slices_AMD_df, arrangement_colna
     # Get difference between AMD values in 3D and 2D slices.
     joint_df <- full_join(slices_AMD_df_subset, AMD_df_subset, "spe", suffix = c("_2D", "_3D"))
     
-    slices_AMD_df_subset$AMD <- (joint_df$AMD_2D - joint_df$AMD_3D) / joint_df$AMD_3D
+    slices_AMD_df_subset$AMD <- ((joint_df$AMD_2D - joint_df$AMD_3D) / joint_df$AMD_3D) * 100
     
     # Combine spes_table and AMD_df
     plot_df <- cbind(spes_table, slices_AMD_df_subset)
@@ -2366,68 +2366,50 @@ plot_AMD_metric <- function(spes_table, AMD_df, slices_AMD_df, arrangement_colna
     plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
     plot_df$slice <- as.character(plot_df$slice)
     
-    fig_slice <- ggplot(plot_df, aes(!!sym(arrangement_colname), AMD, col = slice)) +
+    # y-axis label
+    AMD_ylab <- "AMD error (%)"
+    
+    fig_slice <- ggplot(plot_df, aes(slice, AMD)) +
+      geom_violin() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    fig_arrangement <- ggplot(plot_df, aes(!!sym(arrangement_colname), AMD)) +
       geom_point() +
       theme_bw() +
-      scale_color_manual(values = viridis::viridis(5))
+      ylab(AMD_ylab)
     
-    # fig_bg_prop_A <- ggplot(plot_df, aes(!!sym(arrangement_colname), AMD, col = bg_prop_A)) +
-    #   geom_point() +
-    #   theme_bw() +
-    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    # 
-    # fig_bg_prop_B <- ggplot(plot_df, aes(!!sym(arrangement_colname), AMD, col = bg_prop_B)) +
-    #   geom_point() +
-    #   theme_bw() +
-    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
-    
-    fig_shape <- ggplot(plot_df, aes(!!sym(arrangement_colname), AMD, col = shape)) +
-      geom_point() +
-      theme_bw()
+    fig_shape <- ggplot(plot_df, aes(shape, AMD)) +
+      geom_violin() +
+      theme_bw() +
+      ylab(AMD_ylab)
     
     radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
     plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
     plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
-
-    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AMD, col = variation_E)) +
-      geom_point() +
-      theme_bw()
-
-    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(!!sym(arrangement_colname), AMD, col = volume_E)) +
+    
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variation_E, AMD)) +
       geom_point() +
       theme_bw() +
-      scale_color_continuous(n.breaks = 4)
-
-    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(!!sym(arrangement_colname), AMD, col = width_N)) +
-      geom_point() +
-      theme_bw()
+      ylab(AMD_ylab)
     
-    all_plots_list[[AMD_pairs[i, "pair"]]] <- list(slice = fig_slice + theme(legend.position="none"),
-                                                   # bg_prop_A = fig_bg_prop_A + theme(legend.position="none"),
-                                                   # bg_prop_B = fig_bg_prop_B + theme(legend.position="none"),
-                                                   shape = fig_shape + theme(legend.position="none"),
-                                                   variation_E = fig_variation_E + theme(legend.position="none"),
-                                                   volume_E = fig_volume_E + theme(legend.position="none"),
-                                                   width_N = fig_width_N + theme(legend.position="none"))
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(volume_E, AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(width_N, AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    all_plots_list[[AMD_pairs[i, "pair"]]] <- list(slice = fig_slice,
+                                                   arrangement = fig_arrangement,
+                                                   shape = fig_shape,
+                                                   variation_E = fig_variation_E,
+                                                   volume_E = fig_volume_E,
+                                                   width_N = fig_width_N)
   }
-  
-  # Get legends
-  legend_slice <- get_legend(fig_slice + theme(legend.direction = "horizontal"))
-  # legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
-  # legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
-  legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
-  legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
-  legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
-  legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
-  
-  legends <- plot_grid(legend_slice,
-                       # legend_bg_prop_a,
-                       # legend_bg_prop_B,
-                       legend_shape,
-                       legend_variation_E,
-                       legend_volume_E,
-                       legend_width_N,
-                       nrow = 1)
   
   # Combine the plots together by pairs
   plots_pair_list <- list()
@@ -2436,8 +2418,7 @@ plot_AMD_metric <- function(spes_table, AMD_df, slices_AMD_df, arrangement_colna
     pair <- AMD_pairs[i, "pair"]
     
     plots <- plot_grid(all_plots_list[[pair]]$slice,
-                       # all_plots_list[[pair]]$bg_prop_A,
-                       # all_plots_list[[pair]]$bg_prop_B,
+                       all_plots_list[[pair]]$arrangement,
                        all_plots_list[[pair]]$shape,
                        all_plots_list[[pair]]$variation_E,
                        all_plots_list[[pair]]$volume_E,
@@ -2458,14 +2439,231 @@ plot_AMD_metric <- function(spes_table, AMD_df, slices_AMD_df, arrangement_colna
                         plots_pair_list$`A/B`, 
                         plots_pair_list$`B/A`, 
                         plots_pair_list$`B/B`,
-                        legends,
-                        nrow = 5, ncol = 1, 
-                        rel_heights = c(1, 1, 1, 1, 0.5))
+                        nrow = 4, ncol = 1)
   
   methods::show(AMD_plot)
   
   return(AMD_plot)
 }
+
+plot_AMD_metric1 <- function(spes_table, AMD_df, slices_AMD_df, arrangement_colname) {
+  
+  # AMD pairs are A/A, A/B, B/A, B/B
+  AMD_pairs <- data.frame(cell1 = c("A", "A", "B", "B"),
+                          cell2 = c("A", "B", "A", "B"))
+  AMD_pairs$pair <- paste(AMD_pairs$cell1, AMD_pairs$cell2, sep = "/")
+  
+  # Put all plots into an organised list
+  all_plots_list <- list()
+  
+  for (i in seq(nrow(AMD_pairs))) {
+    
+    # Subset AMD_df for chosen pair
+    AMD_df_subset <- AMD_df[AMD_df$reference == AMD_pairs[i, "cell1"] & AMD_df$target == AMD_pairs[i, "cell2"], ]
+    
+    # Subset slices_AMD_df for chosen pair
+    slices_AMD_df_subset <- slices_AMD_df[slices_AMD_df$reference == AMD_pairs[i, "cell1"] & slices_AMD_df$target == AMD_pairs[i, "cell2"], ]
+    
+    # Get difference between AMD values in 3D and 2D slices.
+    joint_df <- full_join(slices_AMD_df_subset, AMD_df_subset, "spe", suffix = c("_2D", "_3D"))
+    
+    slices_AMD_df_subset$AMD <- ((joint_df$AMD_2D - joint_df$AMD_3D) / joint_df$AMD_3D) * 100
+    
+    # Get average error, which is the same as taking an average of the slices for each spe, then calculating error
+    slices_AMD_df_subset <- slices_AMD_df_subset %>% 
+      group_by(spe) %>%
+      summarise(AMD = mean(AMD, na.rm = T))
+    
+    slices_AMD_df_subset <- slices_AMD_df_subset[order(as.numeric(gsub(".*_(\\d+)", "\\1", slices_AMD_df_subset$spe))), ]
+    
+    # Combine spes_table and AMD_df
+    plot_df <- cbind(spes_table, slices_AMD_df_subset)
+    
+    # Slight changes
+    plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    
+    # y-axis label
+    AMD_ylab <- "AMD error (%)"
+    
+    fig_arrangement <- ggplot(plot_df, aes(!!sym(arrangement_colname), AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    fig_shape <- ggplot(plot_df, aes(shape, AMD)) +
+      geom_violin() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+    
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variation_E, AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(volume_E, AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(width_N, AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    all_plots_list[[AMD_pairs[i, "pair"]]] <- list(arrangement = fig_arrangement,
+                                                   shape = fig_shape,
+                                                   variation_E = fig_variation_E,
+                                                   volume_E = fig_volume_E,
+                                                   width_N = fig_width_N)
+  }
+  
+  # Combine the plots together by pairs
+  plots_pair_list <- list()
+  
+  for (i in seq(nrow(AMD_pairs))) {
+    pair <- AMD_pairs[i, "pair"]
+    
+    plots <- plot_grid(all_plots_list[[pair]]$arrangement,
+                       all_plots_list[[pair]]$shape,
+                       all_plots_list[[pair]]$variation_E,
+                       all_plots_list[[pair]]$volume_E,
+                       all_plots_list[[pair]]$width_N,
+                       nrow = 1, ncol = length(all_plots_list[[pair]]))
+    
+    title <- ggdraw() + 
+      draw_label(paste("Reference:", AMD_pairs[i, "cell1"], "Target:", AMD_pairs[i, "cell2"]), 
+                 fontface='bold')
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    
+    plots_pair_list[[pair]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  AMD_plot <- plot_grid(plots_pair_list$`A/A`, 
+                        plots_pair_list$`A/B`, 
+                        plots_pair_list$`B/A`, 
+                        plots_pair_list$`B/B`,
+                        nrow = 4, ncol = 1)
+  
+  methods::show(AMD_plot)
+  
+  return(AMD_plot)
+}
+
+plot_AMD_metric2 <- function(spes_table, AMD_df, slices_AMD_df, arrangement_colname) {
+  
+  # AMD pairs are A/A, A/B, B/A, B/B
+  AMD_pairs <- data.frame(cell1 = c("A", "A", "B", "B"),
+                          cell2 = c("A", "B", "A", "B"))
+  AMD_pairs$pair <- paste(AMD_pairs$cell1, AMD_pairs$cell2, sep = "/")
+  
+  # Put all plots into an organised list
+  all_plots_list <- list()
+  
+  for (i in seq(nrow(AMD_pairs))) {
+    
+    # Subset AMD_df for chosen pair
+    AMD_df_subset <- AMD_df[AMD_df$reference == AMD_pairs[i, "cell1"] & AMD_df$target == AMD_pairs[i, "cell2"], ]
+    
+    # Subset slices_AMD_df for chosen pair
+    slices_AMD_df_subset <- slices_AMD_df[slices_AMD_df$reference == AMD_pairs[i, "cell1"] & slices_AMD_df$target == AMD_pairs[i, "cell2"], ]
+    
+    # Get difference between AMD values in 3D and 2D slices.
+    joint_df <- full_join(slices_AMD_df_subset, AMD_df_subset, "spe", suffix = c("_2D", "_3D"))
+    
+    slices_AMD_df_subset$AMD <- ((joint_df$AMD_2D - joint_df$AMD_3D) / joint_df$AMD_3D) * 100
+    
+    # Get average error, which is the same as taking an average of the slices for each spe, then calculating error
+    slices_AMD_df_subset <- slices_AMD_df_subset %>% 
+      group_by(spe) %>%
+      summarise(AMD = sd(AMD, na.rm = T))
+    
+    slices_AMD_df_subset <- slices_AMD_df_subset[order(as.numeric(gsub(".*_(\\d+)", "\\1", slices_AMD_df_subset$spe))), ]
+    
+    # Combine spes_table and AMD_df
+    plot_df <- cbind(spes_table, slices_AMD_df_subset)
+    
+    # Slight changes
+    plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    
+    # y-axis label
+    AMD_ylab <- "AMD error (%)"
+    
+    fig_arrangement <- ggplot(plot_df, aes(!!sym(arrangement_colname), AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    fig_shape <- ggplot(plot_df, aes(shape, AMD)) +
+      geom_violin() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+    
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variation_E, AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(volume_E, AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(width_N, AMD)) +
+      geom_point() +
+      theme_bw() +
+      ylab(AMD_ylab)
+    
+    all_plots_list[[AMD_pairs[i, "pair"]]] <- list(arrangement = fig_arrangement,
+                                                   shape = fig_shape,
+                                                   variation_E = fig_variation_E,
+                                                   volume_E = fig_volume_E,
+                                                   width_N = fig_width_N)
+  }
+  
+  # Combine the plots together by pairs
+  plots_pair_list <- list()
+  
+  for (i in seq(nrow(AMD_pairs))) {
+    pair <- AMD_pairs[i, "pair"]
+    
+    plots <- plot_grid(all_plots_list[[pair]]$arrangement,
+                       all_plots_list[[pair]]$shape,
+                       all_plots_list[[pair]]$variation_E,
+                       all_plots_list[[pair]]$volume_E,
+                       all_plots_list[[pair]]$width_N,
+                       nrow = 1, ncol = length(all_plots_list[[pair]]))
+    
+    title <- ggdraw() + 
+      draw_label(paste("Reference:", AMD_pairs[i, "cell1"], "Target:", AMD_pairs[i, "cell2"]), 
+                 fontface='bold')
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    
+    plots_pair_list[[pair]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  AMD_plot <- plot_grid(plots_pair_list$`A/A`, 
+                        plots_pair_list$`A/B`, 
+                        plots_pair_list$`B/A`, 
+                        plots_pair_list$`B/B`,
+                        nrow = 4, ncol = 1)
+  
+  methods::show(AMD_plot)
+  
+  return(AMD_plot)
+}
+
 
 plot_gradient_metrics_type1 <- function(spes_table, gradient_metric_df, slices_gradient_metric_df, metric, arrangement_colname) {
   
@@ -2749,7 +2947,7 @@ plot_gradient_metrics_type2 <- function(spes_table, gradient_metric_df, slices_g
     
     for (radii_colname in radii_colnames) {
       slices_gradient_metric_df_subset[ , radii_colname] <- 
-        (joint_df[ , paste(radii_colname, "_2D", sep = "")] - joint_df[ , paste(radii_colname, "_3D", sep = "")]) / joint_df[ , paste(radii_colname, "_3D", sep = "")]
+        ((joint_df[ , paste(radii_colname, "_2D", sep = "")] - joint_df[ , paste(radii_colname, "_3D", sep = "")]) / joint_df[ , paste(radii_colname, "_3D", sep = "")]) * 100
     }
     
     
@@ -2887,6 +3085,346 @@ plot_gradient_metrics_type2 <- function(spes_table, gradient_metric_df, slices_g
   
   return(combined_plot)
 }
+
+plot_gradient_metrics_type2_1 <- function(spes_table, gradient_metric_df, slices_gradient_metric_df, metric, arrangement_colname, min_radius, max_radius) {
+  
+  # Constants
+  pairs <- data.frame(cell1 = c("A", "A", "B", "B"),
+                      cell2 = c("A", "B", "A", "B"))
+  pairs$pair <- paste(pairs$cell1, pairs$cell2, sep = "/")
+  
+  radii <- seq(20, 100, 10)
+  radii_colnames <- paste("r", radii, sep = "")
+  
+  # Put all plots into an organised list
+  all_plots_list <- list()
+  
+  for (i in seq(nrow(pairs))) {
+    
+    # Subset gradient_metric_df for current reference cell
+    gradient_metric_df_subset <- gradient_metric_df[gradient_metric_df$reference == pairs[i, "cell1"] &
+                                                      gradient_metric_df$target == pairs[i, "cell2"], ]
+    
+    # Subset slices_gradient_metric_df for current reference cell
+    slices_gradient_metric_df_subset <- slices_gradient_metric_df[slices_gradient_metric_df$reference == pairs[i, "cell1"] &
+                                                                    slices_gradient_metric_df$target == pairs[i, "cell2"], ]
+    
+    # Get difference between AMD values in 3D and 2D slices.
+    joint_df <- full_join(slices_gradient_metric_df_subset, gradient_metric_df_subset, by = "spe", suffix = c("_2D", "_3D"))
+    
+    for (radii_colname in radii_colnames) {
+      slices_gradient_metric_df_subset[ , radii_colname] <- 
+        ((joint_df[ , paste(radii_colname, "_2D", sep = "")] - joint_df[ , paste(radii_colname, "_3D", sep = "")]) / joint_df[ , paste(radii_colname, "_3D", sep = "")]) * 100
+    }
+    
+    df <- data.frame(matrix(nrow = nrow(spes_table), ncol = length(radii_colnames)))
+    colnames(df) <- radii_colnames
+    
+    for (radii_colname in radii_colnames) {
+      temp <- slices_gradient_metric_df_subset %>% 
+        group_by(spe) %>%
+        summarise(average = mean(!!sym(radii_colname), na.rm = T))
+      df[radii_colname] <- temp$average
+    }
+
+    df$spe <- temp$spe
+    
+    df <- df[order(as.numeric(gsub(".*_(\\d+)", "\\1", df$spe))), ]
+    
+    # Combine spes_table and mixed_AMD_df
+    plot_df <- cbind(spes_table, df)
+    
+    # Melt
+    plot_df <- reshape2::melt(plot_df, , radii_colnames)
+    
+    # Slight changes
+    plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    plot_df$key <- paste(plot_df$spe, plot_df$slice, sep = "_")
+    
+    # Extract radius value from radius strings (r1 -> 1, r2 -> 2...)
+    plot_df$variable <- unfactor(plot_df$variable)
+    plot_df$variable <- as.numeric(substr(plot_df$variable, 2, nchar(plot_df$variable)))
+    
+    plot_df <- plot_df[plot_df$variable >= min_radius & plot_df$variable <= max_radius, ]
+    
+    fig_arrangement <- ggplot(plot_df, aes(variable, value, group = key, col = !!sym(arrangement_colname))) +
+      geom_line() +
+      labs(x = "radius", y = metric) +
+      theme_bw()
+    
+    # fig_bg_prop_A <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_A)) +
+    #   geom_line() +
+    #   labs(x = "radius", y = metric) +
+    #   theme_bw() +
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
+    # 
+    # fig_bg_prop_B <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_B)) +
+    #   geom_line() +
+    #   labs(x = "radius", y = metric) +
+    #   theme_bw() +
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
+    
+    fig_shape <- ggplot(plot_df, aes(variable, value, group = key, col = shape)) +
+      geom_line() +
+      theme_bw()
+    
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+    
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = key, col = variation_E)) +
+      geom_line() +
+      labs(x = "radius", y = metric) +
+      theme_bw()
+    
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = key, col = volume_E)) +
+      geom_line() +
+      labs(x = "radius", y = metric) +
+      theme_bw() +
+      scale_color_continuous(n.breaks = 4)
+    
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(variable, value, group = key, col = width_N)) +
+      geom_line() +
+      labs(x = "radius", y = metric) +
+      theme_bw()
+    
+    all_plots_list[[pairs[i, "pair"]]] <- list(arrangement = fig_arrangement + theme(legend.position = "none"),
+                                               # bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
+                                               # bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"),
+                                               shape = fig_shape + theme(legend.position = "none"),
+                                               variation_E = fig_variation_E + theme(legend.position = "none"),
+                                               volume_E = fig_volume_E + theme(legend.position = "none"),
+                                               width_N = fig_width_N + theme(legend.position = "none"))
+    
+  }
+  
+  
+  # Get legends
+  legend_arrangement <- get_legend(fig_arrangement + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
+  legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
+  legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
+  legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
+  legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
+  
+  legends <- plot_grid(legend_arrangement,
+                       # legend_bg_prop_a,
+                       # legend_bg_prop_B,
+                       legend_shape,
+                       legend_variation_E,
+                       legend_volume_E,
+                       legend_width_N,
+                       nrow = 1)
+  
+  # Combine the plots together by reference cell type
+  plots_pair_list <- list()
+  
+  for (i in seq(nrow(pairs))) {
+    pair <- pairs[i, "pair"]
+    
+    plots <- plot_grid(all_plots_list[[pair]]$arrangement,
+                       # all_plots_list[[pair]]$bg_prop_A,
+                       # all_plots_list[[pair]]$bg_prop_B,
+                       all_plots_list[[pair]]$shape,
+                       all_plots_list[[pair]]$variation_E,
+                       all_plots_list[[pair]]$volume_E,
+                       all_plots_list[[pair]]$width_N,
+                       nrow = 1, ncol = length(all_plots_list[[pair]]))
+    
+    title <- ggdraw() + 
+      draw_label(paste("Reference:", pairs[i, "cell1"], "Target:", pairs[i, "cell2"]), 
+                 fontface='bold')
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    
+    plots_pair_list[[pair]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  combined_plot <- plot_grid(plots_pair_list$`A/A`, 
+                             plots_pair_list$`A/B`, 
+                             plots_pair_list$`B/A`, 
+                             plots_pair_list$`B/B`,
+                             legends,
+                             nrow = 5, ncol = 1,
+                             rel_heights = c(1, 1, 1, 1, 0.5))
+  
+  methods::show(combined_plot)
+  
+  return(combined_plot)
+}
+
+plot_gradient_metrics_type2_2 <- function(spes_table, gradient_metric_df, slices_gradient_metric_df, metric, arrangement_colname, min_radius, max_radius) {
+  
+  # Constants
+  pairs <- data.frame(cell1 = c("A", "A", "B", "B"),
+                      cell2 = c("A", "B", "A", "B"))
+  pairs$pair <- paste(pairs$cell1, pairs$cell2, sep = "/")
+  
+  radii <- seq(20, 100, 10)
+  radii_colnames <- paste("r", radii, sep = "")
+  
+  # Put all plots into an organised list
+  all_plots_list <- list()
+  
+  for (i in seq(nrow(pairs))) {
+    
+    # Subset gradient_metric_df for current reference cell
+    gradient_metric_df_subset <- gradient_metric_df[gradient_metric_df$reference == pairs[i, "cell1"] &
+                                                      gradient_metric_df$target == pairs[i, "cell2"], ]
+    
+    # Subset slices_gradient_metric_df for current reference cell
+    slices_gradient_metric_df_subset <- slices_gradient_metric_df[slices_gradient_metric_df$reference == pairs[i, "cell1"] &
+                                                                    slices_gradient_metric_df$target == pairs[i, "cell2"], ]
+    
+    # Get difference between AMD values in 3D and 2D slices.
+    joint_df <- full_join(slices_gradient_metric_df_subset, gradient_metric_df_subset, by = "spe", suffix = c("_2D", "_3D"))
+    
+    for (radii_colname in radii_colnames) {
+      slices_gradient_metric_df_subset[ , radii_colname] <- 
+        ((joint_df[ , paste(radii_colname, "_2D", sep = "")] - joint_df[ , paste(radii_colname, "_3D", sep = "")]) / joint_df[ , paste(radii_colname, "_3D", sep = "")]) * 100
+    }
+    
+    df <- data.frame(matrix(nrow = nrow(spes_table), ncol = length(radii_colnames)))
+    colnames(df) <- radii_colnames
+    
+    for (radii_colname in radii_colnames) {
+      temp <- slices_gradient_metric_df_subset %>% 
+        group_by(spe) %>%
+        summarise(sd = sd(!!sym(radii_colname), na.rm = T))
+      df[radii_colname] <- temp$sd
+    }
+    
+    df$spe <- temp$spe
+    
+    df <- df[order(as.numeric(gsub(".*_(\\d+)", "\\1", df$spe))), ]
+    
+    # Combine spes_table and mixed_AMD_df
+    plot_df <- cbind(spes_table, df)
+    
+    # Melt
+    plot_df <- reshape2::melt(plot_df, , radii_colnames)
+    
+    # Slight changes
+    plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    plot_df$key <- paste(plot_df$spe, plot_df$slice, sep = "_")
+    
+    # Extract radius value from radius strings (r1 -> 1, r2 -> 2...)
+    plot_df$variable <- unfactor(plot_df$variable)
+    plot_df$variable <- as.numeric(substr(plot_df$variable, 2, nchar(plot_df$variable)))
+    
+    plot_df <- plot_df[plot_df$variable >= min_radius & plot_df$variable <= max_radius, ]
+    
+    fig_arrangement <- ggplot(plot_df, aes(variable, value, group = key, col = !!sym(arrangement_colname))) +
+      geom_line() +
+      labs(x = "radius", y = metric) +
+      theme_bw()
+    
+    # fig_bg_prop_A <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_A)) +
+    #   geom_line() +
+    #   labs(x = "radius", y = metric) +
+    #   theme_bw() +
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
+    # 
+    # fig_bg_prop_B <- ggplot(plot_df, aes(variable, value, group = key, col = bg_prop_B)) +
+    #   geom_line() +
+    #   labs(x = "radius", y = metric) +
+    #   theme_bw() +
+    #   scale_color_continuous(breaks = c(0.0, 0.05, 0.1))
+    
+    fig_shape <- ggplot(plot_df, aes(variable, value, group = key, col = shape)) +
+      geom_line() +
+      theme_bw()
+    
+    radii_E_df <- plot_df[ , c("radius_x_E", "radius_y_E", "radius_z_E")]
+    plot_df$volume_E <- radii_E_df$radius_x_E * radii_E_df$radius_y_E * plot_df$radius_z_E
+    plot_df$variation_E <- (apply(radii_E_df, 1, sd) / rowMeans(radii_E_df)) * 100
+    
+    fig_variation_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = key, col = variation_E)) +
+      geom_line() +
+      labs(x = "radius", y = metric) +
+      theme_bw()
+    
+    fig_volume_E <- ggplot(plot_df %>% filter(shape == "Ellipsoid"), aes(variable, value, group = key, col = volume_E)) +
+      geom_line() +
+      labs(x = "radius", y = metric) +
+      theme_bw() +
+      scale_color_continuous(n.breaks = 4)
+    
+    fig_width_N <- ggplot(plot_df %>% filter(!is.na(width_N)), aes(variable, value, group = key, col = width_N)) +
+      geom_line() +
+      labs(x = "radius", y = metric) +
+      theme_bw()
+    
+    all_plots_list[[pairs[i, "pair"]]] <- list(arrangement = fig_arrangement + theme(legend.position = "none"),
+                                               # bg_prop_A = fig_bg_prop_A + theme(legend.position = "none"),
+                                               # bg_prop_B = fig_bg_prop_B + theme(legend.position = "none"),
+                                               shape = fig_shape + theme(legend.position = "none"),
+                                               variation_E = fig_variation_E + theme(legend.position = "none"),
+                                               volume_E = fig_volume_E + theme(legend.position = "none"),
+                                               width_N = fig_width_N + theme(legend.position = "none"))
+    
+  }
+  
+  
+  # Get legends
+  legend_arrangement <- get_legend(fig_arrangement + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_a <- get_legend(fig_bg_prop_A + theme(legend.direction = "horizontal"))
+  # legend_bg_prop_B <- get_legend(fig_bg_prop_B + theme(legend.direction = "horizontal"))
+  legend_shape <- get_legend(fig_shape + theme(legend.direction = "horizontal"))
+  legend_variation_E <- get_legend(fig_variation_E + theme(legend.direction = "horizontal"))
+  legend_volume_E <- get_legend(fig_volume_E + theme(legend.direction = "horizontal"))
+  legend_width_N <- get_legend(fig_width_N + theme(legend.direction = "horizontal"))
+  
+  legends <- plot_grid(legend_arrangement,
+                       # legend_bg_prop_a,
+                       # legend_bg_prop_B,
+                       legend_shape,
+                       legend_variation_E,
+                       legend_volume_E,
+                       legend_width_N,
+                       nrow = 1)
+  
+  # Combine the plots together by reference cell type
+  plots_pair_list <- list()
+  
+  for (i in seq(nrow(pairs))) {
+    pair <- pairs[i, "pair"]
+    
+    plots <- plot_grid(all_plots_list[[pair]]$arrangement,
+                       # all_plots_list[[pair]]$bg_prop_A,
+                       # all_plots_list[[pair]]$bg_prop_B,
+                       all_plots_list[[pair]]$shape,
+                       all_plots_list[[pair]]$variation_E,
+                       all_plots_list[[pair]]$volume_E,
+                       all_plots_list[[pair]]$width_N,
+                       nrow = 1, ncol = length(all_plots_list[[pair]]))
+    
+    title <- ggdraw() + 
+      draw_label(paste("Reference:", pairs[i, "cell1"], "Target:", pairs[i, "cell2"]), 
+                 fontface='bold')
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    
+    plots_pair_list[[pair]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  combined_plot <- plot_grid(plots_pair_list$`A/A`, 
+                             plots_pair_list$`A/B`, 
+                             plots_pair_list$`B/A`, 
+                             plots_pair_list$`B/B`,
+                             legends,
+                             nrow = 5, ncol = 1,
+                             rel_heights = c(1, 1, 1, 1, 0.5))
+  
+  methods::show(combined_plot)
+  
+  return(combined_plot)
+}
+
+
 
 plot_gradient_metrics_type2_boxplot <- function(spes_table, gradient_metric_df, slices_gradient_metric_df, metric, arrangement_colname, min_radius, max_radius) {
   
