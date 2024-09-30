@@ -19,7 +19,7 @@ simulate_random_background_cells3D <- function(n_cells,
   }
   
   # Need to over-sample as cells which are too close will be removed later
-  n_cells_inflated <- n_cells * 1.2
+  n_cells_inflated <- n_cells * 2
   
   # Use poisson distribution to sample points
   pois_df <- poisson_distribution3D(n_cells = n_cells_inflated, 
