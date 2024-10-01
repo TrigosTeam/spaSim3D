@@ -28,13 +28,16 @@ spe_cluster_dup <- simulate_spe_metadata3D(prev_metadata)
 bg_metadata <- spe_metadata_background_template("random")
 
 # Change background metadata
-bg_metadata$background$minimum_distance_between_cells <- 0
-bg_metadata$background$n_cells <- 10000
+bg_metadata$background$length <- 600
+bg_metadata$background$width <- 600
+bg_metadata$background$height <- 250
+bg_metadata$background$minimum_distance_between_cells <- 10
+bg_metadata$background$n_cells <- 25000
 
 # Cluster metadata (using background metadata as background)
-cluster_metadata <- spe_metadata_cluster_template("regular", "Sphere", bg_metadata)
-cluster_metadata <- spe_metadata_cluster_template("ring", "Ellipsoid", cluster_metadata)
-cluster_metadata <- spe_metadata_cluster_template("double ring", "Cylinder", cluster_metadata)
+cluster_metadata <- spe_metadata_cluster_template("regular", "sphere", bg_metadata)
+cluster_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", cluster_metadata)
+cluster_metadata <- spe_metadata_cluster_template("double ring", "cylinder", cluster_metadata)
 
 # Get spe from updated metadata
 spe_clusters <- simulate_spe_metadata3D(cluster_metadata)
@@ -45,7 +48,7 @@ plot_cells3D(spe_clusters,
 
 
 # Add metadata to spe
-new_metadata <- spe_metadata_cluster_template("regular", "Network")
+new_metadata <- spe_metadata_cluster_template("regular", "network")
 
 spe_clusters1 <- add_spe_metadata3D(spe_clusters, new_metadata)
 plot_cells3D(spe_clusters1,
@@ -57,9 +60,9 @@ plot_cells3D(spe_clusters1,
 
 ### Random simuation ---------------------------------------------------------
 metadata_bg_r <- spe_metadata_background_template("random")
-metadata_bg_clusters <- spe_metadata_cluster_template("double ring", "Sphere", metadata_bg_r)
-metadata_bg_clusters <- spe_metadata_cluster_template("regular", "Network", metadata_bg_clusters)
-metadata_bg_clusters <- spe_metadata_cluster_template("regular", "Network", metadata_bg_clusters)
+metadata_bg_clusters <- spe_metadata_cluster_template("double ring", "sphere", metadata_bg_r)
+metadata_bg_clusters <- spe_metadata_cluster_template("regular", "network", metadata_bg_clusters)
+metadata_bg_clusters <- spe_metadata_cluster_template("regular", "network", metadata_bg_clusters)
 
 metadata_bg_clusters$cluster_1$centre_loc <- c(50, 50, 50)
 metadata_bg_clusters$cluster_2$centre_loc <- c(25, 25, 25)
@@ -74,17 +77,17 @@ plot_cells3D(spe_clusters,
 
 ### Testing every default clustering -----------------------------------------
 spe_metadata <- spe_metadata_background_template("random")
-spe_metadata <- spe_metadata_cluster_template("regular", "Sphere", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("regular", "Ellipsoid", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("regular", "Cylinder", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("regular", "Network", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("ring", "Sphere", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("ring", "Ellipsoid", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("ring", "Cylinder", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("ring", "Network", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("double ring", "Sphere", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("double ring", "Ellipsoid", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("double ring", "Cylinder", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("double ring", "Network", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("regular", "sphere", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("regular", "ellipsoid", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("regular", "cylinder", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("regular", "network", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("ring", "sphere", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("ring", "cylinder", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("ring", "network", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("double ring", "sphere", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("double ring", "ellipsoid", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("double ring", "cylinder", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("double ring", "network", spe_metadata)
 spe_clusters <- simulate_spe_metadata3D(spe_metadata)
 
