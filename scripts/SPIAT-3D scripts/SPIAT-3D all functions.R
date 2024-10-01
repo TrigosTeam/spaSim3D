@@ -1178,7 +1178,7 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
       mixing_score_df$mixing_score <- mixing_score_df$n_ref_tar_interactions / (0.5 * mixing_score_df$n_ref_ref_interactions)
       mixing_score_df$normalised_mixing_score <- 0.5 * mixing_score_df$mixing_score * mixing_score_df$n_ref_cells / mixing_score_df$n_tar_cell
       if (is.infinite(mixing_score_df$mixing_score)) mixing_score_df$mixing_score <- NA
-      if (is.infinite(mixing_score_df$normalised_mixing_score)) mixing_score_df$mixing_score <- NA
+      if (is.infinite(mixing_score_df$normalised_mixing_score)) mixing_score_df$normalised_mixing_score <- NA
       result[["mixing_score"]][[target_cell_type]] <- mixing_score_df
       
     }
