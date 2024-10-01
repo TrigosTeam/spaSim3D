@@ -87,7 +87,7 @@ thresholds_colnames <- paste("t", thresholds, sep = "")
 
 prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
 
-prop_SAC_df_colnames <- c("spe", "reference", "target", "proportion_SAC")
+prop_SAC_df_colnames <- c("spe", "reference", "target", "prop_SAC")
 prop_SAC_df <- data.frame(matrix(nrow = n_spes * nrow(prop_cell_types), ncol = length(prop_SAC_df_colnames)))
 colnames(prop_SAC_df) <- prop_SAC_df_colnames
 
@@ -188,7 +188,7 @@ thresholds_colnames <- paste("t", thresholds, sep = "")
 
 prop_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
 
-slices_prop_SAC_df_colnames <- c("spe", "slice", "reference", "target", "proportion_SAC")
+slices_prop_SAC_df_colnames <- c("spe", "slice", "reference", "target", "prop_SAC")
 slices_prop_SAC_df <- data.frame(matrix(nrow = n_spes * nrow(prop_cell_types) * n_slices, ncol = length(slices_prop_SAC_df_colnames)))
 colnames(slices_prop_SAC_df) <- slices_prop_SAC_df_colnames
 
@@ -338,7 +338,7 @@ for (arrangement in arrangements) {
         
         index <- nrow(prop_cell_types) * (i - 1) + j
         metric_df_lists3D[[spes_metadata_index]][["prop_SAC"]][index, c("spe", "reference", "target")] <- c(spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
-        metric_df_lists3D[[spes_metadata_index]][["prop_SAC"]][index, "proportion_SAC"] <- proportion_SAC
+        metric_df_lists3D[[spes_metadata_index]][["prop_SAC"]][index, "prop_SAC"] <- proportion_SAC
         
         metric_df_lists3D[[spes_metadata_index]][["prop_prevalence"]][index, c("spe", "reference", "target")] <- c(spe_name, prop_cell_types$ref[j], prop_cell_types$tar[j])
         metric_df_lists3D[[spes_metadata_index]][["prop_prevalence"]][index, thresholds_colnames] <- proportion_prevalence_df$prevalence
@@ -488,7 +488,7 @@ for (arrangement in arrangements) {
           index <- n_slices * nrow(prop_cell_types) * (i - 1) + nrow(prop_cell_types) * (slice_index - 1) + j
           
           metric_df_lists2D[[spes_metadata_index]][["prop_SAC"]][index, c("spe", "slice", "reference", "target")] <- c(spe_name, slice_index, prop_cell_types$ref[j], prop_cell_types$tar[j])
-          metric_df_lists2D[[spes_metadata_index]][["prop_SAC"]][index, "proportion_SAC"] <- proportion_SAC
+          metric_df_lists2D[[spes_metadata_index]][["prop_SAC"]][index, "prop_SAC"] <- proportion_SAC
           
           metric_df_lists2D[[spes_metadata_index]][["prop_prevalence"]][index, c("spe", "slice", "reference", "target")] <- c(spe_name, slice_index, prop_cell_types$ref[j], prop_cell_types$tar[j])
           metric_df_lists2D[[spes_metadata_index]][["prop_prevalence"]][index, thresholds_colnames] <- proportion_prevalence_df$prevalence
