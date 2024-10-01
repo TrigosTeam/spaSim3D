@@ -970,7 +970,7 @@ plot_error_gradient_metric_one_slice <- function(spes_table,
     }
 
     # Get error for each radii/threshold column
-    joint_df <- full_join(metric_df3D_subset, metric_df2D_subset, by = "spe", suffix = c("_2D", "_3D"))
+    joint_df <- full_join(metric_df2D_subset, metric_df3D_subset, by = "spe", suffix = c("_2D", "_3D"))
 
     error_df <- metric_df2D_subset
     for (gradient_colname in gradient_colnames) {

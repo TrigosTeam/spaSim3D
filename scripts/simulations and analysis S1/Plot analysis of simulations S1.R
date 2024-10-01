@@ -876,8 +876,8 @@ for (arrangement in arrangements) {
 setwd("~/R/plots/S1")
 arrangements <- c("mixed", "ringed", "separated")
 shapes <- c("ellipsoid", "network")
-metrics_set1 <- c("AMD",  "ACIN_AUC", "CKR_AUC")
-metrics_set2 <- c("MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
+metrics_set1 <- c("ACIN", "CKR")
+metrics_set2 <- c("MS", "NMS", "ACINP", "AE", "prop_prevalence", "entropy_prevalence")
 
 pdf("plots_error_gradient.pdf", width = 25, height = 10)
 
@@ -886,7 +886,7 @@ for (metric in metrics_set1) {
     curr_metric_plots <- list()
     for (arrangement in arrangements) {
       spes_metadata_index <- paste(arrangement, shape, sep = "_")
-      curr_metric_plots[[arrangement]] <- metric_plots_error_non_gradient[[spes_metadata_index]][[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+      curr_metric_plots[[arrangement]] <- metric_plots_error_gradient[[spes_metadata_index]][[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
     }
     plot <- plot_grid(plotlist = curr_metric_plots,
                       nrow = 1, 
@@ -900,7 +900,7 @@ for (metric in metrics_set2) {
   for (shape in shapes) {
     for (arrangement in arrangements) {
       spes_metadata_index <- paste(arrangement, shape, sep = "_")
-      curr_metric_plots[[spes_metadata_index]] <- metric_plots_error_non_gradient[[spes_metadata_index]][[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+      curr_metric_plots[[spes_metadata_index]] <- metric_plots_error_gradient[[spes_metadata_index]][[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
     }
   }
   plot <- plot_grid(plotlist = curr_metric_plots,

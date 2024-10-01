@@ -111,11 +111,8 @@ for (arrangement in arrangements) {
 setwd("~/R/spaSim-3D/scripts/simulations and analysis S2/S2 data")
 spes_table <- read.table("spes_table.csv")
 spes_table$cluster_prop_B <- 1 - spes_table$cluster_prop_A
-spes_table[spes_table$variable_parameter == "cluster_prop_A", "variable_parameter"] <- "cluster_prop_B"
 spes_table$distance <- 450 - spes_table$cluster_x_coord
-spes_table[spes_table$variable_parameter == "cluster_x_coord", "variable_parameter"] <- "distance" 
 spes_table$E_volume <- (4/3) * pi * spes_table$E_radius_x * spes_table$E_radius_y * spes_table$E_radius_z
-spes_table[spes_table$variable_parameter == "E_radius_z", "variable_parameter"] <- "E_volume" 
 
 # Set up plots metadata
 non_gradient_plots_metadata <- list(
@@ -174,19 +171,16 @@ for (arrangement in arrangements) {
   for (shape in shapes) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
-    spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
-                                    c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]], "variable_parameter")]
-    
     for (metric in metrics) {
       if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
-        metric_plots3D[[spes_metadata_index]][[metric]] <- plot_non_gradient_metric(spes_table_subset, 
+        metric_plots3D[[spes_metadata_index]][[metric]] <- plot_non_gradient_metric(spes_table, 
                                                                                     metric, 
                                                                                     metric_df_lists3D[[spes_metadata_index]][[metric]], 
                                                                                     arrangement_parameters[[arrangement]], 
                                                                                     non_gradient_plots_metadata[[shape]])
       }
       else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_prevalence", "entropy_prevalence")) {
-        metric_plots3D[[spes_metadata_index]][[metric]] <- plot_gradient_metric(spes_table_subset, 
+        metric_plots3D[[spes_metadata_index]][[metric]] <- plot_gradient_metric(spes_table, 
                                                                                 metric,
                                                                                 metric_df_lists3D[[spes_metadata_index]][[metric]], 
                                                                                 arrangement_parameters[[arrangement]], 
@@ -244,11 +238,8 @@ dev.off()
 setwd("~/R/spaSim-3D/scripts/simulations and analysis S2/S2 data")
 spes_table <- read.table("spes_table.csv")
 spes_table$cluster_prop_B <- 1 - spes_table$cluster_prop_A
-spes_table[spes_table$variable_parameter == "cluster_prop_A", "variable_parameter"] <- "cluster_prop_B"
 spes_table$distance <- 450 - spes_table$cluster_x_coord
-spes_table[spes_table$variable_parameter == "cluster_x_coord", "variable_parameter"] <- "distance" 
 spes_table$E_volume <- (4/3) * pi * spes_table$E_radius_x * spes_table$E_radius_y * spes_table$E_radius_z
-spes_table[spes_table$variable_parameter == "E_radius_z", "variable_parameter"] <- "E_volume" 
 
 # Subset metric_df_lists2D to only include the middle slice
 arrangements <- c("mixed", "ringed", "separated")
@@ -325,19 +316,16 @@ for (arrangement in arrangements) {
   for (shape in shapes) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
-    spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
-                                    c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]], "variable_parameter")]
-    
     for (metric in metrics) {
       if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
-        metric_plots2D[[spes_metadata_index]][[metric]] <- plot_non_gradient_metric(spes_table_subset, 
+        metric_plots2D[[spes_metadata_index]][[metric]] <- plot_non_gradient_metric(spes_table, 
                                                                                     metric, 
                                                                                     metric_df_lists2D_subset[[spes_metadata_index]][[metric]], 
                                                                                     arrangement_parameters[[arrangement]], 
                                                                                     non_gradient_plots_metadata[[shape]])
       }
       else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_prevalence", "entropy_prevalence")) {
-        metric_plots2D[[spes_metadata_index]][[metric]] <- plot_gradient_metric(spes_table_subset, 
+        metric_plots2D[[spes_metadata_index]][[metric]] <- plot_gradient_metric(spes_table, 
                                                                                 metric,
                                                                                 metric_df_lists2D_subset[[spes_metadata_index]][[metric]], 
                                                                                 arrangement_parameters[[arrangement]], 
@@ -393,12 +381,8 @@ dev.off()
 setwd("~/R/spaSim-3D/scripts/simulations and analysis S2/S2 data")
 spes_table <- read.table("spes_table.csv")
 spes_table$cluster_prop_B <- 1 - spes_table$cluster_prop_A
-spes_table[spes_table$variable_parameter == "cluster_prop_A", "variable_parameter"] <- "cluster_prop_B" 
 spes_table$distance <- 450 - spes_table$cluster_x_coord
-spes_table[spes_table$variable_parameter == "cluster_x_coord", "variable_parameter"] <- "distance" 
 spes_table$E_volume <- (4/3) * pi * spes_table$E_radius_x * spes_table$E_radius_y * spes_table$E_radius_z
-spes_table[spes_table$variable_parameter == "E_radius_z", "variable_parameter"] <- "E_volume" 
-
 
 
 # Subset metric_df_lists2D to only include the middle slice
@@ -465,11 +449,8 @@ for (arrangement in arrangements) {
   for (shape in shapes) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
-    spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
-                                    c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]], "variable_parameter")]
-    
     for (metric in metrics) {
-      metric_plots2D_vs_3D[[spes_metadata_index]][[metric]] <- plot_3D_vs_2D_metric_one_slice(spes_table_subset, 
+      metric_plots2D_vs_3D[[spes_metadata_index]][[metric]] <- plot_3D_vs_2D_metric_one_slice(spes_table, 
                                                                                               metric, 
                                                                                               metric_df_lists3D[[spes_metadata_index]][[metric]],
                                                                                               metric_df_lists2D_subset[[spes_metadata_index]][[metric]], 
@@ -528,12 +509,8 @@ dev.off()
 setwd("~/R/spaSim-3D/scripts/simulations and analysis S2/S2 data")
 spes_table <- read.table("spes_table.csv")
 spes_table$cluster_prop_B <- 1 - spes_table$cluster_prop_A
-spes_table[spes_table$variable_parameter == "cluster_prop_A", "variable_parameter"] <- "cluster_prop_B" 
 spes_table$distance <- 450 - spes_table$cluster_x_coord
-spes_table[spes_table$variable_parameter == "cluster_x_coord", "variable_parameter"] <- "distance" 
 spes_table$E_volume <- (4/3) * pi * spes_table$E_radius_x * spes_table$E_radius_y * spes_table$E_radius_z
-spes_table[spes_table$variable_parameter == "E_radius_z", "variable_parameter"] <- "E_volume" 
-
 
 # Subset metric_df_lists2D to include 1, 2, 3 slice (I know it says all above, deal with it)
 metric_df_lists2D_subset <- metric_df_lists2D
@@ -596,11 +573,8 @@ for (arrangement in arrangements) {
   for (shape in shapes) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
-    spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
-                                    c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]], "variable_parameter")]
-    
     for (metric in metrics) {
-      metric_plots2D_vs_3D[[spes_metadata_index]][[metric]] <- plot_3D_vs_2D_metric_all_slices(spes_table_subset, 
+      metric_plots2D_vs_3D[[spes_metadata_index]][[metric]] <- plot_3D_vs_2D_metric_all_slices(spes_table, 
                                                                                                metric, 
                                                                                                metric_df_lists3D[[spes_metadata_index]][[metric]],
                                                                                                metric_df_lists2D_subset[[spes_metadata_index]][[metric]], 
@@ -649,6 +623,112 @@ for (metric in metrics_set2) {
   print(plot)
 }
 
+dev.off()
+
+
+
+
+
+
+### Get plots with 2D (all slices) on the x-axis and 3D on the y-axis (not indexing for arrangement or shape) ----------------
+
+# Set up plots metadata
+plots_metadata <- list(
+  temp <- list(x_aes = "2D", y_aes = "3D", color_aes = "slice")
+)
+
+# Generate plots and plots into a list
+arrangements <- c("mixed", "ringed", "separated")
+shapes <- c("ellipsoid", "network")
+metrics <- c("AMD", "MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "ACIN_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
+
+
+# Merge lists in metric_lists
+metric_df_lists3D_merged <- list()
+metric_df_lists2D_merged <- list()
+
+i <- 1
+for (arrangement in arrangements) {
+  for (shape in shapes) {
+    spes_metadata_index <- paste(arrangement, shape, sep = "_")
+    
+    for (metric in metrics) {
+      if (i == 1)  {
+        metric_df_lists3D_merged[[metric]] <- data.frame()
+        metric_df_lists2D_merged[[metric]] <- data.frame()
+      }
+      if (i > 1) {
+        temp <- nrow(metric_df_lists3D[[spes_metadata_index]][[metric]])
+        n_slices <- length(unique(metric_df_lists2D[[spes_metadata_index]][[metric]][["slice"]]))
+        if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC")) {
+          metric_df_lists3D[[spes_metadata_index]][[metric]][["spe"]] <- 
+            paste("spe", rep(seq((temp/4) * (i - 1) + 1, (temp/4) * (i - 1) + (temp/4)), each = 4), sep = "_")
+          metric_df_lists2D[[spes_metadata_index]][[metric]][["spe"]] <-
+            paste("spe", rep(seq((temp/4) * (i - 1) + 1, (temp)/4 * (i - 1) + (temp/4)), each = 4 * n_slices), sep = "_")
+        }
+        else {
+          metric_df_lists3D[[spes_metadata_index]][[metric]][["spe"]] <- 
+            paste("spe", rep(seq((temp/2) * (i - 1) + 1, (temp/2) * (i - 1) + (temp/2)), each = 2), sep = "_")
+          metric_df_lists2D[[spes_metadata_index]][[metric]][["spe"]] <-
+            paste("spe", rep(seq((temp/2) * (i - 1) + 1, (temp/2) * (i - 1) + (temp/2)), each = 2 * n_slices), sep = "_")
+        }
+      }
+      metric_df_lists3D_merged[[metric]] <- rbind(metric_df_lists3D_merged[[metric]], metric_df_lists3D[[spes_metadata_index]][[metric]])
+      metric_df_lists2D_merged[[metric]] <- rbind(metric_df_lists2D_merged[[metric]], metric_df_lists2D[[spes_metadata_index]][[metric]])
+    }
+    
+    i <- i + 1
+  }
+}
+
+metric_plots_3D_vs_2D_all_slices1 <- list()
+
+for (metric in metrics) {
+  metric_plots_3D_vs_2D_all_slices1[[metric]] <- plot_3D_vs_2D_metric_all_slices1(metric, 
+                                                                                  metric_df_lists3D_merged[[metric]],
+                                                                                  metric_df_lists2D_merged[[metric]], 
+                                                                                  plots_metadata)
+}
+
+
+
+# Put plots into a pdf
+setwd("~/R/plots/S2")
+metrics_set1 <- c("AMD",  "ACIN_AUC", "CKR_AUC")
+metrics_set2 <- c("MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC")
+metrics_set3 <- c("prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
+
+pdf("plots2D_vs_3D_all_slices1.pdf", width = 10, height = 10)
+
+curr_metric_plots1 <- list()
+for (metric in metrics_set1) {
+    curr_metric_plots1[[metric]] <- metric_plots_3D_vs_2D_all_slices1[[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+}
+plot1 <- plot_grid(plotlist = curr_metric_plots1,
+                   nrow = 1, 
+                   ncol = length(metrics_set1))
+print(plot1)
+
+curr_metric_plots2 <- list()
+for (metric in metrics_set2) {
+  curr_metric_plots2[[metric]] <- metric_plots_3D_vs_2D_all_slices1[[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+}
+plot2 <- plot_grid(plotlist = curr_metric_plots2,
+                   nrow = 2, 
+                   ncol = 2)
+
+curr_metric_plots3 <- list()
+for (metric in metrics_set3) {
+  curr_metric_plots3[[metric]] <- metric_plots_3D_vs_2D_all_slices1[[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+}
+plot3 <- plot_grid(plotlist = curr_metric_plots3,
+                   nrow = 2, 
+                   ncol = 2)
+
+plot4 <- plot_grid(plot2, plot3,
+                   nrow = 1,
+                   ncol = 2)
+print(plot4)
 dev.off()
 
 
