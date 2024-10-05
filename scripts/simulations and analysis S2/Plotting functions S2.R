@@ -717,8 +717,8 @@ plot_3D_vs_2D_metric_all_slices1 <- function(metric,
       theme_bw() +
       xlim(min(c(data[[x_aes]], data[[y_aes]]), na.rm = T), max(c(data[[x_aes]], data[[y_aes]]), na.rm = T)) +
       ylim(min(c(data[[x_aes]], data[[y_aes]]), na.rm = T), max(c(data[[x_aes]], data[[y_aes]]), na.rm = T)) +
-      geom_abline(intercept = 0, slope = 1, color = "black", linetype = "longdash") +
-      geom_point()
+      geom_point(size = 0.5) +
+      geom_abline(intercept = 0, slope = 1, color = "black", linetype = "longdash")
     
     return(plot)
   }

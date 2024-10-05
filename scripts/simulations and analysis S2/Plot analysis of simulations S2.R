@@ -698,7 +698,7 @@ metrics_set1 <- c("AMD",  "ACIN_AUC", "CKR_AUC")
 metrics_set2 <- c("MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC")
 metrics_set3 <- c("prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
 
-pdf("plots2D_vs_3D_all_slices1.pdf", width = 10, height = 10)
+pdf("plots2D_vs_3D_all_slices1.pdf", width = 12, height = 12)
 
 curr_metric_plots1 <- list()
 for (metric in metrics_set1) {
