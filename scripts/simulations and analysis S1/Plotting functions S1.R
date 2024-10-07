@@ -1062,3 +1062,177 @@ plot_error_gradient_metric_one_slice <- function(spes_table,
   
   return(gradient_metric_with_legends_plot)
 }
+
+### Function for non-gradient output all slices with ground truth ----
+plot_non_gradient_metric_all_slices_ground_truth <- function(spes_table, 
+                                                             metric, 
+                                                             metric_df3D, 
+                                                             metric_df2D, 
+                                                             arrangement, 
+                                                             plots_metadata) {
+  
+  ### Modify plots_metadata
+  # Change plots_metadata arrangement to inputted arrangement
+  plots_metadata$arrangement$x_aes <- arrangement
+  
+  # Change plots_metadata y_aes to inputted metric
+  for (i in seq_along(plots_metadata)) {
+    # Modify the y_aes element
+    plots_metadata[[i]]$y_aes <- metric
+  }
+  
+  # Get metric_cell_types
+  if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("MS_AUC", "NMS_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("ACINP_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("AE_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("prop_SAC", "prop_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
+    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+  }
+  
+  
+  # Define plotting function
+  formatCustomSci <- function(x) {
+    x_sci <- str_split_fixed(formatC(x, format = "e"), "e", 2)
+    alpha <- as.numeric(x_sci[ , 1])
+    power <- as.integer(x_sci[ , 2])
+    paste(alpha, power, sep = "e")
+  }
+  
+  create_plot <- function(data, data3D, x_aes, y_aes, color_aes, title = "") {
+    
+    size = 0.5
+    
+    data3D <- data3D[data3D$variable_parameter == x_aes, ]
+    data <- data[data$variable_parameter == x_aes, ]
+    
+    plot <- ggplot(data) +
+      labs(title = title, x = x_aes, y = y_aes) +
+      geom_point(data = data3D, aes_string(x = x_aes, y = y_aes), size = size) +
+      theme_bw()
+    
+    # Use scientific notation for ellipsoid volume
+    if (x_aes == "E_volume") {
+      plot <- plot + 
+        geom_point(data = data, aes_string(x = x_aes, y = y_aes, color = color_aes), size = size) +
+        scale_x_continuous(labels = formatCustomSci)
+    }
+    else if (typeof(data[[x_aes]]) == "double") {
+      breaks <- pretty(c(min(data[[x_aes]]), max(data[[x_aes]])), n = 2)
+      plot <- plot + 
+        geom_point(data = data, aes_string(x = x_aes, y = y_aes, color = color_aes), size = size) +
+        scale_x_continuous(breaks = breaks)
+    }
+    
+    return(plot)
+  }
+  
+  # Put plots into an organised list
+  plots_list <- list()
+  
+  # Get number of slices
+  n_slices <- length(unique(metric_df2D[["slice"]]))
+  
+  plot_df <- spes_table
+  plot_df <- plot_df %>%
+    mutate(row_num = row_number())
+  plot_df <- do.call(bind_rows, replicate(n_slices, plot_df, simplify = FALSE)) %>%
+    arrange(row_num)
+  plot_df$row_num <- NULL
+  
+  # Separate df for 3D data
+  plot_df3D <- spes_table
+  
+  for (i in seq(nrow(metric_cell_types))) {
+    
+    # Subset metric_df for chosen pair/cell types
+    if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_AUC")) {
+      plot_df[[metric]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"] & metric_df2D$target == metric_cell_types[i, "tar"], metric]
+      plot_df[["slice"]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"] & metric_df2D$target == metric_cell_types[i, "tar"], "slice"]
+      
+      plot_df3D[[metric]] <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"] & metric_df3D$target == metric_cell_types[i, "tar"], metric]
+    }
+    else if (metric %in% c("ACINP_AUC", "AE_AUC")) {
+      plot_df[[metric]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"], metric] 
+      plot_df[["slice"]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"], "slice"] 
+      
+      plot_df3D[[metric]] <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"], metric] 
+    }
+    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
+      plot_df[[metric]] <- metric_df2D[metric_df2D$cell_types == metric_cell_types[i, "cell_types"], metric]
+      plot_df[["slice"]] <- metric_df2D[metric_df2D$cell_types == metric_cell_types[i, "cell_types"], "slice"]
+      
+      plot_df3D[[metric]] <- metric_df3D[metric_df3D$cell_types == metric_cell_types[i, "cell_types"], metric]
+    }
+    
+    # Factor
+    if (!is.null(plot_df$shape)) plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    if (!is.null(plot_df$slice)) plot_df$slice <- as.character(plot_df$slice)
+    
+    if (!is.null(plot_df3D$shape)) plot_df3D$shape <- factor(plot_df3D$shape, c("Ellipsoid", "Network"))
+    if (!is.null(plot_df3D$slice)) plot_df3D$slice <- as.character(plot_df3D$slice)
+    
+    # Generate plots based on plots_metadata, use final column of metric_cell_types
+    plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]] <- lapply(plots_metadata, function(plot_def) {
+      x_aes <- plot_def$x_aes
+      y_aes <- plot_def$y_aes
+      color_aes <- plot_def$color_aes
+      title <- plot_def$title
+      plot <- create_plot(data = plot_df, data3D = plot_df3D, x_aes = x_aes, y_aes = y_aes, color_aes = color_aes, title = title)
+      return(plot)
+    })
+  }
+  
+  # Combine the plots together using metric_cell_types
+  combined_plots_list <- list()
+  for (i in seq(nrow(metric_cell_types))) {
+    
+    # Remove legend from base plots
+    for (j in seq(length(plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]]))) {
+      plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]][[j]] <- 
+        plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]][[j]] + theme(legend.position = "none")
+    }
+    
+    # Get final column
+    cells <- metric_cell_types[i, ncol(metric_cell_types)]
+    
+    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
+    
+    if (metric %in% c("AMD", "prop_SAC", "prop_AUC")) {
+      title <- ggdraw() +
+        draw_label(paste("Reference:", metric_cell_types[i, "ref"], "Target:", metric_cell_types[i, "tar"]),
+                   fontface = 'bold')
+    }
+    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
+      title <- ggdraw() + 
+        draw_label(paste("Cell types of interest:", cells), 
+                   fontface='bold')
+    }
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    combined_plots_list[[cells]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  non_gradient_metric_plot <- plot_grid(plotlist = combined_plots_list,
+                                        nrow = length(combined_plots_list), 
+                                        ncol = 1)
+  
+  return(non_gradient_metric_plot)
+}
