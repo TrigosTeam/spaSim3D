@@ -651,24 +651,6 @@ spes_table$E_volume <- (4/3) * pi * spes_table$E_radius_x * spes_table$E_radius_
 spes_table[spes_table$variable_parameter == "E_radius_z", "variable_parameter"] <- "E_volume" 
 
 
-# Subset metric_df_lists2D to include 1, 2, 3 slice (I know it says all above, deal with it)
-metric_df_lists2D_subset <- metric_df_lists2D
-arrangements <- c("mixed", "ringed", "separated")
-shapes <- c("ellipsoid", "network")
-for (arrangement in arrangements) {
-  for (shape in shapes) {
-    spes_metadata_index <- paste(arrangement, shape, sep = "_")
-    curr_list <- metric_df_lists2D_subset[[spes_metadata_index]]
-    
-    for (i in seq(length(curr_list))) {
-      curr_df <- curr_list[[i]]
-      curr_df <- curr_df[curr_df$slice %in% c(1, 2, 3), ]
-      curr_list[[i]] <- curr_df
-    }
-    metric_df_lists2D_subset[[spes_metadata_index]] <- curr_list
-  }
-}
-
 # Set up plots metadata
 plots_metadata <- list(
   ellipsoid = list(
@@ -719,7 +701,7 @@ for (arrangement in arrangements) {
       metric_plots_error_non_gradient[[spes_metadata_index]][[metric]] <- plot_error_non_gradient_metric(spes_table_subset, 
                                                                                                          metric, 
                                                                                                          metric_df_lists3D[[spes_metadata_index]][[metric]],
-                                                                                                         metric_df_lists2D_subset[[spes_metadata_index]][[metric]], 
+                                                                                                         metric_df_lists2D[[spes_metadata_index]][[metric]], 
                                                                                                          arrangement_parameters[[arrangement]], 
                                                                                                          plots_metadata[[shape]])
     }

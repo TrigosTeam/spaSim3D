@@ -4,6 +4,84 @@ library(S4Vectors)
 library(stringr)
 library(dplyr)
 
+### Utility function to get metric cell types -----
+get_metric_cell_types <- function(metric) {
+  # Get metric_cell_types
+  if (metric %in% c("AMD", "ACIN", "CKR", "ACIN_AUC", "CKR_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("MS", "NMS", "MS_AUC", "NMS_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("ACINP", "ACINP_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("AE", "AE_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("prop_SAC", "prop_prevalence", "prop_AUC")) {
+    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+  }
+  else {
+    stop("metric not found")
+  }
+  return(metric_cell_types)
+}
+### Utility function to subset metric_df -----
+subset_metric_df <- function(metric_df,
+                             metric_cell_types,
+                             index) {
+  if (metric %in% c("AMD", "ACIN", "CKR", "MS", "NMS", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prevalence", "prop_AUC")) {
+    metric_df <- metric_df[metric_df$reference == metric_cell_types[index, "ref"] & metric_df$target == metric_cell_types[index, "tar"], ] 
+  }
+  else if (metric %in% c("ACINP", "AE", "ACINP_AUC", "AE_AUC")) {
+    metric_df <- metric_df[metric_df$reference == metric_cell_types[index, "ref"], ] 
+  }
+  else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+    metric_df <- metric_df[metric_df$cell_types == metric_cell_types[index, "cell_types"], ]
+  }
+  else {
+    stop("metric not found")
+  }
+  return(metric_df)
+}
+
+### Utility function to duplicate df by *rows* -----
+duplicate_df <- function(df, n_times) {
+  df <- df %>%
+    mutate(row_num = row_number())
+  df <- do.call(bind_rows, replicate(n_times, df, simplify = FALSE)) %>%
+    arrange(row_num)
+  df$row_num <- NULL
+  
+  return(df)
+}
+### Utility function to get title --------
+get_metric_cell_types_title <- function(metric, metric_cell_types, index) {
+  
+  if (metric %in% c("AMD", "ACIN", "ACINP", "AE", "CKR", "MS", "NMS", "ACIN_AUC", "ACINP_AUC", "AE_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prevalence", "prop_AUC")) {
+    title <- ggdraw() +
+      draw_label(paste("Reference:", metric_cell_types[index, "ref"], "Target:", metric_cell_types[index, "tar"]),
+                 fontface = 'bold')
+  }
+  else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+    title <- ggdraw() + 
+      draw_label(paste("Cell types of interest:", metric_cell_types[index, "cell_types"]), 
+                 fontface='bold')
+  }
+  else {
+    stop("metric not found")
+  }
+  return(title)
+}
 ### Function for non-gradient output ------------------------------------------
 plot_non_gradient_metric <- function(spes_table, 
                                      metric, 
@@ -23,18 +101,7 @@ plot_non_gradient_metric <- function(spes_table,
   
   
   # Get metric_cell_types
-  if (metric == "AMD") {
-    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("prop_SAC", "prop_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
-  }
-  
+  metric_cell_types <- get_metric_cell_types(metric)
   
   # Define plotting function
   formatCustomSci <- function(x) {
@@ -76,15 +143,10 @@ plot_non_gradient_metric <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    if (metric %in% c("AMD", "prop_SAC", "prop_AUC")) {
-      plot_df <- metric_df[metric_df$reference == metric_cell_types[i, "ref"] & metric_df$target == metric_cell_types[i, "tar"], ] 
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      plot_df <- metric_df[metric_df$cell_types == metric_cell_types[i, "cell_types"], ]
-    }
+    metric_df_subset <- subset_metric_df(metric_df, metric_cell_types, i)
     
     # Combine spes_table and metric_df
-    plot_df <- cbind(spes_table, plot_df)
+    plot_df <- cbind(spes_table, metric_df_subset)
     
     # Factor
     if (!is.null(plot_df$shape)) plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
@@ -109,16 +171,7 @@ plot_non_gradient_metric <- function(spes_table,
     
     plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
     
-    if (metric %in% c("AMD", "prop_SAC", "prop_AUC")) {
-      title <- ggdraw() +
-        draw_label(paste("Reference:", metric_cell_types[i, "ref"], "Target:", metric_cell_types[i, "tar"]),
-                   fontface = 'bold')
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      title <- ggdraw() + 
-        draw_label(paste("Cell types of interest:", cells), 
-                   fontface='bold')
-    }
+    title <- get_metric_cell_types_title(metric, metric_cell_types, i)
     
     fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
     combined_plots_list[[cells]] <- fig
@@ -160,30 +213,7 @@ plot_gradient_metric <- function(spes_table,
   }
   
   # Get metric_cell_types
-  if (metric %in% c("MS", "NMS")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  if (metric %in% c("ACINP")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  if (metric %in% c("AE")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("ACIN", "CKR")) {
-    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("prop_prevalence")) {
-    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("entropy_prevalence")) {
-    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
-  }
-  
+  metric_cell_types <- get_metric_cell_types(metric)
   
   # Define plotting function
   formatCustomSci <- function(x) {
@@ -218,20 +248,10 @@ plot_gradient_metric <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    if (metric %in% c("MS", "NMS", "ACIN", "CKR", "prop_prevalence")) {
-      plot_df <- metric_df[metric_df$reference == metric_cell_types[i, "ref"] & metric_df$target == metric_cell_types[i, "tar"], ] 
-    }
-    else if (metric %in% c("ACINP", "AE")) {
-      plot_df <- metric_df[metric_df$reference == metric_cell_types[i, "ref"], ]
-    }
-    else if (metric %in% c("entropy_prevalence")) {
-      plot_df <- metric_df[metric_df$cell_types == metric_cell_types[i, "cell_types"], ]
-    }
-    else {
-      stop("Invalid metric")
-    }
+    metric_df_subset <- subset_metric_df(metric_df, metric_cell_types, i)
+    
     # Combine spes_table and metric_df
-    plot_df <- cbind(spes_table, plot_df)
+    plot_df <- cbind(spes_table, metric_df)
     
     # Melt
     plot_df <- reshape2::melt(plot_df, , gradient_colnames)
@@ -288,16 +308,7 @@ plot_gradient_metric <- function(spes_table,
     
     plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
     
-    if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_prevalence")) {
-      title <- ggdraw() +
-        draw_label(paste("Reference:", metric_cell_types[i, "ref"], "Target:", metric_cell_types[i, "tar"]),
-                   fontface = 'bold')
-    }
-    else if (metric %in% c("entropy_prevalence")) {
-      title <- ggdraw() + 
-        draw_label(paste("Cell types of interest:", cells), 
-                   fontface='bold')
-    }
+    title <- get_metric_cell_types_title(metric, metric_cell_types, i)
     
     fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
     combined_plots_list[[cells]] <- fig
@@ -329,30 +340,7 @@ plot_3D_vs_2D_metric_one_slice <- function(spes_table,
   plots_metadata$arrangement$color_aes <- arrangement
   
   # Get metric_cell_types
-  if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("MS_AUC", "NMS_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("ACINP_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("AE_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("prop_SAC", "prop_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
-  }
-  
+  metric_cell_types <- get_metric_cell_types(metric)
   
   # Define plotting function
   formatCustomSci <- function(x) {
@@ -393,25 +381,13 @@ plot_3D_vs_2D_metric_one_slice <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"] & metric_df3D$target == metric_cell_types[i, "tar"], ] 
-      colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
-      plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"] & metric_df2D$target == metric_cell_types[i, "tar"], metric] 
-    }
-    else if (metric %in% c("ACINP_AUC", "AE_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"], ] 
-      colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
-      plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"], metric] 
-      
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$cell_types == metric_cell_types[i, "cell_types"], ]
-      colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
-      plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D[metric_df2D$cell_types == metric_cell_types[i, "cell_types"], metric] 
-    }
+    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
     
-    # Combine spes_table and metric_df
-    plot_df <- cbind(spes_table, plot_df)
+    # Combine with spes table
+    plot_df <- spes_table
+    plot_df[[paste(metric, "3D", sep = "_")]] <- metric_df3D_subset[[metric]]
+    plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D_subset[[metric]]
     
     # Factor
     if (!is.null(plot_df$shape)) plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
@@ -451,16 +427,7 @@ plot_3D_vs_2D_metric_one_slice <- function(spes_table,
     
     plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
     
-    if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "prop_SAC", "prop_AUC")) {
-      title <- ggdraw() +
-        draw_label(paste("Reference:", metric_cell_types[i, "ref"], "Target:", metric_cell_types[i, "tar"]),
-                   fontface = 'bold')
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      title <- ggdraw() + 
-        draw_label(paste("Cell types of interest:", cells), 
-                   fontface='bold')
-    }
+    title <- get_metric_cell_types_title(metric, metric_cell_types, i)
     
     fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
     combined_plots_list[[cells]] <- fig
@@ -492,29 +459,7 @@ plot_3D_vs_2D_metric_all_slices <- function(spes_table,
   plots_metadata$arrangement$label <- arrangement  
   
   # Get metric_cell_types
-  if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("MS_AUC", "NMS_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("ACINP_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("AE_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("prop_SAC", "prop_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
-  }
+  metric_cell_types <- get_metric_cell_types(metric)
   
   # Get number of slices
   n_slices <- length(unique(metric_df2D[["slice"]]))
@@ -546,49 +491,17 @@ plot_3D_vs_2D_metric_all_slices <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"] & metric_df3D$target == metric_cell_types[i, "tar"], ] 
-      colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
-      plot_df <- cbind(spes_table, plot_df)
-      
-      plot_df <- plot_df %>%
-        mutate(row_num = row_number())
-      plot_df <- do.call(bind_rows, replicate(n_slices, plot_df, simplify = FALSE)) %>%
-        arrange(row_num)
-      plot_df$row_num <- NULL
-      
-      plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"] & metric_df2D$target == metric_cell_types[i, "tar"], metric]
-      plot_df[["slice"]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"] & metric_df2D$target == metric_cell_types[i, "tar"], "slice"]
-    }
-    else if (metric %in% c("ACINP_AUC", "AE_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"], ] 
-      colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
-      plot_df <- cbind(spes_table, plot_df)
-      
-      plot_df <- plot_df %>%
-        mutate(row_num = row_number())
-      plot_df <- do.call(bind_rows, replicate(n_slices, plot_df, simplify = FALSE)) %>%
-        arrange(row_num)
-      plot_df$row_num <- NULL
-      
-      plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"], metric] 
-      plot_df[["slice"]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"], "slice"] 
-      
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$cell_types == metric_cell_types[i, "cell_types"], ]
-      colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
-      plot_df <- cbind(spes_table, plot_df)
-      
-      plot_df <- plot_df %>%
-        mutate(row_num = row_number())
-      plot_df <- do.call(bind_rows, replicate(n_slices, plot_df, simplify = FALSE)) %>%
-        arrange(row_num)
-      plot_df$row_num <- NULL
-      
-      plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D[metric_df2D$cell_types == metric_cell_types[i, "cell_types"], metric]
-      plot_df[["slice"]] <- metric_df2D[metric_df2D$cell_types == metric_cell_types[i, "cell_types"], "slice"]
-    }
+    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    
+    # Combine with spes table
+    plot_df <- spes_table
+    plot_df[[paste(metric, "3D", sep = "_")]] <- metric_df3D_subset[[metric]]
+    
+    plot_df <- duplicate_df(plot_df, n_slices)
+    
+    plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D_subset[[metric]]
+    plot_df[["slice"]] <- metric_df2D_subset[["slice"]]
     
     # Factor
     if (!is.null(plot_df$shape)) plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
@@ -629,16 +542,7 @@ plot_3D_vs_2D_metric_all_slices <- function(spes_table,
     
     plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
     
-    if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "prop_SAC", "prop_AUC")) {
-      title <- ggdraw() +
-        draw_label(paste("Reference:", metric_cell_types[i, "ref"], "Target:", metric_cell_types[i, "tar"]),
-                   fontface = 'bold')
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      title <- ggdraw() + 
-        draw_label(paste("Cell types of interest:", cells), 
-                   fontface='bold')
-    }
+    title <- get_metric_cell_types_title(metric, metric_cell_types, i)
     
     fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
     combined_plots_list[[cells]] <- fig
@@ -675,29 +579,7 @@ plot_3D_vs_2D_metric_all_slices_no_annotating <- function(metric,
                                                           plots_metadata) {
   
   # Get metric_cell_types
-  if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("MS_AUC", "NMS_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("ACINP_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("AE_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("prop_SAC", "prop_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
-  }
+  metric_cell_types <- get_metric_cell_types(metric)
   
   # Get number of slices
   n_slices <- length(unique(metric_df2D[["slice"]]))
@@ -729,46 +611,17 @@ plot_3D_vs_2D_metric_all_slices_no_annotating <- function(metric,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"] & metric_df3D$target == metric_cell_types[i, "tar"], ] 
-      colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
-      
-      plot_df <- plot_df %>%
-        mutate(row_num = row_number())
-      plot_df <- do.call(bind_rows, replicate(n_slices, plot_df, simplify = FALSE)) %>%
-        arrange(row_num)
-      plot_df$row_num <- NULL
-      
-      plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"] & metric_df2D$target == metric_cell_types[i, "tar"], metric]
-      plot_df[["slice"]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"] & metric_df2D$target == metric_cell_types[i, "tar"], "slice"]
-    }
-    else if (metric %in% c("ACINP_AUC", "AE_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"], ] 
-      colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
-      
-      plot_df <- plot_df %>%
-        mutate(row_num = row_number())
-      plot_df <- do.call(bind_rows, replicate(n_slices, plot_df, simplify = FALSE)) %>%
-        arrange(row_num)
-      plot_df$row_num <- NULL
-      
-      plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"], metric] 
-      plot_df[["slice"]] <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"], "slice"] 
-      
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$cell_types == metric_cell_types[i, "cell_types"], ]
-      colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
-      
-      plot_df <- plot_df %>%
-        mutate(row_num = row_number())
-      plot_df <- do.call(bind_rows, replicate(n_slices, plot_df, simplify = FALSE)) %>%
-        arrange(row_num)
-      plot_df$row_num <- NULL
-      
-      plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D[metric_df2D$cell_types == metric_cell_types[i, "cell_types"], metric]
-      plot_df[["slice"]] <- metric_df2D[metric_df2D$cell_types == metric_cell_types[i, "cell_types"], "slice"]
-    }
+    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    
+    # Combine with spes table
+    plot_df <- spes_table
+    plot_df[[paste(metric, "3D", sep = "_")]] <- metric_df3D_subset[[metric]]
+    
+    plot_df <- duplicate_df(plot_df, n_slices)
+    
+    plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D_subset[[metric]]
+    plot_df[["slice"]] <- metric_df2D_subset[["slice"]]
     
     # Factor
     if (!is.null(plot_df$shape)) plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
@@ -808,16 +661,7 @@ plot_3D_vs_2D_metric_all_slices_no_annotating <- function(metric,
     
     plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
     
-    if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "prop_SAC", "prop_AUC")) {
-      title <- ggdraw() +
-        draw_label(paste("Reference:", metric_cell_types[i, "ref"], "Target:", metric_cell_types[i, "tar"]),
-                   fontface = 'bold')
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      title <- ggdraw() + 
-        draw_label(paste("Cell types of interest:", cells), 
-                   fontface='bold')
-    }
+    title <- get_metric_cell_types_title(metric, metric_cell_types, i)
     
     fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
     combined_plots_list[[cells]] <- fig
@@ -842,29 +686,7 @@ plot_3D_vs_2D_metric_random_slice_no_annotating <- function(metric,
                                                             plots_metadata) {
   
   # Get metric_cell_types
-  if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("MS_AUC", "NMS_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("ACINP_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("AE_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("prop_SAC", "prop_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
-    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
-  }
-  else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
-  }
+  metric_cell_types <- get_metric_cell_types(metric)
   
   # Define plotting function
   formatCustomSci <- function(x) {
@@ -893,31 +715,18 @@ plot_3D_vs_2D_metric_random_slice_no_annotating <- function(metric,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"] & metric_df3D$target == metric_cell_types[i, "tar"], ] 
-      
-      data2D <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"] & metric_df2D$target == metric_cell_types[i, "tar"], ]
-      
-    }
-    else if (metric %in% c("ACINP_AUC", "AE_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$reference == metric_cell_types[i, "ref"], ] 
-      
-      data2D <- metric_df2D[metric_df2D$reference == metric_cell_types[i, "ref"], ] 
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      plot_df <- metric_df3D[metric_df3D$cell_types == metric_cell_types[i, "cell_types"], ]
-      
-      data2D <- metric_df2D[metric_df2D$cell_types == metric_cell_types[i, "cell_types"], ]
-    }
-    colnames(plot_df)[colnames(plot_df) == metric] <- paste(metric, "3D", sep = "_")
+    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
     
-    # Choose a random slice from data2D
+    plot_df <- data.frame(row.names = rownames(metric_df3D_subset))
+    plot_df[[paste(metric, "3D", sep = "_")]] <- metric_df3D_subset[[metric]]
+
+    # Choose a random slice from metric_df2D_subset
     n_slices <- length(unique(metric_df2D[["slice"]]))
     
-    data2D$key <- paste(data2D[["spe"]], data2D[["slice"]], sep = "_")
-    
-    plot_df[[paste(metric, "2D", sep = "_")]] <- data2D[data2D$key %in% paste(unique(data2D[["spe"]]), sample(seq(n_slices), 1000, replace = TRUE), sep = "_"), 
-                                                        metric]
+    metric_df2D_subset$key <- paste(metric_df2D_subset[["spe"]], metric_df2D_subset[["slice"]], sep = "_")
+    plot_df[[paste(metric, "2D", sep = "_")]] <- metric_df2D_subset[metric_df2D_subset$key %in% paste(unique(metric_df2D_subset[["spe"]]), sample(seq(n_slices), nrow(metric_df3D_subset), replace = TRUE), sep = "_"), 
+                                                                    metric]
     
     # Factor
     if (!is.null(plot_df$shape)) plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
@@ -948,16 +757,7 @@ plot_3D_vs_2D_metric_random_slice_no_annotating <- function(metric,
     
     plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
     
-    if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "prop_SAC", "prop_AUC")) {
-      title <- ggdraw() +
-        draw_label(paste("Reference:", metric_cell_types[i, "ref"], "Target:", metric_cell_types[i, "tar"]),
-                   fontface = 'bold')
-    }
-    else if (metric %in% c("entropy_SAC", "entropy_AUC")) {
-      title <- ggdraw() + 
-        draw_label(paste("Cell types of interest:", cells), 
-                   fontface='bold')
-    }
+    title <- get_metric_cell_types_title(metric, metric_cell_types, i)
     
     fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
     combined_plots_list[[cells]] <- fig
