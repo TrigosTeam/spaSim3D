@@ -776,12 +776,12 @@ plot_error_gradient_metric_one_slice <- function(spes_table,
     metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
 
     # Get error df
-    error_df <- ((metric_df2D_subset[, radii_colnames] - metric_df3D_subset[, radii_colnames]) / metric_df3D_subset[, radii_colnames]) * 100
+    error_df <- ((metric_df2D_subset[, gradient_colnames] - metric_df3D_subset[, gradient_colnames]) / metric_df3D_subset[, gradient_colnames]) * 100
     error_df[["spe"]] <- metric_df3D_subset[["spe"]]
     
     # Combine spes_table and error_df
     plot_df <- cbind(spes_table, error_df)
-    
+
     # Melt
     plot_df <- reshape2::melt(plot_df, , gradient_colnames)
     

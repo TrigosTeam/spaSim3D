@@ -614,8 +614,7 @@ plot_3D_vs_2D_metric_all_slices_no_annotating <- function(metric,
     metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
     metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
     
-    # Combine with spes table
-    plot_df <- spes_table
+    plot_df <- data.frame(row.names = rownames(metric_df3D_subset))
     plot_df[[paste(metric, "3D", sep = "_")]] <- metric_df3D_subset[[metric]]
     
     plot_df <- duplicate_df(plot_df, n_slices)
