@@ -109,7 +109,7 @@ for (arrangement in arrangements) {
 }
 
 
-### Get plots for 3D metric analysis ------------------------------------------
+### Get plots for 3D metric analysis (non-gradient) ------------------------------------------
 # Read spes_table
 setwd("~/R/spaSim-3D/scripts/simulations and analysis S1/S1 data")
 spes_table <- read.table("spes_table.csv")
@@ -136,25 +136,10 @@ non_gradient_plots_metadata <- list(
   )
 )
 
-gradient_plots_metadata <- list(
-  ellipsoid = list(
-    arrangement = list(x_aes = "gradient", y_aes = "metric", color_aes = "temp_arrangement"),
-    bg_prop_A = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_A"),
-    bg_prop_B = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_B"),
-    E_volume = list(x_aes = "gradient", y_aes = "metric", color_aes = "E_volume")
-  ),
-  network = list(
-    arrangement = list(x_aes = "gradient", y_aes = "metric", color_aes = "temp_arrangement"),
-    bg_prop_A = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_A"),
-    bg_prop_B = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_B"),
-    N_width = list(x_aes = "gradient", y_aes = "metric", color_aes = "N_width")
-  )
-)
-
 # Generate plots and plots into a list
 arrangements <- c("mixed", "ringed", "separated")
 shapes <- c("ellipsoid", "network")
-metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
+metrics <- c("AMD", "MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "ACIN_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
 
 background_parameters <- c("bg_prop_A", "bg_prop_B")
 
@@ -181,21 +166,12 @@ for (arrangement in arrangements) {
                                     c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]], "variable_parameter")]
     
     for (metric in metrics) {
-      if (metric %in% c("AMD", "prop_SAC", "entropy_SAC", "prop_AUC", "entropy_AUC")) {
-        metric_plots3D[[spes_metadata_index]][[metric]] <- plot_non_gradient_metric(spes_table_subset, 
-                                                                                    metric, 
-                                                                                    metric_df_lists3D[[spes_metadata_index]][[metric]], 
-                                                                                    arrangement_parameters[[arrangement]], 
-                                                                                    non_gradient_plots_metadata[[shape]])
-      }
-      else if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_prevalence", "entropy_prevalence")) {
-        metric_plots3D[[spes_metadata_index]][[metric]] <- plot_gradient_metric(spes_table_subset, 
-                                                                                metric,
-                                                                                metric_df_lists3D[[spes_metadata_index]][[metric]], 
-                                                                                arrangement_parameters[[arrangement]], 
-                                                                                get_gradient(metric),
-                                                                                gradient_plots_metadata[[shape]])
-      }
+      metric_plots3D[[spes_metadata_index]][[metric]] <- plot_non_gradient_metric(spes_table_subset, 
+                                                                                  metric, 
+                                                                                  metric_df_lists3D[[spes_metadata_index]][[metric]], 
+                                                                                  arrangement_parameters[[arrangement]], 
+                                                                                  non_gradient_plots_metadata[[shape]])
+      
     }
   }
 }
@@ -204,12 +180,120 @@ for (arrangement in arrangements) {
 setwd("~/R/plots/S1")
 arrangements <- c("mixed", "ringed", "separated")
 shapes <- c("ellipsoid", "network")
-# metrics <- c("AMD", "MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
 
-metrics_set1 <- c("AMD", "ACIN", "CKR")
-metrics_set2 <- c("MS", "NMS", "ACINP", "AE", "prop_SAC", "prop_prevalence", "prop_AUC", "entropy_SAC", "entropy_prevalence", "entropy_AUC")
+metrics_set1 <- c("AMD",  "ACIN_AUC", "CKR_AUC")
+metrics_set2 <- c("MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
 
-pdf("plots3D.pdf", width = 25, height = 12)
+pdf("plots3D_non_gradient.pdf", width = 25, height = 12)
+
+for (metric in metrics_set1) {
+  for (shape in shapes) {
+    curr_metric_plots <- list()
+    for (arrangement in arrangements) {
+      spes_metadata_index <- paste(arrangement, shape, sep = "_")
+      curr_metric_plots[[arrangement]] <- metric_plots3D[[spes_metadata_index]][[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+    }
+    plot <- plot_grid(plotlist = curr_metric_plots,
+                      nrow = 1, 
+                      ncol = length(arrangements))
+    print(plot)
+  }
+}
+
+for (metric in metrics_set2) {
+  curr_metric_plots <- list()
+  for (shape in shapes) {
+    for (arrangement in arrangements) {
+      spes_metadata_index <- paste(arrangement, shape, sep = "_")
+      curr_metric_plots[[spes_metadata_index]] <- metric_plots3D[[spes_metadata_index]][[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+    }
+  }
+  plot <- plot_grid(plotlist = curr_metric_plots,
+                    nrow = length(shapes), 
+                    ncol = length(arrangements))
+  print(plot)
+}
+
+
+dev.off()
+
+### Get plots for 3D metric analysis (gradient) ------------------------------------------
+# Read spes_table
+setwd("~/R/spaSim-3D/scripts/simulations and analysis S1/S1 data")
+spes_table <- read.table("spes_table.csv")
+spes_table$cluster_prop_B <- 1 - spes_table$cluster_prop_A
+spes_table[spes_table$variable_parameter == "cluster_prop_A", "variable_parameter"] <- "cluster_prop_B"
+spes_table$distance <- 450 - spes_table$cluster_x_coord
+spes_table[spes_table$variable_parameter == "cluster_x_coord", "variable_parameter"] <- "distance" 
+spes_table$E_volume <- (4/3) * pi * spes_table$E_radius_x * spes_table$E_radius_y * spes_table$E_radius_z
+spes_table[spes_table$variable_parameter == "E_radius_z", "variable_parameter"] <- "E_volume" 
+
+gradient_plots_metadata <- list(
+  ellipsoid = list(
+    arrangement = list(x_aes = "gradient", y_aes = "metric", color_aes = "temp_arrangement"),
+    bg_prop_A = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_A"),
+    bg_prop_B = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_B"),
+    E_volume = list(x_aes = "gradient", y_aes = "metric", color_aes = "E_volume")
+  ),
+  network = list(
+    arrangement = list(x_aes = "gradient", y_aes = "metric", color_aes = "temp_arrangement"),
+    bg_prop_A = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_A"),
+    bg_prop_B = list(x_aes = "gradient", y_aes = "metric", color_aes = "bg_prop_B"),
+    N_width = list(x_aes = "gradient", y_aes = "metric", color_aes = "N_width")
+  )
+)
+
+# Generate plots and plots into a list
+arrangements <- c("mixed", "ringed", "separated")
+shapes <- c("ellipsoid", "network")
+metrics <- c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR", "prop_prevalence", "entropy_prevalence")
+
+background_parameters <- c("bg_prop_A", "bg_prop_B")
+
+arrangement_parameters <- list(mixed = "cluster_prop_B",
+                               ringed = "ring_width_factor",
+                               separated = "distance")
+
+shape_parameters <- list(ellipsoid = c("E_volume"),
+                         network = c("N_width"))
+
+
+metric_plots3D <- list(mixed_ellipsoid = list(),
+                       mixed_network = list(),
+                       ringed_ellipsoid = list(),
+                       ringed_network = list(),
+                       separated_ellipsoid = list(),
+                       separated_network = list())
+
+for (arrangement in arrangements) {
+  for (shape in shapes) {
+    spes_metadata_index <- paste(arrangement, shape, sep = "_")
+    
+    spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
+                                    c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]], "variable_parameter")]
+    
+    for (metric in metrics) {
+
+      metric_plots3D[[spes_metadata_index]][[metric]] <- plot_gradient_metric(spes_table_subset, 
+                                                                              metric,
+                                                                              metric_df_lists3D[[spes_metadata_index]][[metric]], 
+                                                                              arrangement_parameters[[arrangement]], 
+                                                                              get_gradient(metric),
+                                                                              gradient_plots_metadata[[shape]])
+      
+    }
+  }
+}
+
+# Put plots into a pdf
+setwd("~/R/plots/S1")
+arrangements <- c("mixed", "ringed", "separated")
+shapes <- c("ellipsoid", "network")
+
+metrics_set1 <- c("ACIN", "CKR")
+metrics_set2 <- c("MS", "NMS", "ACINP", "AE", "prop_prevalence", "entropy_prevalence")
+
+pdf("plots3D_gradient.pdf", width = 25, height = 12)
 
 for (metric in metrics_set1) {
   for (shape in shapes) {

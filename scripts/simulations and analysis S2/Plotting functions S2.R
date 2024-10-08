@@ -695,16 +695,29 @@ plot_3D_vs_2D_metric_random_slice_no_annotating <- function(metric,
   # Define plotting function
   formatCustomSci <- function(x) {
     x_sci <- str_split_fixed(formatC(x, format = "e"), "e", 2)
-    alpha <- as.numeric(x_sci[ , 1])
+    alpha <- round(as.numeric(x_sci[ , 1]), 1)
     power <- as.integer(x_sci[ , 2])
     paste(alpha, power, sep = "e")
   }
   
   create_plot <- function(data, x_aes, y_aes, title = "") {
     
+    wilcox_test  <- wilcox.test(data[[x_aes]], data[[y_aes]], paired = TRUE)
+    p_value <- wilcox_test$p.value
+    if (p_value == 0) p_value <- 2.2e-308
+    if (0 < p_value && p_value < 1e-3)  {
+      p_value <- formatCustomSci(p_value)
+    }
+    else {
+      p_value  <- round(p_value, 3)
+    }
+    title <- paste("p =", p_value)
+    
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes)) +
-      labs(title = title, x = x_aes, y = y_aes) +
+      labs(x = x_aes, y = y_aes) +
       theme_bw() +
+      ggtitle(title) +
+      theme(plot.title = element_text(size = 9)) +
       xlim(min(c(data[[x_aes]], data[[y_aes]]), na.rm = T), max(c(data[[x_aes]], data[[y_aes]]), na.rm = T)) +
       ylim(min(c(data[[x_aes]], data[[y_aes]]), na.rm = T), max(c(data[[x_aes]], data[[y_aes]]), na.rm = T)) +
       geom_point(size = 0.5) +

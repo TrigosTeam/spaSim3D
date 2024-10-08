@@ -3,6 +3,7 @@ library(ggplot2)
 library(S4Vectors)
 library(stringr)
 library(dplyr)
+library(DescTools)
 
 ### Utility function to get metric cell types -----
 get_metric_cell_types <- function(metric) {
@@ -105,7 +106,7 @@ plot_non_gradient_metric <- function(spes_table,
   # Define plotting function
   formatCustomSci <- function(x) {
     x_sci <- str_split_fixed(formatC(x, format = "e"), "e", 2)
-    alpha <- as.numeric(x_sci[ , 1])
+    alpha <- round(as.numeric(x_sci[ , 1]), 1)
     power <- as.integer(x_sci[ , 2])
     paste(alpha, power, sep = "e")
   }
@@ -116,9 +117,25 @@ plot_non_gradient_metric <- function(spes_table,
     
     data <- data[data$variable_parameter == x_aes, ]
     
+    if (sum(!is.na(data[[y_aes]])) >= 2 && any(data[[y_aes]] != 0)) {
+      correlation_test <- cor.test(data[[x_aes]], data[[y_aes]], method = "spearman")
+      correlation <- correlation_test$estimate
+      p_value <- correlation_test$p.value
+      if (p_value == 0) p_value <- 2.2e-308
+      if (0 < p_value && p_value < 1e-3)  {
+        p_value <- formatCustomSci(p_value)
+      }
+      else {
+        p_value  <- round(p_value, 3)
+      }
+      title <- paste("r:", round(correlation, 3), ", p:", p_value)
+    }
+
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes)) +
-      labs(title = title, x = x_aes, y = y_aes) +
-      theme_bw()
+      labs(x = x_aes, y = y_aes) +
+      ggtitle(title) +
+      theme_bw() +
+      theme(plot.title = element_text(size = 9))
     
     # Use scientific notation for ellipsoid volume
     if (x_aes == "E_volume") {
@@ -159,7 +176,7 @@ plot_non_gradient_metric <- function(spes_table,
     plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]] <- lapply(plots_metadata, function(plot_def) {
       x_aes <- plot_def$x_aes
       y_aes <- plot_def$y_aes
-      title <- plot_def$title
+      title <- " "
       plot <- create_plot(data = plot_df, x_aes = x_aes, y_aes = y_aes, title = title)
       return(plot)
     })
@@ -620,7 +637,8 @@ plot_error_non_gradient_metric <- function(spes_table,
 
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes, color = color_aes)) +
       labs(title = title, x = x_aes, y = y_aes) +
-      theme_bw()
+      theme_bw() +
+      ylim(min(c(0, data[[y_aes]]), na.rm = T), max(c(0, data[[y_aes]]), na.rm = T))
     
     # Use scientific notation for ellipsoid volume
     if (x_aes == "E_volume") {
@@ -962,6 +980,13 @@ plot_non_gradient_metric_all_slices_ground_truth <- function(spes_table,
     })
   }
   
+  # Extract legends from first set of plots
+  legends_list <- lapply(plots_list[[1]], function(plot) {
+    plot_legend <- get_legend(plot + theme(legend.direction = "horizontal"))
+    return(plot_legend)
+  })
+  legends <- plot_grid(plotlist = legends_list, nrow = 1)
+  
   # Combine the plots together using metric_cell_types
   combined_plots_list <- list()
   for (i in seq(nrow(metric_cell_types))) {
@@ -990,7 +1015,12 @@ plot_non_gradient_metric_all_slices_ground_truth <- function(spes_table,
                                         nrow = length(combined_plots_list), 
                                         ncol = 1)
   
-  return(non_gradient_metric_plot)
+  non_gradient_metric_with_legends_plot <- plot_grid(non_gradient_metric_plot,
+                                                     legends,
+                                                     nrow = 2,
+                                                     ncol = 1,
+                                                     rel_heights = c(1, 0.1))
+  return(non_gradient_metric_with_legends_plot)
 }
 
 ### Function for slice violin plots -------
@@ -1016,21 +1046,50 @@ plot_violin_all_slices <- function(spes_table,
   # Define plotting function
   formatCustomSci <- function(x) {
     x_sci <- str_split_fixed(formatC(x, format = "e"), "e", 2)
-    alpha <- as.numeric(x_sci[ , 1])
+    alpha <- round(as.numeric(x_sci[ , 1]), 1)
     power <- as.integer(x_sci[ , 2])
     paste(alpha, power, sep = "e")
   }
   
   create_plot <- function(data, x_aes, y_aes, label, title = "") {
-    
+
     data <- data[data$variable_parameter == label, ]
+
+    do_JT_test <- FALSE
+
+    count <- 0
+    for (i in unique(data[[x_aes]])) {
+      if (sum(!is.na(data[[y_aes]][data[[x_aes]] == i])) >= 2) count <- count + 1
+    }
+    if (count >= 2) do_JT_test <- TRUE
+    if (all(data[[y_aes]] == 0, na.rm = T)) do_JT_test <- FALSE
     
+    # JT test
+    if (do_JT_test) {
+      data_means <- aggregate(data[[y_aes]], by = list(data[[x_aes]]), FUN = mean, na.rm = T)
+      
+      colnames(data_means) <- c("slice", "mean_value")
+      data_means <- data_means %>%
+        mutate(diff = mean_value - lag(mean_value))
+      trend_direction <- ifelse(mean(data_means$diff, na.rm = T) > 0, "increasing", ifelse(mean(data_means$diff, na.rm = T) < 0, "decreasing", "two.sided"))
+      jt_results <- JonckheereTerpstraTest(data[[x_aes]], data[[y_aes]], alternative = trend_direction)
+      p_value <- jt_results$p.value
+      if (p_value == 0) p_value <- 2.2e-308
+      if (0 < p_value && p_value < 1e-3)  {
+        p_value <- formatCustomSci(p_value)
+      }
+      else {
+        p_value  <- round(p_value, 3)
+      }
+      title <- paste("p:", p_value)
+    }
+
     plot <- ggplot() +
-      labs(title = title, x = x_aes, y = y_aes) +
-      geom_violin(data = data, aes_string(x = x_aes, y = y_aes)) +
-      theme_bw()
-    
-    return(plot)
+      labs(x = x_aes, y = y_aes) +
+      theme_bw() +
+      ggtitle(title) +
+      theme(plot.title = element_text(size = 9)) +
+      geom_violin(data = data, aes_string(x = x_aes, y = y_aes))
   }
   
   # Put plots into an organised list
@@ -1060,7 +1119,7 @@ plot_violin_all_slices <- function(spes_table,
       x_aes <- plot_def$x_aes
       y_aes <- plot_def$y_aes
       label <- plot_def$label
-      title <- plot_def$title
+      title <- " "
       plot <- create_plot(data = plot_df, x_aes = x_aes, y_aes = y_aes, label = label, title = title)
       return(plot)
     })
