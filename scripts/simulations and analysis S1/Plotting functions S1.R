@@ -314,7 +314,7 @@ plot_gradient_metric <- function(spes_table,
     title <- get_metric_cell_types_title(metric, metric_cell_types, i)
 
     fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
-    print(fig)
+
     combined_plots_list[[cells]] <- fig
   }
   
