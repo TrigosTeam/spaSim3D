@@ -112,6 +112,8 @@ plot_non_gradient_metric <- function(spes_table,
   
   create_plot <- function(data, x_aes, y_aes, title = "") {
     
+    size <- 0.5
+    
     data <- data[data$variable_parameter == x_aes, ]
     
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes)) +
@@ -121,13 +123,13 @@ plot_non_gradient_metric <- function(spes_table,
     # Use scientific notation for ellipsoid volume
     if (x_aes == "E_volume") {
       plot <- plot + 
-        geom_point() +
+        geom_point(size = size) +
         scale_x_continuous(labels = formatCustomSci)
     }
     else if (typeof(data[[x_aes]]) == "double") {
       breaks <- pretty(c(min(data[[x_aes]]), max(data[[x_aes]])), n = 2)
       plot <- plot + 
-        geom_point() + 
+        geom_point(size = size) + 
         scale_x_continuous(breaks = breaks)
     }
     # Factored character is an integer
@@ -356,6 +358,8 @@ plot_3D_vs_2D_metric_one_slice <- function(spes_table,
   
   create_plot <- function(data, x_aes, y_aes, color_aes, title = "") {
     
+    size <- 0.5
+    
     data <- data[data$variable_parameter == color_aes, ]
     
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes, color = color_aes)) +
@@ -369,13 +373,13 @@ plot_3D_vs_2D_metric_one_slice <- function(spes_table,
     # Use scientific notation for ellipsoid volume
     if (color_aes == "E_volume") {
       plot <- plot + 
-        geom_point() +
+        geom_point(size = size) +
         scale_color_continuous(labels = formatCustomSci)
     }
     else if (typeof(data[[color_aes]]) == "double") {
       breaks <- pretty(c(min(data[[color_aes]]), max(data[[color_aes]])), n = 3)
       plot <- plot + 
-        geom_point() + 
+        geom_point(size = size) + 
         scale_color_continuous(breaks = breaks)
     }
     return(plot)
@@ -480,6 +484,8 @@ plot_3D_vs_2D_metric_all_slices <- function(spes_table,
   
   create_plot <- function(data, x_aes, y_aes, color_aes, label, title = "") {
     
+    size <- 0.5
+    
     data <- data[data$variable_parameter == label, ]
     
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes, color = color_aes)) +
@@ -487,8 +493,8 @@ plot_3D_vs_2D_metric_all_slices <- function(spes_table,
       theme_bw() +
       xlim(min(c(data[[x_aes]], data[[y_aes]]), na.rm = T), max(c(data[[x_aes]], data[[y_aes]]), na.rm = T)) +
       ylim(min(c(data[[x_aes]], data[[y_aes]]), na.rm = T), max(c(data[[x_aes]], data[[y_aes]]), na.rm = T)) +
-      geom_abline(intercept = 0, slope = 1, color = "black", linetype = "longdash") +
-      geom_point()
+      geom_point(size = 0.5) +
+      geom_abline(intercept = 0, slope = 1, color = "black", linetype = "longdash")
     
     return(plot)
   }
@@ -608,6 +614,8 @@ plot_error_non_gradient_metric <- function(spes_table,
   
   create_plot <- function(data, x_aes, y_aes, color_aes, title = "") {
     
+    size <- 0.5
+    
     data <- data[data$variable_parameter == x_aes, ]
 
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes, color = color_aes)) +
@@ -617,13 +625,15 @@ plot_error_non_gradient_metric <- function(spes_table,
     # Use scientific notation for ellipsoid volume
     if (x_aes == "E_volume") {
       plot <- plot + 
-        geom_point() +
+        geom_point(size = size) +
+        geom_abline(intercept = 0, slope = 0, color = "black", linetype = "longdash") +
         scale_x_continuous(labels = formatCustomSci)
     }
     else if (typeof(data[[x_aes]]) == "double") {
       breaks <- pretty(c(min(data[[x_aes]]), max(data[[x_aes]])), n = 3)
       plot <- plot + 
-        geom_point() + 
+        geom_point(size = size) + 
+        geom_abline(intercept = 0, slope = 0, color = "black", linetype = "longdash") +
         scale_x_continuous(breaks = breaks)
     }
     return(plot)
@@ -753,7 +763,8 @@ plot_error_gradient_metric_one_slice <- function(spes_table,
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes, group = group_aes, color = color_aes)) +
       labs(title = title, x = x_aes, y = y_aes) +
       theme_bw() +
-      geom_line()
+      geom_line() +
+      geom_abline(intercept = 0, slope = 0, color = "black", linetype = "longdash")
     
     # Use scientific notation for ellipsoid volume
     if (color_aes == "E_volume") {
@@ -886,7 +897,7 @@ plot_non_gradient_metric_all_slices_ground_truth <- function(spes_table,
   
   create_plot <- function(data2D, data3D, x_aes, y_aes, color_aes, title = "") {
     
-    size = 0.5
+    size <- 0.5
     
     data3D <- data3D[data3D$variable_parameter == x_aes, ]
     data2D <- data2D[data2D$variable_parameter == x_aes, ]
@@ -980,4 +991,235 @@ plot_non_gradient_metric_all_slices_ground_truth <- function(spes_table,
                                         ncol = 1)
   
   return(non_gradient_metric_plot)
+}
+
+### Function for slice violin plots -------
+plot_violin_all_slices <- function(spes_table,
+                                   metric,
+                                   metric_df2D,
+                                   arrangement,
+                                   plots_metadata) {
+  
+  ### Modify plots_metadata
+  # Change plots_metadata arrangement to inputted arrangement
+  plots_metadata$arrangement$label <- arrangement
+  
+  # Change plots_metadata y_aes to inputted metric
+  for (i in seq_along(plots_metadata)) {
+    # Modify the y_aes element
+    plots_metadata[[i]]$y_aes <- metric
+  }
+  
+  # Get metric_cell_types
+  metric_cell_types <- get_metric_cell_types(metric)
+  
+  # Define plotting function
+  formatCustomSci <- function(x) {
+    x_sci <- str_split_fixed(formatC(x, format = "e"), "e", 2)
+    alpha <- as.numeric(x_sci[ , 1])
+    power <- as.integer(x_sci[ , 2])
+    paste(alpha, power, sep = "e")
+  }
+  
+  create_plot <- function(data, x_aes, y_aes, label, title = "") {
+    
+    data <- data[data$variable_parameter == label, ]
+    
+    plot <- ggplot() +
+      labs(title = title, x = x_aes, y = y_aes) +
+      geom_violin(data = data, aes_string(x = x_aes, y = y_aes)) +
+      theme_bw()
+    
+    return(plot)
+  }
+  
+  # Put plots into an organised list
+  plots_list <- list()
+  
+  # Get number of slices
+  n_slices <- length(unique(metric_df2D[["slice"]]))
+  
+  for (i in seq(nrow(metric_cell_types))) {
+    
+    # Subset metric_df for chosen pair/cell types
+    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    
+    # Combine with spes table
+    plot_df <- duplicate_df(spes_table, n_slices)
+    
+    plot_df[[metric]] <- metric_df2D_subset[[metric]]
+    plot_df[["slice"]] <- metric_df2D_subset[["slice"]]
+
+    
+    # Factor
+    if (!is.null(plot_df$shape)) plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    if (!is.null(plot_df$slice)) plot_df$slice <- as.character(plot_df$slice)
+    
+    # Generate plots based on plots_metadata, use final column of metric_cell_types
+    plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]] <- lapply(plots_metadata, function(plot_def) {
+      x_aes <- plot_def$x_aes
+      y_aes <- plot_def$y_aes
+      label <- plot_def$label
+      title <- plot_def$title
+      plot <- create_plot(data = plot_df, x_aes = x_aes, y_aes = y_aes, label = label, title = title)
+      return(plot)
+    })
+  }
+  
+  # Combine the plots together using metric_cell_types
+  combined_plots_list <- list()
+  for (i in seq(nrow(metric_cell_types))) {
+    
+    # Get final column
+    cells <- metric_cell_types[i, ncol(metric_cell_types)]
+    
+    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
+    
+    title <- get_metric_cell_types_title(metric, metric_cell_types, i)
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    
+    combined_plots_list[[cells]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  combined_plots <- plot_grid(plotlist = combined_plots_list,
+                              nrow = length(combined_plots_list), 
+                              ncol = 1)
+  
+  # Get labels, if specified
+  labels_vec <- unlist(lapply(plots_metadata, function(x) {
+    return(x$label)
+  }))
+  labels <- list()
+  for (label in labels_vec) {
+    label <- ggdraw() +
+      draw_label(label)
+    labels[[length(labels) + 1]] <- label
+  }
+  labels <- plot_grid(plotlist = labels, nrow = 1)
+  combined_plots_with_labels <- plot_grid(combined_plots, 
+                                          labels,
+                                          nrow = 3, ncol = 1,
+                                          rel_heights = c(1, 0.1, 0.1))
+  return(combined_plots_with_labels)
+}
+
+### Function for slice violin plots with ground truth -------
+plot_violin_all_slices_ground_truth <- function(spes_table,
+                                                metric,
+                                                metric_df3D,
+                                                metric_df2D,
+                                                arrangement,
+                                                plots_metadata) {
+  
+  ### Modify plots_metadata
+  # Change plots_metadata arrangement to inputted arrangement
+  plots_metadata$arrangement$label <- arrangement
+  
+  # Change plots_metadata y_aes to inputted metric
+  for (i in seq_along(plots_metadata)) {
+    # Modify the y_aes element
+    plots_metadata[[i]]$y_aes <- metric
+  }
+  
+  # Get metric_cell_types
+  metric_cell_types <- get_metric_cell_types(metric)
+  
+  # Define plotting function
+  formatCustomSci <- function(x) {
+    x_sci <- str_split_fixed(formatC(x, format = "e"), "e", 2)
+    alpha <- as.numeric(x_sci[ , 1])
+    power <- as.integer(x_sci[ , 2])
+    paste(alpha, power, sep = "e")
+  }
+  
+  create_plot <- function(data, x_aes, y_aes, label, title = "") {
+    
+    data <- data[data$variable_parameter == label, ]
+    
+    plot <- ggplot() +
+      labs(title = title, x = x_aes, y = y_aes) +
+      geom_violin(data = data, aes_string(x = x_aes, y = y_aes)) +
+      theme_bw()
+    
+    return(plot)
+  }
+  
+  # Put plots into an organised list
+  plots_list <- list()
+  
+  # Get number of slices
+  n_slices <- length(unique(metric_df2D[["slice"]]))
+  
+  for (i in seq(nrow(metric_cell_types))) {
+    
+    # Subset metric_df for chosen pair/cell types
+    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    
+    # Combine with spes table
+    plot_df3D <- spes_table
+    plot_df3D[[metric]] <- metric_df3D_subset[[metric]]
+    plot_df3D[["slice"]] <- "GT"
+    
+    plot_df2D <- duplicate_df(spes_table, n_slices)
+    
+    plot_df2D[[metric]] <- metric_df2D_subset[[metric]]
+    plot_df2D[["slice"]] <- metric_df2D_subset[["slice"]]
+    
+    plot_df <- rbind(plot_df3D, plot_df2D)
+    
+    # Factor
+    if (!is.null(plot_df$shape)) plot_df$shape <- factor(plot_df$shape, c("Ellipsoid", "Network"))
+    if (!is.null(plot_df$slice)) plot_df$slice <- as.character(plot_df$slice)
+    
+    # Generate plots based on plots_metadata, use final column of metric_cell_types
+    plots_list[[metric_cell_types[i, ncol(metric_cell_types)]]] <- lapply(plots_metadata, function(plot_def) {
+      x_aes <- plot_def$x_aes
+      y_aes <- plot_def$y_aes
+      label <- plot_def$label
+      title <- plot_def$title
+      plot <- create_plot(data = plot_df, x_aes = x_aes, y_aes = y_aes, label = label, title = title)
+      return(plot)
+    })
+  }
+  
+  # Combine the plots together using metric_cell_types
+  combined_plots_list <- list()
+  for (i in seq(nrow(metric_cell_types))) {
+    
+    # Get final column
+    cells <- metric_cell_types[i, ncol(metric_cell_types)]
+    
+    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
+    
+    title <- get_metric_cell_types_title(metric, metric_cell_types, i)
+    
+    fig <- plot_grid(title, plots, ncol = 1, rel_heights = c(0.1, 1))
+    
+    combined_plots_list[[cells]] <- fig
+  }
+  
+  # Combine the combined plots into one big plot
+  combined_plots <- plot_grid(plotlist = combined_plots_list,
+                              nrow = length(combined_plots_list), 
+                              ncol = 1)
+  
+  # Get labels, if specified
+  labels_vec <- unlist(lapply(plots_metadata, function(x) {
+    return(x$label)
+  }))
+  labels <- list()
+  for (label in labels_vec) {
+    label <- ggdraw() +
+      draw_label(label)
+    labels[[length(labels) + 1]] <- label
+  }
+  labels <- plot_grid(plotlist = labels, nrow = 1)
+  combined_plots_with_labels <- plot_grid(combined_plots, 
+                                          labels,
+                                          nrow = 3, ncol = 1,
+                                          rel_heights = c(1, 0.1, 0.1))
+  return(combined_plots_with_labels)
 }

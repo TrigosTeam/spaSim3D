@@ -740,7 +740,7 @@ dev.off()
 
 # Set up plots metadata
 plots_metadata <- list(
-  temp <- list(x_aes = "2D", y_aes = "3D")
+  temp <- list(x_aes = "3D", y_aes = "2D")
 )
 
 # Generate plots and plots into a list
@@ -826,6 +826,112 @@ plot2 <- plot_grid(plotlist = curr_metric_plots2,
 curr_metric_plots3 <- list()
 for (metric in metrics_set3) {
   curr_metric_plots3[[metric]] <- metric_plots_3D_vs_2D_random_slice[[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+}
+plot3 <- plot_grid(plotlist = curr_metric_plots3,
+                   nrow = 2, 
+                   ncol = 2)
+
+plot4 <- plot_grid(plot2, plot3,
+                   nrow = 1,
+                   ncol = 2)
+print(plot4)
+dev.off()
+
+
+
+
+
+
+### Get plots with 2D (all slices) on the x-axis and ERROR on the y-axis (not annotating for arrangement or shape and choosing random slice) ----------------
+
+# Set up plots metadata
+plots_metadata <- list(
+  temp <- list(x_aes = "3D", y_aes = "error")
+)
+
+# Generate plots and plots into a list
+arrangements <- c("mixed", "ringed", "separated")
+shapes <- c("ellipsoid", "network")
+metrics <- c("AMD", "MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "ACIN_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
+
+
+# Merge lists in metric_lists
+metric_df_lists3D_merged <- list()
+metric_df_lists2D_merged <- list()
+
+i <- 1
+for (arrangement in arrangements) {
+  for (shape in shapes) {
+    spes_metadata_index <- paste(arrangement, shape, sep = "_")
+    
+    for (metric in metrics) {
+      if (i == 1)  {
+        metric_df_lists3D_merged[[metric]] <- data.frame()
+        metric_df_lists2D_merged[[metric]] <- data.frame()
+      }
+      if (i > 1) {
+        temp <- nrow(metric_df_lists3D[[spes_metadata_index]][[metric]])
+        n_slices <- length(unique(metric_df_lists2D[[spes_metadata_index]][[metric]][["slice"]]))
+        if (metric %in% c("AMD", "ACIN_AUC", "CKR_AUC")) {
+          metric_df_lists3D[[spes_metadata_index]][[metric]][["spe"]] <- 
+            paste("spe", rep(seq((temp/4) * (i - 1) + 1, (temp/4) * (i - 1) + (temp/4)), each = 4), sep = "_")
+          metric_df_lists2D[[spes_metadata_index]][[metric]][["spe"]] <-
+            paste("spe", rep(seq((temp/4) * (i - 1) + 1, (temp)/4 * (i - 1) + (temp/4)), each = 4 * n_slices), sep = "_")
+        }
+        else {
+          metric_df_lists3D[[spes_metadata_index]][[metric]][["spe"]] <- 
+            paste("spe", rep(seq((temp/2) * (i - 1) + 1, (temp/2) * (i - 1) + (temp/2)), each = 2), sep = "_")
+          metric_df_lists2D[[spes_metadata_index]][[metric]][["spe"]] <-
+            paste("spe", rep(seq((temp/2) * (i - 1) + 1, (temp/2) * (i - 1) + (temp/2)), each = 2 * n_slices), sep = "_")
+        }
+      }
+      metric_df_lists3D_merged[[metric]] <- rbind(metric_df_lists3D_merged[[metric]], metric_df_lists3D[[spes_metadata_index]][[metric]])
+      metric_df_lists2D_merged[[metric]] <- rbind(metric_df_lists2D_merged[[metric]], metric_df_lists2D[[spes_metadata_index]][[metric]])
+    }
+    
+    i <- i + 1
+  }
+}
+
+metric_plots_error_vs_2D_random_slice <- list()
+
+for (metric in metrics) {
+  metric_plots_error_vs_2D_random_slice[[metric]] <- plot_error_vs_2D_metric_random_slice_no_annotating(metric, 
+                                                                                                        metric_df_lists3D_merged[[metric]],
+                                                                                                        metric_df_lists2D_merged[[metric]], 
+                                                                                                        plots_metadata)
+}
+
+
+
+# Put plots into a pdf
+setwd("~/R/plots/S2")
+metrics_set1 <- c("AMD",  "ACIN_AUC", "CKR_AUC")
+metrics_set2 <- c("MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC")
+metrics_set3 <- c("prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
+
+pdf("plots_error_vs_3D_random_slice_all_cell_pairs.pdf", width = 12, height = 12)
+
+curr_metric_plots1 <- list()
+for (metric in metrics_set1) {
+  curr_metric_plots1[[metric]] <- metric_plots_error_vs_2D_random_slice[[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+}
+plot1 <- plot_grid(plotlist = curr_metric_plots1,
+                   nrow = 1, 
+                   ncol = length(metrics_set1))
+print(plot1)
+
+curr_metric_plots2 <- list()
+for (metric in metrics_set2) {
+  curr_metric_plots2[[metric]] <- metric_plots_error_vs_2D_random_slice[[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
+}
+plot2 <- plot_grid(plotlist = curr_metric_plots2,
+                   nrow = 2, 
+                   ncol = 2)
+
+curr_metric_plots3 <- list()
+for (metric in metrics_set3) {
+  curr_metric_plots3[[metric]] <- metric_plots_error_vs_2D_random_slice[[metric]] + theme(plot.margin = margin(15, 15, 15, 15))  
 }
 plot3 <- plot_grid(plotlist = curr_metric_plots3,
                    nrow = 2, 
