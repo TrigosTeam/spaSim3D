@@ -54,8 +54,8 @@ calculate_all_gradient_cc_metrics3D <- function(spe,
     df[["cells_in_neighbourhood"]]$ref_cell_id <- NULL
     
     result[["cells_in_neighbourhood"]][i, ] <- apply(df[["cells_in_neighbourhood"]], 2, mean)
-    result[["cells_in_neighbourhood_proportion"]][i, ] <- apply(df[["cells_in_neighbourhood_proportion"]][ , paste(target_cell_types, "_prop", sep = "")], 2, mean)
-    result[["entropy"]][i, "entropy"] <- mean(df[["entropy"]]$entropy)
+    result[["cells_in_neighbourhood_proportion"]][i, ] <- apply(df[["cells_in_neighbourhood_proportion"]][ , paste(target_cell_types, "_prop", sep = "")], 2, mean, na.rm = T)
+    result[["entropy"]][i, "entropy"] <- mean(df[["entropy"]]$entropy, na.rm = T)
     
     for (target_cell_type in names(df[["mixing_score"]])) {
       result[["mixing_score"]][[target_cell_type]][i, ] <- df[["mixing_score"]][[target_cell_type]]

@@ -56,7 +56,7 @@ calculate_cross_K3D <- function(spe,
   
   
   ## Get observed cross K-function
-  observed_cross_K <- (volume * n_ref_tar_interactions) / (n_ref_cells * n_tar_cells)
+  observed_cross_K <- (((volume * n_ref_tar_interactions) / n_ref_cells) / n_tar_cells)
   
   result <- data.frame(observed_cross_K = observed_cross_K,
                        expected_cross_K = expected_cross_K,

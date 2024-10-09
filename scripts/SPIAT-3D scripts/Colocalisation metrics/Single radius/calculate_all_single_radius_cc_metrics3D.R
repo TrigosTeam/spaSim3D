@@ -102,7 +102,7 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
     
     ## Cross_K ---------------------
     cross_K_df$tar_cell_type <- target_cell_type
-    cross_K_df$observed_cross_K <- (volume * sum(entropy_df[[target_cell_type]])) / (sum(spe[[feature_colname]] == reference_cell_type) * sum(spe[[feature_colname]] == target_cell_type))
+    cross_K_df$observed_cross_K <- (((volume * sum(entropy_df[[target_cell_type]])) / sum(df[[feature_colname]] == reference_cell_type)) / sum(df[[feature_colname]] == target_cell_type))
     cross_K_df$expected_cross_K <- (4/3) * pi * radius^3
     cross_K_df$cross_K_ratio <- cross_K_df$observed_cross_K / cross_K_df$expected_cross_K
     result[["cross_K"]][[target_cell_type]] <- cross_K_df

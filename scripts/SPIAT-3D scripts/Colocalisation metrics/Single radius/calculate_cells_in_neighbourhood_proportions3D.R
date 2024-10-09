@@ -6,12 +6,12 @@ calculate_cells_in_neighbourhood_proportions3D <- function(spe,
   
   ## Get cells in neighbourhood df
   cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood3D(spe,
-                                               reference_cell_type,
-                                               target_cell_types,
-                                               radius,
-                                               feature_colname,
-                                               FALSE,
-                                               FALSE)
+                                                                  reference_cell_type,
+                                                                  target_cell_types,
+                                                                  radius,
+                                                                  feature_colname,
+                                                                  FALSE,
+                                                                  FALSE)
   
   if (is.null(cells_in_neighbourhood_df)) return(NULL)
   
