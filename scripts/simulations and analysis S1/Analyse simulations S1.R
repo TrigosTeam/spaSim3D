@@ -515,8 +515,8 @@ for (arrangement in arrangements) {
                                                                      plot_image = F)
           }
           else {
-            proportion_SAC <- NA
-            proportion_prevalence_df <- data.frame(threshold = seq(0.01, 1, 0.01), prevalence = NA)
+            entropy_SAC <- NA
+            entropy_prevalence_df <- data.frame(threshold = seq(0.01, 1, 0.01), prevalence = NA)
           }
           
           index <- n_slices * nrow(entropy_cell_types) * (i - 1) + nrow(entropy_cell_types) * (slice_index - 1) + j

@@ -37,7 +37,8 @@ get_metric_cell_types <- function(metric) {
   return(metric_cell_types)
 }
 ### Utility function to subset metric_df -----
-subset_metric_df <- function(metric_df,
+subset_metric_df <- function(metric,
+                             metric_df,
                              metric_cell_types,
                              index) {
   if (metric %in% c("AMD", "ACIN", "CKR", "MS", "NMS", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prevalence", "prop_AUC")) {
@@ -163,7 +164,7 @@ plot_non_gradient_metric <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df_subset <- subset_metric_df(metric_df, metric_cell_types, i)
+    metric_df_subset <- subset_metric_df(metric, metric_df, metric_cell_types, i)
 
     # Combine spes_table and metric_df
     plot_df <- cbind(spes_table, metric_df_subset)
@@ -255,7 +256,7 @@ plot_gradient_metric <- function(spes_table,
     
     # Use scientific notation for ellipsoid volume
     if (color_aes == "E_volume") {
-      plot <- plot + scale_color_continuous(labels = formatCustomSci)
+      plot <- plot + scale_color_continuous(breaks = breaks, labels = formatCustomSci(breaks))
     }
     else {
       plot <- plot + scale_color_continuous(breaks = breaks)
@@ -270,7 +271,7 @@ plot_gradient_metric <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df_subset <- subset_metric_df(metric_df, metric_cell_types, i)
+    metric_df_subset <- subset_metric_df(metric, metric_df, metric_cell_types, i)
 
     # Combine spes_table and metric_df
     plot_df <- cbind(spes_table, metric_df_subset)
@@ -408,8 +409,8 @@ plot_3D_vs_2D_metric_one_slice <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     # Combine with spes table
     plot_df <- spes_table
@@ -522,8 +523,8 @@ plot_3D_vs_2D_metric_all_slices <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     # Combine with spes table
     plot_df <- spes_table
@@ -663,8 +664,8 @@ plot_error_non_gradient_metric <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     # Combine with spes table
     plot_df <- spes_table
@@ -801,8 +802,8 @@ plot_error_gradient_metric_one_slice <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
 
     # Get error df
     error_df <- ((metric_df2D_subset[, gradient_colnames] - metric_df3D_subset[, gradient_colnames]) / metric_df3D_subset[, gradient_colnames]) * 100
@@ -950,8 +951,8 @@ plot_non_gradient_metric_all_slices_ground_truth <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     # Combine with spes table
     plot_df3D <- spes_table
@@ -1101,7 +1102,7 @@ plot_violin_all_slices <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     # Combine with spes table
     plot_df <- duplicate_df(spes_table, n_slices)
@@ -1214,8 +1215,8 @@ plot_violin_all_slices_ground_truth <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     # Combine with spes table
     plot_df3D <- spes_table

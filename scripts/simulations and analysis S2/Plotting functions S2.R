@@ -36,7 +36,8 @@ get_metric_cell_types <- function(metric) {
   return(metric_cell_types)
 }
 ### Utility function to subset metric_df -----
-subset_metric_df <- function(metric_df,
+subset_metric_df <- function(metric,
+                             metric_df,
                              metric_cell_types,
                              index) {
   if (metric %in% c("AMD", "ACIN", "CKR", "MS", "NMS", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prevalence", "prop_AUC")) {
@@ -145,7 +146,7 @@ plot_non_gradient_metric <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df_subset <- subset_metric_df(metric_df, metric_cell_types, i)
+    metric_df_subset <- subset_metric_df(metric, metric_df, metric_cell_types, i)
     
     # Combine spes_table and metric_df
     plot_df <- cbind(spes_table, metric_df_subset)
@@ -250,7 +251,7 @@ plot_gradient_metric <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df_subset <- subset_metric_df(metric_df, metric_cell_types, i)
+    metric_df_subset <- subset_metric_df(metric, metric_df, metric_cell_types, i)
     
     # Combine spes_table and metric_df
     plot_df <- cbind(spes_table, metric_df)
@@ -386,8 +387,8 @@ plot_3D_vs_2D_metric_one_slice <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     # Combine with spes table
     plot_df <- spes_table
@@ -496,8 +497,8 @@ plot_3D_vs_2D_metric_all_slices <- function(spes_table,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     # Combine with spes table
     plot_df <- spes_table
@@ -616,8 +617,8 @@ plot_3D_vs_2D_metric_all_slices_no_annotating <- function(metric,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     plot_df <- data.frame(row.names = rownames(metric_df3D_subset))
     plot_df[[paste(metric, "3D", sep = "_")]] <- metric_df3D_subset[[metric]]
@@ -732,8 +733,8 @@ plot_3D_vs_2D_metric_random_slice_no_annotating <- function(metric,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     plot_df <- data.frame(row.names = rownames(metric_df3D_subset))
     plot_df[[paste(metric, "3D", sep = "_")]] <- metric_df3D_subset[[metric]]
@@ -823,8 +824,8 @@ plot_error_vs_2D_metric_random_slice_no_annotating <- function(metric,
   for (i in seq(nrow(metric_cell_types))) {
     
     # Subset metric_df for chosen pair/cell types
-    metric_df3D_subset <- subset_metric_df(metric_df3D, metric_cell_types, i)
-    metric_df2D_subset <- subset_metric_df(metric_df2D, metric_cell_types, i)
+    metric_df3D_subset <- subset_metric_df(metric, metric_df3D, metric_cell_types, i)
+    metric_df2D_subset <- subset_metric_df(metric, metric_df2D, metric_cell_types, i)
     
     plot_df <- data.frame(row.names = rownames(metric_df3D_subset))
     plot_df[[paste(metric, "3D", sep = "_")]] <- metric_df3D_subset[[metric]]
