@@ -198,22 +198,31 @@ for (i in seq(n_slices + 1)) {
     
     target_cell_type <- setdiff(cell_types, reference_cell_type)
     
+    if (!is.null(gradient_data)) {
+      metric_df_list[["MS"]][index1, radii_colnames] <- gradient_data[["mixing_score"]][[target_cell_type]]$mixing_score
+      metric_df_list[["NMS"]][index1, radii_colnames] <- gradient_data[["mixing_score"]][[target_cell_type]]$normalised_mixing_score
+      metric_df_list[["ACINP"]][index1, radii_colnames] <- gradient_data[["cells_in_neighbourhood_proportion"]][["Tumour"]]
+      metric_df_list[["AE"]][index1, radii_colnames] <- gradient_data[["entropy"]]$entropy
+    }
+    else {
+      metric_df_list[["MS"]][index1, radii_colnames] <- NA
+      metric_df_list[["NMS"]][index1, radii_colnames] <- NA
+      metric_df_list[["ACINP"]][index1, radii_colnames] <- NA
+      metric_df_list[["AE"]][index1, radii_colnames] <- NA
+    }
+    
     metric_df_list[["MS"]][index1, "slice"] <- slice
     metric_df_list[["MS"]][index1, c("reference", "target")] <- c(reference_cell_type, target_cell_type)
-    metric_df_list[["MS"]][index1, radii_colnames] <- gradient_data[["mixing_score"]][[target_cell_type]]$mixing_score
     
     metric_df_list[["NMS"]][index1, "slice"] <- slice
     metric_df_list[["NMS"]][index1, c("reference", "target")] <- c(reference_cell_type, target_cell_type)
-    metric_df_list[["NMS"]][index1, radii_colnames] <- gradient_data[["mixing_score"]][[target_cell_type]]$normalised_mixing_score
     
     metric_df_list[["ACINP"]][index1, "slice"] <- slice
     metric_df_list[["ACINP"]][index1, c("reference")] <- c(reference_cell_type)
-    metric_df_list[["ACINP"]][index1, radii_colnames] <- gradient_data[["cells_in_neighbourhood_proportion"]][["Tumour"]]
     
     metric_df_list[["AE"]][index1, "slice"] <- slice
     metric_df_list[["AE"]][index1, c("reference")] <- c(reference_cell_type)
-    metric_df_list[["AE"]][index1, radii_colnames] <- gradient_data[["entropy"]]$entropy
-    
+
     index1 <- index1 + 1
     
     for (target_cell_type in cell_types) {
@@ -222,13 +231,20 @@ for (i in seq(n_slices + 1)) {
       # ACIN
       metric_df_list[["ACIN"]][index2, "slice"] <- slice
       metric_df_list[["ACIN"]][index2, c("reference", "target")] <- c(reference_cell_type, target_cell_type)
-      metric_df_list[["ACIN"]][index2, radii_colnames] <- gradient_data[["cells_in_neighbourhood"]][[target_cell_type]]
-      
-      
+
       # CKR
       metric_df_list[["CKR"]][index2, "slice"] <- slice
       metric_df_list[["CKR"]][index2, c("reference", "target")] <- c(reference_cell_type, target_cell_type)
-      metric_df_list[["CKR"]][index2, radii_colnames] <- gradient_data[["cross_K"]][[target_cell_type]]$cross_K_ratio
+
+      
+      if (!is.null(gradient_data)) {
+        metric_df_list[["ACIN"]][index2, radii_colnames] <- gradient_data[["cells_in_neighbourhood"]][[target_cell_type]]
+        metric_df_list[["CKR"]][index2, radii_colnames] <- gradient_data[["cross_K"]][[target_cell_type]]$cross_K_ratio
+      }
+      else {
+        metric_df_list[["ACIN"]][index2, radii_colnames] <- NA
+        metric_df_list[["CKR"]][index2, radii_colnames] <- NA
+      }
       
       index2 <- index2 + 1
     }
@@ -244,14 +260,21 @@ for (i in seq(n_slices + 1)) {
                                                                       feature_colname,
                                                                       dimension = dimension)
     
-    proportion_SAC <- calculate_spatial_autocorrelation(proportion_grid_metrics, 
-                                                        "proportion",
-                                                        weight_method = 0.1,
-                                                        dimension = dimension)
     
-    proportion_prevalence_df <- calculate_prevalence_gradient(proportion_grid_metrics,
-                                                              "proportion")
-    
+    if (!is.null(proportion_grid_metrics)) {
+      proportion_SAC <- calculate_spatial_autocorrelation(proportion_grid_metrics, 
+                                                          "proportion",
+                                                          weight_method = 0.1,
+                                                          dimension = dimension)
+      
+      proportion_prevalence_df <- calculate_prevalence_gradient(proportion_grid_metrics,
+                                                                "proportion")
+    }
+    else {
+      proportion_SAC <- NA
+      proportion_prevalence_df <- data.frame(threshold = seq(0.01, 1, 0.01), prevalence = NA)
+    }
+
     index <- nrow(prop_cell_types) * (i - 1) + j
     metric_df_list[["prop_SAC"]][index, "slice"] <- slice
     metric_df_list[["prop_SAC"]][index, c("reference", "target")] <- c(prop_cell_types$ref[j], prop_cell_types$tar[j])
@@ -270,13 +293,20 @@ for (i in seq(n_slices + 1)) {
                                                            feature_colname,
                                                            dimension = dimension)
     
-    entropy_SAC <- calculate_spatial_autocorrelation(entropy_grid_metrics, 
-                                                     "entropy",
-                                                     weight_method = 0.1,
-                                                     dimension = dimension)
-    
-    entropy_prevalence_df <- calculate_prevalence_gradient(entropy_grid_metrics,
-                                                           "entropy")
+    if (!is.null(entropy_grid_metrics)) {
+      entropy_SAC <- calculate_spatial_autocorrelation(entropy_grid_metrics, 
+                                                       "entropy",
+                                                       weight_method = 0.1,
+                                                       dimension = dimension)
+      
+      entropy_prevalence_df <- calculate_prevalence_gradient(entropy_grid_metrics,
+                                                             "entropy")
+      
+    }
+    else {
+      entropy_SAC <- NA
+      entropy_prevalence_df <- data.frame(threshold = seq(0.01, 1, 0.01), prevalence = NA)
+    }
     
     index <- nrow(entropy_cell_types) * (i - 1) + j
     metric_df_list[["entropy_SAC"]][index, "slice"] <- slice
@@ -290,5 +320,190 @@ for (i in seq(n_slices + 1)) {
 }
 
 
+# setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_final")
+# saveRDS(metric_df_list, "metric_df_list.RDS")
+
+### Plot analysis of 2D and 3D data -----
 setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_final")
-saveRDS(metric_df_list, "metric_df_list.RDS")
+metric_df_list <- readRDS("metric_df_list.RDS")
+
+get_gradient <- function(metric) {
+  if (metric %in% c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR")) {
+    return("radius")
+  }
+  else if (metric %in% c("prop_prevalence", "entropy_prevalence")) {
+    return("threshold")  
+  }
+  else {
+    stop("Invalid metric. Must be gradient-based")
+  }
+}
+
+
+## Turn gradient radii metrics into AUC and add to metric_df list
+get_AUC_for_radii_gradient_metrics <- function(y) {
+  x <- radii
+  h <- diff(x)[1]
+  n <- length(x)
+  
+  AUC <- (h / 2) * (y[1] + 2 * sum(y[2:(n - 1)]) + y[n])
+  
+  return(AUC)
+}
+
+
+radii <- seq(20, 100, 10)
+radii_colnames <- paste("r", radii, sep = "")
+
+gradient_radii_metrics <- c("MS", "NMS", "ACINP", "AE", "ACIN", "CKR")
+
+
+for (metric in gradient_radii_metrics) {
+  metric_AUC_name <- paste(metric, "AUC", sep = "_")
+  
+  if (metric %in% c("MS", "NMS", "ACIN", "CKR")) {
+    subset_colnames <- c("slice", "reference", "target", metric_AUC_name)
+  }
+  else {
+    subset_colnames <- c("slice", "reference", metric_AUC_name)
+  }
+  
+  df <- metric_df_list[[metric]]
+  df[[metric_AUC_name]] <- apply(df[ , radii_colnames], 1, get_AUC_for_radii_gradient_metrics)
+  metric_df_list[[metric_AUC_name]] <- df
+  
+}
+
+## Turn threshold radii metrics into AUC and add to metric_df list
+thresholds <- seq(0.01, 1, 0.01)
+threshold_colnames <- paste("t", thresholds, sep = "")
+
+# prop_AUC 3D
+prop_prevalence_df <- metric_df_list[["prop_prevalence"]]
+prop_prevalence_df$prop_AUC <- apply(prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
+prop_AUC_df <- prop_prevalence_df[ , c("slice", "reference", "target", "prop_AUC")]
+metric_df_list[["prop_AUC"]] <- prop_AUC_df
+
+# entropy_AUC 3D
+entropy_prevalence_df <- metric_df_list[["entropy_prevalence"]]
+entropy_prevalence_df$entropy_AUC <- apply(entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
+entropy_AUC_df <- entropy_prevalence_df[ , c("slice", "cell_types", "entropy_AUC")]
+metric_df_list[["entropy_AUC"]] <- entropy_AUC_df
+
+
+## Functions to plot
+# Utility function to get metric cell types
+get_metric_cell_types <- function(metric) {
+  # Get metric_cell_types
+  if (metric %in% c("AMD", "ACIN", "CKR", "ACIN_AUC", "CKR_AUC")) {
+    metric_cell_types <- data.frame(ref = c("Tumour"), tar = c("Immune"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("MS", "NMS", "MS_AUC", "NMS_AUC")) {
+    metric_cell_types <- data.frame(ref = c("Tumour"), tar = c("Immune"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("ACINP", "ACINP_AUC")) {
+    metric_cell_types <- data.frame(ref = c("Tumour"), tar = c("Tumour"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("AE", "AE_AUC")) {
+    metric_cell_types <- data.frame(ref = c("Tumour"), tar = c("Tumour,Immune"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("prop_SAC", "prop_prevalence", "prop_AUC")) {
+    metric_cell_types <- data.frame(ref = c("Tumour"), tar = c("Immune"))
+    metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+  }
+  else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+    metric_cell_types <- data.frame(cell_types = c("Tumour,Immune"))
+  }
+  else {
+    stop("metric not found")
+  }
+  return(metric_cell_types)
+}
+
+# Utility function to subset metric_df
+subset_metric_df <- function(metric_df,
+                             metric_cell_types,
+                             metric,
+                             index) {
+  
+  if (metric %in% c("AMD", "ACIN", "CKR", "MS", "NMS", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prevalence", "prop_AUC")) {
+    metric_df_subset <- metric_df[metric_df$reference == metric_cell_types[index, "ref"] & metric_df$target == metric_cell_types[index, "tar"], ] 
+  }
+  else if (metric %in% c("ACINP", "AE", "ACINP_AUC", "AE_AUC")) {
+    metric_df_subset <- metric_df[metric_df$reference == metric_cell_types[index, "ref"], ] 
+  }
+  else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+    metric_df_subset <- metric_df[metric_df$cell_types == metric_cell_types[index, "cell_types"], ]
+  }
+  else {
+    stop("metric not found")
+  }
+  
+  return(metric_df_subset)
+}
+
+
+
+plotting_function <- function(metric_df_list,
+                              metrics) {
+  
+  # Get all dfs for each metric and put them into a combined df
+  combined_df <- data.frame()
+  
+  for (metric in metrics) {
+
+    # Get metric_df for current metric
+    metric_df <- metric_df_list[[metric]]
+
+    # Get metric cell types for current metric (should only be one set/ one row)
+    metric_cell_types <- get_metric_cell_types(metric)
+    
+    # Subset metric_df
+    metric_df_subset <- subset_metric_df(metric_df,
+                                         metric_cell_types,
+                                         metric,
+                                         1) # Always first row
+    
+    # Change and further subset columns of metric_df_subset
+    colnames(metric_df_subset)[colnames(metric_df_subset) == metric] <- "value"
+    metric_df_subset$metric <- metric
+    metric_df_subset <- metric_df_subset[ , c("slice", "value", "metric")]
+    
+    # Add to combined df
+    combined_df <- rbind(combined_df, metric_df_subset)
+  }
+  combined_df$dummy <- "dummy"
+  
+  # Create the dot plot, highlighting the maximum slice points with a star shape and using facets
+  fig <- ggplot(combined_df[combined_df$slice != 0, ], aes(x = dummy, y = value)) +
+    geom_jitter(width = 0.2, height = 0, size = 2) +
+    geom_point(data = combined_df[combined_df$slice == 0, ], color = "red", shape = 8, size = 6) +
+    labs(x = "Metric", y = "Value") +
+    facet_wrap(~ metric, strip.position = "bottom", scales = "free_y", ncol = 4) +
+    theme_bw()  +
+    theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
+  
+  return(fig)
+  
+}
+
+## Get plot
+metrics <- c("AMD", "MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "ACIN_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
+
+plot <- plotting_function(metric_df_list,
+                          metrics)
+methods::show(plot)
+
+setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_final")
+pdf("lin_et_al_3D_vs_2D.pdf", width = 10, height = 8)
+
+print(plot)
+
+dev.off()
+
+
+
