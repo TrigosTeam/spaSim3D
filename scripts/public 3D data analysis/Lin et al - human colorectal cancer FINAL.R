@@ -149,6 +149,907 @@ metric_df_list <- list(AMD = AMD_df,
                        entropy_prevalence = entropy_prevalence_df)
 
 
+### SPIAT-3D / SPIAT functions (using df as input) ------
+
+calculate_minimum_distances_between_cell_types <- function(df,
+                                                           cell_types_of_interest = NULL,
+                                                           feature_colname = "Cell.Type",
+                                                           dimension) {
+  
+  if (is.null(df[[feature_colname]])) stop(paste("No column called", feature_colname, "found in df object"))
+  
+  if (is.null(df[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.ID column to your df")
+    df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  }  
+  
+  # If there are less than two cells, give error
+  if (nrow(df) < 2) stop("There must be at least two cells in df")
+  
+  # Subset df to only contain the cells of interest
+  if (!is.null(cell_types_of_interest)) {
+    
+    ## If cell types have been chosen, check they are found in the df object
+    unknown_cell_types <- setdiff(cell_types_of_interest, df[[feature_colname]])
+    if (length(unknown_cell_types) != 0) {
+      warning(paste("The following cell types in cell_types_of_interest are not found in the df object:\n   ",
+                    paste(unknown_cell_types, collapse = ", ")))
+    }
+    
+    df <- df[df[[feature_colname]] %in% cell_types_of_interest , ]
+  }
+  # If cell_types_of_interest is NULL, use all cells in df
+  else {
+    cell_types_of_interest <- unique(df[[feature_colname]])
+  }
+  
+  # Create a list containing the cell IDs of each cell type
+  cell_type_ids <- list()
+  for (cell_type in cell_types_of_interest) {
+    cell_type_ids[[cell_type]] <- as.character(df$Cell.ID[df[[feature_colname]] == cell_type])
+  }
+  
+  # Get df coords
+  if (dimension == "3D") {
+    df_coords <- df[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]  
+  }
+  else if (dimension == "2D") {
+    df_coords <- df[ , c("Cell.X.Position", "Cell.Y.Position")]
+  }
+  else {
+    stop("Invalid dimension. Choose either 3D or 2D")
+  }
+  
+  
+  # Get different possible cell type combinations
+  # Each row represents a combination
+  # If a row is [1 , 2], then we are comparing cell type 1 and cell type 2
+  permu <- gtools::permutations(length(cell_types_of_interest), 2, repeats.allowed = TRUE)
+  result <- data.frame()
+  
+  for (i in seq(nrow(permu))) {
+    cell_type1 <- cell_types_of_interest[permu[i, 1]]
+    cell_type2 <- cell_types_of_interest[permu[i, 2]]
+    
+    # Don't have one of the cells
+    if (sum(df[[feature_colname]] == cell_type1) == 0 || sum(df[[feature_colname]] == cell_type2) == 0) {
+      result <- rbind(result, data.frame(ref_cell_id = NA, ref_cell_type = cell_type1, nearest_cell_id = NA, nearest_cell_type = cell_type2, distance = NA))
+      next
+    }
+    
+    # Get x, y, z coords for all cells of cell_type1 and cell_type2
+    cell_type1_coords <- df_coords[df[[feature_colname]] == cell_type1, ]
+    cell_type2_coords <- df_coords[df[[feature_colname]] == cell_type2, ]
+    
+    # Find all of closest points
+    # For each cell of cell_type1, find the closest cell of cell_type2
+    if (cell_type1 != cell_type2) {
+      nearest_neighbours <- RANN::nn2(data = cell_type2_coords, 
+                                      query = cell_type1_coords, 
+                                      k = 1)  
+    }
+    # If we are comparing the same cell_type, and there is only one of this cell type, move on
+    else if (nrow(cell_type1_coords) == 1) {
+      warning("There is only 1 '", cell_type1, "' cell in your data. It has no nearest neighbour of the same cell type.", sep = "")
+      result <- rbind(result, data.frame(ref_cell_id = NA, ref_cell_type = cell_type1, nearest_cell_id = NA, nearest_cell_type = cell_type2, distance = NA))
+      next
+    }
+    # If we are comparing the same cell_type, use the second closest neighbour
+    else {
+      nearest_neighbours <- RANN::nn2(data = cell_type2_coords, 
+                                      query = cell_type1_coords, 
+                                      k = 2)
+      nearest_neighbours[['nn.idx']] <- nearest_neighbours[['nn.idx']][ , 2]
+      nearest_neighbours[['nn.dists']] <- nearest_neighbours[['nn.dists']][ , 2]
+    }
+    
+    # Create the data frame containing the chosen cells and their ids, as well as the nearest cell to them and their ids, and the distance between
+    
+    curr_pair_df <- data.frame(
+      ref_cell_id = cell_type_ids[[cell_type1]],
+      ref_cell_type = cell_type1,
+      nearest_cell_id = cell_type_ids[[cell_type2]][c(nearest_neighbours$nn.idx)],
+      nearest_cell_type = cell_type2,
+      distance = nearest_neighbours$nn.dists
+    )
+    result <- rbind(result, curr_pair_df)
+  }
+  
+  result$pair <- paste(result$ref_cell_type, result$nearest_cell_type,sep = "/")
+  
+  return(result)
+}
+
+
+
+
+summarise_distances_between_cell_types <- function(distances_df) {
+  
+  pair <- distance <- NULL
+  
+  # summarise the results
+  distances_df_summarised <- distances_df %>% 
+    dplyr::group_by(pair) %>%
+    dplyr::summarise(mean(distance), 
+                     min(distance), 
+                     max(distance),
+                     stats::median(distance), 
+                     stats::sd(distance))
+  
+  distances_df_summarised <- data.frame(distances_df_summarised)
+  
+  colnames(distances_df_summarised) <- c("pair", 
+                                         "mean", 
+                                         "min", 
+                                         "max", 
+                                         "median", 
+                                         "std_dev")
+  
+  for (i in seq(nrow(distances_df_summarised))) {
+    # Get cell_types for each pair
+    cell_types <- strsplit(distances_df_summarised[i,"pair"], "/")[[1]]
+    
+    distances_df_summarised[i, "reference"] <- cell_types[1]
+    distances_df_summarised[i, "target"] <- cell_types[2]
+  }
+  
+  return(distances_df_summarised)
+}
+
+
+
+calculate_all_gradient_cc_metrics <- function(df, 
+                                              reference_cell_type, 
+                                              target_cell_types, 
+                                              radii, 
+                                              feature_colname = "Cell.Type", 
+                                              dimension) {
+  
+  
+  ## Define result
+  result <- list("mixing_score" = list(),
+                 "cells_in_neighbourhood" = data.frame(matrix(nrow = length(radii), ncol = length(target_cell_types))),
+                 "cells_in_neighbourhood_proportion" = data.frame(matrix(nrow = length(radii), ncol = length(target_cell_types))),
+                 "entropy" = data.frame(matrix(nrow = length(radii), ncol = 1)),
+                 "cross_K" = list())
+  colnames(result[["cells_in_neighbourhood"]]) <- target_cell_types
+  colnames(result[["cells_in_neighbourhood_proportion"]]) <- target_cell_types
+  colnames(result[["entropy"]]) <- "entropy"
+  
+  # Define other constants
+  mixing_score_df_colnames <- c("ref_cell_type", 
+                                "tar_cell_type", 
+                                "n_ref_cells",
+                                "n_tar_cells", 
+                                "n_ref_tar_interactions",
+                                "n_ref_ref_interactions", 
+                                "mixing_score", 
+                                "normalised_mixing_score")
+  cross_K_df_colnames <- c("ref_cell_type",
+                           "tar_cell_type",
+                           "observed_cross_K",
+                           "expected_cross_K",
+                           "cross_K_ratio")
+  
+  # Define indiviudal data frames for mixing_score and cross_K
+  for (target_cell_type in target_cell_types) {
+    if (reference_cell_type != target_cell_type) {
+      result[["mixing_score"]][[target_cell_type]] <- data.frame(matrix(nrow = length(radii), ncol = length(mixing_score_df_colnames)))
+      colnames(result[["mixing_score"]][[target_cell_type]]) <- mixing_score_df_colnames
+    }
+    result[["cross_K"]][[target_cell_type]] <- data.frame(matrix(nrow = length(radii), ncol = length(cross_K_df_colnames)))
+    colnames(result[["cross_K"]][[target_cell_type]]) <- cross_K_df_colnames
+  }
+  
+  # Get gradient results for each metric
+  for (i in seq(length(radii))) {
+    df_gradient_results <- calculate_all_single_radius_cc_metrics(df,
+                                                                  reference_cell_type,
+                                                                  target_cell_types,
+                                                                  radii[i],
+                                                                  feature_colname,
+                                                                  dimension)
+    
+    if (is.null(df_gradient_results)) return(NULL)
+    
+    df_gradient_results[["cells_in_neighbourhood"]]$ref_cell_id <- NULL
+    
+    result[["cells_in_neighbourhood"]][i, ] <- apply(df_gradient_results[["cells_in_neighbourhood"]], 2, mean, na.rm = T)
+    result[["cells_in_neighbourhood_proportion"]][i, ] <- apply(df_gradient_results[["cells_in_neighbourhood_proportion"]][ , paste(target_cell_types, "_prop", sep = "")], 2, mean, na.rm = T)
+    result[["entropy"]][i, "entropy"] <- mean(df_gradient_results[["entropy"]]$entropy, na.rm = T)
+    
+    for (target_cell_type in names(df_gradient_results[["mixing_score"]])) {
+      result[["mixing_score"]][[target_cell_type]][i, ] <- df_gradient_results[["mixing_score"]][[target_cell_type]]
+    }
+    
+    for (target_cell_type in names(df_gradient_results[["cross_K"]])) {
+      result[["cross_K"]][[target_cell_type]][i, ] <- df_gradient_results[["cross_K"]][[target_cell_type]]
+    }
+  }
+  
+  # Add radius column to each data frame
+  result[["cells_in_neighbourhood"]]$radius <- radii
+  result[["cells_in_neighbourhood_proportion"]]$radius <- radii
+  result[["entropy"]]$radius <- radii
+  for (target_cell_type in names(df_gradient_results[["mixing_score"]])) {
+    result[["mixing_score"]][[target_cell_type]]$radius <- radii
+  }
+  
+  for (target_cell_type in names(df_gradient_results[["cross_K"]])) {
+    result[["cross_K"]][[target_cell_type]]$radius <- radii
+  }
+  
+  return(result)
+}
+
+
+### Calculate all single radius cell-colocalisation metrics
+# If a function only requires one target cell type, iterate through each cell type in target_cell_types, else use all target_cell_types
+
+calculate_all_single_radius_cc_metrics <- function(df, 
+                                                   reference_cell_type, 
+                                                   target_cell_types, 
+                                                   radius, 
+                                                   feature_colname = "Cell.Type",
+                                                   dimension) {
+  
+  if (is.null(df[[feature_colname]])) stop(paste("No column called", feature_colname, "found in df object"))
+  
+  ## For reference_cell_type, check it is found in the df object
+  if (!(reference_cell_type %in% df[[feature_colname]])) {
+    warning(paste("The reference_cell_type", reference_cell_type,"is not found in the df object"))
+    return(NULL)
+  }
+  
+  ## For target_cell_types, check they are found in the df object
+  unknown_cell_types <- setdiff(target_cell_types, df[[feature_colname]])
+  if (length(unknown_cell_types) != 0) {
+    warning(paste("The following cell types in target_cell_types are not found in the df object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
+  }
+  
+  # Check if radius is numeric
+  if (!is.numeric(radius)) stop(paste(radius, " is not of type 'numeric'"))
+  
+  
+  # Define result
+  result <- list("cells_in_neighbourhood" = list(),
+                 "cells_in_neighbourhood_proportion" = list(),
+                 "entropy" = list(),
+                 "mixing_score" = list(),
+                 "cross_K" = list())
+  
+  # Define other constants
+  mixing_score_df_colnames <- c("ref_cell_type", 
+                                "tar_cell_type", 
+                                "n_ref_cells",
+                                "n_tar_cells", 
+                                "n_ref_tar_interactions",
+                                "n_ref_ref_interactions", 
+                                "mixing_score", 
+                                "normalised_mixing_score")
+  cross_K_df_colnames <- c("ref_cell_type",
+                           "tar_cell_type",
+                           "observed_cross_K",
+                           "expected_cross_K",
+                           "cross_K_ratio")
+  
+  # Get rough dimensions of window for cross_K
+  if (dimension == "3D") {
+    df_coords <- df[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]  
+    length <- round(max(df_coords$Cell.X.Position) - min(df_coords$Cell.X.Position))
+    width  <- round(max(df_coords$Cell.Y.Position) - min(df_coords$Cell.Y.Position))
+    height <- round(max(df_coords$Cell.Z.Position) - min(df_coords$Cell.Z.Position))
+    
+    ## Get volume of the window the cells are in
+    volume <- length * width * height
+  }
+  else if (dimension == "2D") {
+    df_coords <- df[ , c("Cell.X.Position", "Cell.Y.Position")]
+    length <- round(max(df_coords$Cell.X.Position) - min(df_coords$Cell.X.Position))
+    width  <- round(max(df_coords$Cell.Y.Position) - min(df_coords$Cell.Y.Position))
+    
+    
+    ## Get area of the window the cells are in
+    area <- length * width
+  }
+  else {
+    stop("Invalid dimension. Choose either 3D or 2D")
+  }
+  
+  
+  
+  
+  # All single radius cc metrics stem from calculate_entropy3D function
+  entropy_df <- calculate_entropy(df, 
+                                  reference_cell_type, 
+                                  target_cell_types, 
+                                  radius, 
+                                  feature_colname,
+                                  dimension)  
+  
+  ## Cells in neighbourhood ----------
+  result[["cells_in_neighbourhood"]] <- entropy_df[ , c("ref_cell_id", target_cell_types)]
+  
+  ## Cells in neighbourhood proportion ----------
+  result[["cells_in_neighbourhood_proportion"]] <- entropy_df[ , c("ref_cell_id", target_cell_types, paste(target_cell_types, "_prop", sep = ""))]
+  
+  ## Entropy --------------
+  result[["entropy"]] <- entropy_df
+  
+  
+  ## These metrics focus on a particular cell type 
+  for (target_cell_type in target_cell_types) {
+    mixing_score_df <- data.frame(matrix(nrow = 1, ncol = length(mixing_score_df_colnames)))
+    colnames(mixing_score_df) <- mixing_score_df_colnames
+    mixing_score_df$ref_cell_type <- reference_cell_type
+    
+    cross_K_df <- data.frame(matrix(nrow = 1, ncol = length(cross_K_df_colnames)))
+    colnames(cross_K_df) <- cross_K_df_colnames
+    cross_K_df$ref_cell_type <- reference_cell_type
+    
+    ## Mixing score -----------------
+    # No need to fill in mixing_score_df if the reference and target cell is the same
+    if (reference_cell_type != target_cell_type) {
+      mixing_score_df$tar_cell_type <- target_cell_type
+      mixing_score_df$n_ref_cells <- sum(df[[feature_colname]] == reference_cell_type)
+      mixing_score_df$n_tar_cells <- sum(df[[feature_colname]] == target_cell_type)
+      mixing_score_df$n_ref_tar_interactions <- sum(entropy_df[[target_cell_type]])
+      mixing_score_df$n_ref_ref_interactions <- sum(entropy_df[[reference_cell_type]])
+      mixing_score_df$mixing_score <- mixing_score_df$n_ref_tar_interactions / (0.5 * mixing_score_df$n_ref_ref_interactions)
+      mixing_score_df$normalised_mixing_score <- 0.5 * mixing_score_df$mixing_score * mixing_score_df$n_ref_cells / mixing_score_df$n_tar_cell
+      if (is.infinite(mixing_score_df$mixing_score)) mixing_score_df$mixing_score <- NA
+      if (is.infinite(mixing_score_df$normalised_mixing_score)) mixing_score_df$normalised_mixing_score <- NA
+      result[["mixing_score"]][[target_cell_type]] <- mixing_score_df
+    }
+    
+    ## Cross_K ---------------------
+    cross_K_df$tar_cell_type <- target_cell_type
+    if (dimension == "3D") {
+      cross_K_df$observed_cross_K <- (((volume * sum(entropy_df[[target_cell_type]])) / sum(df[[feature_colname]] == reference_cell_type)) / sum(df[[feature_colname]] == target_cell_type))
+      cross_K_df$expected_cross_K <- (4/3) * pi * radius^3
+    }
+    else if (dimension == "2D") {
+      cross_K_df$observed_cross_K <- (((area * sum(entropy_df[[target_cell_type]])) / sum(df[[feature_colname]] == reference_cell_type)) / sum(df[[feature_colname]] == target_cell_type))
+      cross_K_df$expected_cross_K <- pi * radius^2
+    }
+    
+    cross_K_df$cross_K_ratio <- cross_K_df$observed_cross_K / cross_K_df$expected_cross_K
+    result[["cross_K"]][[target_cell_type]] <- cross_K_df
+  }
+  
+  return(result)
+}
+
+
+
+
+calculate_entropy <- function(df,
+                              reference_cell_type,
+                              target_cell_types,
+                              radius,
+                              feature_colname = "Cell.Type",
+                              dimension) {
+  
+  # Check
+  if (length(target_cell_types) < 2) stop("Need at least two target cell types")
+  
+  ## Users should ensure include the reference_cell_type as one of the target_cell_types
+  cells_in_neighbourhood_proportion_df <- calculate_cells_in_neighbourhood_proportions(df,
+                                                                                       reference_cell_type,
+                                                                                       target_cell_types,
+                                                                                       radius,
+                                                                                       feature_colname,
+                                                                                       dimension)
+  
+  if (is.null(cells_in_neighbourhood_proportion_df)) return(NULL)
+  
+  ## Get entropy for each row
+  cells_in_neighbourhood_proportion_df$entropy <- apply(cells_in_neighbourhood_proportion_df[ , paste(target_cell_types, "_prop", sep = "")],
+                                                        1,
+                                                        function(x) -1 * sum(x * log(x, length(target_cell_types))))
+  cells_in_neighbourhood_proportion_df$entropy <- ifelse(cells_in_neighbourhood_proportion_df$total > 0 & is.nan(cells_in_neighbourhood_proportion_df$entropy), 
+                                                         0,
+                                                         cells_in_neighbourhood_proportion_df$entropy)
+  
+  return(cells_in_neighbourhood_proportion_df)
+}
+
+
+
+
+
+calculate_cells_in_neighbourhood_proportions <- function(df, 
+                                                         reference_cell_type, 
+                                                         target_cell_types, 
+                                                         radius, 
+                                                         feature_colname = "Cell.Type",
+                                                         dimension) {
+  
+  ## Get cells in neighbourhood df
+  cells_in_neighbourhood_df <- calculate_cells_in_neighbourhood(df,
+                                                                reference_cell_type,
+                                                                target_cell_types,
+                                                                radius,
+                                                                feature_colname,
+                                                                dimension)
+  
+  if (is.null(cells_in_neighbourhood_df)) return(NULL)
+  
+  ## Get total number of target cells for each row (first column is the reference cell id column, so we exclude it)
+  cells_in_neighbourhood_df$total <- apply(cells_in_neighbourhood_df[ , c(-1)], 1, sum)
+  
+  cells_in_neighbourhood_df[ , paste(target_cell_types, "_prop", sep = "")] <- cells_in_neighbourhood_df[ , target_cell_types] / cells_in_neighbourhood_df$total
+  
+  return(cells_in_neighbourhood_df)
+}
+
+
+
+calculate_cells_in_neighbourhood <- function(df, 
+                                             reference_cell_type, 
+                                             target_cell_types, 
+                                             radius, 
+                                             feature_colname = "Cell.Type",
+                                             dimension) {
+  
+  if (is.null(df[[feature_colname]])) stop(paste("No column called", feature_colname, "found in df object"))
+  
+  if (is.null(df[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.ID column to your df")
+    df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+  }  
+  
+  ## For reference_cell_type, check it is found in the df object
+  if (!(reference_cell_type %in% df[[feature_colname]])) {
+    warning(paste("The reference_cell_type", reference_cell_type,"is not found in the df object"))
+    return(NULL)
+  }
+  
+  ## For target_cell_types, check they are found in the df object
+  unknown_cell_types <- setdiff(target_cell_types, df[[feature_colname]])
+  if (length(unknown_cell_types) != 0) {
+    warning(paste("The following cell types in target_cell_types are not found in the df object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
+  }
+  
+  # Check if radius is numeric
+  if (!is.numeric(radius)) {
+    stop(paste(radius, " is not of type 'numeric'"))
+  }
+  
+  # Get df coords
+  if (dimension == "3D") {
+    df_coords <- df[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]  
+  }
+  else if (dimension == "2D") {
+    df_coords <- df[ , c("Cell.X.Position", "Cell.Y.Position")]
+  }
+  else {
+    stop("Invalid dimension. Choose either 3D or 2D")
+  }
+  
+  
+  # Get reference_cell_type coords
+  reference_cell_type_coords <- df_coords[df[[feature_colname]] == reference_cell_type, ]
+  
+  result <- data.frame(matrix(nrow = nrow(reference_cell_type_coords), ncol = 0))
+  
+  for (target_cell_type in target_cell_types) {
+    
+    if (sum(df[[feature_colname]] == target_cell_type) == 0) {
+      result[[target_cell_type]] <- NA
+      next
+    }
+    
+    ## Get target_cell_type coords
+    target_cell_type_coords <- df_coords[df[[feature_colname]] == target_cell_type, ]
+    
+    ## Determine number of target cells dfcified distance for each reference cell
+    ref_tar_result <- dbscan::frNN(target_cell_type_coords, 
+                                   eps = radius,
+                                   query = reference_cell_type_coords, 
+                                   sort = FALSE)
+    
+    n_targets <- rapply(ref_tar_result$id, length)
+    
+    
+    # Don't want to include the reference cell as one of the target cells
+    if (reference_cell_type == target_cell_type) n_targets <- n_targets - 1
+    
+    ## Add to data frame
+    result[[target_cell_type]] <- n_targets
+  }
+  
+  result <- data.frame(ref_cell_id = df$Cell.ID[df[[feature_colname]] == reference_cell_type], result)
+  
+  return(result)
+}
+
+
+
+
+get_df_grid_metrics <- function(df, 
+                                n_splits, 
+                                feature_colname = "Cell.Type",
+                                dimension) {
+  
+  if (is.null(df[[feature_colname]])) stop(paste("No column called", feature_colname, "found in df object"))
+  
+  # Check if n_splits is numeric
+  if (!is.numeric(n_splits)) {
+    stop(paste(n_splits, " n_splits is not of type 'numeric'"))
+  }
+  
+  
+  if (dimension == "3D") {
+    df_coords <- df[ , c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position")]  
+    
+    
+    ## Get dimensions of the window
+    min_x <- min(df_coords[ , "Cell.X.Position"])
+    min_y <- min(df_coords[ , "Cell.Y.Position"])
+    min_z <- min(df_coords[ , "Cell.Z.Position"])
+    
+    max_x <- max(df_coords[ , "Cell.X.Position"])
+    max_y <- max(df_coords[ , "Cell.Y.Position"])
+    max_z <- max(df_coords[ , "Cell.Z.Position"])
+    
+    length <- round(max_x - min_x)
+    width  <- round(max_y - min_y)
+    height <- round(max_z - min_z)
+    
+    ## Get distance of row, col and lay
+    d_row <- length / n_splits
+    d_col <- width / n_splits
+    d_lay <- height / n_splits
+    
+    # Shift df_coords so they begin at the origin
+    df_coords[, "Cell.X.Position"] <- df_coords[, "Cell.X.Position"] - min_x
+    df_coords[, "Cell.Y.Position"] <- df_coords[, "Cell.Y.Position"] - min_y
+    df_coords[, "Cell.Z.Position"] <- df_coords[, "Cell.Z.Position"] - min_z
+    
+    ## Figure out which 'grid prism number' each cell is inside
+    df$grid_prism_num <- floor(df_coords[ , "Cell.X.Position"] / d_row) +
+      floor(df_coords[ , "Cell.Y.Position"] / d_col) * n_splits + 
+      floor(df_coords[ , "Cell.Z.Position"] / d_lay) * n_splits^2 + 1
+    
+    ## Determine the cell types found in each grid prism
+    n_grid_prisms <- n_splits^3
+    grid_prism_cell_matrix <- as.data.frame.matrix(table(df[[feature_colname]], factor(df$grid_prism_num, levels = seq(n_grid_prisms))))
+    grid_prism_cell_matrix <- data.frame(grid_prism_num = seq(n_grid_prisms),
+                                         t(grid_prism_cell_matrix))
+    
+    ## Determine centre coordinates of each grid prism
+    grid_prism_coordinates <- data.frame(grid_prism_num = seq(n_grid_prisms),
+                                         x_coord = ((seq(n_grid_prisms) - 1) %% n_splits + 0.5) * d_row + round(min_x),
+                                         y_coord = (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits) + 0.5) * d_col + round(min_y),
+                                         z_coord = (floor((seq(n_grid_prisms) - 1) / (n_splits^2)) + 0.5) * d_lay + round(min_z))
+    
+    grid_prism_data <- list("grid_prism_cell_matrix" = grid_prism_cell_matrix,
+                            "grid_prism_coordinates" = grid_prism_coordinates)
+  }
+  
+  else if (dimension == "2D") {
+    df_coords <- df[ , c("Cell.X.Position", "Cell.Y.Position")]  
+    
+    
+    ## Get dimensions of the window
+    min_x <- min(df_coords[ , "Cell.X.Position"])
+    min_y <- min(df_coords[ , "Cell.Y.Position"])
+    
+    max_x <- max(df_coords[ , "Cell.X.Position"])
+    max_y <- max(df_coords[ , "Cell.Y.Position"])
+    
+    length <- round(max_x - min_x)
+    width  <- round(max_y - min_y)
+    
+    ## Get distance of row, col
+    d_row <- length / n_splits
+    d_col <- width / n_splits
+    
+    # Shift df_coords so they begin at the origin
+    df_coords[, "Cell.X.Position"] <- df_coords[, "Cell.X.Position"] - min_x
+    df_coords[, "Cell.Y.Position"] <- df_coords[, "Cell.Y.Position"] - min_y
+    
+    ## Figure out which 'grid prism number' each cell is inside
+    df$grid_prism_num <- floor(df_coords[ , "Cell.X.Position"] / d_row) +
+      floor(df_coords[ , "Cell.Y.Position"] / d_col) * n_splits
+    
+    ## Determine the cell types found in each grid prism
+    n_grid_prisms <- n_splits^2
+    grid_prism_cell_matrix <- as.data.frame.matrix(table(df[[feature_colname]], factor(df$grid_prism_num, levels = seq(n_grid_prisms))))
+    grid_prism_cell_matrix <- data.frame(grid_prism_num = seq(n_grid_prisms),
+                                         t(grid_prism_cell_matrix))
+    
+    ## Determine centre coordinates of each grid prism
+    grid_prism_coordinates <- data.frame(grid_prism_num = seq(n_grid_prisms),
+                                         x_coord = ((seq(n_grid_prisms) - 1) %% n_splits + 0.5) * d_row + round(min_x),
+                                         y_coord = (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits) + 0.5) * d_col + round(min_y))
+    
+    grid_prism_data <- list("grid_prism_cell_matrix" = grid_prism_cell_matrix,
+                            "grid_prism_coordinates" = grid_prism_coordinates)
+  }
+  else {
+    stop("Invalid dimension. Choose either 3D or 2D")
+  }
+  return(grid_prism_data)
+}
+
+
+
+calculate_cell_proportion_grid_metrics <- function(df, 
+                                                   n_splits,
+                                                   reference_cell_types,
+                                                   target_cell_types,
+                                                   feature_colname = "Cell.Type",
+                                                   dimension) {
+  
+  if (is.null(df[[feature_colname]])) stop(paste("No column called", feature_colname, "found in df object"))
+  
+  ## Check reference_cell_types are found in the df object
+  unknown_cell_types <- setdiff(reference_cell_types, df[[feature_colname]])
+  if (length(unknown_cell_types) != 0) {
+    warning(paste("The following cell types in reference_cell_types are not found in the df object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
+    return(NULL)
+  }
+  ## Check target_cell_types are found in the df object
+  unknown_cell_types <- setdiff(target_cell_types, df[[feature_colname]])
+  if (length(unknown_cell_types) != 0) {
+    warning(paste("The following cell types in target_cell_types are not found in the df object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
+    return(NULL)
+  }
+  # Check if there is intersection between reference_cell_types and target_cell_types
+  if (length(intersect(reference_cell_types, target_cell_types)) > 0) {
+    stop("Cannot have same cells in both reference_cell_types and target_cell_types")
+  }
+  
+  # Add grid metrics to df
+  grid_prism_data <- get_df_grid_metrics(df, n_splits, feature_colname, dimension)
+  
+  # Get grid_prism_cell_matrix from df
+  grid_prism_cell_matrix <- grid_prism_data$grid_prism_cell_matrix
+  
+  ## Define data frame which contains all results
+  if (dimension == "3D") {
+    n_grid_prisms <- n_splits^3  
+  }
+  else if (dimension == "2D") {
+    n_grid_prisms <- n_splits^2
+  }
+  else {
+    stop("Invalid dimension. Choose either 3D or 2D")
+  }
+  
+  result <- data.frame(row.names = seq(n_grid_prisms))
+  
+  # Fill in the result data frame
+  if (length(reference_cell_types) == 1) {
+    result$reference <- grid_prism_cell_matrix[[reference_cell_types]]
+  }
+  else {
+    result$reference <- rowSums(grid_prism_cell_matrix[ , reference_cell_types])
+  }
+  if (length(target_cell_types) == 1) {
+    result$target <- grid_prism_cell_matrix[[target_cell_types]]
+  }
+  else {
+    result$target <- rowSums(grid_prism_cell_matrix[ , target_cell_types])
+  }
+  result$total <- result$reference + result$target
+  result$proportion <- result$target / result$total
+  
+  # Add grid_prism_coordinates info to result
+  result <- cbind(result, grid_prism_data$grid_prism_coordinates)
+  
+  return(result)
+}
+
+
+calculate_entropy_grid_metrics <- function(df, 
+                                           n_splits,
+                                           cell_types_of_interest,
+                                           feature_colname = "Cell.Type",
+                                           dimension) {
+  
+  if (is.null(df[[feature_colname]])) stop(paste("No column called", feature_colname, "found in df object"))
+  
+  ## If cell types have been chosen, check they are found in the df object
+  unknown_cell_types <- setdiff(cell_types_of_interest, unique(df[[feature_colname]]))
+  if (length(unknown_cell_types) != 0) {
+    warning(paste("The following cell types in cell_types_of_interest are not found in the df object:\n   ",
+                  paste(unknown_cell_types, collapse = ", ")))
+    return(NULL)
+  }
+  
+  # Add grid metrics to df
+  grid_prism_data <- get_df_grid_metrics(df, n_splits, feature_colname, dimension)
+  
+  # Get grid_prism_cell_matrix from df
+  grid_prism_cell_matrix <- grid_prism_data$grid_prism_cell_matrix
+  
+  ## Define data frame which contains all results
+  if (dimension == "3D") {
+    n_grid_prisms <- n_splits^3  
+  }
+  else if (dimension == "2D") {
+    n_grid_prisms <- n_splits^2
+  }
+  else {
+    stop("Invalid dimension. Choose either 3D or 2D")
+  }
+  result <- data.frame(row.names = seq(n_grid_prisms))
+  
+  for (cell_type in cell_types_of_interest) {
+    result[[cell_type]] <- grid_prism_cell_matrix[[cell_type]]
+  }
+  result$total <- rowSums(result)
+  
+  ## Get data frame containing proportions for cell_types_of_interest
+  df_props <- result[ , cell_types_of_interest] / result$total
+  
+  ## Use proportion data frame to get entropy
+  calculate_entropy <- function(x) {
+    entropy <- -1 * sum(x * ifelse(is.infinite(log(x, length(x))), 0, log(x, length(x))))
+    return(entropy)
+  }
+  result$entropy <- apply(df_props, 1, calculate_entropy)
+  
+  # Add grid_prism_coordinates info to result
+  result <- cbind(result, grid_prism_data$grid_prism_coordinates)
+  
+  return(result)
+}
+
+
+
+calculate_spatial_autocorrelation <- function(grid_metrics,
+                                              metric_colname,
+                                              weight_method = 0.1,
+                                              dimension) {
+  
+  
+  ## Get number of grid prisms
+  n_grid_prisms <- nrow(grid_metrics)
+  
+  if (dimension == "3D") {
+    ## Get splitting number (should be the cube root of n_grid_prisms)
+    n_splits <- (n_grid_prisms)^(1/3)
+    
+    ## Find the coordinates of each grid prism
+    x <- ((seq(n_grid_prisms) - 1) %% n_splits)
+    y <- (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits))
+    z <- (floor((seq(n_grid_prisms) - 1) / (n_splits^2)))
+    grid_prism_coords <- data.frame(x = x, y = y, z = z)
+    
+    ## Subset for non NA rows
+    grid_prism_coords <- grid_prism_coords[!is.na(grid_metrics[[metric_colname]]), ]
+    grid_metrics <- grid_metrics[!is.na(grid_metrics[[metric_colname]]), ]
+    
+    weight_matrix <- -1 * apcluster::negDistMat(grid_prism_coords)
+    ## Use the inverse distance between two points as the weight (IDW is 'inverse distance weighting')
+    if (weight_method == "IDW") {
+      weight_matrix <- 1 / weight_matrix
+    }
+    ## Use rook method: adjacent points get a weight of 1, otherwise, weight of 0
+    ## Adjacent points are within 1 unit apart. e.g. (0, 0, 0) vs (0, 0, 1)
+    else if (weight_method == "rook") {
+      weight_matrix <- ifelse(weight_matrix > 1, 0, 1)  
+    }
+    ## Use queen method: adjacent points get a weight of 1, otherwise, weight of 0
+    ## Adjacent points are within sqrt(3) unit apart. e.g. (0, 0, 0) vs (0, 0, 1)
+    else if (weight_method == "queen") {
+      weight_matrix <- ifelse(weight_matrix > sqrt(3), 0, 1)  
+    }
+    ## If a number (x) between 0 and 1 is supplied, set a threshold to be x quantile value of c(weight_matrix)
+    ## Grid prisms within this specified threshold have a weight of 1, otherwise, weight of 0
+    else if (as.numeric(weight_method) && 0 < weight_method && weight_method < 1) {
+      threshold <- quantile(c(weight_matrix), weight_method)
+      weight_matrix <- ifelse(weight_matrix > threshold, 0, 1)
+    }
+    else {
+      stop(paste(weight_method, " weight_method is not an appropriate method"))
+    }
+  }
+  else if (dimension == "2D") {
+    ## Get splitting number (should be the square root of n_grid_prisms)
+    n_splits <- (n_grid_prisms)^(1/2)
+    
+    ## Find the coordinates of each grid prism
+    x <- ((seq(n_grid_prisms) - 1) %% n_splits)
+    y <- (floor(((seq(n_grid_prisms) - 1) %% (n_splits)^2) / n_splits))
+    grid_prism_coords <- data.frame(x = x, y = y)
+    
+    ## Subset for non NA rows
+    grid_prism_coords <- grid_prism_coords[!is.na(grid_metrics[[metric_colname]]), ]
+    grid_metrics <- grid_metrics[!is.na(grid_metrics[[metric_colname]]), ]
+    
+    weight_matrix <- -1 * apcluster::negDistMat(grid_prism_coords)
+    ## Use the inverse distance between two points as the weight (IDW is 'inverse distance weighting')
+    if (weight_method == "IDW") {
+      weight_matrix <- 1 / weight_matrix
+    }
+    ## Use Rook method: adjacent points get a weight of 1, otherwise, weight of 0
+    ## Adjacent points are within 1 unit apart.
+    else if (weight_method == "rook") {
+      weight_matrix <- ifelse(weight_matrix > 1, 0, 1)  
+    }
+    else if (weight_method == "queen") {
+      weight_matrix <- ifelse(weight_matrix > sqrt(2), 0, 1)  
+    }
+    ## If a number (x) between 0 and 1 is supplied, set a threshold to be x quantile value of c(weight_matrix)
+    ## Grid prisms within this specified threshold have a weight of 1, otherwise, weight of 0
+    else if (as.numeric(weight_method) && 0 < weight_method && weight_method < 1) {
+      threshold <- quantile(c(weight_matrix), weight_method)
+      weight_matrix <- ifelse(weight_matrix > threshold, 0, 1)
+    }
+    else {
+      stop(paste(weight_method, " weight_method is not an appropriate method"))
+    }
+  }
+  else {
+    stop("Invalid dimension. Choose either 3D or 2D")
+  }
+  
+  ## Points along the diagonal are comparing the same point so its weight is zero
+  diag(weight_matrix) <- 0
+  
+  n <- nrow(grid_metrics)
+  
+  # Center the data
+  data_centered <- grid_metrics[[metric_colname]] - mean(grid_metrics[[metric_colname]])
+  
+  # Calculate numerator using matrix multiplication
+  numerator <- sum(data_centered * (weight_matrix %*% data_centered))
+  
+  # Calculate denominator
+  denominator <- sum(data_centered^2) * sum(weight_matrix)
+  
+  # Moran's I
+  I <- (n * numerator) / denominator
+  
+  return(I)
+}
+
+
+calculate_prevalence_gradient <- function(grid_metrics,
+                                          metric_colname) {
+  
+  # Thresholds range from 0 to 1
+  thresholds <- seq(0.01, 1, 0.01)
+  
+  # Define result
+  result <- data.frame(threshold = thresholds)
+  
+  # Get prevalences for each threshold
+  result$prevalence <- sapply(thresholds, function(threshold) { 
+    calculate_prevalence(grid_metrics, metric_colname, threshold) 
+  })
+  
+  return(result)
+}
+
+
+calculate_prevalence <- function(grid_metrics,
+                                 metric_colname,
+                                 threshold,
+                                 above = TRUE) {
+  
+  ## Exclude rows with NA values
+  grid_metrics <- grid_metrics[!is.na(grid_metrics[[metric_colname]]), ]
+  
+  if (above) {
+    p <- sum(grid_metrics[[metric_colname]] >= threshold) / nrow(grid_metrics) * 100
+  }
+  else {
+    p <- sum(grid_metrics[[metric_colname]] < threshold) / nrow(grid_metrics) * 100    
+  }
+  
+  return(p)
+}
+
 ### Analyse 2D and 3D data -------
 slice_z_coords <- unique(df3D$Cell.Z.Position)
 feature_colname <- "Cell.Type.Generic"
