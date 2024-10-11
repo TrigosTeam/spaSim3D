@@ -1349,17 +1349,17 @@ subset_metric_df <- function(metric,
 
 
 
-plotting_function <- function(metric_df_list,
-                              metrics) {
+plot_3D_vs_2D <- function(metric_df_list,
+                          metrics) {
   
   # Get all dfs for each metric and put them into a combined df
   combined_df <- data.frame()
   
   for (metric in metrics) {
-
+    
     # Get metric_df for current metric
     metric_df <- metric_df_list[[metric]]
-
+    
     # Get metric cell types for current metric (should only be one set/ one row)
     metric_cell_types <- get_metric_cell_types(metric)
     
@@ -1382,9 +1382,59 @@ plotting_function <- function(metric_df_list,
   
   # Create the dot plot, highlighting the maximum slice points with a star shape and using facets
   fig <- ggplot(combined_df[combined_df$slice != 0, ], aes(x = dummy, y = value)) +
-    geom_jitter(width = 0.2, height = 0, size = 2) +
+    geom_jitter(width = 0.2, height = 0, size = 1.5) +
     geom_point(data = combined_df[combined_df$slice == 0, ], color = "red", shape = 8, size = 6) +
     labs(x = "Metric", y = "Value") +
+    facet_wrap(~ metric, strip.position = "bottom", scales = "free_y", ncol = 4) +
+    theme_bw()  +
+    theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
+  
+  return(fig)
+  
+}
+
+plot_3D_vs_error <- function(metric_df_list,
+                             metrics) {
+  
+  # Get all dfs for each metric and put them into a combined df
+  combined_df <- data.frame()
+  
+  for (metric in metrics) {
+    
+    # Get metric_df for current metric
+    metric_df <- metric_df_list[[metric]]
+    
+    # Get metric cell types for current metric (should only be one set/ one row)
+    metric_cell_types <- get_metric_cell_types(metric)
+    
+    # Subset metric_df
+    metric_df_subset <- subset_metric_df(metric,
+                                         metric_df,
+                                         metric_cell_types,
+                                         1) # Always first row
+    
+    # Change and further subset columns of metric_df_subset
+    colnames(metric_df_subset)[colnames(metric_df_subset) == metric] <- "value"
+    metric_df_subset$metric <- metric
+    metric_df_subset <- metric_df_subset[ , c("slice", "value", "metric")]
+    
+    # Calculate error for each slice, and remove 3D row
+    value_3D <- metric_df_subset[["value"]][metric_df_subset[["slice"]] == 0]
+    metric_df_subset[["value"]] <- ((metric_df_subset[["value"]] - value_3D) / value_3D) * 100
+    metric_df_subset <- metric_df_subset[metric_df_subset[["slice"]] != 0, ]
+    
+    # Add to combined df
+    combined_df <- rbind(combined_df, metric_df_subset)
+  }
+  combined_df$dummy <- "dummy"
+  combined_df$metric <- factor(combined_df$metric, metrics)
+  
+  # Create the dot plot
+  fig <- ggplot(combined_df, aes(x = dummy, y = value)) +
+    geom_point(data = data.frame(x = "dummy", y = 0), aes(x, y), size = 0) + # Ensures plot shows y = 0
+    geom_jitter(width = 0.2, height = 0, size = 1.5) +
+    geom_abline(intercept = 0, slope = 0, color = "red", linetype = "longdash") +
+    labs(x = "Metric", y = "Error (%)") +
     facet_wrap(~ metric, strip.position = "bottom", scales = "free_y", ncol = 4) +
     theme_bw()  +
     theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
@@ -1396,14 +1446,19 @@ plotting_function <- function(metric_df_list,
 ## Get plot
 metrics <- c("AMD", "ACIN_AUC", "ACINP_AUC", "AE_AUC", "MS_AUC", "NMS_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
 
-plot <- plotting_function(metric_df_list,
-                          metrics)
-methods::show(plot)
+plot3D_vs_2D <- plot_3D_vs_2D(metric_df_list,
+                              metrics)
+methods::show(plot3D_vs_2D)
+
+plot3D_vs_error <- plot_3D_vs_error(metric_df_list,
+                                    metrics)
+methods::show(plot3D_vs_error)
 
 setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_final")
-pdf("lin_et_al_3D_vs_2D.pdf", width = 10, height = 8)
+pdf("lin_et_al_plots.pdf", width = 10, height = 8)
 
-print(plot)
+print(plot3D_vs_2D)
+print(plot3D_vs_error)
 
 dev.off()
 
