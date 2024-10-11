@@ -1378,6 +1378,7 @@ plotting_function <- function(metric_df_list,
     combined_df <- rbind(combined_df, metric_df_subset)
   }
   combined_df$dummy <- "dummy"
+  combined_df$metric <- factor(combined_df$metric, metrics)
   
   # Create the dot plot, highlighting the maximum slice points with a star shape and using facets
   fig <- ggplot(combined_df[combined_df$slice != 0, ], aes(x = dummy, y = value)) +
@@ -1393,7 +1394,7 @@ plotting_function <- function(metric_df_list,
 }
 
 ## Get plot
-metrics <- c("AMD", "MS_AUC", "NMS_AUC", "ACINP_AUC", "AE_AUC", "ACIN_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
+metrics <- c("AMD", "ACIN_AUC", "ACINP_AUC", "AE_AUC", "MS_AUC", "NMS_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
 
 plot <- plotting_function(metric_df_list,
                           metrics)
