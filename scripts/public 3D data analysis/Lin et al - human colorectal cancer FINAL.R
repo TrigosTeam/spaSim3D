@@ -87,13 +87,13 @@ NMS_df <- data.frame(matrix(nrow = length(cell_types) * (n_slices + 1), ncol = l
 colnames(NMS_df) <- NMS_df_colnames
 
 # Target is always Tumour and Immune together
-# Only choose prop(Tumour) as prop(Immune) = 1 - prop(Tumour) always
-ACINP_df_colnames <- c("slice", "reference", radii_colnames)
+# Only choose prop(Immune) as prop(Tumour) = 1 - prop(Immune) always
+ACINP_df_colnames <- c("slice", "reference", "target", radii_colnames)
 ACINP_df <- data.frame(matrix(nrow = length(cell_types) * (n_slices + 1), ncol = length(ACINP_df_colnames)))
 colnames(ACINP_df) <- ACINP_df_colnames
 
 # Target is always Tumour and Immune together
-AE_df_colnames <- c("slice", "reference", radii_colnames)
+AE_df_colnames <- c("slice", "reference", "target", radii_colnames)
 AE_df <- data.frame(matrix(nrow = length(cell_types) * (n_slices + 1), ncol = length(AE_df_colnames)))
 colnames(AE_df) <- AE_df_colnames
 
@@ -1102,7 +1102,7 @@ for (i in seq(n_slices + 1)) {
     if (!is.null(gradient_data)) {
       metric_df_list[["MS"]][index1, radii_colnames] <- gradient_data[["mixing_score"]][[target_cell_type]]$mixing_score
       metric_df_list[["NMS"]][index1, radii_colnames] <- gradient_data[["mixing_score"]][[target_cell_type]]$normalised_mixing_score
-      metric_df_list[["ACINP"]][index1, radii_colnames] <- gradient_data[["cells_in_neighbourhood_proportion"]][["Tumour"]]
+      metric_df_list[["ACINP"]][index1, radii_colnames] <- gradient_data[["cells_in_neighbourhood_proportion"]][["Immune"]]
       metric_df_list[["AE"]][index1, radii_colnames] <- gradient_data[["entropy"]]$entropy
     }
     else {
@@ -1119,10 +1119,10 @@ for (i in seq(n_slices + 1)) {
     metric_df_list[["NMS"]][index1, c("reference", "target")] <- c(reference_cell_type, target_cell_type)
     
     metric_df_list[["ACINP"]][index1, "slice"] <- slice
-    metric_df_list[["ACINP"]][index1, c("reference")] <- c(reference_cell_type)
+    metric_df_list[["ACINP"]][index1, c("reference", "target")] <- c(reference_cell_type, "Immune")
     
     metric_df_list[["AE"]][index1, "slice"] <- slice
-    metric_df_list[["AE"]][index1, c("reference")] <- c(reference_cell_type)
+    metric_df_list[["AE"]][index1, c("reference", "target")] <- c(reference_cell_type, "Tumour,Immune")
 
     index1 <- index1 + 1
     
@@ -1221,8 +1221,8 @@ for (i in seq(n_slices + 1)) {
 }
 
 
-# setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_final")
-# saveRDS(metric_df_list, "metric_df_list.RDS")
+setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_final")
+saveRDS(metric_df_list, "metric_df_list.RDS")
 
 ### Plot analysis of 2D and 3D data -----
 setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_final")

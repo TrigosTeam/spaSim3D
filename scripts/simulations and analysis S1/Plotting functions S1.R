@@ -6,36 +6,67 @@ library(dplyr)
 library(DescTools)
 
 ### Utility function to get metric cell types -----
+# get_metric_cell_types <- function(metric) {
+#   # Get metric_cell_types
+#   if (metric %in% c("AMD", "ACIN", "CKR", "ACIN_AUC", "CKR_AUC")) {
+#     metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
+#     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+#   }
+#   else if (metric %in% c("MS", "NMS", "MS_AUC", "NMS_AUC")) {
+#     metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
+#     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+#   }
+#   else if (metric %in% c("ACINP", "ACINP_AUC")) {
+#     metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
+#     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+#   }
+#   else if (metric %in% c("AE", "AE_AUC")) {
+#     metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
+#     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+#   }
+#   else if (metric %in% c("prop_SAC", "prop_prevalence", "prop_AUC")) {
+#     metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+#     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
+#   }
+#   else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+#     metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+#   }
+#   else {
+#     stop("metric not found")
+#   }
+#   return(metric_cell_types)
+# }
 get_metric_cell_types <- function(metric) {
   # Get metric_cell_types
   if (metric %in% c("AMD", "ACIN", "CKR", "ACIN_AUC", "CKR_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "A", "B", "B"), tar = c("A", "B", "A", "B"))
+    metric_cell_types <- data.frame(ref = c("A"), tar = c("B"))
     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
   }
   else if (metric %in% c("MS", "NMS", "MS_AUC", "NMS_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("B", "A"))
+    metric_cell_types <- data.frame(ref = c("A"), tar = c("B"))
     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
   }
   else if (metric %in% c("ACINP", "ACINP_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A", "A"))
+    metric_cell_types <- data.frame(ref = c("A"), tar = c("B"))
     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
   }
   else if (metric %in% c("AE", "AE_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "B"), tar = c("A,B", "A,B"))
+    metric_cell_types <- data.frame(ref = c("A"), tar = c("A,B"))
     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
   }
   else if (metric %in% c("prop_SAC", "prop_prevalence", "prop_AUC")) {
-    metric_cell_types <- data.frame(ref = c("A", "O"), tar = c("B", "A,B"))
+    metric_cell_types <- data.frame(ref = c("A"), tar = c("B"))
     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
   }
   else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
-    metric_cell_types <- data.frame(cell_types = c("A,B", "A,B,O"))
+    metric_cell_types <- data.frame(cell_types = c("A,B"))
   }
   else {
     stop("metric not found")
   }
   return(metric_cell_types)
 }
+
 ### Utility function to subset metric_df -----
 subset_metric_df <- function(metric,
                              metric_df,

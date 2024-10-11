@@ -58,14 +58,13 @@ NMS_colnames <- c("spe", "reference", "target", radii_colnames)
 NMS_df <- data.frame(matrix(nrow = n_spes * length(cell_types), ncol = length(NMS_colnames)))
 colnames(NMS_df) <- NMS_colnames
 
-# Target is always A and B together
-# Only choose prop(A) as prop(B) = 1 - prop(A) always
-ACINP_colnames <- c("spe", "reference", radii_colnames)
+# Only choose prop(A) as prop(A) = 1 - prop(B) always
+ACINP_colnames <- c("spe", "reference", "target", radii_colnames)
 ACINP_df <- data.frame(matrix(nrow = n_spes * length(cell_types), ncol = length(ACINP_colnames)))
 colnames(ACINP_df) <- ACINP_colnames
 
 # Target is always A and B together
-AE_colnames <- c("spe", "reference", radii_colnames)
+AE_colnames <- c("spe", "reference", "target", radii_colnames)
 AE_df <- data.frame(matrix(nrow = n_spes * length(cell_types), ncol = length(AE_colnames)))
 colnames(AE_df) <- AE_colnames
 
@@ -164,13 +163,13 @@ slices_NMS_df <- data.frame(matrix(nrow = n_spes * length(cell_types) * n_slices
 colnames(slices_NMS_df) <- slices_NMS_df_colnames
 
 # Target is always A and B together
-# Only choose prop(A) as prop(B) = 1 - prop(A) always
-slices_ACINP_df_colnames <- c("spe", "slice", "reference", radii_colnames)
+# Only choose prop(A) as prop(A) = 1 - prop(B) always
+slices_ACINP_df_colnames <- c("spe", "slice", "reference", "target", radii_colnames)
 slices_ACINP_df <- data.frame(matrix(nrow = n_spes * length(cell_types) * n_slices, ncol = length(slices_ACINP_df_colnames)))
 colnames(slices_ACINP_df) <- slices_ACINP_df_colnames
 
 # Target is always A and B together
-slices_AE_df_colnames <- c("spe", "slice", "reference", radii_colnames)
+slices_AE_df_colnames <- c("spe", "slice", "reference", "target", radii_colnames)
 slices_AE_df <- data.frame(matrix(nrow = n_spes * length(cell_types) * n_slices, ncol = length(slices_AE_df_colnames)))
 colnames(slices_AE_df) <- slices_AE_df_colnames
 
@@ -298,10 +297,10 @@ for (arrangement in arrangements) {
         metric_df_lists3D[[spes_metadata_index]][["NMS"]][index1, c("spe", "reference", "target")] <- c(spe_name, reference_cell_type, target_cell_type)
         metric_df_lists3D[[spes_metadata_index]][["NMS"]][index1, radii_colnames] <- gradient_data[["mixing_score"]][[target_cell_type]]$normalised_mixing_score
         
-        metric_df_lists3D[[spes_metadata_index]][["ACINP"]][index1, c("spe", "reference")] <- c(spe_name, reference_cell_type)
-        metric_df_lists3D[[spes_metadata_index]][["ACINP"]][index1, radii_colnames] <- gradient_data[["cells_in_neighbourhood_proportion"]][["A"]]
+        metric_df_lists3D[[spes_metadata_index]][["ACINP"]][index1, c("spe", "reference", "target")] <- c(spe_name, reference_cell_type)
+        metric_df_lists3D[[spes_metadata_index]][["ACINP"]][index1, radii_colnames] <- gradient_data[["cells_in_neighbourhood_proportion"]][["B"]]
         
-        metric_df_lists3D[[spes_metadata_index]][["AE"]][index1, c("spe", "reference")] <- c(spe_name, reference_cell_type)
+        metric_df_lists3D[[spes_metadata_index]][["AE"]][index1, c("spe", "reference", "target")] <- c(spe_name, reference_cell_type, "A,B")
         metric_df_lists3D[[spes_metadata_index]][["AE"]][index1, radii_colnames] <- gradient_data[["entropy"]]$entropy
         
         index1 <- index1 + 1
@@ -423,13 +422,13 @@ for (arrangement in arrangements) {
           
           metric_df_lists2D[[spes_metadata_index]][["MS"]][index1, c("spe", "slice", "reference", "target")] <- c(spe_name, slice_index, reference_cell_type, target_cell_type)
           metric_df_lists2D[[spes_metadata_index]][["NMS"]][index1, c("spe", "slice", "reference", "target")] <- c(spe_name, slice_index, reference_cell_type, target_cell_type)
-          metric_df_lists2D[[spes_metadata_index]][["ACINP"]][index1, c("spe", "slice","reference")] <- c(spe_name, slice_index, reference_cell_type)
-          metric_df_lists2D[[spes_metadata_index]][["AE"]][index1, c("spe", "slice","reference")] <- c(spe_name, slice_index, reference_cell_type)
+          metric_df_lists2D[[spes_metadata_index]][["ACINP"]][index1, c("spe", "slice","reference", "target")] <- c(spe_name, slice_index, reference_cell_type, "B")
+          metric_df_lists2D[[spes_metadata_index]][["AE"]][index1, c("spe", "slice","reference", "target")] <- c(spe_name, slice_index, reference_cell_type, "A,B")
           
           if (!is.null(gradient_data)) {
             metric_df_lists2D[[spes_metadata_index]][["MS"]][index1, radii_colnames] <- gradient_data[["mixing_score"]][[target_cell_type]]$mixing_score
             metric_df_lists2D[[spes_metadata_index]][["NMS"]][index1, radii_colnames] <- gradient_data[["mixing_score"]][[target_cell_type]]$normalised_mixing_score
-            metric_df_lists2D[[spes_metadata_index]][["ACINP"]][index1, radii_colnames] <- gradient_data[["cells_in_neighbourhood_proportion"]][["A"]]
+            metric_df_lists2D[[spes_metadata_index]][["ACINP"]][index1, radii_colnames] <- gradient_data[["cells_in_neighbourhood_proportion"]][["B"]]
             metric_df_lists2D[[spes_metadata_index]][["AE"]][index1, radii_colnames] <- gradient_data[["entropy"]]$entropy        
           }
           else {
