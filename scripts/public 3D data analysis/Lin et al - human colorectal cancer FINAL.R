@@ -12,7 +12,7 @@ setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_updated/raw_slice_data"
 slice_nums <- c("002", "007", "014", "020", "025", "029",
                 "034", "039", "044", "049", "050", "051",
                 "052", "054", "059", "064", "069", "074",
-                "078", "084", "086", "091", "097")
+                "078", "084", "086", "091", "097", "102", "106")
 file_names <- paste("CRC01-", slice_nums, ".csv", sep = "")
 
 # Get z coord of each slice in micrometers using the slice number
@@ -55,9 +55,9 @@ for (i in seq(length(slice_nums))) {
 # Store as one data frame
 df3D <- do.call(rbind, list_dfs2D)
 
-# setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_final")
-# saveRDS(list_dfs2D, "list_dfs2D.RDS")
-# saveRDS(df3D, "df3D.RDS")
+setwd("~/R/Lin et al - human colorectal cancer/CRC1_data_final")
+saveRDS(list_dfs2D, "list_dfs2D.RDS")
+saveRDS(df3D, "df3D.RDS")
 
 
 ### Set up dfs to contain analysis results -----
@@ -1326,9 +1326,9 @@ get_metric_cell_types <- function(metric) {
 }
 
 # Utility function to subset metric_df
-subset_metric_df <- function(metric_df,
+subset_metric_df <- function(metric,
+                             metric_df,
                              metric_cell_types,
-                             metric,
                              index) {
   
   if (metric %in% c("AMD", "ACIN", "CKR", "MS", "NMS", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prevalence", "prop_AUC")) {
@@ -1364,9 +1364,9 @@ plotting_function <- function(metric_df_list,
     metric_cell_types <- get_metric_cell_types(metric)
     
     # Subset metric_df
-    metric_df_subset <- subset_metric_df(metric_df,
+    metric_df_subset <- subset_metric_df(metric,
+                                         metric_df,
                                          metric_cell_types,
-                                         metric,
                                          1) # Always first row
     
     # Change and further subset columns of metric_df_subset
