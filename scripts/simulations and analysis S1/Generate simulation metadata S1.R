@@ -9,7 +9,7 @@ E_radius_y_fixed <- 100
 E_radius_z_fixed <- 125
 
 ## Network width
-N_width_fixed <- 37.5
+N_width_fixed <- 30
 
 ## Mixed clusters parameter
 cluster_prop_A_fixed <- 0.7
@@ -33,7 +33,7 @@ E_radius_y_range <- c("min" = 75, "max" = 125)
 E_radius_z_range <- c("min" = 75, "max" = 125)
 
 ## Network width
-N_width_range <- c("min" = 30, "max" = 45)
+N_width_range <- c("min" = 25, "max" = 35)
 
 
 ## Mixed clusters parameter
@@ -89,7 +89,7 @@ for (parameter in spes_table_colnames) {
   i <- i + 1
 }
 
-setwd("~/R/spaSim-3D/scripts/vary one parameter simulations and analysis S1/S1 data")
+setwd("~/R/spaSim-3D/scripts/simulations and analysis S1/S1 data")
 write.table(spes_table, "spes_table.csv")
 
 
