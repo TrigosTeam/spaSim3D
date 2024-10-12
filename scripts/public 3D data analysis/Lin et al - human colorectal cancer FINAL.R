@@ -354,7 +354,7 @@ calculate_all_gradient_cc_metrics <- function(df,
     
     df_gradient_results[["cells_in_neighbourhood"]]$ref_cell_id <- NULL
     
-    result[["cells_in_neighbourhood"]][i, ] <- apply(df_gradient_results[["cells_in_neighbourhood"]], 2, mean, na.rm = T)
+    result[["cells_in_neighbourhood"]][i, ] <- apply(df_gradient_results[["cells_in_neighbourhood"]], 2, mean)
     result[["cells_in_neighbourhood_proportion"]][i, ] <- apply(df_gradient_results[["cells_in_neighbourhood_proportion"]][ , paste(target_cell_types, "_prop", sep = "")], 2, mean, na.rm = T)
     result[["entropy"]][i, "entropy"] <- mean(df_gradient_results[["entropy"]]$entropy, na.rm = T)
     
