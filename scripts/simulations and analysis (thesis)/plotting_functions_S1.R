@@ -24,11 +24,11 @@ get_metric_cell_types <- function(metric) {
     metric_cell_types <- data.frame(ref = c("A"), tar = c("A,B"))
     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
   }
-  else if (metric %in% c("prop_SAC", "prop_prevalence", "prop_AUC")) {
+  else if (metric %in% c("prop_SAC", "prop_prev", "prop_AUC")) {
     metric_cell_types <- data.frame(ref = c("A"), tar = c("B"))
     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
   }
-  else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+  else if (metric %in% c("entropy_SAC", "entropy_prev", "entropy_AUC")) {
     metric_cell_types <- data.frame(cell_types = c("A,B"))
   }
   else {
@@ -43,13 +43,13 @@ subset_metric_df <- function(metric,
                              metric_df,
                              metric_cell_types,
                              index) {
-  if (metric %in% c("AMD", "ACIN", "CKR", "MS", "NMS", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prevalence", "prop_AUC")) {
+  if (metric %in% c("AMD", "ACIN", "CKR", "MS", "NMS", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prev", "prop_AUC")) {
     metric_df <- metric_df[metric_df$reference == metric_cell_types[index, "ref"] & metric_df$target == metric_cell_types[index, "tar"], ] 
   }
   else if (metric %in% c("ACINP", "AE", "ACINP_AUC", "AE_AUC")) {
     metric_df <- metric_df[metric_df$reference == metric_cell_types[index, "ref"], ] 
   }
-  else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+  else if (metric %in% c("entropy_SAC", "entropy_prev", "entropy_AUC")) {
     metric_df <- metric_df[metric_df$cell_types == metric_cell_types[index, "cell_types"], ]
   }
   else {
@@ -73,7 +73,11 @@ plot_non_gradient_metric <- function(spes_table,
                                      metric, 
                                      metric_df, 
                                      arrangement, 
-                                     plots_metadata) {
+                                     plots_metadata,
+                                     plot_labels) {
+  
+  ## P-value multiplying factor
+  p_value_factor <- 24 # 24 scatterplots in total
   
   ### Modify plots_metadata
   # Change plots_metadata arrangement to inputted arrangement
@@ -105,7 +109,8 @@ plot_non_gradient_metric <- function(spes_table,
     if (sum(!is.na(data[[y_aes]])) >= 2 && any(data[[y_aes]] != 0)) {
       correlation_test <- cor.test(data[[x_aes]], data[[y_aes]], method = "spearman")
       correlation <- correlation_test$estimate
-      p_value <- correlation_test$p.value
+      p_value <- correlation_test$p.value * p_value_factor
+      if (p_value > 1) p_value <- 1
       if (p_value == 0) p_value <- 2.2e-308
       if (0 < p_value && p_value < 1e-3)  {
         p_value <- formatCustomSci(p_value)
@@ -174,7 +179,10 @@ plot_non_gradient_metric <- function(spes_table,
     # Get final column
     cells <- metric_cell_types[i, ncol(metric_cell_types)]
     
-    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
+    plots <- plot_grid(plotlist = plots_list[[cells]], 
+                       nrow = 1, 
+                       ncol = length(plots_list[[cells]]),
+                       labels = plot_labels)
     
     combined_plots_list[[cells]] <- plots
   }
@@ -193,7 +201,8 @@ plot_gradient_metric <- function(spes_table,
                                  metric_df, 
                                  arrangement, 
                                  gradient_type,
-                                 plots_metadata) {
+                                 plots_metadata,
+                                 plot_labels) {
   ### Modify plots_metadata
   # Change plots_metadata arrangement to inputted arrangement
   plots_metadata$arrangement$color_aes <- arrangement
@@ -310,17 +319,19 @@ plot_gradient_metric <- function(spes_table,
     # Getting current set of cell types from metric_cell_types
     cells <- metric_cell_types[i, ncol(metric_cell_types)]
     
-    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
+    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]), labels = plot_labels)
     
     combined_plots_list[[cells]] <- plots
   }
   
   # Combine the combined plots into one big plot
   gradient_metric_plot <- plot_grid(plotlist = combined_plots_list,
-                                    nrow = length(combined_plots_list), ncol = 1)
+                                    nrow = length(combined_plots_list), 
+                                    ncol = 1)
   
   # Add legends
-  gradient_metric_with_legends_plot <- plot_grid(gradient_metric_plot, legends,
+  gradient_metric_with_legends_plot <- plot_grid(gradient_metric_plot, 
+                                                 legends,
                                                  nrow = 2, ncol = 1,
                                                  rel_heights = c(1, 0.2))
   
@@ -334,7 +345,8 @@ plot_non_gradient_metric_all_slices_ground_truth <- function(spes_table,
                                                              metric_df3D, 
                                                              metric_df2D, 
                                                              arrangement, 
-                                                             plots_metadata) {
+                                                             plots_metadata,
+                                                             plot_labels) {
   
   ### Modify plots_metadata
   # Change plots_metadata arrangement to inputted arrangement
@@ -439,7 +451,7 @@ plot_non_gradient_metric_all_slices_ground_truth <- function(spes_table,
     # Get final column
     cells <- metric_cell_types[i, ncol(metric_cell_types)]
     
-    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
+    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]), labels = plot_labels)
     
     combined_plots_list[[cells]] <- plots
   }
@@ -458,7 +470,8 @@ plot_error_non_gradient_metric <- function(spes_table,
                                            metric_df3D,
                                            metric_df2D,
                                            arrangement, 
-                                           plots_metadata) {
+                                           plots_metadata,
+                                           plot_labels) {
   
   ### Modify plots_metadata
   # Change plots_metadata arrangement to inputted arrangement
@@ -485,7 +498,7 @@ plot_error_non_gradient_metric <- function(spes_table,
     data <- data[data$variable_parameter == x_aes, ]
     
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes, color = color_aes)) +
-      labs(title = title, x = x_aes, y = y_aes) +
+      labs(title = title, x = x_aes, y = paste(metric, "error (%)")) +
       theme_bw() +
       ylim(min(c(0, data[[y_aes]]), na.rm = T), max(c(0, data[[y_aes]]), na.rm = T))
     
@@ -555,7 +568,7 @@ plot_error_non_gradient_metric <- function(spes_table,
     # Getting current set of cell types from metric_cell_types
     cells <- metric_cell_types[i, ncol(metric_cell_types)]
     
-    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
+    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]), labels = plot_labels)
     
     combined_plots_list[[cells]] <- plots
   }
@@ -573,7 +586,8 @@ plot_violin_all_slices <- function(spes_table,
                                    metric,
                                    metric_df2D,
                                    arrangement,
-                                   plots_metadata) {
+                                   plots_metadata,
+                                   plot_labels) {
   
   ### Modify plots_metadata
   # Change plots_metadata arrangement to inputted arrangement
@@ -677,7 +691,7 @@ plot_violin_all_slices <- function(spes_table,
     # Get final column
     cells <- metric_cell_types[i, ncol(metric_cell_types)]
     
-    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]))
+    plots <- plot_grid(plotlist = plots_list[[cells]], nrow = 1, ncol = length(plots_list[[cells]]), labels = plot_labels)
     
     combined_plots_list[[cells]] <- plots
   }

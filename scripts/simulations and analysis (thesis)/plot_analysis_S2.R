@@ -12,6 +12,7 @@ setwd("~/R/spaSim-3D/scripts/simulations and analysis S2/S2 data")
 metric_df_lists3D <- readRDS("metric_df_lists3D.RDS")
 metric_df_lists2D <- readRDS("metric_df_lists2D.RDS")
 
+
 ### Turn gradient radii metrics into AUC and add to metric_df list ------------------
 get_AUC_for_radii_gradient_metrics <- function(y) {
   x <- radii
@@ -80,27 +81,27 @@ for (arrangement in arrangements) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
     # prop_AUC 3D
-    prop_prevalence_df <- metric_df_lists3D[[spes_metadata_index]][["prop_prevalence"]]
-    prop_prevalence_df$prop_AUC <- apply(prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    prop_AUC_df <- prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
+    prop_prev_df <- metric_df_lists3D[[spes_metadata_index]][["prop_prev"]]
+    prop_prev_df$prop_AUC <- apply(prop_prev_df[ , threshold_colnames], 1, sum) * 0.01
+    prop_AUC_df <- prop_prev_df[ , c("spe", "reference", "target", "prop_AUC")]
     metric_df_lists3D[[spes_metadata_index]][["prop_AUC"]] <- prop_AUC_df
     
     # entropy_AUC 3D
-    entropy_prevalence_df <- metric_df_lists3D[[spes_metadata_index]][["entropy_prevalence"]]
-    entropy_prevalence_df$entropy_AUC <- apply(entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    entropy_AUC_df <- entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
+    entropy_prev_df <- metric_df_lists3D[[spes_metadata_index]][["entropy_prev"]]
+    entropy_prev_df$entropy_AUC <- apply(entropy_prev_df[ , threshold_colnames], 1, sum) * 0.01
+    entropy_AUC_df <- entropy_prev_df[ , c("spe", "cell_types", "entropy_AUC")]
     metric_df_lists3D[[spes_metadata_index]][["entropy_AUC"]] <- entropy_AUC_df
     
     # prop_AUC 2D
-    prop_prevalence_df <- metric_df_lists2D[[spes_metadata_index]][["prop_prevalence"]]
-    prop_prevalence_df$prop_AUC <- apply(prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    prop_AUC_df <- prop_prevalence_df[ , c("spe", "slice", "reference", "target", "prop_AUC")]
+    prop_prev_df <- metric_df_lists2D[[spes_metadata_index]][["prop_prev"]]
+    prop_prev_df$prop_AUC <- apply(prop_prev_df[ , threshold_colnames], 1, sum) * 0.01
+    prop_AUC_df <- prop_prev_df[ , c("spe", "slice", "reference", "target", "prop_AUC")]
     metric_df_lists2D[[spes_metadata_index]][["prop_AUC"]] <- prop_AUC_df
     
     # entropy_AUC 2D
-    entropy_prevalence_df <- metric_df_lists2D[[spes_metadata_index]][["entropy_prevalence"]]
-    entropy_prevalence_df$entropy_AUC <- apply(entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    entropy_AUC_df <- entropy_prevalence_df[ , c("spe", "slice", "cell_types", "entropy_AUC")]
+    entropy_prev_df <- metric_df_lists2D[[spes_metadata_index]][["entropy_prev"]]
+    entropy_prev_df$entropy_AUC <- apply(entropy_prev_df[ , threshold_colnames], 1, sum) * 0.01
+    entropy_AUC_df <- entropy_prev_df[ , c("spe", "slice", "cell_types", "entropy_AUC")]
     metric_df_lists2D[[spes_metadata_index]][["entropy_AUC"]] <- entropy_AUC_df
   }
 }

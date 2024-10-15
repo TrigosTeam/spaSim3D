@@ -23,11 +23,11 @@ get_metric_cell_types <- function(metric) {
     metric_cell_types <- data.frame(ref = c("A"), tar = c("A,B"))
     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
   }
-  else if (metric %in% c("prop_SAC", "prop_prevalence", "prop_AUC")) {
+  else if (metric %in% c("prop_SAC", "prop_prev", "prop_AUC")) {
     metric_cell_types <- data.frame(ref = c("A"), tar = c("B"))
     metric_cell_types$pair <- paste(metric_cell_types$ref, metric_cell_types$tar, sep = "/")
   }
-  else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+  else if (metric %in% c("entropy_SAC", "entropy_prev", "entropy_AUC")) {
     metric_cell_types <- data.frame(cell_types = c("A,B"))
   }
   else {
@@ -42,13 +42,13 @@ subset_metric_df <- function(metric,
                              metric_df,
                              metric_cell_types,
                              index) {
-  if (metric %in% c("AMD", "ACIN", "CKR", "MS", "NMS", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prevalence", "prop_AUC")) {
+  if (metric %in% c("AMD", "ACIN", "CKR", "MS", "NMS", "ACIN_AUC", "CKR_AUC", "MS_AUC", "NMS_AUC", "prop_SAC", "prop_prev", "prop_AUC")) {
     metric_df <- metric_df[metric_df$reference == metric_cell_types[index, "ref"] & metric_df$target == metric_cell_types[index, "tar"], ] 
   }
   else if (metric %in% c("ACINP", "AE", "ACINP_AUC", "AE_AUC")) {
     metric_df <- metric_df[metric_df$reference == metric_cell_types[index, "ref"], ] 
   }
-  else if (metric %in% c("entropy_SAC", "entropy_prevalence", "entropy_AUC")) {
+  else if (metric %in% c("entropy_SAC", "entropy_prev", "entropy_AUC")) {
     metric_df <- metric_df[metric_df$cell_types == metric_cell_types[index, "cell_types"], ]
   }
   else {
@@ -73,6 +73,9 @@ plot_3D_and_error_vs_2D_metric_random_slice_no_annotating <- function(metric,
                                                                       metric_df2D,
                                                                       plots_metadata) {
   
+  # P-value multiplying factor
+  p_value_factor <- 11 # number of metrics
+  
   # Get metric_cell_types
   metric_cell_types <- get_metric_cell_types(metric)
   
@@ -87,7 +90,9 @@ plot_3D_and_error_vs_2D_metric_random_slice_no_annotating <- function(metric,
   create_plot_3D_vs_2D <- function(data, x_aes, y_aes, title = "") {
     
     wilcox_test  <- wilcox.test(data[[x_aes]], data[[y_aes]], paired = TRUE)
-    p_value <- wilcox_test$p.value
+    p_value <- wilcox_test$p.value * p_value_factor
+    
+    if (p_value > 1) p_value <- 1
     if (p_value == 0) p_value <- 2.2e-308
     if (0 < p_value && p_value < 1e-3)  {
       p_value <- formatCustomSci(p_value)
@@ -112,9 +117,10 @@ plot_3D_and_error_vs_2D_metric_random_slice_no_annotating <- function(metric,
   create_plot_error_vs_2D <- function(data, x_aes, y_aes, title = "") {
     
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes)) +
-      labs(title = title, x = x_aes, y = y_aes) +
+      labs(title = title, x = x_aes, y = paste(metric, "error (%)")) +
       theme_bw() +
-      ylim(min(c(0, data[[y_aes]]), na.rm = T), max(c(0, data[[y_aes]]), na.rm = T)) +
+      # ylim(min(c(0, data[[y_aes]]), na.rm = T), max(c(0, data[[y_aes]]), na.rm = T)) +
+      ylim(-200, 1000) +
       geom_point(size = 0.5) +
       geom_abline(intercept = 0, slope = 0, color = "red", linetype = "longdash")
     
@@ -183,7 +189,7 @@ plot_3D_and_error_vs_2D_metric_random_slice_no_annotating <- function(metric,
     cells <- metric_cell_types[i, ncol(metric_cell_types)]
     
     plots <- plot_grid(plotlist = plots_list_3D_vs_2D[[cells]], nrow = 1, ncol = length(plots_list_3D_vs_2D[[cells]]))
-
+    
     combined_plots_list_3D_vs_2D[[cells]] <- plots
     
     ## Part 2
@@ -213,3 +219,6 @@ plot_3D_and_error_vs_2D_metric_random_slice_no_annotating <- function(metric,
   return(list(plots_3D_vs_2D = combined_plots_3D_vs_2D,
               plots_error_vs_2D = combined_plots_error_vs_2D))
 }
+
+library(cowplot)
+library(ggplot2)

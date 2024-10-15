@@ -83,27 +83,27 @@ for (arrangement in arrangements) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
     # prop_AUC 3D
-    prop_prevalence_df <- metric_df_lists3D[[spes_metadata_index]][["prop_prevalence"]]
-    prop_prevalence_df$prop_AUC <- apply(prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    prop_AUC_df <- prop_prevalence_df[ , c("spe", "reference", "target", "prop_AUC")]
+    prop_prev_df <- metric_df_lists3D[[spes_metadata_index]][["prop_prev"]]
+    prop_prev_df$prop_AUC <- apply(prop_prev_df[ , threshold_colnames], 1, sum) * 0.01
+    prop_AUC_df <- prop_prev_df[ , c("spe", "reference", "target", "prop_AUC")]
     metric_df_lists3D[[spes_metadata_index]][["prop_AUC"]] <- prop_AUC_df
     
     # entropy_AUC 3D
-    entropy_prevalence_df <- metric_df_lists3D[[spes_metadata_index]][["entropy_prevalence"]]
-    entropy_prevalence_df$entropy_AUC <- apply(entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    entropy_AUC_df <- entropy_prevalence_df[ , c("spe", "cell_types", "entropy_AUC")]
+    entropy_prev_df <- metric_df_lists3D[[spes_metadata_index]][["entropy_prev"]]
+    entropy_prev_df$entropy_AUC <- apply(entropy_prev_df[ , threshold_colnames], 1, sum) * 0.01
+    entropy_AUC_df <- entropy_prev_df[ , c("spe", "cell_types", "entropy_AUC")]
     metric_df_lists3D[[spes_metadata_index]][["entropy_AUC"]] <- entropy_AUC_df
     
     # prop_AUC 2D
-    prop_prevalence_df <- metric_df_lists2D[[spes_metadata_index]][["prop_prevalence"]]
-    prop_prevalence_df$prop_AUC <- apply(prop_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    prop_AUC_df <- prop_prevalence_df[ , c("spe", "slice", "reference", "target", "prop_AUC")]
+    prop_prev_df <- metric_df_lists2D[[spes_metadata_index]][["prop_prev"]]
+    prop_prev_df$prop_AUC <- apply(prop_prev_df[ , threshold_colnames], 1, sum) * 0.01
+    prop_AUC_df <- prop_prev_df[ , c("spe", "slice", "reference", "target", "prop_AUC")]
     metric_df_lists2D[[spes_metadata_index]][["prop_AUC"]] <- prop_AUC_df
     
     # entropy_AUC 2D
-    entropy_prevalence_df <- metric_df_lists2D[[spes_metadata_index]][["entropy_prevalence"]]
-    entropy_prevalence_df$entropy_AUC <- apply(entropy_prevalence_df[ , threshold_colnames], 1, sum) * 0.01
-    entropy_AUC_df <- entropy_prevalence_df[ , c("spe", "slice", "cell_types", "entropy_AUC")]
+    entropy_prev_df <- metric_df_lists2D[[spes_metadata_index]][["entropy_prev"]]
+    entropy_prev_df$entropy_AUC <- apply(entropy_prev_df[ , threshold_colnames], 1, sum) * 0.01
+    entropy_AUC_df <- entropy_prev_df[ , c("spe", "slice", "cell_types", "entropy_AUC")]
     metric_df_lists2D[[spes_metadata_index]][["entropy_AUC"]] <- entropy_AUC_df
   }
 }
@@ -157,9 +157,19 @@ metric_plots3D_non_gradient <- list(mixed_ellipsoid = list(),
                                     ringed_network = list(),
                                     separated_ellipsoid = list(),
                                     separated_network = list())
+# list for plot labels
+plot_labels <- list()
+i <- 1
+for (shape in shapes) {
+  for (arrangement in arrangements) {
+    spes_metadata_index <- paste(arrangement, shape, sep = "_")
+    plot_labels[[spes_metadata_index]] <- LETTERS[i:(i + 3)]
+    i <- i + 4
+  }
+}
 
-for (arrangement in arrangements) {
-  for (shape in shapes) {
+for (shape in shapes) {
+  for (arrangement in arrangements) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
     spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
@@ -170,7 +180,8 @@ for (arrangement in arrangements) {
                                                                                                metric, 
                                                                                                metric_df_lists3D[[spes_metadata_index]][[metric]], 
                                                                                                arrangement_parameters[[arrangement]], 
-                                                                                               non_gradient_plots_metadata[[shape]])
+                                                                                               non_gradient_plots_metadata[[shape]],
+                                                                                               plot_labels[[spes_metadata_index]])
       
     }
   }
@@ -182,7 +193,7 @@ arrangements <- c("mixed", "ringed", "separated")
 shapes <- c("ellipsoid", "network")
 
 metrics <- c("AMD", "ACIN_AUC", "ACINP_AUC", "AE_AUC", "MS_AUC", "NMS_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
-pdf("plots3D_non_gradient.pdf", width = 15.5, height = 8)
+pdf("plots3D_non_gradient.pdf", width = 16, height = 8)
 
 for (metric in metrics) {
   curr_metric_plots <- list()
@@ -199,6 +210,7 @@ for (metric in metrics) {
   print(plot)
 }
 dev.off()
+
 
 ### Get plots for 3D metric analysis (gradient) ------------------------------------------
 # Read spes_table
@@ -229,7 +241,7 @@ gradient_plots_metadata <- list(
 # Generate plots and plots into a list
 arrangements <- c("mixed", "ringed", "separated")
 shapes <- c("ellipsoid", "network")
-metrics <- c("ACIN", "ACINP", "AE", "MS", "NMS", "CKR", "prop_prevalence", "entropy_prevalence")
+metrics <- c("ACIN", "ACINP", "AE", "MS", "NMS", "CKR", "prop_prev", "entropy_prev")
 
 background_parameters <- c("bg_prop_A", "bg_prop_B")
 
@@ -248,8 +260,19 @@ metric_plots3D_gradient <- list(mixed_ellipsoid = list(),
                                 separated_ellipsoid = list(),
                                 separated_network = list())
 
-for (arrangement in arrangements) {
-  for (shape in shapes) {
+# list for plot labels
+plot_labels <- list()
+i <- 1
+for (shape in shapes) {
+  for (arrangement in arrangements) {
+    spes_metadata_index <- paste(arrangement, shape, sep = "_")
+    plot_labels[[spes_metadata_index]] <- LETTERS[i:(i + 3)]
+    i <- i + 4
+  }
+}
+
+for (shape in shapes) {
+  for (arrangement in arrangements) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
     spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
@@ -262,7 +285,8 @@ for (arrangement in arrangements) {
                                                                                        metric_df_lists3D[[spes_metadata_index]][[metric]], 
                                                                                        arrangement_parameters[[arrangement]], 
                                                                                        get_gradient(metric),
-                                                                                       gradient_plots_metadata[[shape]])
+                                                                                       gradient_plots_metadata[[shape]],
+                                                                                       plot_labels[[spes_metadata_index]])
       
     }
   }
@@ -276,7 +300,7 @@ setwd("~/R/thesis_plots/S1")
 arrangements <- c("mixed", "ringed", "separated")
 shapes <- c("ellipsoid", "network")
 
-metrics <- c("ACIN", "ACINP", "AE", "MS", "NMS", "CKR", "prop_prevalence", "entropy_prevalence")
+metrics <- c("ACIN", "ACINP", "AE", "MS", "NMS", "CKR", "prop_prev", "entropy_prev")
 
 pdf("plots3D_gradient.pdf", width = 17.5, height = 8.5)
 
@@ -348,8 +372,19 @@ metric_plots2D_non_gradient_all_slices_ground_truth <- list(mixed_ellipsoid = li
                                                             separated_ellipsoid = list(),
                                                             separated_network = list())
 
-for (arrangement in arrangements) {
-  for (shape in shapes) {
+# list for plot labels
+plot_labels <- list()
+i <- 1
+for (shape in shapes) {
+  for (arrangement in arrangements) {
+    spes_metadata_index <- paste(arrangement, shape, sep = "_")
+    plot_labels[[spes_metadata_index]] <- LETTERS[i:(i + 3)]
+    i <- i + 4
+  }
+}
+
+for (shape in shapes) {
+  for (arrangement in arrangements) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
     spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
@@ -361,7 +396,8 @@ for (arrangement in arrangements) {
                                                                                                                                                metric_df_lists3D[[spes_metadata_index]][[metric]], 
                                                                                                                                                metric_df_lists2D[[spes_metadata_index]][[metric]], 
                                                                                                                                                arrangement_parameters[[arrangement]], 
-                                                                                                                                               plots_metadata[[shape]])
+                                                                                                                                               plots_metadata[[shape]],
+                                                                                                                                               plot_labels[[spes_metadata_index]])
     }
   }
 }
@@ -373,7 +409,7 @@ arrangements <- c("mixed", "ringed", "separated")
 shapes <- c("ellipsoid", "network")
 
 metrics <- c("AMD", "ACIN_AUC", "ACINP_AUC", "AE_AUC", "MS_AUC", "NMS_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
-pdf("plots2D_all_slices_ground_truth.pdf", width = 15.5, height = 8)
+pdf("plots2D_all_slices_ground_truth.pdf", width = 16, height = 8)
 
 for (metric in metrics) {
   curr_metric_plots <- list()
@@ -444,8 +480,20 @@ metric_plots_error_non_gradient <- list(mixed_ellipsoid = list(),
                                         separated_ellipsoid = list(),
                                         separated_network = list())
 
-for (arrangement in arrangements) {
-  for (shape in shapes) {
+# list for plot labels
+plot_labels <- list()
+i <- 1
+for (shape in shapes) {
+  for (arrangement in arrangements) {
+    spes_metadata_index <- paste(arrangement, shape, sep = "_")
+    plot_labels[[spes_metadata_index]] <- LETTERS[i:(i + 3)]
+    i <- i + 4
+  }
+}
+
+
+for (shape in shapes) {
+  for (arrangement in arrangements) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
     spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
@@ -457,7 +505,8 @@ for (arrangement in arrangements) {
                                                                                                          metric_df_lists3D[[spes_metadata_index]][[metric]],
                                                                                                          metric_df_lists2D[[spes_metadata_index]][[metric]], 
                                                                                                          arrangement_parameters[[arrangement]], 
-                                                                                                         plots_metadata[[shape]])
+                                                                                                         plots_metadata[[shape]],
+                                                                                                         plot_labels[[spes_metadata_index]])
     }
   }
 }
@@ -542,8 +591,20 @@ metric_plots_violin_all_slices <- list(mixed_ellipsoid = list(),
                                        separated_ellipsoid = list(),
                                        separated_network = list())
 
-for (arrangement in arrangements) {
-  for (shape in shapes) {
+
+# list for plot labels
+plot_labels <- list()
+i <- 1
+for (shape in shapes) {
+  for (arrangement in arrangements) {
+    spes_metadata_index <- paste(arrangement, shape, sep = "_")
+    plot_labels[[spes_metadata_index]] <- LETTERS[i:(i + 3)]
+    i <- i + 4
+  }
+}
+
+for (shape in shapes) {
+  for (arrangement in arrangements) {
     spes_metadata_index <- paste(arrangement, shape, sep = "_")
     
     spes_table_subset <- spes_table[spes_table$variable_parameter %in% c(background_parameters, shape_parameters[[shape]], arrangement_parameters[[arrangement]]), 
@@ -554,7 +615,8 @@ for (arrangement in arrangements) {
                                                                                                 metric, 
                                                                                                 metric_df_lists2D[[spes_metadata_index]][[metric]], 
                                                                                                 arrangement_parameters[[arrangement]], 
-                                                                                                plots_metadata[[shape]])
+                                                                                                plots_metadata[[shape]],
+                                                                                                plot_labels[[spes_metadata_index]])
     }
   }
 }
