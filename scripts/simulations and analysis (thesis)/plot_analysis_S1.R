@@ -630,7 +630,7 @@ arrangements <- c("mixed", "ringed", "separated")
 shapes <- c("ellipsoid", "network")
 
 metrics <- c("AMD", "ACIN_AUC", "ACINP_AUC", "AE_AUC", "MS_AUC", "NMS_AUC", "CKR_AUC", "prop_SAC", "prop_AUC", "entropy_SAC", "entropy_AUC")
-pdf("metric_plots_violin_all_slices.pdf", width = 15.5, height = 8)
+pdf("metric_plots_violin_all_slices.pdf", width = 16, height = 8)
 
 for (metric in metrics) {
   curr_metric_plots <- list()
