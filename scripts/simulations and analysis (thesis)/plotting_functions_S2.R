@@ -119,8 +119,7 @@ plot_3D_and_error_vs_2D_metric_random_slice_no_annotating <- function(metric,
     plot <- ggplot(data, aes_string(x = x_aes, y = y_aes)) +
       labs(title = title, x = x_aes, y = paste(metric, "error (%)")) +
       theme_bw() +
-      # ylim(min(c(0, data[[y_aes]]), na.rm = T), max(c(0, data[[y_aes]]), na.rm = T)) +
-      ylim(-200, 1000) +
+      ylim(min(c(0, data[[y_aes]]), na.rm = T), max(c(0, data[[y_aes]]), na.rm = T)) +
       geom_point(size = 0.5) +
       geom_abline(intercept = 0, slope = 0, color = "red", linetype = "longdash")
     
