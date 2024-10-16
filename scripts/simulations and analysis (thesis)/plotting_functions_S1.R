@@ -589,6 +589,8 @@ plot_violin_all_slices <- function(spes_table,
                                    plots_metadata,
                                    plot_labels) {
   
+  p_value_factor <- 24
+  
   ### Modify plots_metadata
   # Change plots_metadata arrangement to inputted arrangement
   plots_metadata$arrangement$label <- arrangement
@@ -632,7 +634,8 @@ plot_violin_all_slices <- function(spes_table,
         mutate(diff = mean_value - lag(mean_value))
       trend_direction <- ifelse(mean(data_means$diff, na.rm = T) > 0, "increasing", ifelse(mean(data_means$diff, na.rm = T) < 0, "decreasing", "two.sided"))
       jt_results <- JonckheereTerpstraTest(data[[x_aes]], data[[y_aes]], alternative = trend_direction)
-      p_value <- jt_results$p.value
+      p_value <- jt_results$p.value * p_value_factor
+      if (p_value > 1) p_value <- 1
       if (p_value == 0) p_value <- 2.2e-308
       if (0 < p_value && p_value < 1e-3)  {
         p_value <- formatCustomSci(p_value)
