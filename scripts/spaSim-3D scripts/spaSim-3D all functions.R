@@ -2604,15 +2604,15 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
 
 
   ### Get template for different shapes
-  if (shape == "sphere") {
-    cluster_metadata <- list(shape = "sphere",
+  if (shape == "Sphere") {
+    cluster_metadata <- list(shape = "Sphere",
                              cluster_cell_types = c("Tumour", "Immune", "Others"),
                              cluster_cell_proportions = c(0.8, 0.15, 0.05),
                              radius = 25,
                              centre_loc = c(40, 40, 40))
   }
-  else if (shape == "ellipsoid") {
-    cluster_metadata <- list(shape = "ellipsoid",
+  else if (shape == "Ellipsoid") {
+    cluster_metadata <- list(shape = "Ellipsoid",
                              cluster_cell_types = c("Tumour", "Immune", "Others"),
                              cluster_cell_proportions = c(0.8, 0.15, 0.05),
                              x_radius = 15,
@@ -2623,16 +2623,16 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
                              x_z_rotation = 45,
                              y_z_rotation = 0)
   }
-  else if (shape == "cylinder") {
-    cluster_metadata <- list(shape = "cylinder",
+  else if (shape == "Cylinder") {
+    cluster_metadata <- list(shape = "Cylinder",
                              cluster_cell_types = c("Endothelial", "Others"),
                              cluster_cell_proportions = c(0.95, 0.05),
                              radius = 10,
                              start_loc = c(0, 0, 0),
                              end_loc   = c(20, 20, 100))
   }
-  else if (shape == "network") {
-    cluster_metadata <- list(shape = "network",
+  else if (shape == "Network") {
+    cluster_metadata <- list(shape = "Network",
                              cluster_cell_types = c("Tumour", "Others"),
                              cluster_cell_proportions = c(0.95, 0.05),
                              n_edges = 18,
