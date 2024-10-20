@@ -2604,15 +2604,15 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
 
 
   ### Get template for different shapes
-  if (shape == "Sphere") {
-    cluster_metadata <- list(shape = "Sphere",
+  if (shape == "sphere") {
+    cluster_metadata <- list(shape = "sphere",
                              cluster_cell_types = c("Tumour", "Immune", "Others"),
                              cluster_cell_proportions = c(0.8, 0.15, 0.05),
                              radius = 25,
                              centre_loc = c(40, 40, 40))
   }
-  else if (shape == "Ellipsoid") {
-    cluster_metadata <- list(shape = "Ellipsoid",
+  else if (shape == "ellipsoid") {
+    cluster_metadata <- list(shape = "ellipsoid",
                              cluster_cell_types = c("Tumour", "Immune", "Others"),
                              cluster_cell_proportions = c(0.8, 0.15, 0.05),
                              x_radius = 15,
@@ -2623,16 +2623,16 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
                              x_z_rotation = 45,
                              y_z_rotation = 0)
   }
-  else if (shape == "Cylinder") {
-    cluster_metadata <- list(shape = "Cylinder",
+  else if (shape == "cylinder") {
+    cluster_metadata <- list(shape = "cylinder",
                              cluster_cell_types = c("Endothelial", "Others"),
                              cluster_cell_proportions = c(0.95, 0.05),
                              radius = 10,
                              start_loc = c(0, 0, 0),
                              end_loc   = c(20, 20, 100))
   }
-  else if (shape == "Network") {
-    cluster_metadata <- list(shape = "Network",
+  else if (shape == "network") {
+    cluster_metadata <- list(shape = "network",
                              cluster_cell_types = c("Tumour", "Others"),
                              cluster_cell_proportions = c(0.95, 0.05),
                              n_edges = 18,
@@ -2641,7 +2641,7 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
                              radius = 50)
   }
   else {
-    stop("shape parameter must be 'Sphere', 'Ellipsoid', 'Cylinder' or 'Network'")
+    stop("shape parameter must be 'sphere', 'ellipsoid', 'cylinder' or 'network'")
   }
 
   ### Add extra metadata for different cluster types
