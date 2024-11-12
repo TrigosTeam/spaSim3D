@@ -1,0 +1,79 @@
+spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_metadata = NULL) {
+  
+  ### Get template for different shapes
+  if (shape == "sphere") {
+    cluster_metadata <- list(shape = "sphere",
+                             cluster_cell_types = c("Tumour", "Immune", "Others"),
+                             cluster_cell_proportions = c(0.8, 0.15, 0.05),
+                             radius = 100,
+                             centre_loc = c(200, 150, 200))
+  }
+  else if (shape == "ellipsoid") {
+    cluster_metadata <- list(shape = "ellipsoid",
+                             cluster_cell_types = c("Tumour", "Immune", "Others"),
+                             cluster_cell_proportions = c(0.8, 0.15, 0.05),
+                             x_radius = 75,
+                             y_radius = 100,
+                             z_radius = 125,
+                             centre_loc = c(450, 300, 100),
+                             x_y_rotation = 0,
+                             x_z_rotation = 45,
+                             y_z_rotation = 0)
+  }
+  else if (shape == "cylinder") {
+    cluster_metadata <- list(shape = "cylinder",
+                             cluster_cell_types = c("Endothelial", "Others"),
+                             cluster_cell_proportions = c(0.95, 0.05),
+                             radius = 40,
+                             start_loc = c(400, 0, 0),
+                             end_loc   = c(600, 400, 200)) 
+  }
+  else if (shape == "network") {
+    cluster_metadata <- list(shape = "network",
+                             cluster_cell_types = c("Immune", "Others"),
+                             cluster_cell_proportions = c(0.95, 0.05),
+                             n_edges = 20,
+                             width = 30,
+                             centre_loc = c(200, 400, 150),
+                             radius = 200)
+  }
+  else {
+    stop("shape parameter must be 'sphere', 'ellipsoid', 'cylinder' or 'network'")
+  }
+  
+  ### Add extra metadata for different cluster types
+  if (cluster_type == "regular") {
+    cluster_metadata <- append(list(cluster_type = "regular"), cluster_metadata)    
+  }
+  else if (cluster_type == "ring") {
+    cluster_metadata <- append(list(cluster_type = "ring"), cluster_metadata)
+    cluster_metadata$ring_cell_types <- c("Immune1", "Others")
+    cluster_metadata$ring_cell_proportions <- c(0.85, 0.15)
+    cluster_metadata$ring_width <- 12
+  }
+  else if (cluster_type == "double ring") {
+    cluster_metadata <- append(list(cluster_type = "double ring"), cluster_metadata)
+    cluster_metadata$inner_ring_cell_types <- c("Immune1", "Others")
+    cluster_metadata$inner_ring_cell_proportions <- c(0.85, 0.15)
+    cluster_metadata$inner_ring_width <- 10
+    cluster_metadata$outer_ring_cell_types <- c("Immune2", "Others")
+    cluster_metadata$outer_ring_cell_proportions <- c(0.85, 0.15)
+    cluster_metadata$outer_ring_width <- 10
+  }
+  else {
+    stop("cluster_type parameter must be 'regular', 'ring' or 'double ring'")
+  }
+  
+  # If original_spe_metadata input is not null, add new cluster_metadata to it
+  if (!is.null(original_spe_metadata) && !is.null(original_spe_metadata[["background"]])) {
+    original_spe_metadata[[paste("cluster", length(original_spe_metadata), sep="_")]] <- cluster_metadata    
+      return(original_spe_metadata)
+  }
+  else if (!is.null(original_spe_metadata) && is.null(original_spe_metadata[["background"]])) {
+    original_spe_metadata[[paste("cluster", length(original_spe_metadata) + 1, sep="_")]] <- cluster_metadata
+    return(original_spe_metadata)
+  }
+  
+  # Else, just return the new cluster_metadata
+  return(list("cluster_1" = cluster_metadata))
+}
