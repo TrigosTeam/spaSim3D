@@ -5,6 +5,10 @@ calculate_entropy_gradient3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
+  if (!(is.numeric(radii) && length(radii) > 1)) {
+    stop("`radii` is not a numeric vector with at least 2 values")
+  }
+  
   result <- data.frame(matrix(nrow = length(radii), ncol = 1))
   colnames(result) <- "entropy"
   

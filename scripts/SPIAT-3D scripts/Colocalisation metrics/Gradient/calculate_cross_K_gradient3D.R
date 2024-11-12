@@ -5,7 +5,9 @@ calculate_cross_K_gradient3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  if (length(radii) <= 1) stop("Please enter at least two numeric values for radii")
+  if (!(is.numeric(radii) && length(radii) > 1)) {
+    stop("`radii` is not a numeric vector with at least 2 values")
+  }
   
   result <- data.frame(matrix(nrow = length(radii), ncol = 3))
   colnames(result) <- c("observed_cross_K", 

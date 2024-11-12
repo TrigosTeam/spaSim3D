@@ -5,6 +5,35 @@ calculate_minimum_distances_to_clusters3D <- function(spe,
                                                       feature_colname = "Cell.Type", 
                                                       plot_image = T) {
 
+  # Check input parameters
+  if (class(spe) != "SpatialExperiment") {
+    stop("`spe` is not a SpatialExperiment object.")
+  }
+  if (!is.character(cell_types_inside_cluster)) {
+    stop("`cell_types_inside_cluster` is not a character vector.")
+  }
+  if (!is.character(cell_types_outside_cluster)) {
+    stop("`cell_types_outside_cluster` is not a character vector.")
+  }
+  if (!(is.numeric(radius) && length(radius) == 1 && radius > 0)) {
+    stop("`radius` is not a positive numeric.")
+  }
+  if (!is.character(cluster_colname)) {
+    stop("`cluster_colname` is not a character. This should be 'alpha_hull_cluster', 'dbscan_cluster', or 'grid_based_cluster', depending on the chosen method.")
+  }
+  if (is.null(spe[[cluster_colname]])) {
+    stop(paste("No column called", cluster_colname, "found in spe object."))
+  }
+  if (!is.character(feature_colname)) {
+    stop("`feature_colname` is not a character.")
+  }
+  if (is.null(spe[[feature_colname]])) {
+    stop(paste("No column called", feature_colname, "found in spe object."))
+  }
+  if (!is.logical(plot_image)) {
+    stop("`plot_image` is not a logical (TRUE or FALSE).")
+  }
+  
   ## Add Cell.ID column
   if (is.null(spe[["Cell.ID"]])) {
     warning("Temporarily adding Cell.Id column to your spe")

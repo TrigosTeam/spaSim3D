@@ -1,5 +1,13 @@
 plot_grid_metrics_continuous3D <- function(grid_metrics, metric_colname) {
   
+  ## Check input parameters
+  if (!(is.character(metric_colname) && metric_colname %in% c("proportion", "entropy"))) {
+    stop("`metric_colname` is not 'proportion' or 'entropy'.")
+  }
+  if (is.null(grid_metrics[[metric_colname]])) {
+    stop("`metric_colname` is not a column in `grid_metrics`.")
+  }
+  
   ## Color of each dot is related to its entropy
   pal <- colorRampPalette(hcl.colors(n = 5, palette = "Red-Blue", rev = TRUE))
   

@@ -1,4 +1,10 @@
-simulate_network_cluster <- function(bg_spe, cluster_properties) {  
+simulate_network_cluster <- function(spe, cluster_properties) {  
+  
+  # Check input parameters
+  input_parameters <- cluster_properties
+  input_parameters[["spe"]] <- spe
+  input_parameter_check_value <- check_input_parameters(input_parameters)
+  if (!is.logical(input_parameter_check_value)) stop(input_parameter_error_message(input_parameter_check_value))
   
   # Get network properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -7,15 +13,6 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
   width <- cluster_properties$width
   centre_loc <- cluster_properties$centre_loc
   radius <- cluster_properties$radius
-  
-  ## Check number of cell types matches the number of cell proportions
-  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
-  
-  ## Check cell proportions are not negative or greater than 1
-  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
-  
-  ## Check cell proportions add up to 1
-  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
   
   # Number of vertices is always one more than the number of edges for the MST will we make
   n_vertices <- n_edges + 1 
@@ -68,12 +65,12 @@ simulate_network_cluster <- function(bg_spe, cluster_properties) {
                                             end_loc = end_loc)
   }
   
-  network_spe <- simulate_clusters3D(bg_spe,
+  network_spe <- simulate_clusters3D(spe,
                                      cluster_properties = network_cluster_properties,
                                      plot_image = F)
 
   # Update current meta data
-  metadata <- bg_spe@metadata
+  metadata <- spe@metadata
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
   cluster_properties[["cylinders"]] <- network_cluster_properties # Include metadata of cylinders used to make up network
   metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep = "_")]] <- cluster_properties

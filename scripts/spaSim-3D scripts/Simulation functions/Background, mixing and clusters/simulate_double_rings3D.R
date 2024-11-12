@@ -1,42 +1,48 @@
-simulate_double_rings3D <- function(bg_spe,
-                                    dr_properties,
+simulate_double_rings3D <- function(spe,
+                                    dr_properties_list,
                                     plot_image = TRUE,
                                     plot_cell_types = NULL,
                                     plot_colours = NULL) {
   
-  for (k in seq(length(dr_properties))) { 
+  # Check shape variable of dr_properties_list
+  shapes <- sapply(dr_properties_list, function(x) {return(x[["shape"]])})
+  n_invalid_shapes <- sum(!(shapes %in% c("sphere", "ellipsoid", "cylinder", "network")))
+  if (n_invalid_shapes > 0) {
+    stop("`dr_properties_list` contains invalid shape parameters or no shape parameters.")
+  }
+  
+  for (i in seq(length(dr_properties_list))) { 
     
-    # For each cluster, get the shape
-    shape <- dr_properties[[k]]$shape
+    shape <- shapes[[i]]
     
     ### Sphere double ring shape
     if (shape == "sphere") {
-      bg_spe <- simulate_sphere_dr(bg_spe, dr_properties[[k]])
+      spe <- simulate_sphere_dr(spe, dr_properties_list[[i]])
     } 
     
     ### Ellipsoid double ring shape
     if (shape == "ellipsoid") {
-      bg_spe <- simulate_ellipsoid_dr(bg_spe, dr_properties[[k]])
+      spe <- simulate_ellipsoid_dr(spe, dr_properties_list[[i]])
     }
     
     ### Cylinder double ring shape
     if (shape == "cylinder") {
-      bg_spe <- simulate_cylinder_dr(bg_spe, dr_properties[[k]])
+      spe <- simulate_cylinder_dr(spe, dr_properties_list[[i]])
     }
     
     ### Network double ring shape
     if (shape == "network") {
-      bg_spe <- simulate_network_dr(bg_spe, dr_properties[[k]])
+      spe <- simulate_network_dr(spe, dr_properties_list[[i]])
     }
   }
   
   # Plot
   if (plot_image) {
-    fig <- plot_cells3D(bg_spe, 
+    fig <- plot_cells3D(spe, 
                         plot_cell_types,
                         plot_colours)
-    print(fig)
+    methods::show(fig)
   }
   
-  return(bg_spe)
+  return(spe)
 }

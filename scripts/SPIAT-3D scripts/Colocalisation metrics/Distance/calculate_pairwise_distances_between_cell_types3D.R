@@ -4,15 +4,36 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
                                                               show_summary = TRUE,
                                                               plot_image = TRUE) {
   
-  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  # Check input parameters
+  if (class(spe) != "SpatialExperiment") {
+    stop("`spe` is not a SpatialExperiment object.")
+  }
+  if (ncol(spe) < 2) {
+    stop("There must be at least two cells in spe.")
+  }
+  if (!(is.null(cell_types_of_interest) && is.character(cell_types_of_interest))) {
+    stop("`cell_types_of_interest` is not a character vector or NULL.")
+  }
+  if (!is.character(feature_colname)) {
+    stop("`feature_colname` is not a character.")
+  }
+  if (is.null(spe[[feature_colname]])) {
+    stop(paste("No column called", feature_colname, "found in spe object."))
+  }
+  if (!is.logical(show_summary)) {
+    stop("`show_summary` is not a logical (TRUE or FALSE).")
+  }
+  if (!is.logical(plot_image)) {
+    stop("`plot_image` is not a logical (TRUE or FALSE).")
+  }
   
   if (is.null(spe[["Cell.ID"]])) {
     warning("Temporarily adding Cell.ID column to your spe")
     spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
   }
   
-  # If there are less than two cells, give error
-  if (ncol(spe) < 2) stop("There must be at least two cells in spe")
+  # De-factor feature column in spe object
+  spe[[feature_colname]] <- as.character(spe[[feature_colname]])
   
   # Subset spe to only contain the cells of interest
   if (!is.null(cell_types_of_interest)) {
@@ -105,15 +126,15 @@ calculate_pairwise_distances_between_cell_types3D <- function(spe,
   colnames(result)[c(1, 2, 3)] <- c("cell_type1_id", "cell_type2_id", "distance")
   result <- result[ , c("cell_type1_id", "cell_type1", "cell_type2_id", "cell_type2", "distance", "pair")]
   
+  # Print summary
+  if (show_summary) {
+    print(summarise_distances_between_cell_types3D(result))  
+  }
+  
   # Plot
   if (plot_image) {
     fig <- plot_distances_between_cell_types_violin3D(result)
     methods::show(fig)
-  }
-  
-  # Print summary
-  if (show_summary) {
-    print(summarise_distances_between_cell_types3D(result))  
   }
   
   return(result)

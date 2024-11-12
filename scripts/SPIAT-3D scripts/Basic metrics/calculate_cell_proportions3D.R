@@ -3,10 +3,25 @@ calculate_cell_proportions3D <- function(spe,
                                          feature_colname = "Cell.Type",
                                          plot_image = TRUE) {
   
-  # Check
-  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
-  
-  if (ncol(spe) == 0) stop("No cells found for calculating cell proportions")
+  # Check input parameters
+  if (class(spe) != "SpatialExperiment") {
+    stop("`spe` is not a SpatialExperiment object.")
+  }
+  if (ncol(spe) == 0) {
+    stop("No cells found for calculating cell proportions.")
+  }
+  if (!(is.null(cell_types_of_interest) && is.character(cell_types_of_interest))) {
+    stop("`cell_types_of_interest` is not a character vector or NULL.")
+  }
+  if (!is.character(feature_colname)) {
+    stop("`feature_colname` is not a character.")
+  }
+  if (is.null(spe[[feature_colname]])) {
+    stop(paste("No column called", feature_colname, "found in spe object."))
+  }
+  if (!is.logical(plot_image)) {
+    stop("`plot_image` is not a logical (TRUE or FALSE).")
+  }
   
   # Creates frequency/bar plot of all cell types in the entire image
   cell_proportions <- data.frame(table(spe[[feature_colname]]))
@@ -37,7 +52,6 @@ calculate_cell_proportions3D <- function(spe,
   # Order the cell types by proportion (highest cell proportion is first)
   cell_proportions <- cell_proportions[rev(order(cell_proportions$proportion)), ]
   rownames(cell_proportions) <- seq(nrow(cell_proportions))
-  
   
   # Plot
   if (plot_image) {

@@ -4,18 +4,30 @@ grid_based_clustering3D <- function(spe,
                                     feature_colname = "Cell.Type",
                                     plot_image = TRUE) {
   
-  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
-  
-  # Check if n_splits is numeric
-  if (!is.numeric(n_splits)) {
-    stop(paste(n_splits, " n_splits is not of type 'numeric'"))
+  # Check input parameters
+  if (class(spe) != "SpatialExperiment") {
+    stop("`spe` is not a SpatialExperiment object.")
   }
-  
-  ## Check cell_types_of_interest are found in the spe object
+  ## Check cell types of interst are found in the spe object
   unknown_cell_types <- setdiff(cell_types_of_interest, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     stop(paste("The following cell types in cell_types_of_interest are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
+  }
+  if (!(is.numeric(radius) && length(radius) == 1 && radius > 0)) {
+    stop("`radius` is not a positive numeric.")
+  }
+  if (!(is.integer(n_splits) && length(n_splits) == 1 || (is.numeric(n_splits) && length(n_splits) == 1 && n_splits > 0 && n_splits%%1 == 0))) {
+    stop("`n_splits` is not a positive integer.")
+  }
+  if (!is.character(feature_colname)) {
+    stop("`feature_colname` is not a character.")
+  }
+  if (is.null(spe[[feature_colname]])) {
+    stop(paste("No column called", feature_colname, "found in spe object."))
+  }
+  if (!is.logical(plot_image)) {
+    stop("`plot_image` is not a logical (TRUE or FALSE).")
   }
   
   # Add grid metrics to spe

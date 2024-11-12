@@ -4,8 +4,10 @@ calculate_entropy3D <- function(spe,
                                 radius,
                                 feature_colname = "Cell.Type") {
   
-  # Check
-  if (length(target_cell_types) < 2) stop("Need at least two target cell types")
+  # Check target_cell_types
+  if (!(is.character(target_cell_types) && length(target_cell_types) >= 2)) {
+    stop("`target_cell_types` is not a character vector with at least 2 cell types.")
+  }
   
   ## Users should ensure include the reference_cell_type as one of the target_cell_types
   cells_in_neighbourhood_proportion_df <- calculate_cells_in_neighbourhood_proportions3D(spe,

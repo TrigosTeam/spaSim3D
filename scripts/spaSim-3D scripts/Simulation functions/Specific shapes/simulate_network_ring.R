@@ -1,4 +1,10 @@
-simulate_network_ring <- function(bg_spe, ring_properties) {  
+simulate_network_ring <- function(spe, ring_properties) {  
+  
+  # Check input parameters
+  input_parameters <- ring_properties
+  input_parameters[["spe"]] <- spe
+  input_parameter_check_value <- check_input_parameters(input_parameters)
+  if (!is.logical(input_parameter_check_value)) stop(input_parameter_error_message(input_parameter_check_value))
   
   # Get network ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
@@ -7,28 +13,9 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   width <- ring_properties$width
   centre_loc <- ring_properties$centre_loc
   radius <- ring_properties$radius
-  
-  ## Check number of cell types matches the number of cell proportions
-  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
-  
-  ## Check cell proportions are not negative or greater than 1
-  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
-  
-  ## Check cell proportions add up to 1
-  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
-  
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
   ring_width <- ring_properties$ring_width
-  
-  ## Check number of ring cell types matches the number of cell proportions
-  if (length(ring_cell_types) != length(ring_cell_proportions)) stop("Number of ring cell types doesn't match number of ring cell proportion.")
-  
-  ## Check ring cell proportions are not negative or greater than 1
-  if (sum(ring_cell_proportions < 0 | ring_cell_proportions > 1) != 0) stop("Ring cell proportions cannot be negative or greater than 1")
-  
-  ## Check ring cell proportions add up to 1
-  if (!all.equal(sum(ring_cell_proportions), 1)) stop("Sum of ring cell proportions is NOT 1")
   
   # Number of vertices is always one more than the number of edges for the MST will we make
   n_vertices <- n_edges + 1 
@@ -86,12 +73,12 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
                                          ring_width = ring_width)
   }
   
-  network_spe <- simulate_rings3D(bg_spe,
+  network_spe <- simulate_rings3D(spe,
                                   ring_properties = network_ring_properties,
                                   plot_image = F)
   
   # Update current meta data
-  metadata <- bg_spe@metadata
+  metadata <- spe@metadata
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
   ring_properties[["cylinders"]] <- network_ring_properties # Include metadata of cylinders used to make up network
   metadata[["simulation"]][[paste("cluster", length(metadata[["simulation"]]), sep = "_")]] <- ring_properties
@@ -99,5 +86,4 @@ simulate_network_ring <- function(bg_spe, ring_properties) {
   network_spe@metadata <- metadata
   
   return(network_spe)
-  
 }

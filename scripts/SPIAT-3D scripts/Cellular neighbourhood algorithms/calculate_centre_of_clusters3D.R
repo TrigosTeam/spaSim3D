@@ -3,6 +3,17 @@
 
 calculate_center_of_clusters3D <- function(spe, cluster_colname) {
   
+  # Check input parameters
+  if (class(spe) != "SpatialExperiment") {
+    stop("`spe` is not a SpatialExperiment object.")
+  }
+  if (!is.character(cluster_colname)) {
+    stop("`cluster_colname` is not a character. This should be 'alpha_hull_cluster', 'dbscan_cluster', or 'grid_based_cluster', depending on the chosen method.")
+  }
+  if (is.null(spe[[cluster_colname]])) {
+    stop(paste("No column called", cluster_colname, "found in spe object."))
+  }
+  
   # Get number of clusters
   n_clusters <- max(spe[[cluster_colname]])
   
@@ -22,4 +33,3 @@ calculate_center_of_clusters3D <- function(spe, cluster_colname) {
   
   return(result)
 }
-

@@ -3,8 +3,16 @@ plot_alpha_hull_clusters3D <- function(spe_with_alpha_hull,
                                        plot_colours = NULL,
                                        feature_colname = "Cell.Type") {
   
-  # Check
-  if (is.null(spe_with_alpha_hull[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  # Check input parameters
+  if (class(spe_with_alpha_hull) != "SpatialExperiment") {
+    stop("`spe_with_alpha_hull` is not a SpatialExperiment object.")
+  }
+  if (!is.character(feature_colname)) {
+    stop("`feature_colname` is not a character.")
+  }
+  if (is.null(spe_with_alpha_hull[[feature_colname]])) {
+    stop(paste("No column called", feature_colname, "found in spe object."))
+  }
   
   ## If no cell types chosen, use all cell types found in data frame
   if (is.null(plot_cell_types)) plot_cell_types <- unique(spe_with_alpha_hull[[feature_colname]])

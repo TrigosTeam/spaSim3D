@@ -1,5 +1,13 @@
 plot_grid_metrics_discrete3D <- function(grid_metrics, metric_colname) {
   
+  ## Check input parameters
+  if (!(is.character(metric_colname) && metric_colname %in% c("proportion", "entropy"))) {
+    stop("`metric_colname` is not 'proportion' or 'entropy'.")
+  }
+  if (is.null(grid_metrics[[metric_colname]])) {
+    stop("`metric_colname` is not a column in `grid_metrics`.")
+  }
+  
   ## Define low, medium and high categories
   # Low: between 0 and 1/3
   # Medium: between 1/3 and 2/3

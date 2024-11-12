@@ -2,9 +2,10 @@ get_tree_depth <- function(tree_edges) {
   
   tree_edges <- data.frame(tree_edges)
   colnames(tree_edges) <- c("vertex1", "vertex2")
-  tree_edges$depth <- NA # If tree_edge is not NA, we have already accounted for it
+  # Set the initial depth of each tree_edge to be NA.
+  tree_edges$depth <- NA
   
-  # Get cells on the 'outskirts' of MST (i.e. leaf_vertices)
+  # Get vertices on the 'outskirts' of MST (leaf_vertices which have a depth of 1)
   tree_vertices <- c(tree_edges[ , 1], tree_edges[ , 2])
   
   leaf_vertices <- names(table(tree_vertices))[table(tree_vertices) == 1]

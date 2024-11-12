@@ -6,17 +6,16 @@ simulate_random_background_cells3D <- function(n_cells,
                                                background_cell_type = "Others", 
                                                plot_image = TRUE) {
   
-  # Check
-  if (!is.numeric(n_cells) | !is.numeric(length) | !is.numeric(width) | 
-      !is.numeric(height)) {
-    stop("One or more of `n_cells`, `length`, width`, `height` is not numeric!")
-  }
-  if (!is.character(background_cell_type)) {
-    stop("`background_cell_type` should be of character type!")
-  }
-  if(!is.numeric(minimum_distance_between_cells)) {
-    stop("`minimum_distance_between_cells` is not numeric!")
-  }
+  # Check input parameters
+  input_parameters <- list("n_cells" = n_cells,
+                           "length" = length,
+                           "width" = width,
+                           "height" = height,
+                           "minimum_distance_between_cells" = minimum_distance_between_cells,
+                           "background_cell_type" = background_cell_type,
+                           "plot_image" = plot_image)
+  input_parameter_check_value <- check_input_parameters(input_parameters)
+  if (!is.logical(input_parameter_check_value)) stop(input_parameter_error_message(input_parameter_check_value))
   
   # Need to over-sample as cells which are too close will be removed later
   n_cells_inflated <- n_cells * 2
@@ -63,7 +62,7 @@ simulate_random_background_cells3D <- function(n_cells,
   pois_df$Cell.Type <- background_cell_type
   pois_df$Cell.ID <- paste("Cell", seq(nrow(pois_df)), sep = "_")
   
-  # Get meta data
+  # Get metadata
   background_metadata <- list("background_type" = "random",
                               "n_cells" = n_cells,
                               "length" = length,
@@ -91,4 +90,3 @@ simulate_random_background_cells3D <- function(n_cells,
   
   return(spe)
 }
-

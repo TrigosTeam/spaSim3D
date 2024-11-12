@@ -138,13 +138,3 @@ spaSim3D_background_integrator <- function() {
   
   return(simulated_spe)
 }
-
-
-
-
-
-
-
-
-
-

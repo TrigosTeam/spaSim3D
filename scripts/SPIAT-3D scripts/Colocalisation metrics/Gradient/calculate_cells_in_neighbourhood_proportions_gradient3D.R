@@ -5,7 +5,9 @@ calculate_cells_in_neighbourhood_proportions_gradient3D <- function(spe,
                                                                     feature_colname = "Cell.Type",
                                                                     plot_image = TRUE) {
   
-  if (length(radii) <= 1) stop("Please enter at least two numeric values for radii")
+  if (!(is.numeric(radii) && length(radii) > 1)) {
+    stop("`radii` is not a numeric vector with at least 2 values")
+  }
   
   result <- data.frame(matrix(nrow = length(radii), ncol = length(target_cell_types)))
   colnames(result) <- target_cell_types

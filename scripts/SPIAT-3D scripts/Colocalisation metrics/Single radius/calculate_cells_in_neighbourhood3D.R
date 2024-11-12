@@ -6,30 +6,49 @@ calculate_cells_in_neighbourhood3D <- function(spe,
                                                show_summary = TRUE,
                                                plot_image = TRUE) {
   
-  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
   
-  if (is.null(spe[["Cell.ID"]])) {
-    warning("Temporarily adding Cell.ID column to your spe")
-    spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
-  }  
+  # Check input parameters
+  if (class(spe) != "SpatialExperiment") {
+    stop("`spe` is not a SpatialExperiment object.")
+  }
+  if (!(is.character(reference_cell_type) && length(reference_cell_type) == 1)) {
+    stop("`reference_cell_type` is not a character.")
+  }
+  if (!is.character(target_cell_types)) {
+    stop("`target_cell_types` is not a character vector.")
+  }
+  if (!(is.numeric(radius) && length(radius) == 1 && radius > 0)) {
+    stop("`radius` is not a positive numeric.")
+  }
+  if (!is.character(feature_colname)) {
+    stop("`feature_colname` is not a character.")
+  }
+  if (is.null(spe[[feature_colname]])) {
+    stop(paste("No column called", feature_colname, "found in spe object."))
+  }
+  if (!is.logical(show_summary)) {
+    stop("`show_summary` is not a logical (TRUE or FALSE).")
+  }
+  if (!is.logical(plot_image)) {
+    stop("`plot_image` is not a logical (TRUE or FALSE).")
+  }
   
   ## For reference_cell_type, check it is found in the spe object
   if (!(reference_cell_type %in% spe[[feature_colname]])) {
     warning(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
     return(NULL)
   }
-  
   ## For target_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
-               paste(unknown_cell_types, collapse = ", ")))
+                  paste(unknown_cell_types, collapse = ", ")))
   }
-  
-  # Check if radius is numeric
-  if (!is.numeric(radius)) {
-    stop(paste(radius, " is not of type 'numeric'"))
-  }
+
+  if (is.null(spe[["Cell.ID"]])) {
+    warning("Temporarily adding Cell.ID column to your spe")
+    spe$Cell.ID <- paste("Cell", seq(ncol(spe)), sep = "_")
+  }  
   
   # Get spe coords
   spe_coords <- data.frame(spatialCoords(spe))
@@ -67,11 +86,10 @@ calculate_cells_in_neighbourhood3D <- function(spe,
   
   result <- data.frame(ref_cell_id = spe$Cell.ID[spe[[feature_colname]] == reference_cell_type], result)
   
-  ## Show summarised results
+  ## Print summary
   if (show_summary) {
     print(summarise_cells_in_neighbourhood3D(result))    
   }
-
   
   ## Plot
   if (plot_image) {

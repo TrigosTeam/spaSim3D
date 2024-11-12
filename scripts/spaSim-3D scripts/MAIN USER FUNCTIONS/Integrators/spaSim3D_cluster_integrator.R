@@ -487,11 +487,3 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
   message("All done!")
   return(simulated_spe_new) 
 }
-
-
-
-
-
-
-
-

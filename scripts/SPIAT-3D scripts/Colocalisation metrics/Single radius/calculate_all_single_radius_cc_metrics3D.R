@@ -7,24 +7,37 @@ calculate_all_single_radius_cc_metrics3D <- function(spe,
                                                      radius, 
                                                      feature_colname = "Cell.Type") {
   
-  if (is.null(spe[[feature_colname]])) stop(paste("No column called", feature_colname, "found in spe object"))
+  # Check input parameters
+  if (class(spe) != "SpatialExperiment") {
+    stop("`spe` is not a SpatialExperiment object.")
+  }
+  if (!(is.character(reference_cell_type) && length(reference_cell_type) == 1)) {
+    stop("`reference_cell_type` is not a character.")
+  }
+  if (!is.character(target_cell_types)) {
+    stop("`target_cell_types` is not a character vector.")
+  }
+  if (!(is.numeric(radius) && length(radius) == 1 && radius > 0)) {
+    stop(paste(radius, " is not a positive numeric."))
+  }
+  if (!is.character(feature_colname)) {
+    stop("`feature_colname` is not a character.")
+  }
+  if (is.null(spe[[feature_colname]])) {
+    stop(paste("No column called", feature_colname, "found in spe object."))
+  }
   
   ## For reference_cell_type, check it is found in the spe object
   if (!(reference_cell_type %in% spe[[feature_colname]])) {
     warning(paste("The reference_cell_type", reference_cell_type,"is not found in the spe object"))
     return(NULL)
   }
-  
   ## For target_cell_types, check they are found in the spe object
   unknown_cell_types <- setdiff(target_cell_types, spe[[feature_colname]])
   if (length(unknown_cell_types) != 0) {
     warning(paste("The following cell types in target_cell_types are not found in the spe object:\n   ",
                paste(unknown_cell_types, collapse = ", ")))
   }
-  
-  # Check if radius is numeric
-  if (!is.numeric(radius)) stop(paste(radius, " is not of type 'numeric'"))
-  
   
   # Define result
   result <- list("cells_in_neighbourhood" = list(),

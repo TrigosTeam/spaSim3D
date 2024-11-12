@@ -2,7 +2,18 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
                                                 metric_colname,
                                                 weight_method = 0.1) {
   
-  
+  ## Check input parameters
+  if (!(is.character(metric_colname))) {
+    stop("`metric_colname` is not a character. This should be 'proportion' or 'entropy', depending on the chosen method.")
+  }
+  if (is.null(grid_metrics[[metric_colname]])) {
+    stop("`metric_colname` is not a column in `grid_metrics`.")
+  }
+  if (!((is.numeric(weight_method) && length(weight_method) == 1 && weight_method > 0 && weight_method < 1) ||
+        (is.character(weight_method) && weight_method %in% c("IDW", "rook", "queen")))) {
+    stop("`weight_method` is not a numeric between 0 and 1 or either 'IDW', 'rook' or 'queen'.")
+  }
+
   ## Get number of grid prisms
   n_grid_prisms <- nrow(grid_metrics)
   
@@ -39,9 +50,6 @@ calculate_spatial_autocorrelation3D <- function(grid_metrics,
   else if (as.numeric(weight_method) && 0 < weight_method && weight_method < 1) {
     threshold <- quantile(c(weight_matrix), weight_method)
     weight_matrix <- ifelse(weight_matrix > threshold, 0, 1)
-  }
-  else {
-    stop(paste(weight_method, " weight_method is not an appropriate method"))
   }
   
   ## Points along the diagonal are comparing the same point so its weight is zero

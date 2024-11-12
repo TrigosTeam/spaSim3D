@@ -3,6 +3,20 @@ calculate_prevalence_gradient3D <- function(grid_metrics,
                                             show_AUC = T,
                                             plot_image = T) {
   
+  ## Check input parameters
+  if (!(is.character(metric_colname))) {
+    stop("`metric_colname` is not a character. This should be 'proportion' or 'entropy', depending on the chosen method.")
+  }
+  if (is.null(grid_metrics[[metric_colname]])) {
+    stop("`metric_colname` is not a column in `grid_metrics`.")
+  }
+  if (!is.logical(show_AUC)) {
+    stop("`show_AUC` is not a logical (TRUE or FALSE).")
+  }
+  if (!is.logical(plot_image)) {
+    stop("`plot_image` is not a logical (TRUE or FALSE).")
+  }
+  
   # Thresholds range from 0 to 1
   thresholds <- seq(0.01, 1, 0.01)
   

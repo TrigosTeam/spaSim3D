@@ -18,6 +18,7 @@ prims_algorithm <- function(graph) {
   # Iterate until we select enough edges (one less than the number of vertices for a MST)
   num_edges <- 0
   while (num_edges < num_vertices - 1) {
+    # Set initial temp values for weight and vertex
     min_weight <- Inf
     min_vertex <- -1
     
@@ -38,7 +39,7 @@ prims_algorithm <- function(graph) {
       }
     }
     
-    # Current edge connects the min_vertex and ???
+    # Current edge connects the min_vertex and curr_vertex
     tree_edges[num_edges + 1, ] <- c(min_vertex, curr_vertex)
     selected[min_vertex] <- TRUE
     num_edges <- num_edges + 1

@@ -1,4 +1,10 @@
-simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
+simulate_ellipsoid_cluster <- function(spe, cluster_properties) {
+  
+  # Check input parameters
+  input_parameters <- cluster_properties
+  input_parameters[["spe"]] <- spe
+  input_parameter_check_value <- check_input_parameters(input_parameters)
+  if (!is.logical(input_parameter_check_value)) stop(input_parameter_error_message(input_parameter_check_value))
   
   # Get ellipsoid properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
@@ -7,17 +13,6 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   y_radius <- cluster_properties$y_radius
   z_radius <- cluster_properties$z_radius
   centre_loc <- cluster_properties$centre_loc
-  
-  ## Check number of cell types matches the number of cell proportions
-  if (length(cluster_cell_types) != length(cluster_cell_proportions)) stop("Number of cell types doesn't match number of cell proportion.")
-  
-  ## Check cell proportions are not negative or greater than 1
-  if (sum(cluster_cell_proportions < 0 | cluster_cell_proportions > 1) != 0) stop("Cell proportions cannot be negative or greater than 1")
-  
-  ## Check cell proportions add up to 1
-  if (!all.equal(sum(cluster_cell_proportions), 1)) stop("Sum of cell proportions is NOT 1")
-  
-  # Rotation angles
   theta <- cluster_properties$y_z_rotation * (pi/180) # rotation in x-axis
   alpha <- cluster_properties$x_z_rotation * (pi/180) # rotation in y-axis
   beta  <- cluster_properties$x_y_rotation * (pi/180) # rotation in z-axis
@@ -38,7 +33,7 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
 
   ## Change cell types in the ellipsoid cluster
   # Get spatial coords from spe (rows are x, y, z, columns are each cell)
-  spe_coords <- t(spatialCoords(bg_spe))
+  spe_coords <- t(spatialCoords(spe))
   
   # Apply transformations to spe_coords'
   spe_coords <- solve(T1) %*% solve(T2) %*% solve(T3) %*% (spe_coords - T4)
@@ -46,15 +41,15 @@ simulate_ellipsoid_cluster <- function(bg_spe, cluster_properties) {
   y <- spe_coords[2, ]
   z <- spe_coords[3, ]
   
-  bg_spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
+  spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
                                     (y / y_radius)^2 +
                                     (z / z_radius)^2 <= 1,
-                                  sample(cluster_cell_types, size = ncol(bg_spe), replace = TRUE, prob = cluster_cell_proportions),
-                                  bg_spe[["Cell.Type"]])
+                                  sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
+                                  spe[["Cell.Type"]])
   
   # Update current meta data
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)
-  bg_spe@metadata[["simulation"]][[paste("cluster", length(bg_spe@metadata[["simulation"]]), sep="_")]] <- cluster_properties
+  spe@metadata[["simulation"]][[paste("cluster", length(spe@metadata[["simulation"]]), sep="_")]] <- cluster_properties
   
-  return(bg_spe)
+  return(spe)
 }

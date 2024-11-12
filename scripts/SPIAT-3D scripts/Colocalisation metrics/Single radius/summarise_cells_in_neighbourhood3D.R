@@ -20,6 +20,3 @@ summarise_cells_in_neighbourhood3D <- function(cells_in_neighbourhood_df) {
   
   return(data.frame(t(df)))
 }
-
-
-
