@@ -1,3 +1,15 @@
+library(SpatialExperiment)
+library(dbscan)
+library(alphashape3d)
+library(apcluster)
+library(plotly)
+library(dplyr)
+library(reshape2)
+library(gtools)
+library(cowplot)
+library(Hmisc)
+
+
 add_spe_metadata3D <- function(spe, metadata, plot_image = TRUE) {
   
   # Ignore the 'background' element in metadata
