@@ -9,16 +9,16 @@ simulate_ellipsoid_ring <- function(spe, ring_properties) {
   # Get ellipsoid ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
   cluster_cell_proportions <- ring_properties$cluster_cell_proportions
-  x_radius <- ring_properties$x_radius
-  y_radius <- ring_properties$y_radius
-  z_radius <- ring_properties$z_radius
+  x_radius <- ring_properties$radii[1]
+  y_radius <- ring_properties$radii[2]
+  z_radius <- ring_properties$radii[3]
   centre_loc <- ring_properties$centre_loc
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
   ring_width <- ring_properties$ring_width
-  theta <- ring_properties$y_z_rotation * (pi/180) # rotation in x-axis
-  alpha <- ring_properties$x_z_rotation * (pi/180) # rotation in y-axis
-  beta  <- ring_properties$x_y_rotation * (pi/180) # rotation in z-axis
+  theta <- ring_properties$axes_rotation[1] * (pi/180) # rotation in x-axis
+  alpha <- ring_properties$axes_rotation[2] * (pi/180) # rotation in y-axis
+  beta  <- ring_properties$axes_rotation[3] * (pi/180) # rotation in z-axis
   
   # Get rotation matrices for rotation in the y-z plane (T2), x-z plane (T3) and x-y plane (T4)
   T1 <- matrix(data = c(1, 0, 0,

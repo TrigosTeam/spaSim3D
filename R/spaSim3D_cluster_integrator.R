@@ -134,16 +134,15 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     cluster_properties <- list(list(shape = "ellipsoid",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
-                                    x_radius = parameter_values[["x radius"]],
-                                    y_radius = parameter_values[["y radius"]],
-                                    z_radius = parameter_values[["z radius"]],
+                                    radii = c(parameter_values[["x radius"]], 
+                                              parameter_values[["y radius"]], 
+                                              parameter_values[["z radius"]]),
                                     centre_loc = c(parameter_values[["centre x coordinate"]],
                                                    parameter_values[["centre y coordinate"]],
                                                    parameter_values[["centre z coordinate"]]),
-                                    y_z_rotation = parameter_values[["x-axis rotation angle"]],
-                                    x_z_rotation = parameter_values[["y-axis rotation angle"]],
-                                    x_y_rotation = parameter_values[["z-axis rotation angle"]]))
-    
+                                    axes_rotation = c(parameter_values[["x-axis rotation angle"]], 
+                                                      parameter_values[["y-axis rotation angle"]], 
+                                                      parameter_values[["z-axis rotation angle"]])))
     message("Generating simulation...")
     simulated_spe_new <- simulate_clusters3D(simulated_spe,
                                              cluster_properties,
@@ -175,15 +174,15 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       cluster_properties <- list(list(shape = "ellipsoid",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
-                                      x_radius = parameter_values[["x radius"]],
-                                      y_radius = parameter_values[["y radius"]],
-                                      z_radius = parameter_values[["z radius"]],
+                                      radii = c(parameter_values[["x radius"]], 
+                                                parameter_values[["y radius"]], 
+                                                parameter_values[["z radius"]]),
                                       centre_loc = c(parameter_values[["centre x coordinate"]],
                                                      parameter_values[["centre y coordinate"]],
                                                      parameter_values[["centre z coordinate"]]),
-                                      y_z_rotation = parameter_values[["x-axis rotation angle"]],
-                                      x_z_rotation = parameter_values[["y-axis rotation angle"]],
-                                      x_y_rotation = parameter_values[["z-axis rotation angle"]]))
+                                      axes_rotation = c(parameter_values[["x-axis rotation angle"]], 
+                                                        parameter_values[["y-axis rotation angle"]], 
+                                                        parameter_values[["z-axis rotation angle"]])))
       
       message("Generating simulation...")
       simulated_spe_new <- simulate_clusters3D(simulated_spe,

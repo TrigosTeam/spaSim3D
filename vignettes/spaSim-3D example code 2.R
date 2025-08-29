@@ -65,7 +65,10 @@ metadata_bg_clusters$cluster_2$centre_loc <- c(25, 25, 25)
 metadata_bg_clusters$cluster_3$centre_loc <- c(75, 75, 75)
 
 
-spe_clusters <- simulate_spe_metadata3D(metadata_bg_clusters)
+spe_clusters <- simulate_spe_metadata3D(metadata_bg_clusters,
+                                        plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Immune2"),
+                                        plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "purple"))
+
 plot_cells3D(spe_clusters,
              plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Immune2"),
              plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "purple"))

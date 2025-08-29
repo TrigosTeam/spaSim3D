@@ -12,13 +12,9 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
     cluster_metadata <- list(shape = "ellipsoid",
                              cluster_cell_types = c("Tumour", "Immune", "Others"),
                              cluster_cell_proportions = c(0.8, 0.15, 0.05),
-                             x_radius = 75,
-                             y_radius = 100,
-                             z_radius = 125,
+                             radii = c(75, 100, 125),
                              centre_loc = c(450, 300, 100),
-                             x_y_rotation = 0,
-                             x_z_rotation = 45,
-                             y_z_rotation = 0)
+                             axes_rotation = c(0, 45, 0))
   }
   else if (shape == "cylinder") {
     cluster_metadata <- list(shape = "cylinder",

@@ -1,4 +1,7 @@
-simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
+simulate_spe_metadata3D <- function(spe_metadata, 
+                                    plot_image = TRUE, 
+                                    plot_cell_types = NULL,
+                                    plot_colours = NULL) {
   
   # First element should contain background metadata
   bg_metadata <- spe_metadata[[1]]
@@ -36,7 +39,9 @@ simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
     
     # Plot
     if (plot_image) {
-      fig <- plot_cells3D(spe)
+      fig <- plot_cells3D(spe,
+                          plot_cell_types,
+                          plot_colours)
       methods::show(fig)
     }
     
@@ -67,7 +72,9 @@ simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
   
   # Plot
   if (plot_image) {
-    fig <- plot_cells3D(spe)
+    fig <- plot_cells3D(spe,
+                        plot_cell_types,
+                        plot_colours)
     methods::show(fig)
   }
   

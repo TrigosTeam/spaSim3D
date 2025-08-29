@@ -83,10 +83,10 @@ plot_cells3D <- function(spe,
     warning("plot_cell_types not specified, all cell types found in the spe object will be used.")
     plot_cell_types <- unique(df[["Cell.Type"]])
   }
-  ## If no colours inputted, use rainbow palette
+  ## If no colours inputted, use viridis (D) palette
   if (is.null(plot_colours)) {
-    warning("plot_colours not specified, rainbow palette will be used.")
-    plot_colours <- rainbow(length(plot_cell_types))
+    warning("plot_colours not specified, viridis (D) palette will be used.")
+    plot_colours <- viridis::viridis(n = length(plot_cell_types), option = "D")
   }
   ## User inputs mismatching cell types and colours
   if (length(plot_cell_types) != length(plot_colours)) {
@@ -132,6 +132,7 @@ plot_cells3D <- function(spe,
   
   return(fig)
 }
+
 simulate_clusters3D <- function(spe,
                                 cluster_properties_list,
                                 plot_image = TRUE,
@@ -401,13 +402,13 @@ simulate_ellipsoid_cluster <- function(spe, cluster_properties) {
   # Get ellipsoid properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
   cluster_cell_proportions <- cluster_properties$cluster_cell_proportions
-  x_radius <- cluster_properties$x_radius
-  y_radius <- cluster_properties$y_radius
-  z_radius <- cluster_properties$z_radius
+  x_radius <- cluster_properties$radii[1]
+  y_radius <- cluster_properties$radii[2]
+  z_radius <- cluster_properties$radii[3]
   centre_loc <- cluster_properties$centre_loc
-  theta <- cluster_properties$y_z_rotation * (pi/180) # rotation in x-axis
-  alpha <- cluster_properties$x_z_rotation * (pi/180) # rotation in y-axis
-  beta  <- cluster_properties$x_y_rotation * (pi/180) # rotation in z-axis
+  theta <- cluster_properties$axes_rotation[1] * (pi/180) # rotation in x-axis
+  alpha <- cluster_properties$axes_rotation[2] * (pi/180) # rotation in y-axis
+  beta  <- cluster_properties$axes_rotation[3] * (pi/180) # rotation in z-axis
   
   # Get rotation matrices for rotation in the y-z plane (T2), x-z plane (T3) and x-y plane (T4)
   T1 <- matrix(data = c(1, 0, 0,
@@ -445,6 +446,7 @@ simulate_ellipsoid_cluster <- function(spe, cluster_properties) {
   
   return(spe)
 }
+
 simulate_ellipsoid_dr <- function(spe, dr_properties) {
   
   # Check input parameters
@@ -456,9 +458,9 @@ simulate_ellipsoid_dr <- function(spe, dr_properties) {
   # Get ellipsoid double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
   cluster_cell_proportions <- dr_properties$cluster_cell_proportions
-  x_radius <- dr_properties$x_radius
-  y_radius <- dr_properties$y_radius
-  z_radius <- dr_properties$z_radius
+  x_radius <- dr_properties$radii[1]
+  y_radius <- dr_properties$radii[2]
+  z_radius <- dr_properties$radii[3]
   centre_loc <- dr_properties$centre_loc
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
@@ -466,9 +468,9 @@ simulate_ellipsoid_dr <- function(spe, dr_properties) {
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
   outer_ring_width <- dr_properties$outer_ring_width
-  theta <- dr_properties$y_z_rotation * (pi/180) # rotation in x-axis
-  alpha <- dr_properties$x_z_rotation * (pi/180) # rotation in y-axis
-  beta  <- dr_properties$x_y_rotation * (pi/180) # rotation in z-axis
+  theta <- dr_properties$axes_rotation[1] * (pi/180) # rotation in x-axis
+  alpha <- dr_properties$axes_rotation[2] * (pi/180) # rotation in y-axis
+  beta  <- dr_properties$axes_rotation[3] * (pi/180) # rotation in z-axis
   
   # Get rotation matrices for rotation in the y-z plane (T2), x-z plane (T3) and x-y plane (T4)
   T1 <- matrix(data = c(1, 0, 0,
@@ -523,6 +525,7 @@ simulate_ellipsoid_dr <- function(spe, dr_properties) {
   
   return(spe)
 }
+
 simulate_ellipsoid_ring <- function(spe, ring_properties) {
   
   # Check input parameters
@@ -534,16 +537,16 @@ simulate_ellipsoid_ring <- function(spe, ring_properties) {
   # Get ellipsoid ring properties
   cluster_cell_types <- ring_properties$cluster_cell_types
   cluster_cell_proportions <- ring_properties$cluster_cell_proportions
-  x_radius <- ring_properties$x_radius
-  y_radius <- ring_properties$y_radius
-  z_radius <- ring_properties$z_radius
+  x_radius <- ring_properties$radii[1]
+  y_radius <- ring_properties$radii[2]
+  z_radius <- ring_properties$radii[3]
   centre_loc <- ring_properties$centre_loc
   ring_cell_types <- ring_properties$ring_cell_types
   ring_cell_proportions <- ring_properties$ring_cell_proportions
   ring_width <- ring_properties$ring_width
-  theta <- ring_properties$y_z_rotation * (pi/180) # rotation in x-axis
-  alpha <- ring_properties$x_z_rotation * (pi/180) # rotation in y-axis
-  beta  <- ring_properties$x_y_rotation * (pi/180) # rotation in z-axis
+  theta <- ring_properties$axes_rotation[1] * (pi/180) # rotation in x-axis
+  alpha <- ring_properties$axes_rotation[2] * (pi/180) # rotation in y-axis
+  beta  <- ring_properties$axes_rotation[3] * (pi/180) # rotation in z-axis
   
   # Get rotation matrices for rotation in the y-z plane (T2), x-z plane (T3) and x-y plane (T4)
   T1 <- matrix(data = c(1, 0, 0,
@@ -591,6 +594,7 @@ simulate_ellipsoid_ring <- function(spe, ring_properties) {
   
   return(spe)
 }
+
 simulate_mixing3D <- function(spe,
                               cell_types,
                               cell_proportions,
@@ -1131,7 +1135,10 @@ simulate_rings3D <- function(spe,
   
   return(spe)
 }
-simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
+simulate_spe_metadata3D <- function(spe_metadata, 
+                                    plot_image = TRUE, 
+                                    plot_cell_types = NULL,
+                                    plot_colours = NULL) {
   
   # First element should contain background metadata
   bg_metadata <- spe_metadata[[1]]
@@ -1169,7 +1176,9 @@ simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
     
     # Plot
     if (plot_image) {
-      fig <- plot_cells3D(spe)
+      fig <- plot_cells3D(spe,
+                          plot_cell_types,
+                          plot_colours)
       methods::show(fig)
     }
     
@@ -1200,12 +1209,15 @@ simulate_spe_metadata3D <- function(spe_metadata, plot_image = TRUE) {
   
   # Plot
   if (plot_image) {
-    fig <- plot_cells3D(spe)
+    fig <- plot_cells3D(spe,
+                        plot_cell_types,
+                        plot_colours)
     methods::show(fig)
   }
   
   return(spe)
 }
+
 simulate_sphere_cluster <- function(spe, cluster_properties) {
   
   # Check input parameters
@@ -1593,16 +1605,15 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
     cluster_properties <- list(list(shape = "ellipsoid",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
-                                    x_radius = parameter_values[["x radius"]],
-                                    y_radius = parameter_values[["y radius"]],
-                                    z_radius = parameter_values[["z radius"]],
+                                    radii = c(parameter_values[["x radius"]], 
+                                              parameter_values[["y radius"]], 
+                                              parameter_values[["z radius"]]),
                                     centre_loc = c(parameter_values[["centre x coordinate"]],
                                                    parameter_values[["centre y coordinate"]],
                                                    parameter_values[["centre z coordinate"]]),
-                                    y_z_rotation = parameter_values[["x-axis rotation angle"]],
-                                    x_z_rotation = parameter_values[["y-axis rotation angle"]],
-                                    x_y_rotation = parameter_values[["z-axis rotation angle"]]))
-    
+                                    axes_rotation = c(parameter_values[["x-axis rotation angle"]], 
+                                                      parameter_values[["y-axis rotation angle"]], 
+                                                      parameter_values[["z-axis rotation angle"]])))
     message("Generating simulation...")
     simulated_spe_new <- simulate_clusters3D(simulated_spe,
                                              cluster_properties,
@@ -1634,15 +1645,15 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       cluster_properties <- list(list(shape = "ellipsoid",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
-                                      x_radius = parameter_values[["x radius"]],
-                                      y_radius = parameter_values[["y radius"]],
-                                      z_radius = parameter_values[["z radius"]],
+                                      radii = c(parameter_values[["x radius"]], 
+                                                parameter_values[["y radius"]], 
+                                                parameter_values[["z radius"]]),
                                       centre_loc = c(parameter_values[["centre x coordinate"]],
                                                      parameter_values[["centre y coordinate"]],
                                                      parameter_values[["centre z coordinate"]]),
-                                      y_z_rotation = parameter_values[["x-axis rotation angle"]],
-                                      x_z_rotation = parameter_values[["y-axis rotation angle"]],
-                                      x_y_rotation = parameter_values[["z-axis rotation angle"]]))
+                                      axes_rotation = c(parameter_values[["x-axis rotation angle"]], 
+                                                        parameter_values[["y-axis rotation angle"]], 
+                                                        parameter_values[["z-axis rotation angle"]])))
       
       message("Generating simulation...")
       simulated_spe_new <- simulate_clusters3D(simulated_spe,
@@ -1940,6 +1951,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
   message("All done!")
   return(simulated_spe_new) 
 }
+
 spe_metadata_background_template <- function(background_type, original_spe_metadata = NULL) {
   
   if (background_type == "random") {
@@ -1994,13 +2006,9 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
     cluster_metadata <- list(shape = "ellipsoid",
                              cluster_cell_types = c("Tumour", "Immune", "Others"),
                              cluster_cell_proportions = c(0.8, 0.15, 0.05),
-                             x_radius = 75,
-                             y_radius = 100,
-                             z_radius = 125,
+                             radii = c(75, 100, 125),
                              centre_loc = c(450, 300, 100),
-                             x_y_rotation = 0,
-                             x_z_rotation = 45,
-                             y_z_rotation = 0)
+                             axes_rotation = c(0, 45, 0))
   }
   else if (shape == "cylinder") {
     cluster_metadata <- list(shape = "cylinder",
@@ -2059,6 +2067,7 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
   # Else, just return the new cluster_metadata
   return(list("cluster_1" = cluster_metadata))
 }
+
 poisson_distribution3D <- function(n_cells, length, width, height)  {
   
   # Choose lambda

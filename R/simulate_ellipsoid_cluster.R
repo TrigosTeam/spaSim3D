@@ -9,13 +9,13 @@ simulate_ellipsoid_cluster <- function(spe, cluster_properties) {
   # Get ellipsoid properties
   cluster_cell_types <- cluster_properties$cluster_cell_types
   cluster_cell_proportions <- cluster_properties$cluster_cell_proportions
-  x_radius <- cluster_properties$x_radius
-  y_radius <- cluster_properties$y_radius
-  z_radius <- cluster_properties$z_radius
+  x_radius <- cluster_properties$radii[1]
+  y_radius <- cluster_properties$radii[2]
+  z_radius <- cluster_properties$radii[3]
   centre_loc <- cluster_properties$centre_loc
-  theta <- cluster_properties$y_z_rotation * (pi/180) # rotation in x-axis
-  alpha <- cluster_properties$x_z_rotation * (pi/180) # rotation in y-axis
-  beta  <- cluster_properties$x_y_rotation * (pi/180) # rotation in z-axis
+  theta <- cluster_properties$axes_rotation[1] * (pi/180) # rotation in x-axis
+  alpha <- cluster_properties$axes_rotation[2] * (pi/180) # rotation in y-axis
+  beta  <- cluster_properties$axes_rotation[3] * (pi/180) # rotation in z-axis
 
   # Get rotation matrices for rotation in the y-z plane (T2), x-z plane (T3) and x-y plane (T4)
   T1 <- matrix(data = c(1, 0, 0,

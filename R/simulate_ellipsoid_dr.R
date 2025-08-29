@@ -9,9 +9,9 @@ simulate_ellipsoid_dr <- function(spe, dr_properties) {
   # Get ellipsoid double ring properties
   cluster_cell_types <- dr_properties$cluster_cell_types
   cluster_cell_proportions <- dr_properties$cluster_cell_proportions
-  x_radius <- dr_properties$x_radius
-  y_radius <- dr_properties$y_radius
-  z_radius <- dr_properties$z_radius
+  x_radius <- dr_properties$radii[1]
+  y_radius <- dr_properties$radii[2]
+  z_radius <- dr_properties$radii[3]
   centre_loc <- dr_properties$centre_loc
   inner_ring_cell_types <- dr_properties$inner_ring_cell_types
   inner_ring_cell_proportions <- dr_properties$inner_ring_cell_proportions
@@ -19,9 +19,9 @@ simulate_ellipsoid_dr <- function(spe, dr_properties) {
   outer_ring_cell_types <- dr_properties$outer_ring_cell_types
   outer_ring_cell_proportions <- dr_properties$outer_ring_cell_proportions
   outer_ring_width <- dr_properties$outer_ring_width
-  theta <- dr_properties$y_z_rotation * (pi/180) # rotation in x-axis
-  alpha <- dr_properties$x_z_rotation * (pi/180) # rotation in y-axis
-  beta  <- dr_properties$x_y_rotation * (pi/180) # rotation in z-axis
+  theta <- dr_properties$axes_rotation[1] * (pi/180) # rotation in x-axis
+  alpha <- dr_properties$axes_rotation[2] * (pi/180) # rotation in y-axis
+  beta  <- dr_properties$axes_rotation[3] * (pi/180) # rotation in z-axis
   
   # Get rotation matrices for rotation in the y-z plane (T2), x-z plane (T3) and x-y plane (T4)
   T1 <- matrix(data = c(1, 0, 0,

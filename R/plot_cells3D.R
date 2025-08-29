@@ -38,10 +38,10 @@ plot_cells3D <- function(spe,
     warning("plot_cell_types not specified, all cell types found in the spe object will be used.")
     plot_cell_types <- unique(df[["Cell.Type"]])
   }
-  ## If no colours inputted, use rainbow palette
+  ## If no colours inputted, use viridis (D) palette
   if (is.null(plot_colours)) {
-    warning("plot_colours not specified, rainbow palette will be used.")
-    plot_colours <- rainbow(length(plot_cell_types))
+    warning("plot_colours not specified, viridis (D) palette will be used.")
+    plot_colours <- viridis::viridis(n = length(plot_cell_types), option = "D")
   }
   ## User inputs mismatching cell types and colours
   if (length(plot_cell_types) != length(plot_colours)) {
