@@ -3,7 +3,7 @@ simulate_clusters3D <- function(spe,
                                 plot_image = TRUE,
                                 plot_cell_types = NULL,
                                 plot_colours = NULL) {
-
+  
   # Check shape variable of cluster_properties
   shapes <- sapply(cluster_properties_list, function(x) {return(x[["shape"]])})
   n_invalid_shapes <- sum(!(shapes %in% c("sphere", "ellipsoid", "cylinder", "network")))
@@ -12,7 +12,7 @@ simulate_clusters3D <- function(spe,
   }
   
   for (i in seq(length(cluster_properties_list))) { 
-  
+    
     shape <- shapes[[i]]
     
     ### Sphere shape

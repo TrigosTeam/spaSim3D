@@ -1,4 +1,5 @@
-simulate_ellipsoid_ring <- function(spe, ring_properties) {
+simulate_ellipsoid_ring <- function(spe, 
+                                    ring_properties) {
   
   # Check input parameters
   input_parameters <- ring_properties
@@ -46,18 +47,18 @@ simulate_ellipsoid_ring <- function(spe, ring_properties) {
   
   # Start with cells in ring  
   spe[["Cell.Type"]] <- ifelse((x / (x_radius + ring_width))^2 +
-                                    (y / (y_radius + ring_width))^2 +
-                                    (z / (z_radius + ring_width))^2 <= 1,
-                                  sample(ring_cell_types, size = ncol(spe), replace = TRUE, prob = ring_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (y / (y_radius + ring_width))^2 +
+                                 (z / (z_radius + ring_width))^2 <= 1,
+                               sample(ring_cell_types, size = ncol(spe), replace = TRUE, prob = ring_cell_proportions),
+                               spe[["Cell.Type"]])
   
   
   # Then do cells in the cluster  
   spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
-                                    (y / y_radius)^2 +
-                                    (z / z_radius)^2 <= 1,
-                                  sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (y / y_radius)^2 +
+                                 (z / z_radius)^2 <= 1,
+                               sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
+                               spe[["Cell.Type"]])
   
   
   # Update current meta data

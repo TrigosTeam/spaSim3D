@@ -1,4 +1,5 @@
-simulate_sphere_dr <- function(spe, dr_properties) {
+simulate_sphere_dr <- function(spe, 
+                               dr_properties) {
   
   # Check input parameters
   input_parameters <- dr_properties
@@ -23,24 +24,24 @@ simulate_sphere_dr <- function(spe, dr_properties) {
   
   # Start with cells in outer ring  
   spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
-                                    (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= (radius + inner_ring_width + outer_ring_width)^2,
-                                  sample(outer_ring_cell_types, size = ncol(spe), replace = TRUE, prob = outer_ring_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
+                                 (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= (radius + inner_ring_width + outer_ring_width)^2,
+                               sample(outer_ring_cell_types, size = ncol(spe), replace = TRUE, prob = outer_ring_cell_proportions),
+                               spe[["Cell.Type"]])
   
   # Then do cells in inner ring  
   spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
-                                    (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= (radius + inner_ring_width)^2,
-                                  sample(inner_ring_cell_types, size = ncol(spe), replace = TRUE, prob = inner_ring_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
+                                 (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= (radius + inner_ring_width)^2,
+                               sample(inner_ring_cell_types, size = ncol(spe), replace = TRUE, prob = inner_ring_cell_proportions),
+                               spe[["Cell.Type"]])
   
   # Then do cells in the cluster 
   spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
-                                    (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
-                                  sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
+                                 (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
+                               sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
+                               spe[["Cell.Type"]])
   
   # Update current meta data
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)

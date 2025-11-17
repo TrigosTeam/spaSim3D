@@ -1,5 +1,5 @@
 spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
-
+  
   ### Message strings
   message_no_simulated_spe <- paste("Hello spaSim-3D user. Please input your simulated spe object into this function.\n",
                                     "If you don't have any, you can use the spaSim3D_background_integrator function")
@@ -42,7 +42,330 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
           3. Continue\n\n",
                                   "To choose, please enter 1, 2 or 3.\n", sep = "")
   
+  # Supporting functions
+  get_integer_greater_than_or_equal_input <- function(parameter, 
+                                                      lower) {
     
+    prompt <- paste("Enter an integer in value greater than or equal to ", lower, " for the ", parameter, ": ", sep = "")
+    
+    valid_input <- FALSE
+    while (!valid_input) {
+      user_input <- readline(prompt = prompt)
+      # Try converting to numeric
+      integer_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
+      
+      # Non-numeric input
+      if (is.na(integer_value)) {
+        message("Invalid input. Please enter a numeric integer value.")
+      }
+      # Numeric but not integer
+      else if (integer_value%%1 != 0) {
+        message("Non-integer input. Please enter an integer value.")
+      }
+      # Integer but below the lower bound
+      else if (integer_value < lower) {
+        message("Out of bounds input. Please a number greater than or equal to ", lower)
+      }
+      else {
+        valid_input <- TRUE
+        message("Valid input received!")
+      }
+    }
+    
+    return(integer_value)
+  }
+  
+  get_integer_input_from_options <- function(integer_options) {
+    
+    first_integers <- integer_options[1:(length(integer_options) - 1)]
+    last_integer <- integer_options[length(integer_options)]
+    integers_string <- paste(paste(first_integers, collapse = ", "), "or", last_integer)
+    
+    prompt <- paste("Enter either ", integers_string, ": ", sep = "")
+    
+    valid_input <- FALSE
+    while (!valid_input) {
+      user_input <- readline(prompt = prompt)
+      # Try converting to numeric
+      integer_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
+      
+      # Non-numeric input
+      if (is.na(integer_value)) {
+        message("Invalid input. Please enter a numeric integer value.")
+      }
+      # Numeric but not integer
+      else if (integer_value%%1 != 0) {
+        message("Non-integer input. Please enter an integer value.")
+      }
+      # Check if conversion was successful and value is in integer_options
+      else if (integer_value %in% integer_options) {
+        valid_input <- TRUE
+        message("Valid input received!")
+      } 
+      else {
+        message(paste("Invalid input. Please enter only", integers_string))
+      }
+    }
+    
+    return(integer_value)
+  }
+  
+  get_non_negative_numeric_input <- function(parameter) {
+    
+    prompt <- paste("Enter a non-negative numeric value for the ", parameter, ": ", sep = "")
+    
+    valid_input <- FALSE
+    while (!valid_input) {
+      user_input <- readline(prompt = prompt)
+      # Try converting to numeric
+      non_negative_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
+      
+      # Non-numeric input
+      if (is.na(non_negative_value)) {
+        message("Invalid input. Please enter a numeric value.")
+      }
+      # Negative input
+      else if (non_negative_value < 0) {
+        message("Negative input. Please enter a non-negative number") 
+      }
+      # Should be correct input
+      else {
+        valid_input <- TRUE
+        message("Valid input received!") 
+      }
+    }
+    
+    return(non_negative_value)
+  }
+  
+  get_positive_numeric_input <- function(parameter) {
+    
+    prompt <- paste("Enter a positive numeric value for the ", parameter, ": ", sep = "")
+    
+    valid_input <- FALSE
+    while (!valid_input) {
+      user_input <- readline(prompt = prompt)
+      # Try converting to numeric
+      positive_numeric_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
+      
+      # Non-numeric input
+      if (is.na(positive_numeric_value)) {
+        message("Invalid input. Please enter a numeric value.")
+      }
+      # Non-positive input
+      else if (positive_numeric_value <= 0) {
+        message("Non-positive input. Please enter a positive number") 
+      }
+      # Should be correct input
+      else {
+        valid_input <- TRUE
+        message("Valid input received!") 
+      }
+    }
+    
+    return(positive_numeric_value)
+  }
+  
+  get_y_or_n_input <- function() {
+    
+    valid_input <- FALSE
+    while (!valid_input) {
+      user_input <- readline(prompt = "Enter either y or n: ")
+      
+      if (user_input %in% c("y", "n")) {
+        valid_input <- TRUE
+        message("Valid input received!")
+      }
+      else {
+        message("Invalid input. Please enter either y or n.")
+      }
+    }
+    
+    return(user_input)
+  }
+  
+  display_parameters <- function(parameter_values) {
+    
+    message("Your current inputs are:\n")
+    
+    display_message <- ""
+    
+    for (i in seq(length(parameter_values))) {
+      display_message <- paste(display_message, "    ", i, ". ", names(parameter_values)[i], ": ", parameter_values[[i]], '\n', sep = "")
+    }
+    message(display_message)
+  }
+  
+  get_cell_types_and_proportions_for_clusters <- function(simulated_spe, 
+                                                          simulate_function, 
+                                                          properties, 
+                                                          cell_type_option, 
+                                                          cell_proportion_option, 
+                                                          temp_cell_type) {
+    
+    message_get_cell_types <- "Keep entering the name of cell types you would like (e.g. Tumour, Immune, etc.).\n    enter 'stop' to move on."
+    
+    # Supporting functions
+    get_y_or_n_input <- function() {
+      
+      valid_input <- FALSE
+      while (!valid_input) {
+        user_input <- readline(prompt = "Enter either y or n: ")
+        
+        if (user_input %in% c("y", "n")) {
+          valid_input <- TRUE
+          message("Valid input received!")
+        }
+        else {
+          message("Invalid input. Please enter either y or n.")
+        }
+      }
+      
+      return(user_input)
+    }
+    
+    get_numeric_between_input <- function(parameter, 
+                                          lower, 
+                                          upper) {
+      
+      prompt <- paste("Enter a numeric value between ", lower, " and ", upper, " for the ", parameter, ": ", sep = "")
+      
+      valid_input <- FALSE
+      while (!valid_input) {
+        user_input <- readline(prompt = prompt)
+        # Try converting to numeric
+        numeric_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
+        
+        # Non-numeric input
+        if (is.na(numeric_value)) {
+          message("Invalid input. Please enter a numeric value.")
+        }
+        # Out of bounds input
+        else if (numeric_value < lower || numeric_value > upper) {
+          message("Out of bounds input. Please a number between ", lower, " and ", upper, ".", sep = "")
+        }
+        # Should be correct
+        else {
+          valid_input <- TRUE
+          message("Valid input received!")
+        }
+      }
+      
+      return(numeric_value)
+    }
+    
+    ## Display the cell types currently found in simulated_spe to the user
+    current_cell_types <- setdiff(unique(simulated_spe[["Cell.Type"]]), temp_cell_type)
+    message("Your data currently has the following cell types:\n", paste(current_cell_types, collapse = ", "), "\n")
+    
+    ## Get cell types from user
+    cell_types <- c()
+    user_input <- ""
+    message(message_get_cell_types)
+    while (user_input != "stop") {
+      
+      user_input <- readline(prompt = "Enter a cell type, or enter 'stop': ")
+      
+      ## Ignore if user enters a blank string
+      if (user_input == "") {
+        
+      }
+      ## Add inputted cell type to cell_types vector
+      else if (user_input != "stop") {
+        cell_types <- c(cell_types, user_input)
+        message(paste("Cell type added:", user_input))
+      }
+      ## User wants to stop but hasn't entered any cell types
+      else if (user_input == "stop" && length(cell_types) == 0) {
+        message("You have not entered any cell types. Try again\n")
+        user_input <- ""
+      }
+      ## User wants to stop
+      else {
+        message(paste("Your cell types chosen are:", paste(cell_types, collapse = ", ")))
+        
+        ## Allow user to re-choose cell types
+        message("Would like to re-choose these cell types?\n")
+        user_input_y_or_n <- get_y_or_n_input()
+        if (user_input_y_or_n == "y") {
+          message("Your data currently has the following cell types:\n", paste(current_cell_types, collapse = ", "), "\n")
+          cell_types <- c()
+          message(message_get_cell_types)
+          user_input <- ""
+        }
+      }
+    }
+    properties[[1]][[cell_type_option]] <- cell_types
+    
+    ## Get cell proportions from user
+    cell_proportions <- c()
+    max_proportion <- 1
+    i <- 1
+    message("For each cell type, choose their proportion in the simulation. They must add to 1.\n")
+    while (i <= length(cell_types)) {
+      
+      ## For the last cell type, we can figure out what the cell proportion must be
+      if (i == length(cell_types)) {
+        cell_proportions <- c(cell_proportions, max_proportion)
+        message("Cell proportion for ", cell_types[i], " must be ", round(max_proportion, 5))
+      }
+      ## Add inputted cell proportion to cell_proportions vector
+      else {
+        cell_proportion <- get_numeric_between_input(paste("cell proportion of", cell_types[i], "cells"), 0, max_proportion)
+        cell_proportions <- c(cell_proportions, cell_proportion)
+        max_proportion <- 1 - sum(cell_proportions)
+        message("Cell proportion for ", cell_types[i], " is ", cell_proportion)
+      }
+      i <- i + 1
+      
+      if (i > length(cell_types)) {
+        properties[[1]][[cell_proportion_option]] <- cell_proportions
+        
+        ## Convert spe object to data frame
+        df <- data.frame(spatialCoords(simulated_spe), "Cell.Type" = simulated_spe[["Cell.Type"]])
+        
+        ## Just change the cell type of the temp_cell_type, no need to actually re-simulate
+        df[["Cell.Type"]] <- ifelse(df[["Cell.Type"]] == temp_cell_type, 
+                                    sample(cell_types, size = length(df[["Cell.Type"]]), replace = TRUE, prob = cell_proportions), 
+                                    df[["Cell.Type"]])
+        
+        # Add Cell.ID column to data frame
+        df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
+        
+        # Update current meta data
+        metadata <- simulated_spe@metadata
+        metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_type_option]] <- cell_types
+        metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_proportion_option]] <- cell_proportions
+        
+        # Convert data frame to spe object
+        simulated_spe_new <- SpatialExperiment(
+          assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+          colData = df,
+          spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
+          metadata = metadata)
+        
+        ## Generate simulation
+        message("Generating simulation...")
+        fig <- plot_cells3D(simulated_spe_new)
+        print(fig)
+        
+        if (length(cell_types) == 1) break # If there is only one cell type, proportion is always 1
+        
+        ## Allow user to re-choose cell proportions  
+        message("Would like to re-choose these cell proportions?\n")
+        user_input_y_or_n <- get_y_or_n_input()
+        if (user_input_y_or_n == "y") {
+          cell_proportions <- c()
+          max_proportion <- 1
+          i <- 1
+          message("For each cell type, choose their proportion in the simulation. They must add to 1.\n")
+        }
+      }
+    }
+    
+    return(list(data = simulated_spe_new, properties = properties))
+  }
+  
   ## Start with checking if the user has inputted spe object
   if (class(simulated_spe) != "SpatialExperiment") {
     stop(message_no_simulated_spe)

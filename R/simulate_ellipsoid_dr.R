@@ -1,4 +1,5 @@
-simulate_ellipsoid_dr <- function(spe, dr_properties) {
+simulate_ellipsoid_dr <- function(spe, 
+                                  dr_properties) {
   
   # Check input parameters
   input_parameters <- dr_properties
@@ -50,25 +51,25 @@ simulate_ellipsoid_dr <- function(spe, dr_properties) {
   
   # Start with cells in outer ring  
   spe[["Cell.Type"]] <- ifelse((x / (x_radius + inner_ring_width + outer_ring_width))^2 +
-                                    (y / (y_radius + inner_ring_width + outer_ring_width))^2 +
-                                    (z / (z_radius + inner_ring_width + outer_ring_width))^2 <= 1,
-                                  sample(outer_ring_cell_types, size = ncol(spe), replace = TRUE, prob = outer_ring_cell_proportions),
-                                  spe[["Cell.Type"]])
-    
+                                 (y / (y_radius + inner_ring_width + outer_ring_width))^2 +
+                                 (z / (z_radius + inner_ring_width + outer_ring_width))^2 <= 1,
+                               sample(outer_ring_cell_types, size = ncol(spe), replace = TRUE, prob = outer_ring_cell_proportions),
+                               spe[["Cell.Type"]])
+  
   # Then do cells in inner ring  
   spe[["Cell.Type"]] <- ifelse((x / (x_radius + inner_ring_width))^2 +
-                                    (y / (y_radius + inner_ring_width))^2 +
-                                    (z / (z_radius + inner_ring_width))^2 <= 1,
-                                  sample(inner_ring_cell_types, size = ncol(spe), replace = TRUE, prob = inner_ring_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (y / (y_radius + inner_ring_width))^2 +
+                                 (z / (z_radius + inner_ring_width))^2 <= 1,
+                               sample(inner_ring_cell_types, size = ncol(spe), replace = TRUE, prob = inner_ring_cell_proportions),
+                               spe[["Cell.Type"]])
   
   
   # Then do cells in the cluster  
   spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
-                                    (y / y_radius)^2 +
-                                    (z / z_radius)^2 <= 1,
-                                  sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (y / y_radius)^2 +
+                                 (z / z_radius)^2 <= 1,
+                               sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
+                               spe[["Cell.Type"]])
   
   # Update current meta data
   if (is.null(dr_properties$cluster_type)) dr_properties <- append(list(cluster_type = "double ring"), dr_properties)

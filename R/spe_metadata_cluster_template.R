@@ -1,4 +1,6 @@
-spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_metadata = NULL) {
+spe_metadata_cluster_template <- function(cluster_type, 
+                                          shape, 
+                                          original_spe_metadata = NULL) {
   
   ### Get template for different shapes
   if (shape == "sphere") {
@@ -63,7 +65,7 @@ spe_metadata_cluster_template <- function(cluster_type, shape, original_spe_meta
   # If original_spe_metadata input is not null, add new cluster_metadata to it
   if (!is.null(original_spe_metadata) && !is.null(original_spe_metadata[["background"]])) {
     original_spe_metadata[[paste("cluster", length(original_spe_metadata), sep="_")]] <- cluster_metadata    
-      return(original_spe_metadata)
+    return(original_spe_metadata)
   }
   else if (!is.null(original_spe_metadata) && is.null(original_spe_metadata[["background"]])) {
     original_spe_metadata[[paste("cluster", length(original_spe_metadata) + 1, sep="_")]] <- cluster_metadata

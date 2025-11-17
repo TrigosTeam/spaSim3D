@@ -19,11 +19,11 @@ simulate_spe_metadata3D <- function(spe_metadata,
   }
   else if (bg_metadata$background_type == "ordered") {
     spe <- simulate_ordered_background_cells3D(bg_metadata$n_cells,
-                                              bg_metadata$length,
-                                              bg_metadata$width,
-                                              bg_metadata$height,
-                                              bg_metadata$jitter_proportion,
-                                              plot_image = F) 
+                                               bg_metadata$length,
+                                               bg_metadata$width,
+                                               bg_metadata$height,
+                                               bg_metadata$jitter_proportion,
+                                               plot_image = F) 
   }
   else {
     stop("background_type parameter found in the first list must be 'random' or 'ordered'.")

@@ -26,6 +26,6 @@ simulate_mixing3D <- function(spe,
                         plot_colours)
     methods::show(fig)
   }
-    
+  
   return(spe)
 }

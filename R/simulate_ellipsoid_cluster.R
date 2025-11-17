@@ -1,4 +1,5 @@
-simulate_ellipsoid_cluster <- function(spe, cluster_properties) {
+simulate_ellipsoid_cluster <- function(spe, 
+                                       cluster_properties) {
   
   # Check input parameters
   input_parameters <- cluster_properties
@@ -16,7 +17,7 @@ simulate_ellipsoid_cluster <- function(spe, cluster_properties) {
   theta <- cluster_properties$axes_rotation[1] * (pi/180) # rotation in x-axis
   alpha <- cluster_properties$axes_rotation[2] * (pi/180) # rotation in y-axis
   beta  <- cluster_properties$axes_rotation[3] * (pi/180) # rotation in z-axis
-
+  
   # Get rotation matrices for rotation in the y-z plane (T2), x-z plane (T3) and x-y plane (T4)
   T1 <- matrix(data = c(1, 0, 0,
                         0, cos(theta), -sin(theta),
@@ -30,7 +31,7 @@ simulate_ellipsoid_cluster <- function(spe, cluster_properties) {
   
   # Get translation matrix from ellipsoid centre (same as centre...)
   T4 <- centre_loc
-
+  
   ## Change cell types in the ellipsoid cluster
   # Get spatial coords from spe (rows are x, y, z, columns are each cell)
   spe_coords <- t(spatialCoords(spe))
@@ -42,10 +43,10 @@ simulate_ellipsoid_cluster <- function(spe, cluster_properties) {
   z <- spe_coords[3, ]
   
   spe[["Cell.Type"]] <- ifelse((x / x_radius)^2 +
-                                    (y / y_radius)^2 +
-                                    (z / z_radius)^2 <= 1,
-                                  sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (y / y_radius)^2 +
+                                 (z / z_radius)^2 <= 1,
+                               sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
+                               spe[["Cell.Type"]])
   
   # Update current meta data
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)

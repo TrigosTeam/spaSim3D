@@ -1,4 +1,6 @@
-add_spe_metadata3D <- function(spe, metadata, plot_image = TRUE) {
+add_spe_metadata3D <- function(spe, 
+                               metadata, 
+                               plot_image = TRUE) {
   
   # Ignore the 'background' element in metadata
   metadata[['background']] <- NULL

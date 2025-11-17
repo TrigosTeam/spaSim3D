@@ -29,7 +29,7 @@ plot_cells3D <- function(spe,
   if (is.null(spe[[feature_colname]])) {
     stop(paste(feature_colname, "is not a valid column in your spe object."))
   }
-    
+  
   ## Convert spe object to data frame
   df <- data.frame(spatialCoords(spe), "Cell.Type" = spe[[feature_colname]])
   

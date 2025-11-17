@@ -1,4 +1,5 @@
-simulate_sphere_cluster <- function(spe, cluster_properties) {
+simulate_sphere_cluster <- function(spe, 
+                                    cluster_properties) {
   
   # Check input parameters
   input_parameters <- cluster_properties
@@ -16,10 +17,10 @@ simulate_sphere_cluster <- function(spe, cluster_properties) {
   spe_coords <- data.frame(spatialCoords(spe))
   
   spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
-                                    (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
-                                  sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
+                                 (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
+                               sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
+                               spe[["Cell.Type"]])
   
   # Update current meta data
   if (is.null(cluster_properties$cluster_type)) cluster_properties <- append(list(cluster_type = "regular"), cluster_properties)

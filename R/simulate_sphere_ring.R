@@ -1,4 +1,5 @@
-simulate_sphere_ring <- function(spe, ring_properties) {
+simulate_sphere_ring <- function(spe, 
+                                 ring_properties) {
   
   # Check input parameters
   input_parameters <- ring_properties
@@ -17,21 +18,21 @@ simulate_sphere_ring <- function(spe, ring_properties) {
   
   ## Change cell types in the sphere ringed cluster
   spe_coords <- data.frame(spatialCoords(spe))
-
+  
   # Start with cells in ring  
   spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
-                                    (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= (radius + ring_width)^2,
-                                  sample(ring_cell_types, size = ncol(spe), replace = TRUE, prob = ring_cell_proportions),
-                                  spe[["Cell.Type"]])
+                                 (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
+                                 (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= (radius + ring_width)^2,
+                               sample(ring_cell_types, size = ncol(spe), replace = TRUE, prob = ring_cell_proportions),
+                               spe[["Cell.Type"]])
   
   # Then do cells in the cluster 
   spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
-                                    (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
-                                    (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
-                                  sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
-                                  spe[["Cell.Type"]])
-
+                                 (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
+                                 (spe_coords$Cell.Z.Position - centre_loc[3])^2 <= radius^2,
+                               sample(cluster_cell_types, size = ncol(spe), replace = TRUE, prob = cluster_cell_proportions),
+                               spe[["Cell.Type"]])
+  
   # Update current meta data
   if (is.null(ring_properties$cluster_type)) ring_properties <- append(list(cluster_type = "ring"), ring_properties)
   spe@metadata[["simulation"]][[paste("cluster", length(spe@metadata[["simulation"]]), sep="_")]] <- ring_properties
