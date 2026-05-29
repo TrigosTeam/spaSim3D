@@ -12,9 +12,9 @@
 #'     because the metadata of the SpatialExperiment object needs to already 
 #'     contain spaSim3D specific data relating to the background of the 
 #'     SpatialExperiment object, and any clusters.
-#' @param cluster_properties_list A list of lists containing the cluster properties of
-#'     each cluster desired. See the example to know what properties are
-#'     required for each cluster shape.
+#' @param cluster_properties_list A list of lists containing the cluster 
+#'     properties of each cluster desired. See the example to know what 
+#'     properties are required for each cluster shape.
 #' @param plot_image A logical indicating whether to plot 3D spatial data with 
 #'     the added metadata. Defaults to TRUE.
 #' @param plot_cell_types A string vector specifying the cell types to plot. If 
