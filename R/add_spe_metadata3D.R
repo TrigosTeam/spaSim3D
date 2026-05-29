@@ -5,9 +5,8 @@
 #'      SpatialExperiment object, giving it a new set of simulated clusters.
 #' 
 #' @param spe A SpatialExperiment object containing 3D spatial information for 
-#'     the cells. Should be generated using the output of one of the following 
-#'     spaSim3D functions: simulate_spe_metadata3D, 
-#'     spaSim3D_background_integrator. This is because the metadata of the
+#'     the cells. Should be generated using the output of 
+#'     simulate_spe_metadata3D. This is because the metadata of the 
 #'     SpatialExperiment object needs to already contain spaSim3D specific data 
 #'     relating to the background of the SpatialExperiment object, and any 
 #'     clusters.
