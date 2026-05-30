@@ -76,7 +76,7 @@
 #'                                     cluster_cell_proportions = c(1),
 #'                                     n_edges = 15,
 #'                                     width = 8,
-#'                                     centre_loc = c(25, 25, 25), # Rough centre of network cluster
+#'                                     centre_loc = c(75, 75, 25), # Rough centre of network cluster
 #'                                     radius = 40 # Rough radius spanned by the network cluster
 #'                                   )
 #'                                 ),
