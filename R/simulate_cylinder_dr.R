@@ -28,7 +28,7 @@
 #'     "end_loc": A numerical vector of length 3 representing the ending x,y,z 
 #'         coordinate of the cylinder. E.g. (20, 20, 20).
 #'     "inner_ring_cell_types": A character vector representing the cell types 
-#'         that make up the inner E.g. c("Immune1", "Immune2", "Immune3").
+#'         that make up the inner ring. E.g. c("Immune1", "Immune2", "Immune3").
 #'     "inner_ring_cell_proportions": A numeric vector representing the 
 #'         proportion of each cell type in the cluster. Its elements must each 
 #'         be greater than 0, sum to 1 and the vector must be the same length as
@@ -37,7 +37,7 @@
 #'     "inner_ring_width": A positive number representing the width of the inner
 #'         ring.
 #'     "outer_ring_cell_types": A character vector representing the cell types 
-#'         that make up the inner E.g. c("T cell", "B cell").
+#'         that make up the outer ring. E.g. c("T cell", "B cell").
 #'     "outer_ring_cell_proportions": A numeric vector representing the 
 #'         proportion of each cell type in the cluster. Its elements must each 
 #'         be greater than 0, sum to 1 and the vector must be the same length as
