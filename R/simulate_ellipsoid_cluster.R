@@ -44,7 +44,7 @@
 #'                                            background_cell_type = "Others",
 #'                                            plot_image = FALSE)
 #'                                            
-#' # Simulate clusters
+#' # Simulate cluster
 #' ellipsoid_cluster <- simulate_ellipsoid_cluster(bg_r,
 #'                                                 cluster_properties = list(
 #'                                                   shape = "ellipsoid",

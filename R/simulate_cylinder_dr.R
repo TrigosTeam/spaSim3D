@@ -60,7 +60,7 @@
 #'                                            background_cell_type = "Others",
 #'                                            plot_image = FALSE)
 #'                                            
-#' # Simulate clusters
+#' # Simulate cluster
 #' cylinder_dr_cluster <- simulate_cylinder_dr(bg_r,
 #'                                             dr_properties = list(
 #'                                               shape = "cylinder",

@@ -49,7 +49,7 @@
 #'                                            background_cell_type = "Others",
 #'                                            plot_image = FALSE)
 #'                                            
-#' # Simulate clusters
+#' # Simulate cluster
 #' cylinder_ring_cluster <- simulate_cylinder_ring(bg_r,
 #'                                                 ring_properties = list(
 #'                                                   shape = "cylinder",
