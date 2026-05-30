@@ -41,48 +41,48 @@
 #'                                            plot_image = TRUE)
 #'                                            
 #' # Simulate clusters
-#' bg_cluster <- simulate_clusters3D(bg_r,
-#'                                   cluster_properties = list(
-#'                                     # Sphere example
-#'                                     C1 = list(
-#'                                       shape = "sphere",
-#'                                       cluster_cell_types = c("Tumour", "Immune", "Others"),
-#'                                       cluster_cell_proportions = c(0.55, 0.4, 0.05),
-#'                                       radius = 25,
-#'                                       centre_loc = c(40, 40, 40)
-#'                                     ),
-#'                                     # Cylinder example
-#'                                     C2 = list(
-#'                                       shape = "cylinder",
-#'                                       cluster_cell_types = c("Endothelial", "Others"),
-#'                                       cluster_cell_proportions = c(0.95, 0.05),
-#'                                       radius = 10,
-#'                                       start_loc = c(0, 0, 0),
-#'                                       end_loc   = c(20, 20 , 100)
-#'                                     ),
-#'                                     # Ellipsoid example
-#'                                     C3 = list(
-#'                                       shape = "ellipsoid",
-#'                                       cluster_cell_types = c("Tumour", "Immune", "Others"),
-#'                                       cluster_cell_proportions = c(0.65, 0.3, 0.05),
-#'                                       radii = c(15, 20, 25),
-#'                                       centre_loc = c(70, 70, 70),
-#'                                       axes_rotation = c(0, 0, 0)
-#'                                     )
-#'                                     # Network example
-#'                                     C4 = list(
-#'                                       shape = "network",
-#'                                       cluster_cell_types = c("Immune"),
-#'                                       cluster_cell_proportions = c(1),
-#'                                       n_edges = 15,
-#'                                       width = 8,
-#'                                       centre_loc = c(25, 25, 25), # Rough centre of network cluster
-#'                                       radius = 40 # Rough radius spanned by the network cluster
-#'                                     )
+#' clusters <- simulate_clusters3D(bg_r,
+#'                                 cluster_properties = list(
+#'                                   # Sphere example
+#'                                   C1 = list(
+#'                                     shape = "sphere",
+#'                                     cluster_cell_types = c("Tumour", "Immune", "Others"),
+#'                                     cluster_cell_proportions = c(0.55, 0.4, 0.05),
+#'                                     radius = 25,
+#'                                     centre_loc = c(40, 40, 40)
 #'                                   ),
-#'                                   plot_image = TRUE,
-#'                                   plot_cell_types = c("Others", "Immune", "Endothelial", "Tumour"),
-#'                                   plot_colours = c("lightgray", "skyblue", "#FF7F7F", "orange"))                                         
+#'                                   # Cylinder example
+#'                                   C2 = list(
+#'                                     shape = "cylinder",
+#'                                     cluster_cell_types = c("Endothelial", "Others"),
+#'                                     cluster_cell_proportions = c(0.95, 0.05),
+#'                                     radius = 10,
+#'                                     start_loc = c(0, 0, 0),
+#'                                     end_loc   = c(20, 20 , 100)
+#'                                   ),
+#'                                   # Ellipsoid example
+#'                                   C3 = list(
+#'                                     shape = "ellipsoid",
+#'                                     cluster_cell_types = c("Tumour", "Immune", "Others"),
+#'                                     cluster_cell_proportions = c(0.65, 0.3, 0.05),
+#'                                     radii = c(15, 20, 25),
+#'                                     centre_loc = c(70, 70, 70),
+#'                                     axes_rotation = c(0, 0, 0)
+#'                                   )
+#'                                   # Network example
+#'                                   C4 = list(
+#'                                     shape = "network",
+#'                                     cluster_cell_types = c("Immune"),
+#'                                     cluster_cell_proportions = c(1),
+#'                                     n_edges = 15,
+#'                                     width = 8,
+#'                                     centre_loc = c(25, 25, 25), # Rough centre of network cluster
+#'                                     radius = 40 # Rough radius spanned by the network cluster
+#'                                   )
+#'                                 ),
+#'                                 plot_image = TRUE,
+#'                                 plot_cell_types = c("Others", "Immune", "Endothelial", "Tumour"),
+#'                                 plot_colours = c("lightgray", "skyblue", "#FF7F7F", "orange"))
 #'                                            
 #' @export
 
