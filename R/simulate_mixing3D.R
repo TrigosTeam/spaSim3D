@@ -41,7 +41,7 @@
 #'                                            height = 100,
 #'                                            jitter_proportion = 0,
 #'                                            background_cell_type = "Others",
-#'                                            plot_image = TRUE)
+#'                                            plot_image = FALSE)
 #'                                            
 #' # Simulate mixing
 #' bg_mix <- simulate_mixing3D(bg_n,

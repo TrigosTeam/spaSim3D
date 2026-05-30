@@ -38,7 +38,7 @@
 #'                                            height = 100,
 #'                                            minimum_distance_between_cells = 0.5,
 #'                                            background_cell_type = "Others",
-#'                                            plot_image = TRUE)
+#'                                            plot_image = FALSE)
 #'                                            
 #' # Simulate clusters with double rings
 #' clusters_with_double_rings <- simulate_double_rings3D(bg_r,
