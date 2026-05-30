@@ -1,4 +1,4 @@
-#' @title Simulate clusters in spaSim3D
+#' @title Simulate clusters in spaSim3D.
 #'
 #' @description This functions simulates clusters specified by the user onto an
 #'     existing SpatialExperiment object. This includes customisable spheres,

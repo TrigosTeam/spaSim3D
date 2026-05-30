@@ -1,4 +1,4 @@
-#' @title Simulate a cylinder cluster with a double ring in spaSim3D
+#' @title Simulate a cylinder cluster with a double ring in spaSim3D.
 #'
 #' @description This functions simulates a cylinder cluster with a double ring
 #'     onto an existing SpatialExperiment object. The parameters of the cylinder 
