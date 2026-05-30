@@ -12,8 +12,8 @@
 #'     because the metadata of the SpatialExperiment object needs to already 
 #'     contain spaSim3D specific data relating to the background of the 
 #'     SpatialExperiment object, and any clusters.
-#' @param cluster_properties A list containing the cluster properties of the 
-#'     cylinder cluster desired. The list should contain the following elements:
+#' @param cluster_properties A list containing the properties of the cylinder 
+#'     cluster desired. The list should contain the following elements:
 #'     "shape": Must be equal to the character "cylinder".
 #'     "cluster_cell_types": A character vector representing the cell types that 
 #'         make up the cluster. E.g. c("Tumour", "Immune").
