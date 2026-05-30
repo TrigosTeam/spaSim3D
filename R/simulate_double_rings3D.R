@@ -42,7 +42,7 @@
 #'                                            
 #' # Simulate clusters with double rings
 #' clusters_with_double_rings <- simulate_double_rings3D(bg_r,
-#'                                                       dr_properties = list(
+#'                                                       dr_properties_list = list(
 #'                                                         D1 = list(
 #'                                                           shape = "sphere",
 #'                                                           cluster_cell_types = c("Tumour", "Others"),
