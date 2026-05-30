@@ -30,18 +30,18 @@
 #'     "inner_ring_cell_types": A character vector representing the cell types 
 #'         that make up the inner ring. E.g. c("Immune1", "Immune2", "Immune3").
 #'     "inner_ring_cell_proportions": A numeric vector representing the 
-#'         proportion of each cell type in the cluster. Its elements must each 
-#'         be greater than 0, sum to 1 and the vector must be the same length as
-#'         "inner_ring_cell_types". E.g. c(0.3, 0.4, 0.3) corresponds to an
-#'         inner ring made up of 30% Immune1, 40% Immune2 and 30% Immune3.
+#'         proportion of each cell type in the inner ring. Its elements must 
+#'         each be greater than 0, sum to 1 and the vector must be the same 
+#'         length as "inner_ring_cell_types". E.g. c(0.3, 0.4, 0.3) corresponds 
+#'         to an inner ring made up of 30% Immune1, 40% Immune2 and 30% Immune3.
 #'     "inner_ring_width": A positive number representing the width of the inner
 #'         ring.
 #'     "outer_ring_cell_types": A character vector representing the cell types 
 #'         that make up the outer ring. E.g. c("T cell", "B cell").
 #'     "outer_ring_cell_proportions": A numeric vector representing the 
-#'         proportion of each cell type in the cluster. Its elements must each 
-#'         be greater than 0, sum to 1 and the vector must be the same length as
-#'         "outer_ring_cell_types". E.g. c(0.5, 0.5) corresponds to an
+#'         proportion of each cell type in the outer ring. Its elements must 
+#'         each be greater than 0, sum to 1 and the vector must be the same 
+#'         length as "outer_ring_cell_types". E.g. c(0.5, 0.5) corresponds to an
 #'         outer ring made up of 50% T cell and 50% B cell.
 #'     "outer_ring_width": A positive number representing the width of the outer
 #'         ring.
@@ -68,7 +68,7 @@
 #'                                               cluster_cell_proportions = c(0.95, 0.05),
 #'                                               radius = 10,
 #'                                               start_loc = c(0, 0, 0),
-#'                                               end_loc   = c(20, 20 , 100),
+#'                                               end_loc   = c(20, 20, 100),
 #'                                               inner_ring_cell_types = c("Immune1", "Others"),
 #'                                               inner_ring_cell_proportions = c(0.85, 0.15),
 #'                                               inner_ring_width = 5,
@@ -76,7 +76,9 @@
 #'                                               outer_ring_cell_proportions = c(1),
 #'                                               outer_ring_width = 3
 #'                                             ))
-#'                                            
+#' # Plot
+#' plots_cells3D(cylinder_dr_cluster)
+#'                                             
 #' @export
 
 simulate_cylinder_dr <- function(spe, 
