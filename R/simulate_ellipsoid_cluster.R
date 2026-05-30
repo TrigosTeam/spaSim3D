@@ -1,3 +1,64 @@
+#' @title Simulate an ellipsoid cluster in spaSim3D
+#'
+#' @description This functions simulates an ellipsoid cluster onto an existing 
+#'     SpatialExperiment object. The parameters of the ellipsoid are fully
+#'     customisable by the user.
+#' 
+#' @param spe A SpatialExperiment object containing 3D spatial information for 
+#'     the cells. Should be generated using the output of one of the following
+#'     functions: simulate_random_background_cells3D, 
+#'     simulate_ordered_background_cells3D,
+#'     simulate_mixing3D or any of the other simulate_* functions. This is 
+#'     because the metadata of the SpatialExperiment object needs to already 
+#'     contain spaSim3D specific data relating to the background of the 
+#'     SpatialExperiment object, and any clusters.
+#' @param cluster_properties A list containing the properties of the ellipsoid 
+#'     cluster desired. The list should contain the following elements:
+#'     "shape": Must be equal to the character "ellipsoid".
+#'     "cluster_cell_types": A character vector representing the cell types that 
+#'         make up the cluster. E.g. c("Tumour", "Immune").
+#'     "cluster_cell_proportions": A numeric vector representing the proportion 
+#'         of each cell type in the cluster. Its elements must each be 
+#'         greater than 0, sum to 1 and the vector must be the same length as
+#'         "cluster_cell_types". E.g. c(0.6, 0.4) corresponds to a cluster made
+#'         up of 60% Tumour and 40% Immune.
+#'     "radii": A numerical vector of length 3 containing only positive numbers,
+#'         representing the radii of the ellipsoid in the x,y,z direction
+#'         respectively. E.g. c(15, 20, 25).
+#'     "centre_loc": A numerical vector of length 3 representing the centre
+#'         x,y,z coordinate of the ellipsoid E.g. (0, 0, 0).
+#'     "axes_rotation": A numerical vector of length 3 representing axes
+#'         rotation of the ellipsoid in the y-z plane, x-z plane and x-y plane 
+#'         respectively. Values should be in degrees unit. E.g. (30, 45, 0).
+#'
+#' @return The same 3D SpatialExperiment object used as input for spe, updated
+#'     with the new ellipsoid cluster and the corresponding metadata.
+#'
+#' @examples
+#' # Simulate background
+#' bg_r <- simulate_random_background_cells3D(n_cells = 10000,
+#'                                            length = 100,
+#'                                            width = 100,
+#'                                            height = 100,
+#'                                            minimum_distance_between_cells = 0.5,
+#'                                            background_cell_type = "Others",
+#'                                            plot_image = FALSE)
+#'                                            
+#' # Simulate clusters
+#' ellipsoid_cluster <- simulate_ellipsoid_cluster(bg_r,
+#'                                                 cluster_properties = list(
+#'                                                   shape = "ellipsoid",
+#'                                                   cluster_cell_types = c("Tumour", "Immune", "Others"),
+#'                                                   cluster_cell_proportions = c(0.65, 0.3, 0.05),
+#'                                                   radii = c(15, 20, 25),
+#'                                                   centre_loc = c(70, 70, 70),
+#'                                                   axes_rotation = c(0, 0, 0)
+#'                                                 ))
+#' # Plot
+#' plots_cells3D(ellipsoid_cluster)
+#'                                            
+#' @export
+
 simulate_ellipsoid_cluster <- function(spe, 
                                        cluster_properties) {
   
