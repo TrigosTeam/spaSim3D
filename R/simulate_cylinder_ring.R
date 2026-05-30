@@ -47,7 +47,7 @@
 #'                                            height = 100,
 #'                                            minimum_distance_between_cells = 0.5,
 #'                                            background_cell_type = "Others",
-#'                                            plot_image = TRUE)
+#'                                            plot_image = FALSE)
 #'                                            
 #' # Simulate clusters
 #' cylinder_ring_cluster <- simulate_cylinder_ring(bg_r,

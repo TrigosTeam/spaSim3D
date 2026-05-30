@@ -58,7 +58,7 @@
 #'                                            height = 100,
 #'                                            minimum_distance_between_cells = 0.5,
 #'                                            background_cell_type = "Others",
-#'                                            plot_image = TRUE)
+#'                                            plot_image = FALSE)
 #'                                            
 #' # Simulate clusters
 #' cylinder_dr_cluster <- simulate_cylinder_dr(bg_r,
