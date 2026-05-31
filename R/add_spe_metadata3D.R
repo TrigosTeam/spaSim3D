@@ -10,7 +10,7 @@
 #'     SpatialExperiment object needs to already contain spaSim3D specific data 
 #'     relating to the background of the SpatialExperiment object, and any 
 #'     clusters.
-#' @param metadata A list containing the new metadata to add to the
+#' @param spe_metadata A list containing the new metadata to add to the
 #'     SpatialExperiment object. This is generated from the output of the 
 #'     spaSim3D function 'spe_metadata_cluster_template'. Avoid using the 
 #'     'spe_metadata_background_template' as 'add_spe_metadata3D' is not
@@ -42,28 +42,28 @@
 #' @export
 
 add_spe_metadata3D <- function(spe, 
-                               metadata, 
+                               spe_metadata, 
                                plot_image = TRUE) {
   
-  # Ignore the 'background' element in metadata
-  metadata[['background']] <- NULL
+  # Ignore the 'background' element in spe_metadata
+  spe_metadata[['background']] <- NULL
   
-  for (i in seq(length(metadata))) {
-    metadata_cluster <- metadata[[i]]
+  for (i in seq(length(spe_metadata))) {
+    spe_metadata_cluster <- spe_metadata[[i]]
     
     # Ensure cluster_type is a single character like "regular"
-    if (!(is.character(metadata_cluster$cluster_type) && length(metadata_cluster$cluster_type) == 1)) {
-      stop(paste("cluster_type parameter found in the metadata cluster list", i, "is not a character."))
+    if (!(is.character(spe_metadata_cluster$cluster_type) && length(spe_metadata_cluster$cluster_type) == 1)) {
+      stop(paste("cluster_type parameter found in the spe_metadata cluster list", i, "is not a character."))
     }
     
-    if (metadata_cluster$cluster_type == "regular") {
-      spe <- simulate_clusters3D(spe, list(metadata_cluster), plot_image = F)
+    if (spe_metadata_cluster$cluster_type == "regular") {
+      spe <- simulate_clusters3D(spe, list(spe_metadata_cluster), plot_image = F)
     }
-    else if (metadata_cluster$cluster_type == "ring") {
-      spe <- simulate_rings3D(spe, list(metadata_cluster), plot_image = F)
+    else if (spe_metadata_cluster$cluster_type == "ring") {
+      spe <- simulate_rings3D(spe, list(spe_metadata_cluster), plot_image = F)
     }
-    else if (metadata_cluster$cluster_type == "double ring") {
-      spe <- simulate_double_rings3D(spe, list(metadata_cluster), plot_image = F)
+    else if (spe_metadata_cluster$cluster_type == "double ring") {
+      spe <- simulate_double_rings3D(spe, list(spe_metadata_cluster), plot_image = F)
     }
     else {
       stop("cluster_type parameter must be either 'regular', 'ring' or 'double ring'.")
