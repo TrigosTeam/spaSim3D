@@ -24,8 +24,8 @@
 #'     simulate_spe_metadata3D function as this function requires a background
 #'     element. 
 #'
-#' @return A list containing the background metadata template or the original
-#'     metadata updated with the background metadata template.
+#' @return A list containing the cluster metadata template or the original
+#'     metadata updated with the cluster metadata template.
 #'
 #' @examples
 #' # Get background metadata
