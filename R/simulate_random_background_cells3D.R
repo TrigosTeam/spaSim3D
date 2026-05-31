@@ -11,10 +11,10 @@
 #'     length to 100.
 #' @param width A positive number representing the width of the 3D window of
 #'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
-#'     width to 150
+#'     width to 150.
 #' @param height A positive number representing the height of the 3D window of
 #'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
-#'     height to 200
+#'     height to 200.
 #' @param minimum_distance_between_cells A positive number representing the
 #'     minimum distance between cells.
 #' @param background_cell_type A character representing the cell type label of

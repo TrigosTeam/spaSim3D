@@ -11,10 +11,10 @@
 #'     length to 100.
 #' @param width A positive number representing the width of the 3D window of
 #'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
-#'     width to 150
+#'     width to 150.
 #' @param height A positive number representing the height of the 3D window of
 #'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
-#'     height to 200
+#'     height to 200.
 #' @param jitter_proportion A number between 0 and 1 representing the amount of
 #'     'jitter' to apply to all cells. jitter_proportion = 0.5 and the original
 #'     distance between each cell is 5 units, then each cell will move UP TO
