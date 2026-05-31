@@ -1,6 +1,6 @@
 #' @title Simulate a sphere cluster in spaSim3D.
 #'
-#' @description This functions simulates a sphere cluster onto an existing 
+#' @description This function simulates a sphere cluster onto an existing 
 #'     SpatialExperiment object. The parameters of the sphere are fully
 #'     customisable by the user.
 #' 

@@ -1,6 +1,6 @@
 #' @title Simulate a sphere cluster with a ring in spaSim3D.
 #'
-#' @description This functions simulates a sphere cluster with a ring onto an 
+#' @description This function simulates a sphere cluster with a ring onto an 
 #'     existing SpatialExperiment object. The parameters of the sphere and its 
 #'     ring are fully customisable by the user.
 #' 

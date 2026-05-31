@@ -1,6 +1,6 @@
 #' @title Simulate an ellipsoid cluster in spaSim3D.
 #'
-#' @description This functions simulates an ellipsoid cluster onto an existing 
+#' @description This function simulates an ellipsoid cluster onto an existing 
 #'     SpatialExperiment object. The parameters of the ellipsoid are fully
 #'     customisable by the user.
 #' 

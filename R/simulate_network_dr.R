@@ -1,6 +1,6 @@
 #' @title Simulate a network cluster with a double ring in spaSim3D.
 #'
-#' @description This functions simulates a network cluster with a double ring
+#' @description This function simulates a network cluster with a double ring
 #'     onto an existing SpatialExperiment object. The parameters of the network 
 #'     and its double ring are fully customisable by the user.
 #' 

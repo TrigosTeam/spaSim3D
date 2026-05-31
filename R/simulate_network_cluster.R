@@ -1,6 +1,6 @@
 #' @title Simulate a network cluster in spaSim3D.
 #'
-#' @description This functions simulates a network cluster onto an existing 
+#' @description This function simulates a network cluster onto an existing 
 #'     SpatialExperiment object. The parameters of the network are fully
 #'     customisable by the user.
 #' 

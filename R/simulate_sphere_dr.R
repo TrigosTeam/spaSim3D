@@ -1,6 +1,6 @@
 #' @title Simulate a sphere cluster with a double ring in spaSim3D.
 #'
-#' @description This functions simulates a sphere cluster with a double ring
+#' @description This function simulates a sphere cluster with a double ring
 #'     onto an existing SpatialExperiment object. The parameters of the sphere 
 #'     and its double ring are fully customisable by the user.
 #' 

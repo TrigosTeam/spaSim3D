@@ -1,6 +1,6 @@
 #' @title Simulate an ellipsoid cluster with a double ring in spaSim3D.
 #'
-#' @description This functions simulates an ellipsoid cluster with a double ring
+#' @description This function simulates an ellipsoid cluster with a double ring
 #'     onto an existing SpatialExperiment object. The parameters of the 
 #'     ellipsoid and its double ring are fully customisable by the user.
 #' 

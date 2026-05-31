@@ -1,6 +1,6 @@
 #' @title Simulate clusters with double rings in spaSim3D.
 #'
-#' @description This functions simulates clusters specified by the user onto an
+#' @description This function simulates clusters specified by the user onto an
 #'     existing SpatialExperiment object. This includes customisable spheres,
 #'     ellipsoids, cylinders and network clusters, all with double rings.
 #' 

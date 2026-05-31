@@ -1,8 +1,8 @@
 #' @title Simulate random background cells in spaSim3D.
 #'
-#' @description This functions simulates background cells in a 'random'
-#'     fashion, so that cells follows a Poisson distribution. The parameters of 
-#'     the background are completely customisable by the user.
+#' @description This function simulates background cells in a 'random' fashion, 
+#'     so that cells follows a Poisson distribution. The parameters of the 
+#'     background are completely customisable by the user.
 #' 
 #' @param n_cells A positive number representing the number of cells in the 
 #'     background.

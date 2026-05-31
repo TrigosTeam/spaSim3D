@@ -1,6 +1,6 @@
 #' @title Simulate a network cluster with a ring in spaSim3D.
 #'
-#' @description This functions simulates a network cluster with a ring onto an 
+#' @description This functions simulate a network cluster with a ring onto an 
 #'     existing SpatialExperiment object. The parameters of the network and its 
 #'     ring are fully customisable by the user.
 #' 

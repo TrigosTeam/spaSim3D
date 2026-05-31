@@ -1,6 +1,6 @@
 #' @title Simulate a cylinder cluster in spaSim3D.
 #'
-#' @description This functions simulates a cylinder cluster onto an existing 
+#' @description This function simulates a cylinder cluster onto an existing 
 #'     SpatialExperiment object. The parameters of the cylinder are fully
 #'     customisable by the user.
 #' 

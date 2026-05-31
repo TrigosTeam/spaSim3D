@@ -1,6 +1,6 @@
 #' @title Simulate mixing in spaSim3D.
 #'
-#' @description This functions simulates mixing of an existing SpatialExperiment 
+#' @description This function simulates mixing of an existing SpatialExperiment 
 #'     object. This means completely updating the cell types that make up the
 #'     background of the SpatialExperiment object.
 #' 

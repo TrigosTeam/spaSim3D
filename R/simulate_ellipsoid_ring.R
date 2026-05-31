@@ -1,7 +1,7 @@
 #' @title Simulate an ellipsoid cluster with a ring in spaSim3D.
 #'
-#' @description This functions simulates an ellipsoid cluster with a ring onto 
-#'     an existing SpatialExperiment object. The parameters of the ellipsoid and 
+#' @description This function simulates an ellipsoid cluster with a ring onto an 
+#'     existing SpatialExperiment object. The parameters of the ellipsoid and 
 #'     its ring are fully customisable by the user.
 #' 
 #' @param spe A SpatialExperiment object containing 3D spatial information for 

@@ -1,6 +1,6 @@
 #' @title Simulate ordered background cells in spaSim3D.
 #'
-#' @description This functions simulates background cells in an 'ordered'
+#' @description This function simulates background cells in an 'ordered'
 #'     fashion, so that cells are geometrically equidistant apart. 
 #'     The parameters of the background are completely customisable by the user.
 #' 

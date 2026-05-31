@@ -1,6 +1,6 @@
 #' @title Function to plot cells in 3D spatial data.
 #'
-#' @description This functions plots the cells of 3D spatial data in a 3D 
+#' @description This function plots the cells of 3D spatial data in a 3D 
 #'     SpatialExperiment Object.
 #' 
 #' @param spe A SpatialExperiment object containing 3D spatial information for 
