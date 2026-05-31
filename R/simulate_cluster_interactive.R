@@ -1,85 +1,85 @@
-#' @title Function to simulate clusters in a 3D tissue.
+#' @title Function to simulate clusters in a 3D tissue interactively.
 #'
 #' @description This is an interactive function that allows users to simulate
 #'     cell clusters in a 3D tissue. The function will ask you for your
 #'     inputs, for which the user can enter them in the console.
-#'     
-#' @simulated_spe A SpatialExperiment object containing 3D spatial information 
-#'     for the cells. The intended input should be generated using the output of 
-#'     spaSim3D_background_integrator or spaSim3D_cluster_integrator, however, 
-#'     any of the simulate_* functions should work. This is because the metadata 
-#'     of the SpatialExperiment object needs to already contain spaSim3D 
-#'     specific data relating to the background of the SpatialExperiment object, 
-#'     and any clusters. Defaults to NULL, although, a valid spaSim3D 
+#'
+#' @simulated_spe A SpatialExperiment object containing 3D spatial information
+#'     for the cells. The intended input should be generated using the output of
+#'     simulate_background_interactive or simulate_cluster_interactive, however,
+#'     any of the simulate_* functions should work. This is because the metadata
+#'     of the SpatialExperiment object needs to already contain spaSim3D
+#'     specific data relating to the background of the SpatialExperiment object,
+#'     and any clusters. Defaults to NULL, although, a valid spaSim3D
 #'     SpatialExperiment object is required.
 #'
 #' @return A 3D SpatialExperiment object with the new cell clusters.
 #'
 #' @examples
 #' # Simulate background
-#' background_spe <- spaSim3D_background_integrator()
-#' 
+#' background_spe <- simulate_background_interactive()
+#'
 #' # Simulate clusters
-#' clusters_spe <- spaSim3D_cluster_integrator(simulated_spe = background_spe)
-#' 
+#' clusters_spe <- simulate_cluster_interactive(simulated_spe = background_spe)
+#'
 #' @export
 
-spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
-  
+simulate_cluster_interactive <- function(simulated_spe = NULL) {
+
   ### Message strings
   message_no_simulated_spe <- paste("Hello spaSim-3D user. Please input your simulated spe object into this function.\n",
                                     "If you don't have any, you can use the spaSim3D_background_integrator function")
-  
+
   message_shape_choice <- paste("Hello spaSim-3D user, hopefully you can see a plot of your current spe object. What type of shape do you want your cluster to be?\n
           1. Sphere\n
           2. Ellipsoid\n
           3. Cylinder\n
           4. Network\n\n",
                                 "To choose, please enter 1, 2, 3 or 4.\n", sep = "")
-  
+
   message_sphere_cluster <- paste("We will need a few parameters to generate a sphere cluster\n",
                                   "    Radius\n",
                                   "    Coordinates of sphere centre: x, y and z\n",
                                   "If you want to change your inputs, you'll be able to at the end.\n", sep = "")
-  
+
   message_ellipsoid_cluster <- paste("We will need a few parameters to generate a ellipsoid cluster\n",
                                      "    Radii: x, y and z\n",
                                      "    Coordinates of ellipsoid centre: x, y and z\n",
                                      "    Angle of rotation in the x-axis, y-axis and z-axis\n",
                                      "If you want to change your inputs, you'll be able to at the end.\n", sep = "")
-  
+
   message_cylinder_cluster <- paste("We will need a few parameters to generate a cylinder cluster\n",
                                     "    Radius\n",
                                     "    Coordinates of the cylinder start point: x, y and z\n",
                                     "    Coordinates of the cylinder end point: x, y and z\n",
                                     "If you want to change your inputs, you'll be able to at the end.\n", sep = "")
-  
+
   message_network_cluster <- paste("We will need a few parameters to generate a network cluster\n",
                                    "    Number of branches\n",
                                    "    Width of each branch: x, y and z\n",
                                    "    Radius spanned by the whole network: x, y and z\n",
                                    "    Coordinates of network centre: x, y and z\n",
                                    "If you want to change your inputs, you'll be able to at the end.\n", sep = "")
-  
-  
+
+
   message_cluster_choice <- paste("You can customise your cluster further if you'd like:\n
           1. Add a ring\n
           2. Add a double ring\n
           3. Continue\n\n",
                                   "To choose, please enter 1, 2 or 3.\n", sep = "")
-  
+
   # Supporting functions
-  get_integer_greater_than_or_equal_input <- function(parameter, 
+  get_integer_greater_than_or_equal_input <- function(parameter,
                                                       lower) {
-    
+
     prompt <- paste("Enter an integer in value greater than or equal to ", lower, " for the ", parameter, ": ", sep = "")
-    
+
     valid_input <- FALSE
     while (!valid_input) {
       user_input <- readline(prompt = prompt)
       # Try converting to numeric
       integer_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
-      
+
       # Non-numeric input
       if (is.na(integer_value)) {
         message("Invalid input. Please enter a numeric integer value.")
@@ -97,24 +97,24 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
         message("Valid input received!")
       }
     }
-    
+
     return(integer_value)
   }
-  
+
   get_integer_input_from_options <- function(integer_options) {
-    
+
     first_integers <- integer_options[1:(length(integer_options) - 1)]
     last_integer <- integer_options[length(integer_options)]
     integers_string <- paste(paste(first_integers, collapse = ", "), "or", last_integer)
-    
+
     prompt <- paste("Enter either ", integers_string, ": ", sep = "")
-    
+
     valid_input <- FALSE
     while (!valid_input) {
       user_input <- readline(prompt = prompt)
       # Try converting to numeric
       integer_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
-      
+
       # Non-numeric input
       if (is.na(integer_value)) {
         message("Invalid input. Please enter a numeric integer value.")
@@ -127,77 +127,77 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       else if (integer_value %in% integer_options) {
         valid_input <- TRUE
         message("Valid input received!")
-      } 
+      }
       else {
         message(paste("Invalid input. Please enter only", integers_string))
       }
     }
-    
+
     return(integer_value)
   }
-  
+
   get_non_negative_numeric_input <- function(parameter) {
-    
+
     prompt <- paste("Enter a non-negative numeric value for the ", parameter, ": ", sep = "")
-    
+
     valid_input <- FALSE
     while (!valid_input) {
       user_input <- readline(prompt = prompt)
       # Try converting to numeric
       non_negative_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
-      
+
       # Non-numeric input
       if (is.na(non_negative_value)) {
         message("Invalid input. Please enter a numeric value.")
       }
       # Negative input
       else if (non_negative_value < 0) {
-        message("Negative input. Please enter a non-negative number") 
+        message("Negative input. Please enter a non-negative number")
       }
       # Should be correct input
       else {
         valid_input <- TRUE
-        message("Valid input received!") 
+        message("Valid input received!")
       }
     }
-    
+
     return(non_negative_value)
   }
-  
+
   get_positive_numeric_input <- function(parameter) {
-    
+
     prompt <- paste("Enter a positive numeric value for the ", parameter, ": ", sep = "")
-    
+
     valid_input <- FALSE
     while (!valid_input) {
       user_input <- readline(prompt = prompt)
       # Try converting to numeric
       positive_numeric_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
-      
+
       # Non-numeric input
       if (is.na(positive_numeric_value)) {
         message("Invalid input. Please enter a numeric value.")
       }
       # Non-positive input
       else if (positive_numeric_value <= 0) {
-        message("Non-positive input. Please enter a positive number") 
+        message("Non-positive input. Please enter a positive number")
       }
       # Should be correct input
       else {
         valid_input <- TRUE
-        message("Valid input received!") 
+        message("Valid input received!")
       }
     }
-    
+
     return(positive_numeric_value)
   }
-  
+
   get_y_or_n_input <- function() {
-    
+
     valid_input <- FALSE
     while (!valid_input) {
       user_input <- readline(prompt = "Enter either y or n: ")
-      
+
       if (user_input %in% c("y", "n")) {
         valid_input <- TRUE
         message("Valid input received!")
@@ -206,38 +206,38 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
         message("Invalid input. Please enter either y or n.")
       }
     }
-    
+
     return(user_input)
   }
-  
+
   display_parameters <- function(parameter_values) {
-    
+
     message("Your current inputs are:\n")
-    
+
     display_message <- ""
-    
+
     for (i in seq(length(parameter_values))) {
       display_message <- paste(display_message, "    ", i, ". ", names(parameter_values)[i], ": ", parameter_values[[i]], '\n', sep = "")
     }
     message(display_message)
   }
-  
-  get_cell_types_and_proportions_for_clusters <- function(simulated_spe, 
-                                                          simulate_function, 
-                                                          properties, 
-                                                          cell_type_option, 
-                                                          cell_proportion_option, 
+
+  get_cell_types_and_proportions_for_clusters <- function(simulated_spe,
+                                                          simulate_function,
+                                                          properties,
+                                                          cell_type_option,
+                                                          cell_proportion_option,
                                                           temp_cell_type) {
-    
+
     message_get_cell_types <- "Keep entering the name of cell types you would like (e.g. Tumour, Immune, etc.).\n    enter 'stop' to move on."
-    
+
     # Supporting functions
     get_y_or_n_input <- function() {
-      
+
       valid_input <- FALSE
       while (!valid_input) {
         user_input <- readline(prompt = "Enter either y or n: ")
-        
+
         if (user_input %in% c("y", "n")) {
           valid_input <- TRUE
           message("Valid input received!")
@@ -246,22 +246,22 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
           message("Invalid input. Please enter either y or n.")
         }
       }
-      
+
       return(user_input)
     }
-    
-    get_numeric_between_input <- function(parameter, 
-                                          lower, 
+
+    get_numeric_between_input <- function(parameter,
+                                          lower,
                                           upper) {
-      
+
       prompt <- paste("Enter a numeric value between ", lower, " and ", upper, " for the ", parameter, ": ", sep = "")
-      
+
       valid_input <- FALSE
       while (!valid_input) {
         user_input <- readline(prompt = prompt)
         # Try converting to numeric
         numeric_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
-        
+
         # Non-numeric input
         if (is.na(numeric_value)) {
           message("Invalid input. Please enter a numeric value.")
@@ -276,25 +276,25 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
           message("Valid input received!")
         }
       }
-      
+
       return(numeric_value)
     }
-    
+
     ## Display the cell types currently found in simulated_spe to the user
     current_cell_types <- setdiff(unique(simulated_spe[["Cell.Type"]]), temp_cell_type)
     message("Your data currently has the following cell types:\n", paste(current_cell_types, collapse = ", "), "\n")
-    
+
     ## Get cell types from user
     cell_types <- c()
     user_input <- ""
     message(message_get_cell_types)
     while (user_input != "stop") {
-      
+
       user_input <- readline(prompt = "Enter a cell type, or enter 'stop': ")
-      
+
       ## Ignore if user enters a blank string
       if (user_input == "") {
-        
+
       }
       ## Add inputted cell type to cell_types vector
       else if (user_input != "stop") {
@@ -309,7 +309,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       ## User wants to stop
       else {
         message(paste("Your cell types chosen are:", paste(cell_types, collapse = ", ")))
-        
+
         ## Allow user to re-choose cell types
         message("Would like to re-choose these cell types?\n")
         user_input_y_or_n <- get_y_or_n_input()
@@ -322,14 +322,14 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       }
     }
     properties[[1]][[cell_type_option]] <- cell_types
-    
+
     ## Get cell proportions from user
     cell_proportions <- c()
     max_proportion <- 1
     i <- 1
     message("For each cell type, choose their proportion in the simulation. They must add to 1.\n")
     while (i <= length(cell_types)) {
-      
+
       ## For the last cell type, we can figure out what the cell proportion must be
       if (i == length(cell_types)) {
         cell_proportions <- c(cell_proportions, max_proportion)
@@ -343,41 +343,41 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
         message("Cell proportion for ", cell_types[i], " is ", cell_proportion)
       }
       i <- i + 1
-      
+
       if (i > length(cell_types)) {
         properties[[1]][[cell_proportion_option]] <- cell_proportions
-        
+
         ## Convert spe object to data frame
         df <- data.frame(spatialCoords(simulated_spe), "Cell.Type" = simulated_spe[["Cell.Type"]])
-        
+
         ## Just change the cell type of the temp_cell_type, no need to actually re-simulate
-        df[["Cell.Type"]] <- ifelse(df[["Cell.Type"]] == temp_cell_type, 
-                                    sample(cell_types, size = length(df[["Cell.Type"]]), replace = TRUE, prob = cell_proportions), 
+        df[["Cell.Type"]] <- ifelse(df[["Cell.Type"]] == temp_cell_type,
+                                    sample(cell_types, size = length(df[["Cell.Type"]]), replace = TRUE, prob = cell_proportions),
                                     df[["Cell.Type"]])
-        
+
         # Add Cell.ID column to data frame
         df$Cell.ID <- paste("Cell", seq(nrow(df)), sep = "_")
-        
+
         # Update current meta data
         metadata <- simulated_spe@metadata
         metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_type_option]] <- cell_types
         metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_proportion_option]] <- cell_proportions
-        
+
         # Convert data frame to spe object
         simulated_spe_new <- SpatialExperiment(
           assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
           colData = df,
           spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
           metadata = metadata)
-        
+
         ## Generate simulation
         message("Generating simulation...")
         fig <- plot_cells3D(simulated_spe_new)
         print(fig)
-        
+
         if (length(cell_types) == 1) break # If there is only one cell type, proportion is always 1
-        
-        ## Allow user to re-choose cell proportions  
+
+        ## Allow user to re-choose cell proportions
         message("Would like to re-choose these cell proportions?\n")
         user_input_y_or_n <- get_y_or_n_input()
         if (user_input_y_or_n == "y") {
@@ -388,23 +388,23 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
         }
       }
     }
-    
+
     return(list(data = simulated_spe_new, properties = properties))
   }
-  
+
   ## Start with checking if the user has inputted spe object
   if (class(simulated_spe) != "SpatialExperiment") {
     stop(message_no_simulated_spe)
   }
-  
+
   ## Plot the user's data so they can see what they already have
   fig <- plot_cells3D(simulated_spe)
   methods::show(fig)
-  
+
   ## Get user's choice for shape type (sphere, ellipsoid, cylinder or network)
   message(message_shape_choice)
   user_input_shape <- get_integer_input_from_options(1:4)
-  
+
   ### Sphere
   if (user_input_shape == 1) {
     # Get required parameters for a sphere cluster from user
@@ -414,7 +414,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                              "centre y coordinate" = get_non_negative_numeric_input("centre y coordinate"),
                              "centre z coordinate" = get_non_negative_numeric_input("centre z coordinate"))
     display_parameters(parameter_values)
-    
+
     # Generate sphere cluster simulation using these parameters
     cluster_properties <- list(list(shape = "sphere",
                                     cluster_cell_types = "Cluster",
@@ -429,22 +429,22 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                              plot_image = TRUE,
                                              plot_cell_types = NULL,
                                              plot_colours = NULL)
-    
+
     # Allow user the option to change their input parameters
     message("Would you like to change your input parameters?\n")
     change_input_parameters_y_or_n <- get_y_or_n_input()
     while (change_input_parameters_y_or_n == "y") {
-      
+
       # Determine which parameter the user wants to change
       user_input_parameter_choice <- get_integer_input_from_options(seq(length(parameter_values)))
-      
+
       if (user_input_parameter_choice == 1) parameter_values[["radius"]] <- get_positive_numeric_input("radius")
       if (user_input_parameter_choice == 2) parameter_values[["centre x coordinate"]] <- get_non_negative_numeric_input("centre x coordinate")
       if (user_input_parameter_choice == 3) parameter_values[["centre y coordinate"]] <- get_non_negative_numeric_input("centre y coordinate")
       if (user_input_parameter_choice == 4) parameter_values[["centre z coordinate"]] <- get_non_negative_numeric_input("centre z coordinate")
-      
+
       display_parameters(parameter_values)
-      
+
       # Generate sphere cluster simulation using updated parameters
       cluster_properties <- list(list(shape = "sphere",
                                       cluster_cell_types = "Cluster",
@@ -459,7 +459,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                                plot_image = TRUE,
                                                plot_cell_types = NULL,
                                                plot_colours = NULL)
-      
+
       message("Would you like to change your inputs?\n")
       change_input_parameters_y_or_n <- get_y_or_n_input()
     }
@@ -478,19 +478,19 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                              "y-axis rotation angle" = get_non_negative_numeric_input("y-axis rotation angle"),
                              "z-axis rotation angle" = get_non_negative_numeric_input("z-axis rotation angle"))
     display_parameters(parameter_values)
-    
+
     # Generate ellipsoid cluster simulation using these parameters
     cluster_properties <- list(list(shape = "ellipsoid",
                                     cluster_cell_types = "Cluster",
                                     cluster_cell_proportions = 1,
-                                    radii = c(parameter_values[["x radius"]], 
-                                              parameter_values[["y radius"]], 
+                                    radii = c(parameter_values[["x radius"]],
+                                              parameter_values[["y radius"]],
                                               parameter_values[["z radius"]]),
                                     centre_loc = c(parameter_values[["centre x coordinate"]],
                                                    parameter_values[["centre y coordinate"]],
                                                    parameter_values[["centre z coordinate"]]),
-                                    axes_rotation = c(parameter_values[["x-axis rotation angle"]], 
-                                                      parameter_values[["y-axis rotation angle"]], 
+                                    axes_rotation = c(parameter_values[["x-axis rotation angle"]],
+                                                      parameter_values[["y-axis rotation angle"]],
                                                       parameter_values[["z-axis rotation angle"]])))
     message("Generating simulation...")
     simulated_spe_new <- simulate_clusters3D(simulated_spe,
@@ -498,15 +498,15 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                              plot_image = TRUE,
                                              plot_cell_types = NULL,
                                              plot_colours = NULL)
-    
+
     # Allow user the option to change their input parameters
     message("Would you like to change your input parameters?\n")
     change_input_parameters_y_or_n <- get_y_or_n_input()
     while (change_input_parameters_y_or_n == "y") {
-      
+
       # Determine which parameter the user wants to change
       user_input_parameter_choice <- get_integer_input_from_options(seq(length(parameter_values)))
-      
+
       if (user_input_parameter_choice == 1) parameter_values[["x radius"]] <- get_positive_numeric_input("x radius")
       if (user_input_parameter_choice == 2) parameter_values[["y radius"]] <- get_positive_numeric_input("y radius")
       if (user_input_parameter_choice == 3) parameter_values[["z radius"]] <- get_positive_numeric_input("z radius")
@@ -516,30 +516,30 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       if (user_input_parameter_choice == 7) parameter_values[["x-axis rotation angle"]] <- get_non_negative_numeric_input("x-axis rotation angle")
       if (user_input_parameter_choice == 8) parameter_values[["y-axis rotation angle"]] <- get_non_negative_numeric_input("y-axis rotation angle")
       if (user_input_parameter_choice == 9) parameter_values[["z-axis rotation angle"]] <- get_non_negative_numeric_input("z-axis rotation angle")
-      
+
       display_parameters(parameter_values)
-      
+
       # Generate ellipsoid cluster simulation using updated parameters
       cluster_properties <- list(list(shape = "ellipsoid",
                                       cluster_cell_types = "Cluster",
                                       cluster_cell_proportions = 1,
-                                      radii = c(parameter_values[["x radius"]], 
-                                                parameter_values[["y radius"]], 
+                                      radii = c(parameter_values[["x radius"]],
+                                                parameter_values[["y radius"]],
                                                 parameter_values[["z radius"]]),
                                       centre_loc = c(parameter_values[["centre x coordinate"]],
                                                      parameter_values[["centre y coordinate"]],
                                                      parameter_values[["centre z coordinate"]]),
-                                      axes_rotation = c(parameter_values[["x-axis rotation angle"]], 
-                                                        parameter_values[["y-axis rotation angle"]], 
+                                      axes_rotation = c(parameter_values[["x-axis rotation angle"]],
+                                                        parameter_values[["y-axis rotation angle"]],
                                                         parameter_values[["z-axis rotation angle"]])))
-      
+
       message("Generating simulation...")
       simulated_spe_new <- simulate_clusters3D(simulated_spe,
                                                cluster_properties,
                                                plot_image = TRUE,
                                                plot_cell_types = NULL,
                                                plot_colours = NULL)
-      
+
       message("Would you like to change your inputs?\n")
       change_input_parameters_y_or_n <- get_y_or_n_input()
     }
@@ -556,7 +556,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                              "end y coordinate" = get_non_negative_numeric_input("end y coordinate"),
                              "end z coordinate" = get_non_negative_numeric_input("end z coordinate"))
     display_parameters(parameter_values)
-    
+
     # Generate cylinder cluster simulation using these parameters
     cluster_properties <- list(list(shape = "cylinder",
                                     cluster_cell_types = "Cluster",
@@ -574,15 +574,15 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                              plot_image = TRUE,
                                              plot_cell_types = NULL,
                                              plot_colours = NULL)
-    
+
     # Allow user the option to change their input parameters
     message("Would you like to change your input parameters?\n")
     change_input_parameters_y_or_n <- get_y_or_n_input()
     while (change_input_parameters_y_or_n == "y") {
-      
+
       # Determine which parameter the user wants to change
       user_input_parameter_choice <- get_integer_input_from_options(seq(length(parameter_values)))
-      
+
       if (user_input_parameter_choice == 1) parameter_values[["radius"]] <- get_positive_numeric_input("radius")
       if (user_input_parameter_choice == 2) parameter_values[["start x coordinate"]] <- get_non_negative_numeric_input("start x coordinate")
       if (user_input_parameter_choice == 3) parameter_values[["start y coordinate"]] <- get_non_negative_numeric_input("start y coordinate")
@@ -590,9 +590,9 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
       if (user_input_parameter_choice == 5) parameter_values[["end x coordinate"]] <- get_non_negative_numeric_input("end x coordinate")
       if (user_input_parameter_choice == 6) parameter_values[["end y coordinate"]] <- get_non_negative_numeric_input("end y coordinate")
       if (user_input_parameter_choice == 7) parameter_values[["end z coordinate"]] <- get_non_negative_numeric_input("end z coordinate")
-      
+
       display_parameters(parameter_values)
-      
+
       # Generate cylinder cluster simulation using updated parameters
       cluster_properties <- list(list(shape = "cylinder",
                                       cluster_cell_types = "Cluster",
@@ -610,7 +610,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                                plot_image = TRUE,
                                                plot_cell_types = NULL,
                                                plot_colours = NULL)
-      
+
       message("Would you like to change your inputs?\n")
       change_input_parameters_y_or_n <- get_y_or_n_input()
     }
@@ -626,7 +626,7 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                              "centre y coordinate" = get_non_negative_numeric_input("centre y coordinate"),
                              "centre z coordinate" = get_non_negative_numeric_input("centre z coordinate"))
     display_parameters(parameter_values)
-    
+
     # Generate network cluster simulation using these parameters
     cluster_properties <- list(list(shape = "network",
                                     cluster_cell_types = "Cluster",
@@ -643,24 +643,24 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                              plot_image = TRUE,
                                              plot_cell_types = NULL,
                                              plot_colours = NULL)
-    
+
     # Allow user the option to change their input parameters
     message("Would you like to change your input parameters?\n")
     change_input_parameters_y_or_n <- get_y_or_n_input()
     while (change_input_parameters_y_or_n == "y") {
-      
+
       # Determine which parameter the user wants to change
       user_input_parameter_choice <- get_integer_input_from_options(seq(length(parameter_values)))
-      
+
       if (user_input_parameter_choice == 1) parameter_values[["number of branches"]] <- get_integer_greater_than_or_equal_input("number of branches", 2)
       if (user_input_parameter_choice == 2) parameter_values[["width of branch"]] <- get_positive_numeric_input("width of branch")
       if (user_input_parameter_choice == 3) parameter_values[["radius spanned by network"]] <- get_positive_numeric_input("radius spanned by network")
       if (user_input_parameter_choice == 4) parameter_values[["centre x coordinate"]] <- get_non_negative_numeric_input("centre x coordinate")
       if (user_input_parameter_choice == 5) parameter_values[["centre y coordinate"]] <- get_non_negative_numeric_input("centre y coordinate")
       if (user_input_parameter_choice == 6) parameter_values[["centre z coordinate"]] <- get_non_negative_numeric_input("centre z coordinate")
-      
+
       display_parameters(parameter_values)
-      
+
       # Generate sphere cluster simulation using updated parameters
       cluster_properties <- list(list(shape = "network",
                                       cluster_cell_types = "Cluster",
@@ -671,19 +671,19 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                       centre_loc = c(parameter_values[["centre x coordinate"]],
                                                      parameter_values[["centre y coordinate"]],
                                                      parameter_values[["centre z coordinate"]])))
-      
+
       message("Generating simulation...")
       simulated_spe_new <- simulate_clusters3D(simulated_spe,
                                                cluster_properties,
                                                plot_image = TRUE,
                                                plot_cell_types = NULL,
                                                plot_colours = NULL)
-      
+
       message("Would you like to change your inputs?\n")
       change_input_parameters_y_or_n <- get_y_or_n_input()
     }
   }
-  
+
   # Allow user to change the cell composition of the cluster
   message("Let's change the cell composition of this cluster")
   simulated_spe_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_spe_new,
@@ -694,110 +694,110 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                                                                   "Cluster")
   simulated_spe_new <- simulated_spe_new_and_properties[["data"]]
   cluster_properties <- simulated_spe_new_and_properties[["properties"]]
-  
-  
-  
+
+
+
   ## Get user's choice for cluster type (ringed, double ringed or continue)
   message(message_cluster_choice)
   user_input_cluster <- get_integer_input_from_options(1:3)
-  
+
   ### Ring
   if (user_input_cluster == 1) {
     # Get width of ring from user
     message("For a single ring, we needs its width.\n")
-    
+
     # Generate cluster with ring simulation using this width
     cluster_properties[[1]][["ring_width"]] <- get_positive_numeric_input("ring width")
     cluster_properties[[1]][["ring_cell_types"]] <- c("Ring")
     cluster_properties[[1]][["ring_cell_proportions"]] <- 1
-    
+
     message("Generating simulation...")
     simulated_spe_new <- simulate_rings3D(simulated_spe,
                                           cluster_properties,
                                           plot_image = TRUE,
                                           plot_cell_types = NULL,
                                           plot_colours = NULL)
-    
+
     # Allow user the option to change the ring width
     message("Would you like to change the ring width?\n")
     change_input_parameters_y_or_n <- get_y_or_n_input()
     while (change_input_parameters_y_or_n == "y") {
-      
+
       # Determine which parameter the user wants to change
       cluster_properties[[1]][["ring_width"]] <- get_positive_numeric_input("ring width")
-      
+
       message("Generating simulation...")
       simulated_spe_new <- simulate_rings3D(simulated_spe,
                                             cluster_properties,
                                             plot_image = TRUE,
                                             plot_cell_types = NULL,
                                             plot_colours = NULL)
-      
+
       message("Would you like to the ring width?\n")
       change_input_parameters_y_or_n <- get_y_or_n_input()
     }
-    
+
     # Allow user to change the cell composition of the ring
     message("Let's change the cell composition of the ring")
-    
+
     simulated_spe_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_spe_new,
                                                                                     simulate_rings3D,
                                                                                     cluster_properties,
                                                                                     "ring_cell_types",
                                                                                     "ring_cell_proportions",
                                                                                     "Ring")
-    
+
     simulated_spe_new <- simulated_spe_new_and_properties[["data"]]
   }
   ### Double ring
   else if (user_input_cluster == 2) {
     # Get width of inner and outer ring from user
     message("For a double ring, we needs the width of the inner and outer ring.\n")
-    
+
     # Generate cluster with double ring simulation using both widths
     parameter_values <- list("inner ring width" = get_positive_numeric_input("inner ring width"),
                              "outer ring width" = get_positive_numeric_input("outer ring width"))
     display_parameters(parameter_values)
-    
+
     cluster_properties[[1]][["inner_ring_width"]] <- parameter_values[["inner ring width"]]
     cluster_properties[[1]][["outer_ring_width"]] <- parameter_values[["outer ring width"]]
     cluster_properties[[1]][["inner_ring_cell_types"]] <- c("Inner ring")
     cluster_properties[[1]][["inner_ring_cell_proportions"]] <- 1
     cluster_properties[[1]][["outer_ring_cell_types"]] <- c("Outer ring")
     cluster_properties[[1]][["outer_ring_cell_proportions"]] <- 1
-    
+
     message("Generating simulation...")
     simulated_spe_new <- simulate_double_rings3D(simulated_spe,
                                                  cluster_properties,
                                                  plot_image = TRUE,
                                                  plot_cell_types = NULL,
                                                  plot_colours = NULL)
-    
+
     # Allow user the option to change the widths of the inner or outer ring
     message("Would you like to change the widths of the inner or outer ring?\n")
     change_input_parameters_y_or_n <- get_y_or_n_input()
     while (change_input_parameters_y_or_n == "y") {
-      
+
       # Determine which parameter the user wants to change
       if (user_input_parameter_choice == 1) parameter_values[["inner ring width"]] <- get_positive_numeric_input("inner ring width")
       if (user_input_parameter_choice == 2) parameter_values[["outer ring width"]] <- get_positive_numeric_input("outer ring width")
-      
+
       cluster_properties[[1]][["inner_ring_width"]] <- parameter_values[["inner ring width"]]
       cluster_properties[[1]][["outer_ring_width"]] <- parameter_values[["outer ring width"]]
-      
+
       display_parameters(parameter_values)
-      
+
       message("Generating simulation...")
       simulated_spe_new <- simulate_double_rings3D(simulated_spe,
                                                    cluster_properties,
                                                    plot_image = TRUE,
                                                    plot_cell_types = NULL,
                                                    plot_colours = NULL)
-      
+
       message("Would you like to change the widths of the inner or outer ring?\n")
       change_input_parameters_y_or_n <- get_y_or_n_input()
     }
-    
+
     # Allow user to change the cell composition of the inner ring
     message("Let's change the cell composition of the inner ring")
     simulated_spe_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_spe_new,
@@ -806,10 +806,10 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                                                                     "inner_ring_cell_types",
                                                                                     "inner_ring_cell_proportions",
                                                                                     "Inner ring")
-    
+
     simulated_spe_new <- simulated_spe_new_and_properties[["data"]]
     cluster_properties <- simulated_spe_new_and_properties[["properties"]]
-    
+
     # Allow user to change the cell composition of the outer ring
     message("Let's change the cell composition of the outer ring")
     simulated_spe_new_and_properties <- get_cell_types_and_proportions_for_clusters(simulated_spe_new,
@@ -818,14 +818,14 @@ spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
                                                                                     "outer_ring_cell_types",
                                                                                     "outer_ring_cell_proportions",
                                                                                     "Outer ring")
-    
+
     simulated_spe_new <- simulated_spe_new_and_properties[["data"]]
   }
   ### Continue
   else if (user_input_cluster == 3) {
-    
+
   }
-  
+
   message("All done!")
-  return(simulated_spe_new) 
+  return(simulated_spe_new)
 }
