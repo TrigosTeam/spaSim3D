@@ -1,0 +1,32 @@
+Package: spaSim3D
+Title: spatial Simulator of 3D tissues
+Version: 0.1.0
+Authors@R: 
+    person("David", "Le", , "david.le@petermac.org", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0008-1215-4230"))
+Description: spaSim3D is a 3D simulator toolbox, allowing users to generate 
+                 fully customisable and realistic 3D spatial tissue data.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports:
+  BiocManager,
+  dbscan,
+  apcluster,
+  plotly,
+  cowplot,
+  Hmisc,
+  reshape2,
+  gtools,
+  DescTools,
+  dplyr
+URL: https://github.com/TrigosTeam/spaSim3D
+Suggests: 
+    SpatialExperiment,
+    ComplexHeatmap,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+VignetteBuilder: knitr
