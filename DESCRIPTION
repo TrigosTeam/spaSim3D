@@ -20,7 +20,8 @@ Imports:
   reshape2,
   gtools,
   DescTools,
-  dplyr
+  dplyr,
+  viridis
 URL: https://github.com/TrigosTeam/spaSim3D
 Suggests: 
     SpatialExperiment,
