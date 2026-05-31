@@ -99,7 +99,6 @@
 #'                                                           outer_ring_cell_proportions = c(1),
 #'                                                           outer_ring_width = 2
 #'                                                         )
-#'                                                         
 #'                                                       ),
 #'                                                       plot_image = TRUE,
 #'                                                       plot_cell_types = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
