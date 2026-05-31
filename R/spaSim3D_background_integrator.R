@@ -1,3 +1,17 @@
+#' @title Function to simulate background of 3D tissue.
+#'
+#' @description This is an interactive function that allows users to simulate
+#'     background cells of a 3D tissue. The function will ask you for your
+#'     inputs, for which the user can enter them in the console.
+#'
+#' @return A 3D SpatialExperiment object with the background cells.
+#'
+#' @examples
+#' # Simulate background
+#' background_spe <- spaSim3D_background_integrator()
+#' 
+#' @export
+
 spaSim3D_background_integrator <- function() {
   
   ### Message strings

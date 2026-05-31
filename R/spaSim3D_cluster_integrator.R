@@ -1,3 +1,29 @@
+#' @title Function to simulate clusters in a 3D tissue.
+#'
+#' @description This is an interactive function that allows users to simulate
+#'     cell clusters in a 3D tissue. The function will ask you for your
+#'     inputs, for which the user can enter them in the console.
+#'     
+#' @simulated_spe A SpatialExperiment object containing 3D spatial information 
+#'     for the cells. The intended input should be generated using the output of 
+#'     spaSim3D_background_integrator or spaSim3D_cluster_integrator, however, 
+#'     any of the simulate_* functions should work. This is because the metadata 
+#'     of the SpatialExperiment object needs to already contain spaSim3D 
+#'     specific data relating to the background of the SpatialExperiment object, 
+#'     and any clusters. Defaults to NULL, although, a valid spaSim3D 
+#'     SpatialExperiment object is required.
+#'
+#' @return A 3D SpatialExperiment object with the new cell clusters.
+#'
+#' @examples
+#' # Simulate background
+#' background_spe <- spaSim3D_background_integrator()
+#' 
+#' # Simulate clusters
+#' clusters_spe <- spaSim3D_cluster_integrator(simulated_spe = background_spe)
+#' 
+#' @export
+
 spaSim3D_cluster_integrator <- function(simulated_spe = NULL) {
   
   ### Message strings
