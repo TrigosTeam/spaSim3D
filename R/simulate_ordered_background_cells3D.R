@@ -1,3 +1,47 @@
+#' @title Simulate ordered background cells in spaSim3D.
+#'
+#' @description This functions simulates background cells in an 'ordered'
+#'     fashion, so that cells are geometrically equidistant apart. 
+#'     The parameters of the background are completely customisable by the user.
+#' 
+#' @param n_cells A positive number representing the number of cells in the 
+#'     background.
+#' @param length A positive number representing the length of the 3D window of
+#'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
+#'     length to 100.
+#' @param width A positive number representing the width of the 3D window of
+#'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
+#'     width to 150
+#' @param height A positive number representing the height of the 3D window of
+#'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
+#'     height to 200
+#' @param jitter_proportion A number between 0 and 1 representing the amount of
+#'     'jitter' to apply to all cells. jitter_proportion = 0.5 and the original
+#'     distance between each cell is 5 units, then each cell will move UP TO
+#'     0.5 * 5 = 2.5 units away from its original position in the x, y and z
+#'     directions. The 'original distance between each cell' is calculated by
+#'     this function and will depend on the previous parameters, not something
+#'     to worry about :)
+#' @param background_cell_type A character representing the cell type label of
+#'     all the cells in the background. Defaults to "Others".
+#' @param plot_image A logical indicating whether to plot 3D spatial data. 
+#'     Defaults to TRUE. 
+#'
+#' @return A 3D SpatialExperiment object with the background cells and 
+#'     corresponding metadata.
+#'
+#' @examples
+#' # Simulate background
+#' bg_n <- simulate_normal_background_cells3D(n_cells = 10000,
+#'                                            length = 100,
+#'                                            width = 100,
+#'                                            height = 100,
+#'                                            jitter_proportion = 0,
+#'                                            background_cell_type = "Others",
+#'                                            plot_image = TRUE)
+#'                                            
+#' @export
+
 simulate_ordered_background_cells3D <- function(n_cells, 
                                                 length, 
                                                 width, 

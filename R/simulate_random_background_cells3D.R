@@ -1,3 +1,42 @@
+#' @title Simulate random background cells in spaSim3D.
+#'
+#' @description This functions simulates background cells in a 'random'
+#'     fashion, so that cells follows a Poisson distribution. The parameters of 
+#'     the background are completely customisable by the user.
+#' 
+#' @param n_cells A positive number representing the number of cells in the 
+#'     background.
+#' @param length A positive number representing the length of the 3D window of
+#'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
+#'     length to 100.
+#' @param width A positive number representing the width of the 3D window of
+#'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
+#'     width to 150
+#' @param height A positive number representing the height of the 3D window of
+#'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
+#'     height to 200
+#' @param minimum_distance_between_cells A positive number representing the
+#'     minimum distance between cells.
+#' @param background_cell_type A character representing the cell type label of
+#'     all the cells in the background. Defaults to "Others".
+#' @param plot_image A logical indicating whether to plot 3D spatial data. 
+#'     Defaults to TRUE. 
+#'
+#' @return A 3D SpatialExperiment object with the background cells and 
+#'     corresponding metadata.
+#'
+#' @examples
+#' # Simulate background
+#' bg_r <- simulate_random_background_cells3D(n_cells = 10000,
+#'                                            length = 100,
+#'                                            width = 100,
+#'                                            height = 100,
+#'                                            minimum_distance_between_cells = 0.5,
+#'                                            background_cell_type = "Others",
+#'                                            plot_image = TRUE)
+#'                                            
+#' @export
+
 simulate_random_background_cells3D <- function(n_cells, 
                                                length, 
                                                width, 
