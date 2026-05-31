@@ -4,7 +4,7 @@
 #'     cell clusters in a 3D tissue. The function will ask you for your
 #'     inputs, for which the user can enter them in the console.
 #'
-#' @simulated_spe A SpatialExperiment object containing 3D spatial information
+#' @param simulated_spe A SpatialExperiment object containing 3D spatial information
 #'     for the cells. The intended input should be generated using the output of
 #'     simulate_background_interactive or simulate_cluster_interactive, however,
 #'     any of the simulate_* functions should work. This is because the metadata
