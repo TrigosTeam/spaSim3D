@@ -1,5 +1,5 @@
 ---
-title: "simulate with metadata functions"
+title: "Simulate with metadata functions"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{simulate with metadata functions}
