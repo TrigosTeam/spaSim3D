@@ -29,7 +29,8 @@ devtools::install_github("TrigosTeam/spaSim3D")
 # Vignette
 
 The vignette with an overview of the package can be accessed from the
-top Menu under About or clicking here.
+top Menu under About or clicking
+[here](https://trigosteam.github.io/spaSim3D/).
 
 # Example
 
