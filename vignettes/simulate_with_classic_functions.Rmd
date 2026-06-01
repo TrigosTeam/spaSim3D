@@ -1,0 +1,15 @@
+---
+title: "simulate with classic functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{simulate with classic functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```

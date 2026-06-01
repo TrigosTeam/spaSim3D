@@ -14,6 +14,37 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+# Overview
+spaSim3D (**spa**tial **Sim**ulator 3D) in a simulator of 3D tissue spatial 
+data. It includes a diverse range of functions to meet your simulation needs.
+This includes generation and customisation of background cells in the 3D tissue.
+This also includes generation and customisation of various cell clusters, such
+as spheres, ellipsoids, cylinders and network clusters with or without cellular
+rings and double rings. Collectively, these tools can help to mimic a realistic
+3D biological tissue.
+
+# Installing
+spaSim3D is available for installation via our GitHub.
+
+```{r install, eval = FALSE}
+### Install from GitHub ###
+# install.packages("devtools")
+# devtools::install_github("TrigosTeam/spaSim3D")
+
 library(spaSim3D)
 ```
+
+# Visual example
+```{r}
+# spe_metadata <- spe_metadata_background_template("random")
+# spe_metadata <- spe_metadata_cluster_template("regular", "sphere", spe_metadata)
+# spe_metadata <- spe_metadata_cluster_template("regular", "network", spe_metadata)
+# spe_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", spe_metadata)
+# spe_clusters <- simulate_spe_metadata3D(spe_metadata, 
+#                                         plot_image = T, 
+#                                         plot_cell_types = c("Tumour", "Immune", "Immune1"),
+#                                         plot_colours = c("orange", "skyblue", "blue"))
+#
+
+```
+

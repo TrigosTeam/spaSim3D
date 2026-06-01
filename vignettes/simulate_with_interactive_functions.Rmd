@@ -1,0 +1,8 @@
+---
+title: "simulate with interactive functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{simulate with interactive functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---

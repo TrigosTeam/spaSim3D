@@ -1,0 +1,8 @@
+---
+title: "simulate with metadata functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{simulate with metadata functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
