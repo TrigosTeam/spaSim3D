@@ -69,20 +69,20 @@ bg_r <- simulate_random_background_cells3D(n_cells = 10000,
                                            plot_image = FALSE)
 
 # Simulate cluster
-sphere_dr_cluster <- simulate_cylinder_dr(bg_r,
-                                          dr_properties = list(
-                                            shape = "sphere",
-                                            cluster_cell_types = c("Tumour", "Others"),
-                                            cluster_cell_proportions = c(0.95, 0.05),
-                                            radius = 20,
-                                            centre_loc = c(40, 40, 40),
-                                            inner_ring_cell_types = c("Immune1", "Others"),
-                                            inner_ring_cell_proportions = c(0.85, 0.15),
-                                            inner_ring_width = 5,
-                                            outer_ring_cell_types = c("Immune2"),
-                                            outer_ring_cell_proportions = c(1),
-                                            outer_ring_width = 3
-                                          ))
+sphere_dr_cluster <- simulate_sphere_dr(bg_r,
+                                        dr_properties = list(
+                                          shape = "sphere",
+                                          cluster_cell_types = c("Tumour", "Others"),
+                                          cluster_cell_proportions = c(0.95, 0.05),
+                                          radius = 20,
+                                          centre_loc = c(40, 40, 40),
+                                          inner_ring_cell_types = c("Immune1", "Others"),
+                                          inner_ring_cell_proportions = c(0.85, 0.15),
+                                          inner_ring_width = 5,
+                                          outer_ring_cell_types = c("Immune2"),
+                                          outer_ring_cell_proportions = c(1),
+                                          outer_ring_width = 3
+                                        ))
 # Plot
 plots_cells3D(sphere_dr_cluster)
 
