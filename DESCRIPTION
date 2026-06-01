@@ -25,7 +25,6 @@ Imports:
 URL: https://github.com/TrigosTeam/spaSim3D
 Suggests: 
     SpatialExperiment,
-    ComplexHeatmap,
     testthat (>= 3.0.0),
     knitr,
     rmarkdown
