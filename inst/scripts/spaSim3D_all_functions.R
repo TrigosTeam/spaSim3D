@@ -80,7 +80,7 @@ plot_cells3D <- function(spe,
   }
 
   ## Convert spe object to data frame
-  df <- data.frame(spatialCoords(spe), "Cell.Type" = spe[[feature_colname]])
+  df <- data.frame(SpatialExperiment::spatialCoords(spe), "Cell.Type" = spe[[feature_colname]])
 
   ## If no cell types chosen, use all cell types found in data frame
   if (is.null(plot_cell_types)) {
@@ -117,22 +117,22 @@ plot_cells3D <- function(spe,
                               levels = plot_cell_types)
 
   ## Plot
-  fig <- plot_ly(df,
-                 type = "scatter3d",
-                 mode = 'markers',
-                 x = ~Cell.X.Position,
-                 y = ~Cell.Y.Position,
-                 z = ~Cell.Z.Position,
-                 color = ~Cell.Type,
-                 colors = plot_colours,
-                 marker = list(size = 2))
+  fig <- plotly::plot_ly(df,
+                         type = "scatter3d",
+                         mode = 'markers',
+                         x = ~Cell.X.Position,
+                         y = ~Cell.Y.Position,
+                         z = ~Cell.Z.Position,
+                         color = ~Cell.Type,
+                         colors = plot_colours,
+                         marker = list(size = 2))
 
-  fig <- fig %>% layout(scene = list(xaxis = list(title = 'x', showgrid = T, showaxeslabels = F, showticklabels = T, gridwidth = 5,
-                                                  titlefont = list(size = 20), tickfont = list(size = 15)),
-                                     yaxis = list(title = 'y', showgrid = T, showaxeslabels = F, showticklabels = T, gridwidth = 5,
-                                                  titlefont = list(size = 20), tickfont = list(size = 15)),
-                                     zaxis = list(title = 'z', showgrid = T, showaxeslabels = F, showticklabels = T, gridwidth = 5,
-                                                  titlefont = list(size = 20), tickfont = list(size = 15))))
+  fig <- fig %>% plotly::layout(scene = list(xaxis = list(title = 'x', showgrid = T, showaxeslabels = F, showticklabels = T, gridwidth = 5,
+                                                          titlefont = list(size = 20), tickfont = list(size = 15)),
+                                             yaxis = list(title = 'y', showgrid = T, showaxeslabels = F, showticklabels = T, gridwidth = 5,
+                                                          titlefont = list(size = 20), tickfont = list(size = 15)),
+                                             zaxis = list(title = 'z', showgrid = T, showaxeslabels = F, showticklabels = T, gridwidth = 5,
+                                                          titlefont = list(size = 20), tickfont = list(size = 15))))
 
   return(fig)
 }
@@ -205,7 +205,7 @@ simulate_cylinder_cluster <- function(spe,
   if (identical(start_loc, end_loc)) warning("Start and end coordinates of the cylinder are the same.")
 
   ## Change cell types in the cylinder cluster
-  spe_coords <- spatialCoords(spe)
+  spe_coords <- SpatialExperiment::spatialCoords(spe)
 
   # Get directional vector
   v1 <- end_loc - start_loc
@@ -255,7 +255,7 @@ simulate_cylinder_dr <- function(spe,
   if (identical(start_loc, end_loc)) warning("Start and end coordinates of the cylinder are the same.")
 
   ## Change cell types in the cylinder cluster
-  spe_coords <- spatialCoords(spe)
+  spe_coords <- SpatialExperiment::spatialCoords(spe)
 
   # Get directional vector
   v1 <- end_loc - start_loc
@@ -317,7 +317,7 @@ simulate_cylinder_ring <- function(spe,
   if (identical(start_loc, end_loc)) warning("Start and end coordinates of the cylinder are the same.")
 
   ## Change cell types in the cylinder cluster
-  spe_coords <- spatialCoords(spe)
+  spe_coords <- SpatialExperiment::spatialCoords(spe)
 
   # Get directional vector
   v1 <- end_loc - start_loc
@@ -434,7 +434,7 @@ simulate_ellipsoid_cluster <- function(spe,
 
   ## Change cell types in the ellipsoid cluster
   # Get spatial coords from spe (rows are x, y, z, columns are each cell)
-  spe_coords <- t(spatialCoords(spe))
+  spe_coords <- t(SpatialExperiment::spatialCoords(spe))
 
   # Apply transformations to spe_coords'
   spe_coords <- solve(T1) %*% solve(T2) %*% solve(T3) %*% (spe_coords - T4)
@@ -497,7 +497,7 @@ simulate_ellipsoid_dr <- function(spe,
 
   ## Change cell types in the ellipsoid cluster
   # Get spatial coords from spe (rows are x, y, z, columns are each cell)
-  spe_coords <- t(spatialCoords(spe))
+  spe_coords <- t(SpatialExperiment::spatialCoords(spe))
 
   # Apply transformations to spe_coords'
   spe_coords <- solve(T1) %*% solve(T2) %*% solve(T3) %*% (spe_coords - T4)
@@ -574,7 +574,7 @@ simulate_ellipsoid_ring <- function(spe,
 
   ## Change cell types in the ellipsoid cluster
   # Get spatial coords from spe (rows are x, y, z, columns are each cell)
-  spe_coords <- t(spatialCoords(spe))
+  spe_coords <- t(SpatialExperiment::spatialCoords(spe))
 
   # Apply transformations to spe_coords'
   spe_coords <- solve(T1) %*% solve(T2) %*% solve(T3) %*% (spe_coords - T4)
@@ -671,7 +671,7 @@ simulate_network_cluster <- function(spe,
                                    (random_coords$z- centre_loc[3])^2 <= radius^2, ]
 
   ## Subset further and pick 'n_vertices' coords to represent the vertices
-  random_coords <- sample_n(random_coords, n_vertices)
+  random_coords <- dplyr:sample_n(random_coords, n_vertices)
 
   ## Get adjacency matrix from points (pairwise distance between points)
   # Assume all points have an edge between each other
@@ -850,7 +850,7 @@ simulate_network_dr <- function(spe,
                                    (random_coords$z- centre_loc[3])^2 <= radius^2, ]
 
   ## Subset further and pick 'n_vertices' coords to represent the vertices
-  random_coords <- sample_n(random_coords, n_vertices)
+  random_coords <- dplyr:sample_n(random_coords, n_vertices)
 
   ## Get adjacency matrix from points (pairwise distance between points)
   # Assume all points have an edge between each other
@@ -1034,7 +1034,7 @@ simulate_network_ring <- function(spe,
                                    (random_coords$z- centre_loc[3])^2 <= radius^2, ]
 
   ## Subset further and pick 'n_vertices' coords to represent the vertices
-  random_coords <- sample_n(random_coords, n_vertices)
+  random_coords <- dplyr:sample_n(random_coords, n_vertices)
 
   ## Get adjacency matrix from points (pairwise distance between points)
   # Assume all points have an edge between each other
@@ -1265,7 +1265,7 @@ simulate_ordered_background_cells3D <- function(n_cells,
   simulation_metadata <- list(background = background_metadata)
 
   ## Convert data frame to spe object
-  spe <- SpatialExperiment(
+  spe <- SpatialExperiment::SpatialExperiment(
     assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
     colData = df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
@@ -1403,7 +1403,7 @@ simulate_random_background_cells3D <- function(n_cells,
   simulation_metadata <- list(background = background_metadata)
 
   ## Convert data frame to spe object
-  spe <- SpatialExperiment(
+  spe <- SpatialExperiment::SpatialExperiment(
     assay = matrix(data = NA, nrow = nrow(pois_df), ncol = nrow(pois_df)),
     colData = pois_df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
@@ -1567,7 +1567,7 @@ simulate_sphere_cluster <- function(spe,
   centre_loc <- cluster_properties$centre_loc
 
   # Change cell types in the sphere cluster
-  spe_coords <- data.frame(spatialCoords(spe))
+  spe_coords <- data.frame(SpatialExperiment::spatialCoords(spe))
 
   spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
                                  (spe_coords$Cell.Y.Position - centre_loc[2])^2 +
@@ -1603,7 +1603,7 @@ simulate_sphere_dr <- function(spe,
   outer_ring_width <- dr_properties$outer_ring_width
 
   ## Change cell types in the sphere ringed cluster
-  spe_coords <- data.frame(spatialCoords(spe))
+  spe_coords <- data.frame(SpatialExperiment::spatialCoords(spe))
 
   # Start with cells in outer ring
   spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
@@ -1652,7 +1652,7 @@ simulate_sphere_ring <- function(spe,
   ring_width <- ring_properties$ring_width
 
   ## Change cell types in the sphere ringed cluster
-  spe_coords <- data.frame(spatialCoords(spe))
+  spe_coords <- data.frame(SpatialExperiment::spatialCoords(spe))
 
   # Start with cells in ring
   spe[["Cell.Type"]] <- ifelse((spe_coords$Cell.X.Position - centre_loc[1])^2 +
@@ -2423,7 +2423,7 @@ simulate_cluster_interactive <- function(simulated_spe = NULL) {
         properties[[1]][[cell_proportion_option]] <- cell_proportions
 
         ## Convert spe object to data frame
-        df <- data.frame(spatialCoords(simulated_spe), "Cell.Type" = simulated_spe[["Cell.Type"]])
+        df <- data.frame(SpatialExperiment::spatialCoords(simulated_spe), "Cell.Type" = simulated_spe[["Cell.Type"]])
 
         ## Just change the cell type of the temp_cell_type, no need to actually re-simulate
         df[["Cell.Type"]] <- ifelse(df[["Cell.Type"]] == temp_cell_type,
@@ -2439,7 +2439,7 @@ simulate_cluster_interactive <- function(simulated_spe = NULL) {
         metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_proportion_option]] <- cell_proportions
 
         # Convert data frame to spe object
-        simulated_spe_new <- SpatialExperiment(
+        simulated_spe_new <- SpatialExperiment::SpatialExperiment(
           assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
           colData = df,
           spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),

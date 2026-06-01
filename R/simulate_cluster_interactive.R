@@ -364,7 +364,7 @@ simulate_cluster_interactive <- function(simulated_spe = NULL) {
         metadata[["simulation"]][[length(metadata[["simulation"]])]][[cell_proportion_option]] <- cell_proportions
 
         # Convert data frame to spe object
-        simulated_spe_new <- SpatialExperiment(
+        simulated_spe_new <- SpatialExperiment::SpatialExperiment(
           assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
           colData = df,
           spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
