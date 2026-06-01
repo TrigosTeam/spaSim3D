@@ -6,3 +6,115 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+One approach that spaSim3D uses to generate simulations is through creating and
+updating simulation metadata. It works by first obtaining all the desired
+parameters for a simulation in a separate metadata output, and then feeding this 
+into  another function to generate the 3D simulation.
+
+# Templates for spaSim3D metadata
+First, you need to generate templates of the metadata. These templates come in 
+the form of a list of all the different parameters needed. You can update these 
+parameters after.
+
+You should first start off with background metadata, which contains all 
+parameters needed for the background cells of the 3D tissue. The background type
+can either be set to "random" or "ordered". These types emulate the different
+background cell arrangements seen in 3D tissues and are explained in detail in 
+the simulate_with_classic_functions.Rmd vignette.
+
+Then, you can add cluster metadata, which would contain parameters for the cell
+clusters you want to add to your 3D tissue. Repeat this multiple times for
+multiple clusters. It requires the user to specify the cluster type, which can
+be set to "regular", "ring" or "double ring", and the cluster shape, which can
+be set to "sphere", "ellipsoid", "cylinder" or "network". These different 
+cluster types and cluster shapes are able to capture the structures seen in 
+real 3D tissues and are explained in detail in the 
+simulate_with_classic_functions.Rmd vignette.
+
+```{r}
+library(spaSim3D)
+
+# Get background metadata
+background_metadata <- spe_metadata_background_template(background_type = "random",
+                                                        original_spe_metadata = NULL)
+ 
+# Add cluster metadata (using background metadata as background)
+# This will be cluster_1 in the metadata
+cluster_metadata <- spe_metadata_cluster_template(cluster_type = "regular", 
+                                                  shape = "sphere", 
+                                                  original_spe_metadata = background_metadata)
+
+# This will be cluster_2 in the metadata
+cluster_metadata <- spe_metadata_cluster_template(cluster_type = "ring", 
+                                                  shape = "ellipsoid", 
+                                                  original_spe_metadata = cluster_metadata)
+
+# This will be cluster_3 in the metadata
+cluster_metadata <- spe_metadata_cluster_template(cluster_type = "double ring", 
+                                                  shape = "cylinder", 
+                                                  original_spe_metadata= cluster_metadata)
+
+```
+
+# Updating the templates
+The templates contain parameters equal to arbitrary values. However, it is up to 
+the user to change the parameters to their specifications. For example, changing
+the 3D tissue size, or increasing the size of the clusters, or changing the
+centre position of the clusters, etc.
+
+There are some parameters that should never update. For the background, don't
+update the background_type - if you want to switch from random to ordered or 
+vice versa, remake the template. For the clusters, don't update the cluster_type
+or shape, remake the template instead. It's also important that you don't make
+new parameters, and only update the existing parameters found in the templates.
+
+For description about the parameters that you can update, this is lazy answer,
+but please see the simulate_with_classic_functions.Rmd vignette and do
+help(whatever_simulation_function_in_the_vignette) to get a breakdown of what 
+each parameter means.
+
+This part is a bit tedious, however, for a large scale simulation project,
+often these parameters are 'set and forget' - figure what parameters you want to
+work with at the start, and you won't really need to update it later.
+```{r}
+# Change background metadata
+cluster_metadata$background$n_cells <- 30000
+cluster_metadata$background$width <- 450
+cluster_metadata$background$minimum_distance_between_cells <- 2
+cluster_metadata$background$cell_types <- c("Others", "Immune")
+cluster_metadata$background$cell_proportions <- c(0.99, 0.01)
+
+# Change cluster metadata
+cluster_metadata$cluster_1$radius <- 80
+cluster_metadata$cluster_1$cluster_cell_proportions <- c(0.9, 0.1, 0)
+
+cluster_metadata$cluster_2$ring_width <- 10 
+
+cluster_metadata$cluster_3$outer_ring_width <- 5
+
+
+```
+
+
+# Simulating with the templates
+After you've updated the parameters to your liking, simulate :)
+```{r}
+# Simulating
+clusters <- simulate_spe_metadata3D(cluster_metadata, plot_image = FALSE)
+
+# Plot
+plot_cells3D(clusters,
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "tomato"))
+```
+
+
+
