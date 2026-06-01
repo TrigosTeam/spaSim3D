@@ -37,7 +37,7 @@ bg_metadata <- spe_metadata_background_template("random")
 # Change background metadata
 bg_metadata$background$n_cells <- 25000
 
-Get spe from background metadata
+# Get spe from background metadata
 spe_background <- simulate_spe_metadata3D(bg_metadata)
 
 }

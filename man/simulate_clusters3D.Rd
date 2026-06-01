@@ -58,7 +58,7 @@ bg_r <- simulate_random_background_cells3D(n_cells = 10000,
                                            minimum_distance_between_cells = 0.5,
                                            background_cell_type = "Others",
                                            plot_image = FALSE)
-                                           
+
 # Simulate clusters
 clusters <- simulate_clusters3D(bg_r,
                                 cluster_properties = list(
@@ -87,7 +87,7 @@ clusters <- simulate_clusters3D(bg_r,
                                     radii = c(15, 20, 25),
                                     centre_loc = c(70, 70, 70),
                                     axes_rotation = c(0, 0, 0)
-                                  )
+                                  ),
                                   # Network example
                                   C4 = list(
                                     shape = "network",
@@ -102,5 +102,5 @@ clusters <- simulate_clusters3D(bg_r,
                                 plot_image = TRUE,
                                 plot_cell_types = c("Others", "Immune", "Endothelial", "Tumour"),
                                 plot_colours = c("lightgray", "skyblue", "#FF7F7F", "orange"))
-                                           
+
 }

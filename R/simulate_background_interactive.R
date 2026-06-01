@@ -47,7 +47,12 @@ simulate_background_interactive <- function() {
 
     valid_input <- FALSE
     while (!valid_input) {
-      user_input <- readline(prompt = prompt)
+      if (interactive) {
+        user_input <- readline(prompt = prompt)
+      } else {
+        user_input <- 1
+      }
+
       # Try converting to numeric
       integer_value <- tryCatch({as.numeric(user_input)}, error = function(e) NA)
 
