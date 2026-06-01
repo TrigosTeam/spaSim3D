@@ -52,7 +52,7 @@ bg_r <- simulate_random_background_cells3D(n_cells = 10000,
                                            minimum_distance_between_cells = 0.5,
                                            background_cell_type = "Others",
                                            plot_image = FALSE)
-                                           
+
 # Simulate cluster
 network_cluster <- simulate_network_cluster(bg_r,
                                             cluster_properties = list(
@@ -66,5 +66,5 @@ network_cluster <- simulate_network_cluster(bg_r,
                                             ))
 # Plot
 plots_cells3D(network_cluster)
-                                           
+
 }

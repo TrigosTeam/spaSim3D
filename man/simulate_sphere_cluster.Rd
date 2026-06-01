@@ -48,7 +48,7 @@ bg_r <- simulate_random_background_cells3D(n_cells = 10000,
                                            minimum_distance_between_cells = 0.5,
                                            background_cell_type = "Others",
                                            plot_image = FALSE)
-                                           
+
 # Simulate cluster
 sphere_cluster <- simulate_sphere_cluster(bg_r,
                                           cluster_properties = list(
@@ -60,5 +60,5 @@ sphere_cluster <- simulate_sphere_cluster(bg_r,
                                           ))
 # Plot
 plots_cells3D(sphere_cluster)
-                                           
+
 }

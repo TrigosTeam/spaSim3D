@@ -62,5 +62,5 @@ bg_n <- simulate_normal_background_cells3D(n_cells = 10000,
                                            jitter_proportion = 0,
                                            background_cell_type = "Others",
                                            plot_image = TRUE)
-                                           
+
 }

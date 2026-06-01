@@ -56,7 +56,7 @@ bg_r <- simulate_random_background_cells3D(n_cells = 10000,
                                            minimum_distance_between_cells = 0.5,
                                            background_cell_type = "Others",
                                            plot_image = FALSE)
-                                           
+
 # Simulate cluster
 sphere_ring_cluster <- simulate_cylinder_ring(bg_r,
                                               ring_properties = list(
@@ -71,5 +71,5 @@ sphere_ring_cluster <- simulate_cylinder_ring(bg_r,
                                               ))
 # Plot
 plots_cells3D(sphere_ring_cluster)
-                                            
+
 }
