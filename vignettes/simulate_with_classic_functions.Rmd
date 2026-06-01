@@ -87,10 +87,10 @@ type.
 ```{r}
 ## Simulate mixing
 
-# The background will have 50% Other, 25% Immune and 25% Tumour cells.
+# The background will have 95% Other, 2.5% Immune and 2.5% Tumour cells.
 mixed_background <- simulate_mixing3D(random_background,
                                       cell_types = c("Others", "Immune", "Tumour"),
-                                      cell_proportions = c(0.5, 0.25, 0.25),
+                                      cell_proportions = c(0.95, 0.025, 0.025),
                                       plot_image = FALSE)
 
 # Plot
@@ -114,7 +114,9 @@ help(whatever_simulation_function) to get a breakdown of what each parameter
 means.
 
 Hence, the 4 different simulation functions to use to generate these 4 different
-shaped cell clusters + 1 function that combines these 4 functions.
+shaped cell clusters + 1 function that combines these 4 functions. I recommend
+just using the function that combines the 4 together, but I won't stop you from
+using the individual functions.
 
 As stated before, the parameters for each shape will differ, but they all share
 common parameters: cluster_cell_types and cluster_cell_proportions. These are
@@ -145,7 +147,7 @@ clusters <- simulate_clusters3D(mixed_background,
                                         cluster_cell_proportions = c(0.95, 0.05),
                                         radius = 10,
                                         start_loc = c(0, 0, 0),
-                                        end_loc   = c(20, 20 , 100)
+                                        end_loc = c(20, 20 , 100)
                                     ),
                                     C3 = list(
                                         shape = "ellipsoid",
@@ -163,19 +165,276 @@ plot_cells3D(clusters,
              plot_cell_types = c("Others", "Immune", "Tumour"),
              plot_colours = c("lightgray", "skyblue", "orange"))
 
+
+
+## Using individual functions
+# Sphere
+sphere_cluster <- simulate_sphere_cluster(mixed_background,
+                                          cluster_properties = list(
+                                            shape = "sphere",
+                                            cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                            cluster_cell_proportions = c(0.55, 0.4, 0.05),
+                                            radius = 25,
+                                            centre_loc = c(40, 40, 40)
+                                          ))
+plot_cells3D(sphere_cluster,  
+             plot_cell_types = c("Others", "Immune", "Tumour"),
+             plot_colours = c("lightgray", "skyblue", "orange"))
+
+# Ellipsoid
+ellipsoid_cluster <- simulate_ellipsoid_cluster(mixed_background,
+                                                cluster_properties = list(
+                                                  shape = "ellipsoid",
+                                                  cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                                  cluster_cell_proportions = c(0.65, 0.3, 0.05),
+                                                  radii = c(15, 20, 25),
+                                                  centre_loc = c(70, 70, 70),
+                                                  axes_rotation = c(0, 0, 0)
+                                                ))
+plot_cells3D(ellipsoid_cluster,  
+             plot_cell_types = c("Others", "Immune", "Tumour"),
+             plot_colours = c("lightgray", "skyblue", "orange"))
+
+# Cylinder
+cylinder_cluster <- simulate_cylinder_cluster(mixed_background,
+                                              cluster_properties = list(
+                                                shape = "cylinder",
+                                                cluster_cell_types = c("Endothelial", "Others"),
+                                                cluster_cell_proportions = c(0.95, 0.05),
+                                                radius = 10,
+                                                start_loc = c(0, 0, 0),
+                                                end_loc   = c(20, 20, 100)
+                                              ))
+plot_cells3D(cylinder_cluster,  
+             plot_cell_types = c("Others", "Immune", "Tumour", "Endothelial"),
+             plot_colours = c("lightgray", "skyblue", "orange", "tomato"))
+
+# Network
+network_cluster <- simulate_network_cluster(mixed_background,
+                                            cluster_properties = list(
+                                                shape = "network",
+                                                cluster_cell_types = c("Immune1", "Immune2", "Immune3"),
+                                                cluster_cell_proportions = c(0.85, 0.10, 0.05),
+                                                n_edges = 15,
+                                                width = 8,
+                                                centre_loc = c(50, 50, 50), # Rough centre of network cluster
+                                                radius = 50 # Rough radius spanned by the network cluster
+                                            ))
+plot_cells3D(network_cluster,  
+             plot_cell_types = c("Others", "Immune1", "Immune2", "Immune3"),
+             plot_colours = c("lightgray", "skyblue", "green", "tomato"))
+
 ```
 
 
-# Simulate rings
+# Simulate clusters with rings
+Instead of simulating cell clusters, you can simulate cell clusters with a ring
+around them. This aims to emulate what is seen in some real tumour tissues,
+where immune cells are found surrounding the tumour, unable to infiltrate the 
+tumour cluster.
+
+Each shape has its own specialised 'ring' function for simulation. There are 4
+new functions that simulate each shaped cluster with a ring + 1 function that 
+combines these 4 functions to simulate clusters with rings. Again, I recommend
+using the 1 function that combines the 4 functions.
+
+The parameters are exactly the same with the addition of ring specific
+parameters - including the width of the ring, what cell types make up the ring
+and the proportion of those cell types within the ring.
 
 ```{r}
+## Simulate ringed clusters
+
+# Use the simulate_rings3D to simulate numerous and different types of ringed 
+# clusters at once. This will simulate a sphere, cylinder and an ellipsoid, all
+# with a cell ring.
+
+ringed_clusters <- simulate_rings3D(mixed_background,
+                                    ring_properties = list(
+                                        R1 = list(
+                                            shape = "sphere",
+                                            cluster_cell_types = c("Tumour", "Others"),
+                                            cluster_cell_proportions = c(0.95, 0.05),
+                                            radius = 20,
+                                            centre_loc = c(40, 40, 40),
+                                            ring_cell_types = c("Immune", "Others"),
+                                            ring_cell_proportions = c(0.85, 0.15),
+                                            ring_width = 5
+                                        ),
+                                        R2 = list(
+                                            shape = "cylinder",
+                                            cluster_cell_types = c("Void"),
+                                            cluster_cell_proportions = c(1),
+                                            radius = 8,
+                                            start_loc = c(0, 0, 0),
+                                            end_loc   = c(20, 20 , 100),
+                                            ring_cell_types = c("Endothelial", "Others"),
+                                            ring_cell_proportions = c(0.85, 0.15),
+                                            ring_width = 5
+                                        ),
+                                        R3 = list(
+                                            shape = "ellipsoid",
+                                            cluster_cell_types = c("Tumour", "Others"),
+                                            cluster_cell_proportions = c(0.95, 0.05),
+                                            radii = c(20, 30, 40),
+                                            centre_loc = c(70, 70, 70),
+                                            axes_rotation = c(0, 0, 0),
+                                            ring_cell_types = c("Immune", "Others"),
+                                            ring_cell_proportions = c(0.85, 0.15),
+                                            ring_width = 5
+                                        )
+                                    ),
+                                    plot_image = FALSE)
+
+# Plot
+plot_cells3D(ringed_clusters,  
+             plot_cell_types = c("Others", "Tumour", "Immune", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "skyblue", "#FF7F7F"))
+
+
+## Using individual functions
+# Sphere
+sphere_ring_cluster <- simulate_cylinder_ring(mixed_background,
+                                              ring_properties = list(
+                                                shape = "sphere",
+                                                cluster_cell_types = c("Tumour", "Others"),
+                                                cluster_cell_proportions = c(0.95, 0.05),
+                                                radius = 20,
+                                                centre_loc = c(40, 40, 40),
+                                                ring_cell_types = c("Immune", "Others"),
+                                                ring_cell_proportions = c(0.85, 0.15),
+                                                ring_width = 5
+                                              ))
+plot_cells3D(sphere_ring_cluster,  
+             plot_cell_types = c("Others", "Tumour", "Immune"),
+             plot_colours = c("lightgray", "orange", "skyblue"))
+
+# Ellipsoid
+ellipsoid_ring_cluster <- simulate_ellipsoid_ring(mixed_background,
+                                                  ring_properties = list(
+                                                    shape = "ellipsoid",
+                                                    cluster_cell_types = c("Tumour", "Others"),
+                                                    cluster_cell_proportions = c(0.95, 0.05),
+                                                    radii = c(20, 30, 40),
+                                                    centre_loc = c(70, 70, 70),
+                                                    axes_rotation = c(0, 0, 0),
+                                                    ring_cell_types = c("Immune", "Others"),
+                                                    ring_cell_proportions = c(0.85, 0.15),
+                                                    ring_width = 5
+                                                  ))
+plot_cells3D(ellipsoid_ring_cluster,  
+             plot_cell_types = c("Others", "Tumour", "Immune"),
+             plot_colours = c("lightgray", "orange", "skyblue"))
+# Cylinder
+cylinder_ring_cluster <- simulate_cylinder_ring(mixed_background,
+                                                ring_properties = list(
+                                                  shape = "cylinder",
+                                                  cluster_cell_types = c("Endothelial", "Others"),
+                                                  cluster_cell_proportions = c(0.95, 0.05),
+                                                  radius = 10,
+                                                  start_loc = c(0, 0, 0),
+                                                  end_loc = c(20, 20, 100),
+                                                  ring_cell_types = c("Immune1", "Others"),
+                                                  ring_cell_proportions = c(0.85, 0.15),
+                                                  ring_width = 5
+                                                ))
+plot_cells3D(cylinder_ring_cluster,  
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "#FF7F7F"))
+
+# Network
+network_ring_cluster <- simulate_network_ring(mixed_background,
+                                              ring_properties = list(
+                                                shape = "network",
+                                                cluster_cell_types = c("Immune1"),
+                                                cluster_cell_proportions = c(1),
+                                                n_edges = 15,
+                                                width = 8,
+                                                centre_loc = c(50, 50, 50),
+                                                radius = 50,
+                                                ring_cell_types = c("Immune2"),
+                                                ring_cell_proportions = c(1),
+                                                ring_width = 2
+                                              ))
+plot_cells3D(network_ring_cluster,  
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Immune2"),
+             plot_colours = c("lightgray", "orange", "skyblue", "green", "orchid"))
 
 ```
 
 
-# Simulate double rings
+# Simulate clusters with double rings
+Instead of a ring, how about a double ring? The purpose of this is to emulate
+real tissues where clusters of cells are shown to have an inner ring (e.g.
+internal tumour margin) and an outer ring (e.g. external tumour margin).
+
+
+Each shape has its own specialised 'double ring' function for simulation. There 
+are 4 new functions that simulate each shaped cluster with a double ring + 1 
+function that combines these 4 functions to simulate clusters with double rings. 
+Again, I recommend using the 1 function that combines the 4 functions.
+
+The parameters have been updated so that the double ring, composed of an inner
+ring and outer ring, have their own set of parameters - including the width of 
+each ring, what cell types make up each ring and the proportion of those cell 
+types within each ring.
 
 ```{r}
+## Simulate double ringed clusters
 
+# Use the simulate_double_rings3D to simulate numerous and different types of 
+# doubled ringed clusters at once. This will simulate a sphere, cylinder and an 
+# ellipsoid, all with a double cell ring.
+
+double_ringed_clusters <- simulate_double_rings3D(mixed_background,
+                                                  dr_properties = list(
+                                                      D1 = list(
+                                                          shape = "sphere",
+                                                          cluster_cell_types = c("Tumour", "Others"),
+                                                          cluster_cell_proportions = c(0.95, 0.05),
+                                                          radius = 20,
+                                                          centre_loc = c(40, 40, 40),
+                                                          inner_ring_cell_types = c("Immune1", "Others"),
+                                                          inner_ring_cell_proportions = c(0.85, 0.15),
+                                                          inner_ring_width = 5,
+                                                          outer_ring_cell_types = c("Immune2"),
+                                                          outer_ring_cell_proportions = c(1),
+                                                          outer_ring_width = 3
+                                                      ),
+                                                      D2 = list(
+                                                          shape = "cylinder",
+                                                          cluster_cell_types = c("Void"),
+                                                          cluster_cell_proportions = c(1),
+                                                          radius = 8,
+                                                          start_loc = c(0, 0, 0),
+                                                          end_loc   = c(20, 20 , 100),
+                                                          inner_ring_cell_types = c("Endothelial", "Others"),
+                                                          inner_ring_cell_proportions = c(0.85, 0.15),
+                                                          inner_ring_width = 5,
+                                                          outer_ring_cell_types = c("Immune2"),
+                                                          outer_ring_cell_proportions = c(1),
+                                                          outer_ring_width = 3
+                                                      ),
+                                                      D3 = list(
+                                                          shape = "ellipsoid",
+                                                          cluster_cell_types = c("Tumour", "Others"),
+                                                          cluster_cell_proportions = c(0.95, 0.05),
+                                                          radii = c(10, 15, 20),
+                                                          centre_loc = c(70, 70, 70),
+                                                          axes_rotation = c(0, 0, 0),
+                                                          inner_ring_cell_types = c("Immune1", "Others"),
+                                                          inner_ring_cell_proportions = c(0.85, 0.15),
+                                                          inner_ring_width = 5,
+                                                          outer_ring_cell_types = c("Immune2"),
+                                                          outer_ring_cell_proportions = c(1),
+                                                          outer_ring_width = 3
+                                                      )
+                                                  ),
+                                                  plot_image = FALSE) 
+
+# Plot
+plot_cells3D(double_ringed_clusters,  
+             plot_cell_types = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "skyblue", "blue", "#FF7F7F"))
 ```
 
