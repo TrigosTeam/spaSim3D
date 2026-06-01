@@ -293,8 +293,8 @@ plot_cells3D(ringed_clusters,
 
 
 ## Using individual functions
-# Sphere
-sphere_ring_cluster <- simulate_cylinder_ring(mixed_background,
+# Sphere with ring
+sphere_ring_cluster <- simulate_sphere_ring(mixed_background,
                                               ring_properties = list(
                                                 shape = "sphere",
                                                 cluster_cell_types = c("Tumour", "Others"),
@@ -309,7 +309,7 @@ plot_cells3D(sphere_ring_cluster,
              plot_cell_types = c("Others", "Tumour", "Immune"),
              plot_colours = c("lightgray", "orange", "skyblue"))
 
-# Ellipsoid
+# Ellipsoid with ring
 ellipsoid_ring_cluster <- simulate_ellipsoid_ring(mixed_background,
                                                   ring_properties = list(
                                                     shape = "ellipsoid",
@@ -325,7 +325,8 @@ ellipsoid_ring_cluster <- simulate_ellipsoid_ring(mixed_background,
 plot_cells3D(ellipsoid_ring_cluster,  
              plot_cell_types = c("Others", "Tumour", "Immune"),
              plot_colours = c("lightgray", "orange", "skyblue"))
-# Cylinder
+
+# Cylinder with ring
 cylinder_ring_cluster <- simulate_cylinder_ring(mixed_background,
                                                 ring_properties = list(
                                                   shape = "cylinder",
@@ -342,7 +343,7 @@ plot_cells3D(cylinder_ring_cluster,
              plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Endothelial"),
              plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "#FF7F7F"))
 
-# Network
+# Network with ring
 network_ring_cluster <- simulate_network_ring(mixed_background,
                                               ring_properties = list(
                                                 shape = "network",
@@ -436,5 +437,86 @@ double_ringed_clusters <- simulate_double_rings3D(mixed_background,
 plot_cells3D(double_ringed_clusters,  
              plot_cell_types = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
              plot_colours = c("lightgray", "orange", "skyblue", "blue", "#FF7F7F"))
+
+## Using individual functions
+# Sphere with double ring
+sphere_dr_cluster <- simulate_sphere_dr(mixed_background,
+                                        dr_properties = list(
+                                            shape = "sphere",
+                                            cluster_cell_types = c("Tumour", "Others"),
+                                            cluster_cell_proportions = c(0.95, 0.05),
+                                            radius = 20,
+                                            centre_loc = c(40, 40, 40),
+                                            inner_ring_cell_types = c("Immune1", "Others"),
+                                            inner_ring_cell_proportions = c(0.85, 0.15),
+                                            inner_ring_width = 5,
+                                            outer_ring_cell_types = c("Immune2"),
+                                            outer_ring_cell_proportions = c(1),
+                                            outer_ring_width = 3
+                                        ))
+plot_cells3D(sphere_ring_cluster,  
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1"),
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen"))
+
+# Ellipsoid with double ring
+ellipsoid_dr_cluster <- simulate_ellipsoid_dr(mixed_background,
+                                              dr_properties = list(
+                                                shape = "ellipsoid",
+                                                cluster_cell_types = c("Tumour", "Others"),
+                                                cluster_cell_proportions = c(0.95, 0.05),
+                                                radii = c(10, 15, 20),
+                                                centre_loc = c(70, 70, 70),
+                                                axes_rotation = c(0, 0, 0),
+                                                inner_ring_cell_types = c("Immune1", "Others"),
+                                                inner_ring_cell_proportions = c(0.85, 0.15),
+                                                inner_ring_width = 5,
+                                                outer_ring_cell_types = c("Immune2"),
+                                                outer_ring_cell_proportions = c(1),
+                                                outer_ring_width = 3
+                                              ))
+plot_cells3D(ellipsoid_dr_cluster,  
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Immune2"),
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "orchid"))
+
+# Cylinder with double ring
+cylinder_dr_cluster <- simulate_cylinder_dr(mixed_background,
+                                            dr_properties = list(
+                                              shape = "cylinder",
+                                              cluster_cell_types = c("Endothelial", "Others"),
+                                              cluster_cell_proportions = c(0.95, 0.05),
+                                              radius = 10,
+                                              start_loc = c(0, 0, 0),
+                                              end_loc   = c(20, 20, 100),
+                                              inner_ring_cell_types = c("Immune1", "Others"),
+                                              inner_ring_cell_proportions = c(0.85, 0.15),
+                                              inner_ring_width = 5,
+                                              outer_ring_cell_types = c("Immune2"),
+                                              outer_ring_cell_proportions = c(1),
+                                              outer_ring_width = 3
+                                            ))
+plot_cells3D(cylinder_dr_cluster,  
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Immune2", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "orchid", "tomato"))
+
+# Network with double ring
+network_dr_cluster <- simulate_network_dr(mixed_background,
+                                          dr_properties = list(
+                                            shape = "network",
+                                            cluster_cell_types = c("Tumour"),
+                                            cluster_cell_proportions = c(1),
+                                            n_edges = 15,
+                                            width = 5,
+                                            centre_loc = c(50, 50, 50),
+                                            radius = 50,
+                                            inner_ring_cell_types = c("Endothelial"),
+                                            inner_ring_cell_proportions = c(1),
+                                            inner_ring_width = 2,
+                                            outer_ring_cell_types = c("Immune"),
+                                            outer_ring_cell_proportions = c(1),
+                                            outer_ring_width = 2
+                                          ))
+plot_cells3D(network_dr_cluster,  
+             plot_cell_types = c("Others", "Tumour", "Immune", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "skyblue", "tomato"))
 ```
 
