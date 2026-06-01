@@ -7,6 +7,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
 spaSim3D has two interactive functions which allow the user to generate 3D
 tissue simulations at their own pace. When running each function, you will be
 asked to input specific inputs directly into the console to simulate 3D tissues.
