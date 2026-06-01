@@ -30,21 +30,27 @@ spaSim3D is available for installation via our GitHub.
 ### Install from GitHub ###
 # install.packages("devtools")
 # devtools::install_github("TrigosTeam/spaSim3D")
-
-library(spaSim3D)
+# 
+# if (!requireNamespace("BiocManager", quietly = TRUE))     
+#   install.packages("BiocManager")
+# BiocManager::install("SpatialExperiment")
 ```
 
 # Visual example
-```{r}
-# spe_metadata <- spe_metadata_background_template("random")
-# spe_metadata <- spe_metadata_cluster_template("regular", "sphere", spe_metadata)
-# spe_metadata <- spe_metadata_cluster_template("regular", "network", spe_metadata)
-# spe_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", spe_metadata)
-# spe_clusters <- simulate_spe_metadata3D(spe_metadata, 
-#                                         plot_image = T, 
-#                                         plot_cell_types = c("Tumour", "Immune", "Immune1"),
-#                                         plot_colours = c("orange", "skyblue", "blue"))
-#
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(spaSim3D)
+
+spe_metadata <- spe_metadata_background_template("random")
+spe_metadata <- spe_metadata_cluster_template("regular", "sphere", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("regular", "network", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", spe_metadata)
+spe_clusters <- simulate_spe_metadata3D(spe_metadata,
+                                        plot_image = F)
+
+plot_cells3D(spe_clusters,
+             plot_cell_types = c("Tumour", "Immune", "Immune1"),
+             plot_colours = c("orange", "skyblue", "blue"))
+
 
 ```
 
