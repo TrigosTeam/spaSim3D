@@ -15,7 +15,7 @@
 simulate_background_interactive <- function() {
 
   ### Message strings
-  message_background <- paste("Hello spaSim-3D user, how do you want your background cells to look like?\n
+  message_background <- paste("Hello spaSim3D user, how do you want your background cells to look like?\n
           1. Random pattern\n
           2. Ordered pattern\n\n",
                               "In a random pattern, cells are placed randomly...\n",

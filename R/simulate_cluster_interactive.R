@@ -27,7 +27,7 @@
 simulate_cluster_interactive <- function(simulated_spe = NULL) {
 
   ### Message strings
-  message_no_simulated_spe <- paste("Hello spaSim-3D user. Please input your simulated spe object into this function.\n",
+  message_no_simulated_spe <- paste("Hello spaSim3D user. Please input your simulated spe object into this function.\n",
                                     "If you don't have any, you can use the spaSim3D_background_integrator function")
 
   message_shape_choice <- paste("Hello spaSim-3D user, hopefully you can see a plot of your current spe object. What type of shape do you want your cluster to be?\n
