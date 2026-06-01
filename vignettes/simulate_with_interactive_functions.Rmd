@@ -21,6 +21,11 @@ simulate_cluster_interactive().
 
 That's it. You can keep adding cell clusters, or start from scratch.
 
+I think these functions are great for users who have only just encountered this
+package for the first time. However, for large scale simulation projects, an
+interactive approach doesn't seem logical, and I would recommend the other 
+vignettes to see other approaches instead.
+
 ```{r}
 ### First, generate the background
 # background_spe <- simulate_background_interactive()
