@@ -6,3 +6,29 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+spaSim3D has two interactive functions which allow the user to generate 3D
+tissue simulations at their own pace. When running each function, you will be
+asked to input specific inputs directly into the console to simulate 3D tissues.
+The meaning of each input should be clearly described as you work through the 
+functions, so I won't explain them in this vignette.
+
+Start by generating the 'background' of cells for your 3D tissue using 
+simulate_background_interactive().
+
+Then, generate 3D cell clusters on top of your background using
+simulate_cluster_interactive().
+
+That's it. You can keep adding cell clusters, or start from scratch.
+
+```{r}
+### First, generate the background
+# background_spe <- simulate_background_interactive()
+
+### Add a cluster to the background
+# cluster_spe <- simulate_cluster_interactive(background_spe)
+
+### Add another cluster
+# cluster_spe <- simulate_cluster_interactive(cluster_spe)
+```
+
