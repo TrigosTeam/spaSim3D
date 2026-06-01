@@ -2,7 +2,7 @@
 title: "Simulate with classic functions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{simulate with classic functions}
+  %\VignetteIndexEntry{Simulate with classic functions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
