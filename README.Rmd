@@ -48,14 +48,14 @@ plot...
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 library(spaSim3D)
 
-spe_metadata <- spe_metadata_background_template("random")
-spe_metadata <- spe_metadata_cluster_template("regular", "sphere", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("regular", "network", spe_metadata)
-spe_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", spe_metadata)
-spe_clusters <- simulate_spe_metadata3D(spe_metadata,
+background_metadata <- spe_metadata_background_template("random")
+cluster_metadata <- spe_metadata_cluster_template("regular", "sphere", background_metadata)
+cluster_metadata <- spe_metadata_cluster_template("regular", "network", cluster_metadata)
+cluster_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", cluster_metadata)
+clusters <- simulate_spe_metadata3D(cluster_metadata,
                                         plot_image = F)
 # Plot
-# plot_cells3D(spe_clusters,
+# plot_cells3D(clusters,
 #              plot_cell_types = c("Tumour", "Immune", "Immune1"),
 #              plot_colours = c("orange", "skyblue", "blue"))
 
