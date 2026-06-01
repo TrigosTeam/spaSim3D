@@ -13,3 +13,169 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+
+spaSim3D is an 3D adaptation of the original spaSim. Hence, these 'classic
+functions' are the functions which are literally the 3D equivalent of the
+simulation functions used in the original spaSim.
+
+Do I recommend using these functions - No. I think inputs can get quite messy
+when using these functions. I would recommend using the metadata functions
+instead, which I think are more cleaner, but, you do you.
+
+Anyway, let's go through each one :)
+
+
+# Simulate background cells
+spaSim3D had two methods to simulate background cells. Both methods involve
+creating a 3D window and filling it with 'background cells' - blank cells with
+no cell type identity. The methods differ in how the cells are placed in the
+background:
+
+1. simulate_random_background_cells3D results in a 3D tissue where the cells are
+positioned randomly, following a Poisson distribution. This is designed to mimic
+3D tumour tissues where the cells often exhibit a random arrangement.
+
+2. simulate_ordered_background_cells3D results in a 3D tissue where the cell are
+positioned in an organised grid pattern such that adjacent cells are equidistant
+from each other. This is designed to mimic healthy 3D tissues where the cells
+often exhibit a uniform arrangement.
+
+```{r}
+library(spaSim3D)
+
+# 1. Simulate random background of cells
+random_background <- simulate_random_background_cells3D(n_cells = 10000,
+                                                        length = 100,
+                                                        width = 100,
+                                                        height = 100,
+                                                        minimum_distance_between_cells = 0.5,
+                                                        background_cell_type = "Others",
+                                                        plot_image = FALSE)
+
+# Plot - apparently the plot_image parameter doesn't like to show the plot when knitting to html
+plot_cells3D(random_background, 
+             plot_cell_types = "Others", 
+             plot_colours = "lightgray")
+
+
+# 2. Simulate ordered background of cells
+ordered_background <- simulate_ordered_background_cells3D(n_cells = 10000,
+                                                          length = 100,
+                                                          width = 100,
+                                                          height = 100,
+                                                          jitter_proportion = 0,
+                                                          background_cell_type = "Others",
+                                                          plot_image = FALSE)
+
+# Plot
+plot_cells3D(ordered_background, 
+             plot_cell_types = "Others", 
+             plot_colours = "lightgray")
+
+```
+
+# Simulate mixing of the background cells
+The background functions simulate a background of a blank, undefined cell type.
+If users which to assign cell types randomly to the background cells, they can
+use the mixing function. 
+
+The user inputs a selection of cell types and their desired proportions. Then, 
+each individual cells is reassigned to these chosen cell types with a 
+probability that directly corresponds to the desired proportion of that cell 
+type.
+
+```{r}
+## Simulate mixing
+
+# The background will have 50% Other, 25% Immune and 25% Tumour cells.
+mixed_background <- simulate_mixing3D(random_background,
+                                      cell_types = c("Others", "Immune", "Tumour"),
+                                      cell_proportions = c(0.5, 0.25, 0.25),
+                                      plot_image = FALSE)
+
+# Plot
+plot_cells3D(mixed_background,  
+             plot_cell_types = c("Others", "Immune", "Tumour"),
+             plot_colours = c("lightgray", "skyblue", "orange"))
+
+```
+
+
+# Simulate clusters
+Once you've generated the background of cells, you want to simulate clusters
+within the background. These clusters can mimic clusters of tumour cells seen
+in cancer tissues, or blood vessels, or immune networks. If you are creative
+enough, you can use these clusters to simulate animal embryos.
+
+spaSim3D allows you to simulate 4 different shapes of clusters: spheres,
+ellipsoids, cylinders and networks. Each has their own set of parameters. E.g.
+A sphere has radius and a centre coordinate. You can use 
+help(whatever_simulation_function) to get a breakdown of what each parameter 
+means.
+
+Hence, the 4 different simulation functions to use to generate these 4 different
+shaped cell clusters + 1 function that combines these 4 functions.
+
+As stated before, the parameters for each shape will differ, but they all share
+common parameters: cluster_cell_types and cluster_cell_proportions. These are
+similar to the cell_types and cell_proportions used for the background
+simulation functions - specify what cell types and the corresponding proportions 
+you want for each cluster, and the cells within the cluster will be reassigned
+to these cell types with a probability equal to the desired proportion of each
+cell type.
+
+
+```{r}
+## Simulate clusters
+
+# Use the simulate_clusters3D to simulate numerous and different types of clusters at once.
+# This will simulate a sphere, cylinder and an ellipsoid.
+clusters <- simulate_clusters3D(mixed_background,
+                                cluster_properties = list(
+                                    C1 = list(
+                                        shape = "sphere",
+                                        cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                        cluster_cell_proportions = c(0.55, 0.4, 0.05),
+                                        radius = 25,
+                                        centre_loc = c(40, 40, 40)
+                                    ),
+                                    C2 = list(
+                                        shape = "cylinder",
+                                        cluster_cell_types = c("Endothelial", "Others"),
+                                        cluster_cell_proportions = c(0.95, 0.05),
+                                        radius = 10,
+                                        start_loc = c(0, 0, 0),
+                                        end_loc   = c(20, 20 , 100)
+                                    ),
+                                    C3 = list(
+                                        shape = "ellipsoid",
+                                        cluster_cell_types = c("Tumour", "Immune", "Others"),
+                                        cluster_cell_proportions = c(0.65, 0.3, 0.05),
+                                        radii = c(15, 20, 25),
+                                        centre_loc = c(70, 70, 70),
+                                        axes_rotation = c(0, 0, 0)
+                                    )
+                                ),
+                                plot_image = FALSE)
+
+# Plot
+plot_cells3D(clusters,  
+             plot_cell_types = c("Others", "Immune", "Tumour"),
+             plot_colours = c("lightgray", "skyblue", "orange"))
+
+```
+
+
+# Simulate rings
+
+```{r}
+
+```
+
+
+# Simulate double rings
+
+```{r}
+
+```
+
