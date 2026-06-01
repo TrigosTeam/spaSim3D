@@ -4,11 +4,19 @@
 # spaSim3D
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
-The goal of spaSim3D is to …
+The goal of spaSim3D (**spa**tial **Sim**ulator 3D) is to generate fully
+customisable 3D spatial tissue data. It includes a diverse range of
+functions to meet your simulation needs. This includes generation and
+customisation of background cells in the 3D tissue. This also includes
+generation and customisation of various cell clusters, such as spheres,
+ellipsoids, cylinders and network clusters with or without cellular
+rings and double rings. Collectively, these tools can help to mimic a
+realistic 3D biological tissue.
 
-## Installation
+# Installation
 
 You can install the development version of spaSim3D from
 [GitHub](https://github.com/) with:
@@ -18,35 +26,28 @@ You can install the development version of spaSim3D from
 devtools::install_github("TrigosTeam/spaSim3D")
 ```
 
-## Example
+# Vignette
 
-This is a basic example which shows you how to solve a common problem:
+The vignette with an overview of the package can be accessed from the
+top Menu under About or clicking here.
+
+# Example
+
+This is a basic example which shows how to simulate background cells
+with different cell clusters. I can’t show the plot because it is an
+interactive 3D plot…
 
 ``` r
 library(spaSim3D)
-## basic example code
+
+spe_metadata <- spe_metadata_background_template("random")
+spe_metadata <- spe_metadata_cluster_template("regular", "sphere", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("regular", "network", spe_metadata)
+spe_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", spe_metadata)
+spe_clusters <- simulate_spe_metadata3D(spe_metadata,
+                                        plot_image = F)
+# Plot
+# plot_cells3D(spe_clusters,
+#              plot_cell_types = c("Tumour", "Immune", "Immune1"),
+#              plot_colours = c("orange", "skyblue", "blue"))
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
