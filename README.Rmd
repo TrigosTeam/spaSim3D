@@ -53,7 +53,7 @@ cluster_metadata <- spe_metadata_cluster_template("regular", "sphere", backgroun
 cluster_metadata <- spe_metadata_cluster_template("regular", "network", cluster_metadata)
 cluster_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", cluster_metadata)
 clusters <- simulate_spe_metadata3D(cluster_metadata,
-                                        plot_image = F)
+                                    plot_image = F)
 # Plot
 # plot_cells3D(clusters,
 #              plot_cell_types = c("Tumour", "Immune", "Immune1"),
