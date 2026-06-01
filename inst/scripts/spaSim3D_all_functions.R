@@ -9,44 +9,6 @@ library(gtools)
 library(cowplot)
 library(Hmisc)
 
-add_spe_metadata3D <- function(spe,
-                               spe_metadata,
-                               plot_image = TRUE) {
-
-  # Ignore the 'background' element in spe_metadata
-  spe_metadata[['background']] <- NULL
-
-  for (i in seq(length(spe_metadata))) {
-    spe_metadata_cluster <- spe_metadata[[i]]
-
-    # Ensure cluster_type is a single character like "regular"
-    if (!(is.character(spe_metadata_cluster$cluster_type) && length(spe_metadata_cluster$cluster_type) == 1)) {
-      stop(paste("cluster_type parameter found in the spe_metadata cluster list", i, "is not a character."))
-    }
-
-    if (spe_metadata_cluster$cluster_type == "regular") {
-      spe <- simulate_clusters3D(spe, list(spe_metadata_cluster), plot_image = F)
-    }
-    else if (spe_metadata_cluster$cluster_type == "ring") {
-      spe <- simulate_rings3D(spe, list(spe_metadata_cluster), plot_image = F)
-    }
-    else if (spe_metadata_cluster$cluster_type == "double ring") {
-      spe <- simulate_double_rings3D(spe, list(spe_metadata_cluster), plot_image = F)
-    }
-    else {
-      stop("cluster_type parameter must be either 'regular', 'ring' or 'double ring'.")
-    }
-  }
-
-  # Plot
-  if (plot_image) {
-    fig <- plot_cells3D(spe)
-    methods::show(fig)
-  }
-
-  return(spe)
-}
-
 plot_cells3D <- function(spe,
                          plot_cell_types = NULL,
                          plot_colours = NULL,
