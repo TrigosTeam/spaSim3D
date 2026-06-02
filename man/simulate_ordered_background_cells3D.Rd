@@ -55,12 +55,17 @@ The parameters of the background are completely customisable by the user.
 }
 \examples{
 # Simulate background
-bg_n <- simulate_normal_background_cells3D(n_cells = 10000,
-                                           length = 100,
-                                           width = 100,
-                                           height = 100,
-                                           jitter_proportion = 0,
-                                           background_cell_type = "Others",
-                                           plot_image = TRUE)
+bg_o <- simulate_ordered_background_cells3D(n_cells = 10000,
+                                            length = 100,
+                                            width = 100,
+                                            height = 100,
+                                            jitter_proportion = 0,
+                                            background_cell_type = "Others",
+                                            plot_image = TRUE)
+
+# Re-plotting so it shows in GitHub pages
+plot_cells3D(bg_o,
+             plot_cell_types = "Others",
+             plot_colours = "lightgray")
 
 }

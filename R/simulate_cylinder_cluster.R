@@ -52,7 +52,7 @@
 #'                                                 end_loc   = c(20, 20, 100)
 #'                                               ))
 #' # Plot
-#' plots_cells3D(cylinder_cluster)
+#' plot_cells3D(cylinder_cluster)
 #'
 #' @export
 

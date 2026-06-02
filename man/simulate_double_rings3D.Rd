@@ -58,7 +58,7 @@ bg_r <- simulate_random_background_cells3D(n_cells = 10000,
                                            minimum_distance_between_cells = 0.5,
                                            background_cell_type = "Others",
                                            plot_image = FALSE)
-                                           
+
 # Simulate clusters with double rings
 clusters_with_double_rings <- simulate_double_rings3D(bg_r,
                                                       dr_properties_list = list(
@@ -121,6 +121,12 @@ clusters_with_double_rings <- simulate_double_rings3D(bg_r,
                                                       ),
                                                       plot_image = TRUE,
                                                       plot_cell_types = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
-                                                      plot_colours = c("lightgray", "orange", "skyblue", "blue", "#FF7F7F")) 
-                                           
+                                                      plot_colours = c("lightgray", "orange", "skyblue", "blue", "tomato"))
+
+# Re-plotting so it shows in GitHub pages
+plot_cells3D(clusters_with_double_rings,
+             plot_cell_types = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "skyblue", "blue", "tomato"))
+
+
 }

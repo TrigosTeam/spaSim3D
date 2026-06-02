@@ -82,7 +82,12 @@
 #'                                 ),
 #'                                 plot_image = TRUE,
 #'                                 plot_cell_types = c("Others", "Immune", "Endothelial", "Tumour"),
-#'                                 plot_colours = c("lightgray", "skyblue", "#FF7F7F", "orange"))
+#'                                 plot_colours = c("lightgray", "skyblue", "tomato", "orange"))
+#'
+#' # Re-plotting so it shows in GitHub pages
+#' plot_cells3D(clusters,
+#'              plot_cell_types = c("Others", "Immune", "Endothelial", "Tumour"),
+#'              plot_colours = c("lightgray", "skyblue", "tomato", "orange"))
 #'
 #' @export
 

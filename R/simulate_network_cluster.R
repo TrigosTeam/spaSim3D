@@ -55,7 +55,7 @@
 #'                                               radius = 50
 #'                                             ))
 #' # Plot
-#' plots_cells3D(network_cluster)
+#' plot_cells3D(network_cluster)
 #'
 #' @export
 

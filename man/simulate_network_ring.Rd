@@ -76,6 +76,6 @@ network_ring_cluster <- simulate_network_ring(bg_r,
                                                 ring_width = 2
                                               ))
 # Plot
-plots_cells3D(network_ring_cluster)
+plot_cells3D(network_ring_cluster)
 
 }

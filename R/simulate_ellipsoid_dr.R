@@ -82,7 +82,7 @@
 #'                                               ))
 #'
 #' # Plot
-#' plots_cells3D(ellipsoid_dr_cluster)
+#' plot_cells3D(ellipsoid_dr_cluster)
 #'
 #' @export
 

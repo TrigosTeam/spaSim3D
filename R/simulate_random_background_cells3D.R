@@ -35,6 +35,11 @@
 #'                                            background_cell_type = "Others",
 #'                                            plot_image = TRUE)
 #'
+#' # Re-plotting so it shows in GitHub pages
+#' plot_cells3D(bg_r,
+#'              plot_cell_types = "Others",
+#'              plot_colours = "lightgray")
+#'
 #' @export
 
 simulate_random_background_cells3D <- function(n_cells,

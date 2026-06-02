@@ -90,6 +90,6 @@ network_dr_cluster <- simulate_network_dr(bg_r,
                                             outer_ring_width = 2
                                           ))
 # Plot
-plots_cells3D(network_dr_cluster)
+plot_cells3D(network_dr_cluster)
 
 }

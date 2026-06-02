@@ -59,6 +59,6 @@ sphere_cluster <- simulate_sphere_cluster(bg_r,
                                             centre_loc = c(40, 40, 40)
                                           ))
 # Plot
-plots_cells3D(sphere_cluster)
+plot_cells3D(sphere_cluster)
 
 }

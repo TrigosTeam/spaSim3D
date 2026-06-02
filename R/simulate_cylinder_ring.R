@@ -63,7 +63,7 @@
 #'                                                   ring_width = 5
 #'                                                 ))
 #' # Plot
-#' plots_cells3D(cylinder_ring_cluster)
+#' plot_cells3D(cylinder_ring_cluster)
 #'
 #' @export
 

@@ -80,7 +80,7 @@
 #'                                             outer_ring_width = 2
 #'                                           ))
 #' # Plot
-#' plots_cells3D(network_dr_cluster)
+#' plot_cells3D(network_dr_cluster)
 #'
 #' @export
 

@@ -73,6 +73,6 @@ cylinder_ring_cluster <- simulate_cylinder_ring(bg_r,
                                                   ring_width = 5
                                                 ))
 # Plot
-plots_cells3D(cylinder_ring_cluster)
+plot_cells3D(cylinder_ring_cluster)
 
 }

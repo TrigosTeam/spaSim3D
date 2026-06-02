@@ -55,7 +55,7 @@
 #'                                                   axes_rotation = c(0, 0, 0)
 #'                                                 ))
 #' # Plot
-#' plots_cells3D(ellipsoid_cluster)
+#' plot_cells3D(ellipsoid_cluster)
 #'
 #' @export
 

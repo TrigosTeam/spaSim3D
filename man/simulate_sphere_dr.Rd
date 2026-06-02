@@ -84,6 +84,6 @@ sphere_dr_cluster <- simulate_sphere_dr(bg_r,
                                           outer_ring_width = 3
                                         ))
 # Plot
-plots_cells3D(sphere_dr_cluster)
+plot_cells3D(sphere_dr_cluster)
 
 }

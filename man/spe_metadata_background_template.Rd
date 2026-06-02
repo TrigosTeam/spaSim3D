@@ -40,4 +40,9 @@ bg_metadata$background$n_cells <- 25000
 # Get spe from background metadata
 spe_background <- simulate_spe_metadata3D(bg_metadata)
 
+# Re-plotting so it shows in GitHub pages
+plot_cells3D(spe_background,
+             plot_cell_types = "Others",
+             plot_colours = "lightgray")
+
 }

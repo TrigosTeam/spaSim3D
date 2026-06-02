@@ -63,12 +63,13 @@ sphere_ring_cluster <- simulate_sphere_ring(bg_r,
                                               shape = "sphere",
                                               cluster_cell_types = c("Tumour", "Others"),
                                               cluster_cell_proportions = c(0.95, 0.05),
+                                              radius = 20,
                                               centre_loc = c(40, 40, 40),
                                               ring_cell_types = c("Immune", "Others"),
                                               ring_cell_proportions = c(0.85, 0.15),
-                                              ring_width = 5
+                                              ring_width = 6
                                             ))
 # Plot
-plots_cells3D(sphere_ring_cluster)
+plot_cells3D(sphere_ring_cluster)
 
 }

@@ -87,6 +87,6 @@ cylinder_dr_cluster <- simulate_cylinder_dr(bg_r,
                                               outer_ring_width = 3
                                             ))
 # Plot
-plots_cells3D(cylinder_dr_cluster)
+plot_cells3D(cylinder_dr_cluster)
 
 }

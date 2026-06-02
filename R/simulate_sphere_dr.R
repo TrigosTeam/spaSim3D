@@ -74,7 +74,7 @@
 #'                                           outer_ring_width = 3
 #'                                         ))
 #' # Plot
-#' plots_cells3D(sphere_dr_cluster)
+#' plot_cells3D(sphere_dr_cluster)
 #'
 #' @export
 

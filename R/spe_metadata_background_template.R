@@ -30,6 +30,11 @@
 #' # Get spe from background metadata
 #' spe_background <- simulate_spe_metadata3D(bg_metadata)
 #'
+#' # Re-plotting so it shows in GitHub pages
+#' plot_cells3D(spe_background,
+#'              plot_cell_types = "Others",
+#'              plot_colours = "lightgray")
+#'
 #' @export
 
 spe_metadata_background_template <- function(background_type,

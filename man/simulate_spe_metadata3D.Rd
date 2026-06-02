@@ -49,5 +49,7 @@ cluster_metadata <- spe_metadata_cluster_template("ring", "ellipsoid", cluster_m
 
 # Get spe from cluster metadata
 spe_clusters <- simulate_spe_metadata3D(cluster_metadata)
+# Re-plotting so it shows in GitHub pages
+plot_cells3D(spe_clusters)
 
 }

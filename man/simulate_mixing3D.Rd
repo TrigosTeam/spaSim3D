@@ -56,20 +56,25 @@ background of the SpatialExperiment object.
 }
 \examples{
 # Simulate background
-bg_n <- simulate_normal_background_cells3D(n_cells = 10000,
-                                           length = 100,
-                                           width = 100,
-                                           height = 100,
-                                           jitter_proportion = 0,
-                                           background_cell_type = "Others",
-                                           plot_image = FALSE)
-                                           
+bg_o <- simulate_ordered_background_cells3D(n_cells = 10000,
+                                            length = 100,
+                                            width = 100,
+                                            height = 100,
+                                            jitter_proportion = 0,
+                                            background_cell_type = "Others",
+                                            plot_image = FALSE)
+
 # Simulate mixing
-bg_mix <- simulate_mixing3D(bg_n,
+bg_mix <- simulate_mixing3D(bg_o,
                             cell_types = c("Others", "Immune", "Tumour"),
                             cell_proportions = c(0.5, 0.25, 0.25),
                             plot_image = TRUE,
                             plot_cell_types = c("Others", "Immune", "Tumour"),
                             plot_colours = c("lightgray", "skyblue", "orange"))
-                                                     
+
+# Re-plotting so it shows in GitHub pages
+plot_cells3D(bg_mix,
+             plot_cell_types = c("Others", "Immune", "Tumour"),
+             plot_colours = c("lightgray", "skyblue", "orange"))
+
 }

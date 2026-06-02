@@ -65,6 +65,6 @@ network_cluster <- simulate_network_cluster(bg_r,
                                               radius = 50
                                             ))
 # Plot
-plots_cells3D(network_cluster)
+plot_cells3D(network_cluster)
 
 }
