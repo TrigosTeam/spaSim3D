@@ -131,7 +131,7 @@ simulate_ordered_background_cells3D <- function(n_cells,
 
   ## Convert data frame to spe object
   spe <- SpatialExperiment::SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    assay = matrix(data = NA, nrow = 0, ncol = nrow(df)),
     colData = df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
     metadata = list(simulation = simulation_metadata))

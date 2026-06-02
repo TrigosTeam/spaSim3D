@@ -160,7 +160,7 @@ simulate_random_background_cells3D <- function(n_cells,
 
   ## Convert data frame to spe object
   spe <- SpatialExperiment::SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(pois_df), ncol = nrow(pois_df)),
+    assay = matrix(data = NA, nrow = 0, ncol = nrow(pois_df)),
     colData = pois_df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
     metadata = list(simulation = simulation_metadata))

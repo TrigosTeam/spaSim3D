@@ -1228,7 +1228,7 @@ simulate_ordered_background_cells3D <- function(n_cells,
 
   ## Convert data frame to spe object
   spe <- SpatialExperiment::SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+    assay = matrix(data = NA, nrow = 0, ncol = nrow(df)),
     colData = df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
     metadata = list(simulation = simulation_metadata))
@@ -1366,7 +1366,7 @@ simulate_random_background_cells3D <- function(n_cells,
 
   ## Convert data frame to spe object
   spe <- SpatialExperiment::SpatialExperiment(
-    assay = matrix(data = NA, nrow = nrow(pois_df), ncol = nrow(pois_df)),
+    assay = matrix(data = NA, nrow = 0, ncol = nrow(pois_df)),
     colData = pois_df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
     metadata = list(simulation = simulation_metadata))
@@ -2402,7 +2402,7 @@ simulate_cluster_interactive <- function(simulated_spe = NULL) {
 
         # Convert data frame to spe object
         simulated_spe_new <- SpatialExperiment::SpatialExperiment(
-          assay = matrix(data = NA, nrow = nrow(df), ncol = nrow(df)),
+          assay = matrix(data = NA, nrow = 0, ncol = nrow(df)),
           colData = df,
           spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
           metadata = metadata)
