@@ -15,11 +15,6 @@ Imports:
   dbscan,
   apcluster,
   plotly,
-  cowplot,
-  Hmisc,
-  reshape2,
-  gtools,
-  DescTools,
   dplyr,
   viridis
 URL: https://github.com/TrigosTeam/spaSim3D

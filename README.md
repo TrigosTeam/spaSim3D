@@ -7,14 +7,14 @@
 
 <!-- badges: end -->
 
-The goal of spaSim3D (**spa**tial **Sim**ulator 3D) is to generate fully
-customisable 3D spatial tissue data. It includes a diverse range of
-functions to meet your simulation needs. This includes generation and
+The goal of spaSim3D (**spa**tial **Sim**ulator **3D**) is to generate
+fully customisable 3D spatial tissue data. It includes a diverse range
+of functions to meet your simulation needs. This includes generation and
 customisation of background cells in the 3D tissue. This also includes
 generation and customisation of various cell clusters, such as spheres,
 ellipsoids, cylinders and network clusters with or without cellular
-rings and double rings. Collectively, these tools can help to mimic a
-realistic 3D biological tissue.
+rings and double rings. Collectively, these tools can help to mimic
+realistic 3D biological tissues.
 
 # Installation
 
@@ -22,8 +22,12 @@ You can install the development version of spaSim3D from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
+install.packages("devtools")
 devtools::install_github("TrigosTeam/spaSim3D")
+
+if (!requireNamespace("BiocManager", quietly = TRUE))     
+  install.packages("BiocManager")
+BiocManager::install("SpatialExperiment")
 ```
 
 # Vignette

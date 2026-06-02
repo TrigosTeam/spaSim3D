@@ -86,15 +86,19 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>The goal of spaSim3D (<strong>spa</strong>tial <strong>Sim</strong>ulator 3D) is to generate fully customisable 3D spatial tissue data. It includes a diverse range of functions to meet your simulation needs. This includes generation and customisation of background cells in the 3D tissue. This also includes generation and customisation of various cell clusters, such as spheres, ellipsoids, cylinders and network clusters with or without cellular rings and double rings. Collectively, these tools can help to mimic a realistic 3D biological tissue.</p>
+<p>The goal of spaSim3D (<strong>spa</strong>tial <strong>Sim</strong>ulator <strong>3D</strong>) is to generate fully customisable 3D spatial tissue data. It includes a diverse range of functions to meet your simulation needs. This includes generation and customisation of background cells in the 3D tissue. This also includes generation and customisation of various cell clusters, such as spheres, ellipsoids, cylinders and network clusters with or without cellular rings and double rings. Collectively, these tools can help to mimic realistic 3D biological tissues.</p>
 </div>
 <div class="section level1">
 <h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h1>
 <p>You can install the development version of spaSim3D from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"TrigosTeam/spaSim3D"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"TrigosTeam/spaSim3D"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>     </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"SpatialExperiment"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level1">
 <h1 id="vignette">Vignette<a class="anchor" aria-label="anchor" href="#vignette"></a>

@@ -47,17 +47,17 @@ background_metadata <- spe_metadata_background_template(background_type = "rando
                                                         original_spe_metadata = NULL)
  
 # Add cluster metadata (using background metadata as background)
-# This will be cluster_1 in the metadata
+# This will be cluster_1 in the metadata - a regular sphere
 cluster_metadata <- spe_metadata_cluster_template(cluster_type = "regular", 
                                                   shape = "sphere", 
                                                   original_spe_metadata = background_metadata)
 
-# This will be cluster_2 in the metadata
+# This will be cluster_2 in the metadata - an ellipsoid surrounded by a ring
 cluster_metadata <- spe_metadata_cluster_template(cluster_type = "ring", 
                                                   shape = "ellipsoid", 
                                                   original_spe_metadata = cluster_metadata)
 
-# This will be cluster_3 in the metadata
+# This will be cluster_3 in the metadata -  a cylinder surrounded by a double ring
 cluster_metadata <- spe_metadata_cluster_template(cluster_type = "double ring", 
                                                   shape = "cylinder", 
                                                   original_spe_metadata= cluster_metadata)
@@ -94,7 +94,8 @@ cluster_metadata$background$cell_proportions <- c(0.99, 0.01)
 
 # Change cluster metadata
 cluster_metadata$cluster_1$radius <- 80
-cluster_metadata$cluster_1$cluster_cell_proportions <- c(0.9, 0.1, 0)
+cluster_metadata$cluster_1$cluster_cell_types <- c("Tumour1", "Immune", "Immune1")
+cluster_metadata$cluster_1$cluster_cell_proportions <- c(0.5, 0.25, 0.25)
 
 cluster_metadata$cluster_2$ring_width <- 10 
 
@@ -112,8 +113,8 @@ clusters <- simulate_spe_metadata3D(cluster_metadata, plot_image = FALSE)
 
 # Plot
 plot_cells3D(clusters,
-             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Endothelial"),
-             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "tomato"))
+             plot_cell_types = c("Others", "Tumour", "Tumour1", "Immune", "Immune1", "Endothelial"),
+             plot_colours = c("lightgray", "orange", "brown", "skyblue", "lightgreen", "tomato"))
 ```
 
 

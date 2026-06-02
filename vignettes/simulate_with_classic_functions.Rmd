@@ -162,8 +162,8 @@ clusters <- simulate_clusters3D(mixed_background,
 
 # Plot
 plot_cells3D(clusters,  
-             plot_cell_types = c("Others", "Immune", "Tumour"),
-             plot_colours = c("lightgray", "skyblue", "orange"))
+             plot_cell_types = c("Others", "Immune", "Tumour", "Endothelial"),
+             plot_colours = c("lightgray", "skyblue", "orange", "tomato"))
 
 
 
@@ -221,8 +221,8 @@ network_cluster <- simulate_network_cluster(mixed_background,
                                                 radius = 50 # Rough radius spanned by the network cluster
                                             ))
 plot_cells3D(network_cluster,  
-             plot_cell_types = c("Others", "Immune1", "Immune2", "Immune3"),
-             plot_colours = c("lightgray", "skyblue", "green", "tomato"))
+             plot_cell_types = c("Others", "Tumour", "Immune1", "Immune2", "Immune3"),
+             plot_colours = c("lightgray", "orange", "skyblue", "green", "tomato"))
 
 ```
 
@@ -289,7 +289,7 @@ ringed_clusters <- simulate_rings3D(mixed_background,
 # Plot
 plot_cells3D(ringed_clusters,  
              plot_cell_types = c("Others", "Tumour", "Immune", "Endothelial"),
-             plot_colours = c("lightgray", "orange", "skyblue", "#FF7F7F"))
+             plot_colours = c("lightgray", "orange", "skyblue", "tomato"))
 
 
 ## Using individual functions
@@ -341,7 +341,7 @@ cylinder_ring_cluster <- simulate_cylinder_ring(mixed_background,
                                                 ))
 plot_cells3D(cylinder_ring_cluster,  
              plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Endothelial"),
-             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "#FF7F7F"))
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "tomato"))
 
 # Network with ring
 network_ring_cluster <- simulate_network_ring(mixed_background,
@@ -436,7 +436,7 @@ double_ringed_clusters <- simulate_double_rings3D(mixed_background,
 # Plot
 plot_cells3D(double_ringed_clusters,  
              plot_cell_types = c("Others", "Tumour", "Immune1", "Immune2", "Endothelial"),
-             plot_colours = c("lightgray", "orange", "skyblue", "blue", "#FF7F7F"))
+             plot_colours = c("lightgray", "orange", "skyblue", "blue", "tomato"))
 
 ## Using individual functions
 # Sphere with double ring
@@ -454,9 +454,9 @@ sphere_dr_cluster <- simulate_sphere_dr(mixed_background,
                                             outer_ring_cell_proportions = c(1),
                                             outer_ring_width = 3
                                         ))
-plot_cells3D(sphere_ring_cluster,  
-             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1"),
-             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen"))
+plot_cells3D(sphere_dr_cluster,  
+             plot_cell_types = c("Others", "Tumour", "Immune", "Immune1", "Immune2"),
+             plot_colours = c("lightgray", "orange", "skyblue", "lightgreen", "orchid"))
 
 # Ellipsoid with double ring
 ellipsoid_dr_cluster <- simulate_ellipsoid_dr(mixed_background,
