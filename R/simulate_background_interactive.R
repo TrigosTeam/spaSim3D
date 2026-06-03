@@ -8,7 +8,7 @@
 #'
 #' @examples
 #' # Simulate background
-#' background_spe <- simulate_background_interactive()
+#' # background_spe <- simulate_background_interactive()
 #'
 #' @export
 

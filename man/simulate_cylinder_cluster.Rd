@@ -18,19 +18,26 @@ SpatialExperiment object, and any clusters.}
 
 \item{cluster_properties}{A list containing the properties of the cylinder
 cluster desired. The list should contain the following elements:
-"shape": Must be equal to the character "cylinder".
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{"shape": Must be equal to the character "cylinder".
+
 "cluster_cell_types": A character vector representing the cell types that
-make up the cluster. E.g. c("Tumour", "Immune").
+    make up the cluster. E.g. c("Tumour", "Immune").
+
 "cluster_cell_proportions": A numeric vector representing the proportion
-of each cell type in the cluster. Its elements must each be
-greater than 0, sum to 1 and the vector must be the same length as
-"cluster_cell_types". E.g. c(0.6, 0.4) corresponds to a cluster made
-up of 60\% Tumour and 40\% Immune.
+    of each cell type in the cluster. Its elements must each be
+    greater than 0, sum to 1 and the vector must be the same length as
+    "cluster_cell_types". E.g. c(0.6, 0.4) corresponds to a cluster made
+    up of 60\% Tumour and 40\% Immune.
+
 "radius": A positive number representing the radius of the cylinder.
+
 "start_loc": A numerical vector of length 3 representing the starting
-x,y,z coordinate of the cylinder. E.g. (0, 0, 0).
+    x,y,z coordinate of the cylinder. E.g. (0, 0, 0).
+
 "end_loc": A numerical vector of length 3 representing the ending x,y,z
-coordinate of the cylinder. E.g. (20, 20, 20).}
+    coordinate of the cylinder. E.g. (20, 20, 20).
+}\if{html}{\out{</div>}}}
 }
 \value{
 The same 3D SpatialExperiment object used as input for spe, updated

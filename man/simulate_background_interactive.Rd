@@ -16,6 +16,6 @@ inputs, for which the user can enter them in the console.
 }
 \examples{
 # Simulate background
-background_spe <- simulate_background_interactive()
+# background_spe <- simulate_background_interactive()
 
 }

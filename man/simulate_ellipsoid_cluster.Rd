@@ -18,22 +18,29 @@ SpatialExperiment object, and any clusters.}
 
 \item{cluster_properties}{A list containing the properties of the ellipsoid
 cluster desired. The list should contain the following elements:
-"shape": Must be equal to the character "ellipsoid".
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{"shape": Must be equal to the character "ellipsoid".
+
 "cluster_cell_types": A character vector representing the cell types that
-make up the cluster. E.g. c("Tumour", "Immune").
+    make up the cluster. E.g. c("Tumour", "Immune").
+
 "cluster_cell_proportions": A numeric vector representing the proportion
-of each cell type in the cluster. Its elements must each be
-greater than 0, sum to 1 and the vector must be the same length as
-"cluster_cell_types". E.g. c(0.6, 0.4) corresponds to a cluster made
-up of 60\% Tumour and 40\% Immune.
+    of each cell type in the cluster. Its elements must each be
+    greater than 0, sum to 1 and the vector must be the same length as
+    "cluster_cell_types". E.g. c(0.6, 0.4) corresponds to a cluster made
+    up of 60\% Tumour and 40\% Immune.
+
 "radii": A numerical vector of length 3 containing only positive numbers,
-representing the radii of the ellipsoid in the x,y,z direction
-respectively. E.g. c(15, 20, 25).
+    representing the radii of the ellipsoid in the x,y,z direction
+    respectively. E.g. c(15, 20, 25).
+
 "centre_loc": A numerical vector of length 3 representing the centre
-x,y,z coordinate of the ellipsoid E.g. (0, 0, 0).
+    x,y,z coordinate of the ellipsoid E.g. (0, 0, 0).
+
 "axes_rotation": A numerical vector of length 3 representing axes
-rotation of the ellipsoid in the y-z plane, x-z plane and x-y plane
-respectively. Values should be in degrees unit. E.g. (30, 45, 0).}
+    rotation of the ellipsoid in the y-z plane, x-z plane and x-y plane
+    respectively. Values should be in degrees unit. E.g. (30, 45, 0).
+}\if{html}{\out{</div>}}}
 }
 \value{
 The same 3D SpatialExperiment object used as input for spe, updated

@@ -14,28 +14,38 @@
 #'     SpatialExperiment object, and any clusters.
 #' @param ring_properties A list containing the properties of the network
 #'     cluster and ring desired. The list should contain the following elements:
+#'
 #'     "shape": Must be equal to the character "network".
+#'
 #'     "cluster_cell_types": A character vector representing the cell types that
 #'         make up the cluster. E.g. c("Tumour", "Immune").
+#'
 #'     "cluster_cell_proportions": A numeric vector representing the proportion
 #'         of each cell type in the cluster. Its elements must each be
 #'         greater than 0, sum to 1 and the vector must be the same length as
 #'         "cluster_cell_types". E.g. c(0.6, 0.4) corresponds to a cluster made
 #'         up of 60% Tumour and 40% Immune.
+#'
 #'     "n_edges": A positive number capped at 99 representing the number of
 #'         edges.
+#'
 #'     "width": A positive number representing the width of each network edge.
+#'
 #'     "centre_loc": A numerical vector of length 3 representing the approximate
 #'         centre x,y,z coordinate of the network E.g. (0, 0, 0).
+#'
 #'     "radius": A positive number representing the rough radius spanned by the
 #'         network.
+#'
 #'     "ring_cell_types": A character vector representing the cell types
 #'         that make up the ring. E.g. c("Immune1", "Immune2", "Immune3").
+#'
 #'     "ring_cell_proportions": A numeric vector representing the
 #'         proportion of each cell type in the ring. Its elements must each be
 #'         greater than 0, sum to 1 and the vector must be the same length as
 #'         "ring_cell_types". E.g. c(0.3, 0.4, 0.3) corresponds to an
 #'         ring made up of 30% Immune1, 40% Immune2 and 30% Immune3.
+#'
 #'     "ring_width": A positive number representing the width of the ring.
 #'
 #' @return The same 3D SpatialExperiment object used as input for spe, updated

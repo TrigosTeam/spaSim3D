@@ -96,21 +96,10 @@ SpatialExperiment object is required.</p></dd>
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Simulate background</span></span></span>
-<span class="r-in"><span><span class="va">background_spe</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_background_interactive.html">simulate_background_interactive</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Hello spaSim3D user, how do you want your background cells to look like?</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>           1. Random pattern</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>           2. Ordered pattern</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> In a random pattern, cells are placed randomly...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> In a ordered pattern, cells follow a regularly spaced in a hexagonal grid</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> To choose, please enter 1 or 2.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (interactive) {    user_input &lt;- readline(prompt = prompt)} else {    user_input &lt;- 1}:</span> argument is not interpretable as logical</span>
+<span class="r-in"><span><span class="co"># background_spe &lt;- simulate_background_interactive()</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulate clusters</span></span></span>
-<span class="r-in"><span><span class="va">clusters_spe</span> <span class="op">&lt;-</span> <span class="fu">simulate_cluster_interactive</span><span class="op">(</span>simulated_spe <span class="op">=</span> <span class="va">background_spe</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'background_spe' not found</span>
+<span class="r-in"><span><span class="co"># clusters_spe &lt;- simulate_cluster_interactive(simulated_spe = background_spe)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

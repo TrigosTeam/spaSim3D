@@ -17,10 +17,10 @@
 #'
 #' @examples
 #' # Simulate background
-#' background_spe <- simulate_background_interactive()
+#' # background_spe <- simulate_background_interactive()
 #'
 #' # Simulate clusters
-#' clusters_spe <- simulate_cluster_interactive(simulated_spe = background_spe)
+#' # clusters_spe <- simulate_cluster_interactive(simulated_spe = background_spe)
 #'
 #' @export
 

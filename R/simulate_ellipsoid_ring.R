@@ -14,29 +14,38 @@
 #'     SpatialExperiment object, and any clusters.
 #' @param ring_properties A list containing the properties of the ellipsoid
 #'     cluster and ring desired. The list should contain the following elements:
+#'
 #'     "shape": Must be equal to the character "ellipsoid".
+#'
 #'     "cluster_cell_types": A character vector representing the cell types that
 #'         make up the cluster. E.g. c("Tumour", "Immune").
+#'
 #'     "cluster_cell_proportions": A numeric vector representing the proportion
 #'         of each cell type in the cluster. Its elements must each be
 #'         greater than 0, sum to 1 and the vector must be the same length as
 #'         "cluster_cell_types". E.g. c(0.6, 0.4) corresponds to a cluster made
 #'         up of 60% Tumour and 40% Immune.
+#'
 #'     "radii": A numerical vector of length 3 containing only positive numbers,
 #'         representing the radii of the ellipsoid in the x,y,z direction
 #'         respectively. E.g. c(15, 20, 25).
+#'
 #'     "centre_loc": A numerical vector of length 3 representing the centre
 #'         x,y,z coordinate of the ellipsoid E.g. (0, 0, 0).
+#'
 #'     "axes_rotation": A numerical vector of length 3 representing axes
 #'         rotation of the ellipsoid in the y-z plane, x-z plane and x-y plane
 #'         respectively. Values should be in degrees unit. E.g. (30, 45, 0).
+#'
 #'     "ring_cell_types": A character vector representing the cell types
 #'         that make up the ring. E.g. c("Immune1", "Immune2", "Immune3").
+#'
 #'     "ring_cell_proportions": A numeric vector representing the
 #'         proportion of each cell type in the ring. Its elements must each be
 #'         greater than 0, sum to 1 and the vector must be the same length as
 #'         "ring_cell_types". E.g. c(0.3, 0.4, 0.3) corresponds to an
 #'         ring made up of 30% Immune1, 40% Immune2 and 30% Immune3.
+#'
 #'     "ring_width": A positive number representing the width of the ring.
 #'
 #' @return The same 3D SpatialExperiment object used as input for spe, updated
