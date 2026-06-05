@@ -20,7 +20,7 @@ asked to input specific inputs directly into the console to simulate 3D tissues.
 The meaning of each input should be clearly described as you work through the 
 functions, so I won't explain them in this vignette.
 
-Start by generating the 'background' of cells for your 3D tissue using 
+Start by generating the 'background' cells for your 3D tissue using 
 simulate_background_interactive().
 
 Then, generate 3D cell clusters on top of your background using
@@ -30,8 +30,8 @@ That's it. You can keep adding cell clusters, or start from scratch.
 
 I think these functions are great for users who have only just encountered this
 package for the first time. However, for large scale simulation projects, an
-interactive approach doesn't seem logical, and I would recommend the other 
-vignettes to see other approaches instead.
+interactive approach would be very slow, and I would recommend the other 
+vignettes which show other approaches for simulation instead.
 
 ```{r}
 ### First, generate the background

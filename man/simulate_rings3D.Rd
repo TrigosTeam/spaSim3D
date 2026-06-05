@@ -78,7 +78,7 @@ clusters_with_rings <- simulate_rings3D(bg_r,
                                             cluster_cell_proportions = c(1),
                                             radius = 8,
                                             start_loc = c(0, 0, 0),
-                                            end_loc   = c(20, 20 , 100),
+                                            end_loc = c(20, 20 , 100),
                                             ring_cell_types = c("Endothelial", "Others"),
                                             ring_cell_proportions = c(0.85, 0.15),
                                             ring_width = 5

@@ -60,7 +60,7 @@ cluster_metadata <- spe_metadata_cluster_template(cluster_type = "ring",
 # This will be cluster_3 in the metadata -  a cylinder surrounded by a double ring
 cluster_metadata <- spe_metadata_cluster_template(cluster_type = "double ring", 
                                                   shape = "cylinder", 
-                                                  original_spe_metadata= cluster_metadata)
+                                                  original_spe_metadata = cluster_metadata)
 
 ```
 
@@ -70,20 +70,21 @@ the user to change the parameters to their specifications. For example, changing
 the 3D tissue size, or increasing the size of the clusters, or changing the
 centre position of the clusters, etc.
 
-There are some parameters that should never update. For the background, don't
-update the background_type - if you want to switch from random to ordered or 
-vice versa, remake the template. For the clusters, don't update the cluster_type
-or shape, remake the template instead. It's also important that you don't make
-new parameters, and only update the existing parameters found in the templates.
+There are some parameters that you should never update. For the background, 
+don't update the background_type - if you want to switch from random to ordered 
+or  vice versa, remake the template. For the clusters, don't update the 
+cluster_type or shape, remake the template instead. It's also important that you 
+don't makenew parameters, and only update the existing parameters found in the 
+templates.
 
-For description about the parameters that you can update, this is lazy answer,
+For description about the parameters that you can update, this is a lazy answer,
 but please see the simulate_with_classic_functions.Rmd vignette and do
 help(whatever_simulation_function_in_the_vignette) to get a breakdown of what 
 each parameter means.
 
 This part is a bit tedious, however, for a large scale simulation project,
-often these parameters are 'set and forget' - figure what parameters you want to
-work with at the start, and you won't really need to update it later.
+often these parameters are 'set and forget' - figure out what parameters you 
+want to work with at the start, and you won't really need to update them later.
 ```{r}
 # Change background metadata
 cluster_metadata$background$n_cells <- 30000

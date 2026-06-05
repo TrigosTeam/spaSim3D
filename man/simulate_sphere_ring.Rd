@@ -33,7 +33,7 @@ cluster and ring desired. The list should contain the following elements:
 "radius": A positive number representing the radius of the sphere.
 
 "centre_loc": A numerical vector of length 3 representing the centre
-    x,y,z coordinate of the sphere E.g. (40, 50, 60).
+    x,y,z coordinate of the sphere. E.g. (40, 50, 60).
 
 "ring_cell_types": A character vector representing the cell types
     that make up the ring. E.g. c("Immune1", "Immune2", "Immune3").

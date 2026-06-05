@@ -32,7 +32,7 @@
 #'     "width": A positive number representing the width of each network edge.
 #'
 #'     "centre_loc": A numerical vector of length 3 representing the approximate
-#'         centre x,y,z coordinate of the network E.g. (0, 0, 0).
+#'         centre x,y,z coordinate of the network. E.g. (0, 0, 0).
 #'
 #'     "radius": A positive number representing the rough radius spanned by the
 #'         network.

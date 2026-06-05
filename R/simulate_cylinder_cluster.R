@@ -55,7 +55,7 @@
 #'                                                 cluster_cell_proportions = c(0.95, 0.05),
 #'                                                 radius = 10,
 #'                                                 start_loc = c(0, 0, 0),
-#'                                                 end_loc   = c(20, 20, 100)
+#'                                                 end_loc = c(20, 20, 100)
 #'                                               ))
 #' # Plot
 #' plot_cells3D(cylinder_cluster)

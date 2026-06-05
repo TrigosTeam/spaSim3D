@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-spaSim3D is an 3D adaptation of the original spaSim. Hence, these 'classic
+spaSim3D is a 3D adaptation of the original spaSim. Hence, these 'classic
 functions' are the functions which are literally the 3D equivalent of the
 simulation functions used in the original spaSim.
 
@@ -29,7 +29,7 @@ Anyway, let's go through each one :)
 spaSim3D had two methods to simulate background cells. Both methods involve
 creating a 3D window and filling it with 'background cells' - blank cells with
 no cell type identity. The methods differ in how the cells are placed in the
-background:
+3D window:
 
 1. simulate_random_background_cells3D results in a 3D tissue where the cells are
 positioned randomly, following a Poisson distribution. This is designed to mimic
@@ -53,6 +53,7 @@ random_background <- simulate_random_background_cells3D(n_cells = 10000,
                                                         plot_image = FALSE)
 
 # Plot - apparently the plot_image parameter doesn't like to show the plot when knitting to html
+# It also doesn't like to plot when I Knit, but it should work for you
 plot_cells3D(random_background, 
              plot_cell_types = "Others", 
              plot_colours = "lightgray")
@@ -76,13 +77,12 @@ plot_cells3D(ordered_background,
 
 # Simulate mixing of the background cells
 The background functions simulate a background of a blank, undefined cell type.
-If users which to assign cell types randomly to the background cells, they can
+If users wish to assign cell types randomly to the background cells, they can
 use the mixing function. 
 
 The user inputs a selection of cell types and their desired proportions. Then, 
-each individual cells is reassigned to these chosen cell types with a 
-probability that directly corresponds to the desired proportion of that cell 
-type.
+each individual cell is reassigned to these chosen cell types with a probability 
+that directly corresponds to the desired proportion of that cell type.
 
 ```{r}
 ## Simulate mixing
@@ -109,14 +109,14 @@ enough, you can use these clusters to simulate animal embryos.
 
 spaSim3D allows you to simulate 4 different shapes of clusters: spheres,
 ellipsoids, cylinders and networks. Each has their own set of parameters. E.g.
-A sphere has radius and a centre coordinate. You can use 
+A sphere has a radius and a centre coordinate. You can use 
 help(whatever_simulation_function) to get a breakdown of what each parameter 
 means.
 
-Hence, the 4 different simulation functions to use to generate these 4 different
-shaped cell clusters + 1 function that combines these 4 functions. I recommend
-just using the function that combines the 4 together, but I won't stop you from
-using the individual functions.
+Hence, there are 4 different simulation functions to use to generate these 4 
+different shaped cell clusters + 1 function that combines these 4 functions. I 
+recommend just using the function that combines the 4 together, but I won't stop 
+you from using the individual functions.
 
 As stated before, the parameters for each shape will differ, but they all share
 common parameters: cluster_cell_types and cluster_cell_proportions. These are
@@ -203,7 +203,7 @@ cylinder_cluster <- simulate_cylinder_cluster(mixed_background,
                                                 cluster_cell_proportions = c(0.95, 0.05),
                                                 radius = 10,
                                                 start_loc = c(0, 0, 0),
-                                                end_loc   = c(20, 20, 100)
+                                                end_loc = c(20, 20, 100)
                                               ))
 plot_cells3D(cylinder_cluster,  
              plot_cell_types = c("Others", "Immune", "Tumour", "Endothelial"),
@@ -267,7 +267,7 @@ ringed_clusters <- simulate_rings3D(mixed_background,
                                             cluster_cell_proportions = c(1),
                                             radius = 8,
                                             start_loc = c(0, 0, 0),
-                                            end_loc   = c(20, 20 , 100),
+                                            end_loc = c(20, 20 , 100),
                                             ring_cell_types = c("Endothelial", "Others"),
                                             ring_cell_proportions = c(0.85, 0.15),
                                             ring_width = 5
@@ -408,7 +408,7 @@ double_ringed_clusters <- simulate_double_rings3D(mixed_background,
                                                           cluster_cell_proportions = c(1),
                                                           radius = 8,
                                                           start_loc = c(0, 0, 0),
-                                                          end_loc   = c(20, 20 , 100),
+                                                          end_loc = c(20, 20 , 100),
                                                           inner_ring_cell_types = c("Endothelial", "Others"),
                                                           inner_ring_cell_proportions = c(0.85, 0.15),
                                                           inner_ring_width = 5,
@@ -486,7 +486,7 @@ cylinder_dr_cluster <- simulate_cylinder_dr(mixed_background,
                                               cluster_cell_proportions = c(0.95, 0.05),
                                               radius = 10,
                                               start_loc = c(0, 0, 0),
-                                              end_loc   = c(20, 20, 100),
+                                              end_loc = c(20, 20, 100),
                                               inner_ring_cell_types = c("Immune1", "Others"),
                                               inner_ring_cell_proportions = c(0.85, 0.15),
                                               inner_ring_width = 5,

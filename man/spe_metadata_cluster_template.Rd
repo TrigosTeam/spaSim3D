@@ -27,9 +27,9 @@ is inputted, the cluster metadata template will be added to it. If NULL,
 the cluster metadata template will be returned, without a background
 element. Hence, it is permissible to generate metadata that does not
 include a background element. This can be inputted into the
-add_spe_metadata3D function, however, cannot be inputed into
-simulate_spe_metadata3D function as this function requires a background
-element.}
+spe_metadata_background_template to add a background element, however,
+cannot be inputed into simulate_spe_metadata3D function as this function
+requires a background element.}
 }
 \value{
 A list containing the cluster metadata template or the original

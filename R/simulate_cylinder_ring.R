@@ -66,7 +66,7 @@
 #'                                                   cluster_cell_proportions = c(0.95, 0.05),
 #'                                                   radius = 10,
 #'                                                   start_loc = c(0, 0, 0),
-#'                                                   end_loc   = c(20, 20, 100),
+#'                                                   end_loc = c(20, 20, 100),
 #'                                                   ring_cell_types = c("Immune1", "Others"),
 #'                                                   ring_cell_proportions = c(0.85, 0.15),
 #'                                                   ring_width = 5

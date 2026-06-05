@@ -16,10 +16,10 @@
 #'     the background. E.g. If you want a 100 by 150 by 200 unit window, set
 #'     height to 200.
 #' @param jitter_proportion A number between 0 and 1 representing the amount of
-#'     'jitter' to apply to all cells. jitter_proportion = 0.5 and the original
-#'     distance between each cell is 5 units, then each cell will move UP TO
-#'     0.5 * 5 = 2.5 units away from its original position in the x, y and z
-#'     directions. The 'original distance between each cell' is calculated by
+#'     'jitter' to apply to all cells. If jitter_proportion = 0.5 and the
+#'     original distance between each cell is 5 units, then each cell will move
+#'     UP TO 0.5 * 5 = 2.5 units away from its original position in the x, y and
+#'     z directions. The 'original distance between each cell' is calculated by
 #'     this function and will depend on the previous parameters, not something
 #'     to worry about :)
 #' @param background_cell_type A character representing the cell type label of

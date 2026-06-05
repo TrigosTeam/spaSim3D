@@ -28,7 +28,7 @@
 #'     Defaults to NULL.
 #'
 #' @return The same 3D SpatialExperiment object used as input for spe, updated
-#'     with the new cluster with double rings and corresponding metadata.
+#'     with the new clusters with double rings and corresponding metadata.
 #'
 #' @examples
 #' # Simulate background
@@ -62,7 +62,7 @@
 #'                                                           cluster_cell_proportions = c(1),
 #'                                                           radius = 8,
 #'                                                           start_loc = c(0, 0, 0),
-#'                                                           end_loc   = c(20, 20 , 100),
+#'                                                           end_loc = c(20, 20 , 100),
 #'                                                           inner_ring_cell_types = c("Endothelial", "Others"),
 #'                                                           inner_ring_cell_proportions = c(0.85, 0.15),
 #'                                                           inner_ring_width = 5,

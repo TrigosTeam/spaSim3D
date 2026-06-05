@@ -96,16 +96,17 @@ function, you will be asked to input specific inputs directly into the
 console to simulate 3D tissues. The meaning of each input should be
 clearly described as you work through the functions, so I won’t explain
 them in this vignette.</p>
-<p>Start by generating the ‘background’ of cells for your 3D tissue
-using simulate_background_interactive().</p>
+<p>Start by generating the ‘background’ cells for your 3D tissue using
+simulate_background_interactive().</p>
 <p>Then, generate 3D cell clusters on top of your background using
 simulate_cluster_interactive().</p>
 <p>That’s it. You can keep adding cell clusters, or start from
 scratch.</p>
 <p>I think these functions are great for users who have only just
 encountered this package for the first time. However, for large scale
-simulation projects, an interactive approach doesn’t seem logical, and I
-would recommend the other vignettes to see other approaches instead.</p>
+simulation projects, an interactive approach would be very slow, and I
+would recommend the other vignettes which show other approaches for
+simulation instead.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">### First, generate the background</span></span>
 <span><span class="co"># background_spe &lt;- simulate_background_interactive()</span></span>

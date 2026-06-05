@@ -29,7 +29,7 @@
 #'     "radius": A positive number representing the radius of the sphere.
 #'
 #'     "centre_loc": A numerical vector of length 3 representing the centre
-#'         x,y,z coordinate of the sphere E.g. (40, 50, 60).
+#'         x,y,z coordinate of the sphere. E.g. (40, 50, 60).
 #'
 #' @return The same 3D SpatialExperiment object used as input for spe, updated
 #'     with the new sphere cluster and the corresponding metadata.

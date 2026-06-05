@@ -31,7 +31,7 @@
 #'         respectively. E.g. c(15, 20, 25).
 #'
 #'     "centre_loc": A numerical vector of length 3 representing the centre
-#'         x,y,z coordinate of the ellipsoid E.g. (0, 0, 0).
+#'         x,y,z coordinate of the ellipsoid. E.g. (0, 0, 0).
 #'
 #'     "axes_rotation": A numerical vector of length 3 representing axes
 #'         rotation of the ellipsoid in the y-z plane, x-z plane and x-y plane
