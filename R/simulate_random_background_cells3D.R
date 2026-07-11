@@ -64,57 +64,54 @@ simulate_random_background_cells3D <- function(n_cells,
   # Need to over-sample as cells which are too close will be removed later
   n_cells_inflated <- n_cells * 2
 
-  pois_df <- data.frame("Cell.X.Position" = runif(n_cells_inflated, 0, length),
-                        "Cell.Y.Position" = runif(n_cells_inflated, 0, width),
-                        "Cell.Z.Position" = runif(n_cells_inflated, 0, height))
+  spatial_df <- data.frame("Cell.X.Position" = runif(n_cells_inflated, 0, length),
+                           "Cell.Y.Position" = runif(n_cells_inflated, 0, width),
+                           "Cell.Z.Position" = runif(n_cells_inflated, 0, height))
 
   # Add integer rownames to data frame - each cell is labelled by an integer
-  rownames(pois_df) <- seq(nrow(pois_df))
+  rownames(spatial_df) <- seq(nrow(spatial_df))
 
   ### Check if all other cells are to close to the current cell
   # Use frNN function: for each point, get all points within min_d of it
-  pois_df_distances <- dbscan::frNN(pois_df,
-                                    eps = minimum_distance_between_cells,
-                                    query = NULL,
-                                    sort = FALSE)
+  spatial_df_distances <- dbscan::frNN(spatial_df,
+                                       eps = minimum_distance_between_cells,
+                                       query = NULL,
+                                       sort = FALSE)
 
   # For each cell, get all other cells which were within 'minimum_distance_between_cells'
-  pois_df_distances_ids <- pois_df_distances$id
+  spatial_df_distances_ids <- spatial_df_distances$id
 
   # Filter out zero length cells
-  pois_df_distances_ids <- Filter(function(x) length(x) != 0, pois_df_distances_ids)
+  spatial_df_distances_ids <- Filter(function(x) length(x) != 0, spatial_df_distances_ids)
 
   # Get integer labels for the remaining cells
-  pois_df_distances_ids_names <- as.integer(names(pois_df_distances_ids))
+  spatial_df_distances_ids_names <- as.integer(names(spatial_df_distances_ids))
 
-  # Determine which cells should be chosen from pois_df
-  cells_chosen <- rep(T, nrow(pois_df))
-  for (i in seq_len(length(pois_df_distances_ids))) {
-    cells_too_close <- pois_df_distances_ids[[i]]
+  # Determine which cells should be chosen from spatial_df
+  cells_chosen <- rep(T, nrow(spatial_df))
+  for (i in seq_len(length(spatial_df_distances_ids))) {
+    cells_too_close <- spatial_df_distances_ids[[i]]
 
-    if (cells_chosen[pois_df_distances_ids_names[i]]) cells_chosen[cells_too_close] <- F
+    if (cells_chosen[spatial_df_distances_ids_names[i]]) cells_chosen[cells_too_close] <- F
   }
 
-  pois_df <- pois_df[cells_chosen, ]
+  spatial_df <- spatial_df[cells_chosen, ]
 
-  # Use poisson distribution to generate number of cells based of user input
-  pois_number_of_cells <- rpois(1, n_cells)
-
-  # If number of cells remaining is still higher than pois_number_of_cells, randomly subset pois_number_of_cells cells
-  if (nrow(pois_df) > pois_number_of_cells) {
-    pois_df <- dplyr::sample_n(pois_df, pois_number_of_cells)
+  # If number of cells remaining is still higher than n_cells, randomly subset n_cells
+  if (nrow(spatial_df) > n_cells) {
+    spatial_df <- dplyr::sample_n(spatial_df, n_cells)
   }
   else {
     warning("The number of cells in your object could not reach the desired number of cells, consider lowering the number of cells, the minimum distance between cells, or increasing length, width or height.")
   }
 
   # Add Cell.Type and Cell.ID
-  pois_df$Cell.Type <- background_cell_type
-  pois_df$Cell.ID <- paste("Cell", seq(nrow(pois_df)), sep = "_")
+  spatial_df$Cell.Type <- background_cell_type
+  spatial_df$Cell.ID <- paste("Cell", seq(nrow(spatial_df)), sep = "_")
 
   # Get metadata
   background_metadata <- list("background_type" = "random",
-                              "n_cells" = pois_number_of_cells,
+                              "n_cells" = n_cells,
                               "length" = length,
                               "width" = width,
                               "height" = height,
@@ -125,8 +122,8 @@ simulate_random_background_cells3D <- function(n_cells,
 
   ## Convert data frame to spe object
   spe <- SpatialExperiment::SpatialExperiment(
-    assay = matrix(data = NA, nrow = 0, ncol = nrow(pois_df)),
-    colData = pois_df,
+    assay = matrix(data = NA, nrow = 0, ncol = nrow(spatial_df)),
+    colData = spatial_df,
     spatialCoordsNames = c("Cell.X.Position", "Cell.Y.Position", "Cell.Z.Position"),
     metadata = list(simulation = simulation_metadata))
 
