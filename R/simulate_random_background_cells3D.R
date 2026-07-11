@@ -64,57 +64,9 @@ simulate_random_background_cells3D <- function(n_cells,
   # Need to over-sample as cells which are too close will be removed later
   n_cells_inflated <- n_cells * 2
 
-  # Use poisson distribution to sample points
-  poisson_distribution3D <- function(n_cells,
-                                     length,
-                                     width,
-                                     height)  {
-
-    # Choose lambda
-    lambda <- 5
-
-    # Set number of rows, columns and layers
-    nRows <- nCols <- nLays <- round((n_cells/lambda)^(1/3))
-
-    # Get number of cubes in grid
-    nCubes <- nRows * nCols * nLays
-
-    # Get pois vector
-    pois <- rpois(nCubes, lambda)
-
-    # Get points for each prism region
-    x <- c()
-    y <- c()
-    z <- c()
-
-    for (row in seq(nRows)) {
-
-      for (col in seq(nCols)) {
-
-        for (lay in seq(nLays)) {
-          current_cube_index <- nRows^2 * (row - 1) + nCols * (col - 1) + lay
-
-          x <- append(x, runif(pois[current_cube_index], row - 1, row))
-          y <- append(y, runif(pois[current_cube_index], col - 1, col))
-          z <- append(z, runif(pois[current_cube_index], lay - 1, lay))
-        }
-      }
-    }
-    x <- x * length / nRows
-    y <- y * width / nCols
-    z <- z * height / nLays
-
-    df <- data.frame("Cell.X.Position" = x,
-                     "Cell.Y.Position" = y,
-                     "Cell.Z.Position" = z)
-
-    return(df)
-  }
-
-  pois_df <- poisson_distribution3D(n_cells = n_cells_inflated,
-                                    length = length,
-                                    width = width,
-                                    height = height)
+  pois_df <- data.frame("Cell.X.Position" = runif(n_cells_inflated, 0, length),
+                        "Cell.Y.Position" = runif(n_cells_inflated, 0, width),
+                        "Cell.Z.Position" = runif(n_cells_inflated, 0, height))
 
   # Add integer rownames to data frame - each cell is labelled by an integer
   rownames(pois_df) <- seq(nrow(pois_df))
@@ -145,8 +97,16 @@ simulate_random_background_cells3D <- function(n_cells,
 
   pois_df <- pois_df[cells_chosen, ]
 
-  # If number of cells remaining is still higher than n_cells, randomly subset n_cells cells
-  if (nrow(pois_df) > n_cells) pois_df <- dplyr::sample_n(pois_df, n_cells)
+  # Use poisson distribution to generate number of cells based of user input
+  pois_number_of_cells <- rpois(1, n_cells)
+
+  # If number of cells remaining is still higher than pois_number_of_cells, randomly subset pois_number_of_cells cells
+  if (nrow(pois_df) > pois_number_of_cells) {
+    pois_df <- dplyr::sample_n(pois_df, pois_number_of_cells)
+  }
+  else {
+    warning("The number of cells in your object could not reach the desired number of cells, consider lowering the number of cells, the minimum distance between cells, or increasing length, width or height.")
+  }
 
   # Add Cell.Type and Cell.ID
   pois_df$Cell.Type <- background_cell_type
@@ -154,7 +114,7 @@ simulate_random_background_cells3D <- function(n_cells,
 
   # Get metadata
   background_metadata <- list("background_type" = "random",
-                              "n_cells" = n_cells,
+                              "n_cells" = pois_number_of_cells,
                               "length" = length,
                               "width" = width,
                               "height" = height,
